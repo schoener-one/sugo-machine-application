@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package moco.message;
+
+message Command {
+	string name = 1;
+	uint32 id = 2;
+	string parameters = 3;
+}
+
+message CommandResponse {
+	uint32 id = 1;
+	enum Result {
+		SUCCESS = 0;
+		INVALID_STATE = 1;
+		INVALID_PARAMETER = 2;
+        INVALID_COMMAND = 3;
+        ERROR = 4;		
+	}
+	Result result = 2;
+	string response = 3;
+}

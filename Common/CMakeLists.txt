@@ -1,0 +1,26 @@
+# CMake configuration file
+# Module: Common
+
+add_library (Common STATIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Thread.cpp
+    )
+target_include_directories (Common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(Common ${Boost_LIBRARIES})
+
+# Google Unittests
+if (NOT NO_UNITTEST)    
+    include(GoogleTest)
+    add_executable(CommonTest
+        test/CommonTest.cpp
+        )
+    target_compile_options(CommonTest PUBLIC "-DUNIT_TEST")
+    target_link_libraries(CommonTest
+        Common
+        ${Boost_LIBRARIES}
+        pthread
+        gtest
+        gtest_main
+        gmock)
+    gtest_add_tests(CommonTest "" AUTO)
+endif()
