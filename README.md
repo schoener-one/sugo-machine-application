@@ -69,9 +69,9 @@ cmake as follows:
 
 ```bash
 source .../sdk/environment-setup-...
-cmake . -Bbuild -DCMAKE_BUILD_TYPE=Debug \
+cmake . -Bbuild.rpi -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_TOOLCHAIN_FILE=$OECORE_NATIVE_SYSROOT/usr/share/cmake/OEToolchainConfig.cmake
-cmake --build build -- all
+cmake --build build.rpi -- all
 ```
 
 ## Using

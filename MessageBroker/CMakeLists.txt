@@ -7,7 +7,6 @@ target_link_libraries(MessageBroker INTERFACE Common Protocol)
 
 # Google Unittests
 if (NOT NO_UNITTEST)    
-    include(GoogleTest)
     add_executable(MessageBrokerTest
         test/MessageBrokerTest.cpp
         )
@@ -20,8 +19,8 @@ if (NOT NO_UNITTEST)
         ${Boost_LIBRARIES}
         pthread
         zmq
-        gtest
-        gtest_main
+        GTest::GTest
+        GTest::Main
         gmock)
     gtest_add_tests(MessageBrokerTest "" AUTO)
 endif()

@@ -10,7 +10,6 @@ target_link_libraries(Common ${Boost_LIBRARIES})
 
 # Google Unittests
 if (NOT NO_UNITTEST)    
-    include(GoogleTest)
     add_executable(CommonTest
         test/CommonTest.cpp
         )
@@ -19,8 +18,8 @@ if (NOT NO_UNITTEST)
         Common
         ${Boost_LIBRARIES}
         pthread
-        gtest
-        gtest_main
+        GTest::GTest
+        GTest::Main
         gmock)
     gtest_add_tests(CommonTest "" AUTO)
 endif()

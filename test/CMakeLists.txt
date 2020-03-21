@@ -3,7 +3,6 @@
 
 # Google Unittests
 if (NOT NO_UNITTEST)
-    include(GoogleTest)
     add_executable(CoffeeAutomatSmokeTest
         CoffeeAutomatSmokeTest.cpp
         )
@@ -19,8 +18,8 @@ if (NOT NO_UNITTEST)
         ${Boost_LIBRARIES}
         pthread
         zmq
-        gtest
-        gtest_main
+        GTest::GTest
+        GTest::Main
         gmock)
-    gtest_discover_tests(CoffeeAutomatSmokeTest "" AUTO TEST_LIST moco)
+    gtest_add_tests(CoffeeAutomatSmokeTest "" AUTO TEST_LIST moco)
 endif()
