@@ -1,9 +1,12 @@
-/*
- * CommonTest.cpp
+///////////////////////////////////////////////////////////////////////////////
+/** @file
+ * @license: CLOSED
  *
- *  Created on: 25.01.2020
- *      Author: denis
+ * @author: denis
+ * @date:   25.01.2020
  */
+///////////////////////////////////////////////////////////////////////////////
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -32,7 +35,7 @@ protected:
 };
 
 #ifdef ENABLE_REALTIMETHREAD_TEST
-TEST_F(CommonTest, Test_RealTimeThread)
+TEST_F(CommonTest, RealTimeThread)
 {
     Thread          thread;
     std::thread::id id;

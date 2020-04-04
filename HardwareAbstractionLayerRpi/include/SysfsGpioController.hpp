@@ -22,7 +22,7 @@ class SysfsGpioController : public IGpioController
 public:
     static const std::string GpioBasePath;
 
-    SysfsGpioController() {}
+    explicit SysfsGpioController(bool isActiveHigh) : m_isActiveHigh(isActiveHigh) {}
 
     // IHardwareAbstractionLayer::IStepperMotorController::IGpioController {{
     bool registerPin(unsigned pin, PinDirection pinDirection) override;
@@ -46,15 +46,16 @@ private:
             file = InvalidPin;
         }
 
-        std::string      path;
-        int              file;
-        PinDirection     direction;
+        std::string  path;
+        int          file;
+        PinDirection direction;
     };
 
     bool prepareInPin(unsigned pin);
     bool prepareOutPin(unsigned pin);
 
-    PinInfo m_pinInfoList[MaxPinCount];
+    const bool m_isActiveHigh;
+    PinInfo    m_pinInfoList[MaxPinCount];
 };
 
 }  // namespace moco

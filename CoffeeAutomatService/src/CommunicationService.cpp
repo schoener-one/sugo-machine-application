@@ -24,9 +24,8 @@ public:
 using namespace moco;
 namespace asio = boost::asio;
 
-CommunicationService::CommunicationService(const std::string& address)
+CommunicationService::CommunicationService()
 :m_ioService()
-,m_address(address)
 {
 }
 
@@ -34,12 +33,12 @@ CommunicationService::~CommunicationService()
 {
 }
 
-bool CommunicationService::start()
+bool CommunicationService::start(const std::string& address)
 {
 	try
 	{
 		m_repSocket = std::make_unique<RepSocket>(m_ioService);
-		m_repSocket->bind(m_address);
+		m_repSocket->bind(address);
 		std::array<char, BUFFER_SIZE> buf;
 
 		while(true)

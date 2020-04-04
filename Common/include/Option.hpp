@@ -1,0 +1,83 @@
+///////////////////////////////////////////////////////////////////////////////
+/** @file
+ * @license: CLOSED
+ *
+ * @author: denis
+ * @date:   15.04.2020
+ */
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef COMMON_INCLUDE_OPTION_HPP_
+#define COMMON_INCLUDE_OPTION_HPP_
+
+#include <boost/any.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/program_options.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/shared_ptr.hpp>
+
+namespace moco
+{
+class Configuration;
+
+/**
+ * Class which contains a single option.
+ */
+class Option
+{
+public:
+    using ValueSemantic = boost::program_options::value_semantic;
+
+    Option() {}
+    Option(const Option& option) : m_description(option.m_description), m_value(option.m_value)
+    {
+        applyDefault();
+    }
+    template <class ValueT>
+    Option(const std::string& name, ValueT value, const std::string& description)
+        : m_description(boost::make_shared<boost::program_options::option_description>(
+              name.c_str(), boost::program_options::value<ValueT>()->default_value(value),
+              description.c_str()))
+    {
+        applyDefault();
+    }
+    Option(const std::string& name, const ValueSemantic* semantic, const std::string& description)
+        : m_description(boost::make_shared<boost::program_options::option_description>(
+              name.c_str(), semantic, description.c_str()))
+    {
+        applyDefault();
+    }
+
+    const std::string& getName() const { return m_description->long_name(); }
+
+    const boost::program_options::option_description& getDescription()
+    {
+    	assert(m_description);
+        return *m_description.get();
+    }
+
+    void applyDefault() { assert(m_description->semantic()->apply_default(m_value) == true); }
+
+    template <class ValueT>
+    const ValueT get() const
+    {
+        return boost::any_cast<ValueT>(m_value);
+    }
+
+    Option& operator=(const Option& option)
+    {
+        m_description = option.m_description;
+        m_value       = option.m_value;
+        return *this;
+    }
+
+    friend Configuration;
+
+private:
+    boost::shared_ptr<boost::program_options::option_description> m_description;
+    boost::any                                                    m_value;
+};
+
+}  // namespace moco
+
+#endif  // COMMON_INCLUDE_OPTION_HPP_

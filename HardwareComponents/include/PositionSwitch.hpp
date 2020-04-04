@@ -19,7 +19,7 @@ namespace moco
 class PositionSwitch : public IPositionSwitch
 {
 public:
-	PositionSwitch(unsigned switchGpioPin, bool isActiveHigh);
+	explicit PositionSwitch(unsigned switchGpioPin);
 
 	// IPositionSwitch {{
 	bool isOpen() const override;
@@ -28,7 +28,6 @@ public:
 
 private:
 	const unsigned m_switchGpioPin;
-	const bool m_isActiveHigh;
 };
 
 } // namespace moco

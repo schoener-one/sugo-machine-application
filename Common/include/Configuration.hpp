@@ -1,0 +1,81 @@
+///////////////////////////////////////////////////////////////////////////////
+/** @file
+ * @license: CLOSED
+ *
+ * @author: denis
+ * @date:   02.04.2020
+ */
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef COMMON_INCLUDE_CONFIGURATION_HPP_
+#define COMMON_INCLUDE_CONFIGURATION_HPP_
+
+#include <cassert>
+#include <initializer_list>
+#include <map>
+#include <string>
+
+#include "IConfiguration.hpp"
+#include "Option.hpp"
+
+namespace moco
+{
+/**
+ * Class which contains configuration options.
+ */
+class Configuration : public IConfiguration
+{
+public:
+    Configuration() {}
+    explicit Configuration(std::initializer_list<Option> list)
+    {
+        for (auto& option : list)
+        {
+            add(option);
+        }
+    }
+    virtual ~Configuration() {}
+
+    // IConfiguration {{
+    virtual OptionDescriptions getOptionDescriptions() const override
+    {
+        OptionDescriptions descriptions;
+        for (auto& option : m_mapOptions)
+        {
+            descriptions.add(option.second.m_description);
+        }
+        return std::move(descriptions);
+    }
+
+    virtual bool set(const VariablesMap& mapVariables) override
+    {
+        for (auto& item : mapVariables)
+        {
+            auto option = m_mapOptions.find(item.first);
+            if (option != m_mapOptions.end())
+            {
+                option->second.m_value = item.second.value();
+            }
+        }
+        return true;
+    }
+
+    void add(const Option& option) override { m_mapOptions[option.getName()] = option; }
+
+    const Option& getOption(const std::string& name) const override
+    {
+        return m_mapOptions.at(name);
+    }
+    // IConfiguration }}
+
+    const Option& operator[](const std::string& name) { return getOption(name); }
+
+private:
+    /// List of options
+    using OptionMap = std::map<std::string, Option>;
+    OptionMap m_mapOptions;
+};
+
+}  // namespace moco
+
+#endif  // COMMON_INCLUDE_CONFIGURATION_HPP_

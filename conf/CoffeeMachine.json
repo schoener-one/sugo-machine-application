@@ -1,0 +1,28 @@
+{
+    "coffee-automat-service" : {
+        "address" : "*",
+        "port" : 1234
+    },
+    "cup-rotation-tray": {
+        "stepper-motor" : {
+            "speed-rpm" : 20,
+            "index" : 0
+        },
+        "position-switches" : {
+            "switch1" : {
+                "gpio-pin" : 5
+            },
+            "switch2" : {
+                "gpio-pin" : 6
+            },
+            "switch3" : {
+                "gpio-pin" : 12
+            } 
+        }
+    },
+    "hardware-abstraction-layer": {
+        "gpio" : {
+            "logic-active-high" : false
+        }
+    }
+}

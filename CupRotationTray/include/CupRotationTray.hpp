@@ -10,10 +10,12 @@
 
 #include <string>
 
-#include "CommandExecutionComponent.hpp"
-#include "ICommandMessageBroker.hpp"
+#include <Command.pb.h>
 
+#include "CommandExecutionComponent.hpp"
 #include "ICircularMotionController.hpp"
+#include "ICommandMessageBroker.hpp"
+#include "IConfiguration.hpp"
 #include "Ident.hpp"
 #include "StateMachine.hpp"
 
@@ -62,6 +64,8 @@ class CupRotationTrayImpl final
       public CommandExecutionComponent<CupRotationTray::State, CupRotationTray::Event>
 {
 public:
+    static void setConfiguration(IConfiguration& configuration);
+
     CupRotationTrayImpl(ICommandMessageBroker&     messageBroker,
                         ICircularMotionController& circularMotionController);
 

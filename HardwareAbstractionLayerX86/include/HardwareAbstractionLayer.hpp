@@ -1,5 +1,5 @@
 /*
- * HardwareAbstractionLayerStub.hpp
+ * HardwareAbstractionLayer.hpp
  *
  *  Created on: 03.01.2020
  *      Author: denis
@@ -9,6 +9,7 @@
 #define HARDWAREABSTRACTIONLAYERSTUB_HPP_
 
 #include "Globals.hpp"
+#include "IConfiguration.hpp"
 #include "IHardwareAbstractionLayer.hpp"
 
 namespace moco
@@ -33,9 +34,13 @@ std::ostream& operator<<(std::ostream&                                          
     return ostr;
 }
 
-class HardwareAbstractionLayerStub : public IHardwareAbstractionLayer
+class HardwareAbstractionLayer : public IHardwareAbstractionLayer
 {
 public:
+    static void setConfiguration(IConfiguration& configuration) { (void)configuration; }
+
+    explicit HardwareAbstractionLayer(bool isActiveHigh) { (void)isActiveHigh; }
+
     // IHardwareAbstractionLayer {{
     IGpioController&         getGpioController() override { return m_gpioController; }
     IStepperMotorController& getStepperMotorController() override
@@ -86,8 +91,8 @@ private:
                                        public IStepperMotorController::IMotorControl
     {
     public:
-        static constexpr unsigned                  MicroStepCount = 1u;
-        static constexpr unsigned                  StepsPerRound  = 200u;
+        static constexpr unsigned MicroStepCount = 1u;
+        static constexpr unsigned StepsPerRound  = 200u;
 
         // IStepperMotorController {{
         void     reset() override { LOG(debug) << "Reset stepper motor"; }

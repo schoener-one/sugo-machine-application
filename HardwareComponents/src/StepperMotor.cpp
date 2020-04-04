@@ -43,7 +43,6 @@ unsigned StepperMotor::runSteps(unsigned steps, Direction direction, RunGuard ru
     unsigned stepsDone = 0;
     for (; (stepsDone < steps) && (!m_isStopped); stepsDone++)
     {
-        LOG(debug) << "Step " << (stepsDone + 1) << "/" << steps;
         // Make one step
         const auto t1 = std::chrono::high_resolution_clock::now();
         motor.step(motorDirection);

@@ -74,7 +74,7 @@ protected:
 	}
 };
 
-TEST_F(CoffeeAutomatSmokeTest, Test_CoffeeAutomat_CommandResponse)
+TEST_F(CoffeeAutomatSmokeTest, CoffeeAutomat_CommandResponse)
 {
 	CommandMessageBroker messageBroker;
 	CoffeeAutomatImpl coffeeAutomat(messageBroker);
@@ -99,7 +99,7 @@ TEST_F(CoffeeAutomatSmokeTest, Test_CoffeeAutomat_CommandResponse)
 	EXPECT_EQ(message::CommandResponse::SUCCESS, response2.result());
 }
 
-TEST_F(CoffeeAutomatSmokeTest, Test_CircularMotionController_ResetNoMotion)
+TEST_F(CoffeeAutomatSmokeTest, CircularMotionController_ResetNoMotion)
 {
 	IStepperMotorMock stepperMotorMock;
 	CircularMotionController::PositionSwitchArray positionSwitchArray =
@@ -117,7 +117,7 @@ TEST_F(CoffeeAutomatSmokeTest, Test_CircularMotionController_ResetNoMotion)
 	EXPECT_TRUE(circularMotionController.reset());
 }
 
-TEST_F(CoffeeAutomatSmokeTest, Test_CircularMotionController_ResetWithMotion)
+TEST_F(CoffeeAutomatSmokeTest, CircularMotionController_ResetWithMotion)
 {
 	IStepperMotorMock stepperMotorMock;
 	CircularMotionController::PositionSwitchArray positionSwitchArray =

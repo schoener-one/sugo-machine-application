@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include "IConfiguration.hpp"
 #include "IHardwareAbstractionLayer.hpp"
 
 namespace moco
@@ -17,7 +18,9 @@ namespace moco
 class HardwareAbstractionLayer : public IHardwareAbstractionLayer
 {
 public:
-    HardwareAbstractionLayer();
+    static void setConfiguration(IConfiguration& configuration);
+
+    explicit HardwareAbstractionLayer(bool isActiveHigh);
     virtual ~HardwareAbstractionLayer();
 
     // IHardwareAbstractionLayer {{

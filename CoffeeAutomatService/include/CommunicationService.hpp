@@ -22,7 +22,7 @@ class CommunicationService
 public:
 	constexpr static unsigned BUFFER_SIZE = 2048;
 
-	explicit CommunicationService(const std::string& address);
+	CommunicationService();
 	virtual ~CommunicationService();
 
 	/**
@@ -30,17 +30,8 @@ public:
 	 * The method does not block, but returns after creation.
 	 * @return true if succeeded.
 	 */
-	bool start();
+	bool start(const std::string& address);
 	bool stop();
-
-	/**
-	 * Returns the service address.
-	 * @return The service address.
-	 */
-	const std::string& getAddress()
-	{
-		return m_address;
-	}
 
 protected:
 	/**
@@ -54,7 +45,6 @@ protected:
 
 private:
 	boost::asio::io_service m_ioService;
-	const std::string m_address;
 	std::unique_ptr<RepSocket> m_repSocket;
 };
 

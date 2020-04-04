@@ -8,30 +8,36 @@
 #ifndef COFFEEAUTOMATAPPLICATION_HPP_
 #define COFFEEAUTOMATAPPLICATION_HPP_
 
-#include "Globals.hpp"
-#include <boost/program_options.hpp>
+#include <memory>
+
+#include "Configuration.hpp"
 
 namespace moco
 {
-
 /**
  * CoffeeAutomat application class.
  */
 class CoffeeAutomatApplication final
 {
 public:
-	CoffeeAutomatApplication();
+    CoffeeAutomatApplication();
 
-	void parseOptions(int argc, char **argv);
-	int start();
-
-	static void initLogging(boost::log::trivial::severity_level severity);
+    /**
+     * Starts the application with command line arguments.
+     * @param argc Argument count.
+     * @param argv Pointer to a vector of string passed as arguments.
+     * @return     0 if the application run successfully, value smaller
+     *             than 0 to indicate an error.
+     */
+    bool start(int argc, char const** argv);
 
 private:
-	boost::program_options::variables_map m_vm;
-	bool m_initSuccessfully;
+    bool parseCommandLine(int argc, char const** argv);
+    bool parseConfigurationFile();
+
+    Configuration m_configuration;
 };
 
-} // namespace moco
+}  // namespace moco
 
 #endif /* COFFEEAUTOMATAPPLICATION_HPP_ */
