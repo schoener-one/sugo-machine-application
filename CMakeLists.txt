@@ -55,16 +55,18 @@ include_directories(${Boost_INCLUDE_DIRS})
 ##
 if (NOT NO_UNITTEST)
 enable_testing()
-add_subdirectory(${PROJECT_SOURCE_DIR}/test) #Smoke tests
 endif()
 
 ## **********************************
 ## The MOCO project!
 ##
 
-# x86 Stubs
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-    include_directories (${PROJECT_SOURCE_DIR}/Stubs/include)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerX86)
+    set(HardwareAbstractionLayerImpl HardwareAbstractionLayerX86)
+else()
+    add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerRpi)
+    set(HardwareAbstractionLayerImpl HardwareAbstractionLayerRpi)
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/Common)
@@ -76,23 +78,6 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/CoffeeAutomat)
 add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareComponents)
 add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer)
 add_subdirectory(${PROJECT_SOURCE_DIR}/CoffeeAutomatApplication)
-
-# Executable CoffeeAutomatApp
-add_executable(CoffeeAutomatApp ${PROJECT_SOURCE_DIR}/CoffeeAutomatApplication/src/main.cpp)
-target_link_libraries(CoffeeAutomatApp
-    Common
-    Protocol
-    MessageBroker
-	CoffeeAutomatService
-    CupRotationTray
-	CoffeeAutomat
-	HardwareComponents
-	HardwareAbstractionLayer
-	CoffeeAutomatApplication
-	${Protobuf_LIBRARIES}
-	${Boost_LIBRARIES}
-	pthread
-	zmq)
 
 ## **********************************
 ## Static code analysis
@@ -116,7 +101,7 @@ if (CPPCHECK_EXEC)
         --quiet
         --enable=all
         --std=c++11
-        --inline-suppr
+        --inline-suppr 
         --template "{file}:{line}: {severity} {id}: {message}"
         --suppress=missingIncludeSystem
         -I ${PROJECT_SOURCE_DIR}/CoffeeAutomat/include
@@ -129,5 +114,5 @@ if (CPPCHECK_EXEC)
         -I ${PROJECT_SOURCE_DIR}/MessageBroker/include
         ${SRC_ALL}
     )
-    add_dependencies(CoffeeAutomatApp cppcheck)
+    add_dependencies(CoffeeAutomatApplication cppcheck)
 endif()

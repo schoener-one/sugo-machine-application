@@ -13,8 +13,8 @@
 
 using namespace moco;
 
-PositionSwitch::PositionSwitch(unsigned switchGpioPin, bool isActiveHigh)
-    : m_switchGpioPin(switchGpioPin), m_isActiveHigh(isActiveHigh)
+PositionSwitch::PositionSwitch(unsigned switchGpioPin)
+    : m_switchGpioPin(switchGpioPin)
 {
     IHardwareAbstractionLayer& hal = IHardwareAbstractionLayer::get();
     const bool success = hal.getGpioController().registerPin(m_switchGpioPin, IGpioController::In);
@@ -29,9 +29,7 @@ bool PositionSwitch::isOpen() const
     const bool success = hal.getGpioController().getPinState(m_switchGpioPin, pinState);
     // FIXME add proper error handling
     assert(success == true);
-    const IGpioController::PinState openState =
-        m_isActiveHigh ? IGpioController::Low : IGpioController::High;
-    return (pinState == openState);
+    return (pinState == IGpioController::Low);
 }
 
 // cppcheck-suppress unusedFunction

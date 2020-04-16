@@ -15,7 +15,6 @@
 
 #include <wiringPi.h>
 
-
 namespace moco
 {
 /**
@@ -24,7 +23,7 @@ namespace moco
 class AdafruitMotorControl : public IStepperMotorController::IMotorControl
 {
 public:
-	constexpr static unsigned StepsPerRound = 200u;
+    constexpr static unsigned StepsPerRound = 200u;
 
     explicit AdafruitMotorControl(Adafruit_StepperMotor& motor) : m_stepperMotor(motor) {}
 
@@ -41,13 +40,10 @@ public:
 
     unsigned getMicroStepCount() const override
     {
-    	return static_cast<unsigned>(Adafruit_StepperMotor::MICROSTEPS);
+        return static_cast<unsigned>(Adafruit_StepperMotor::MICROSTEPS);
     }
 
-    unsigned getStepsPerRound() const override
-    {
-    	return StepsPerRound * getMicroStepCount();
-    }
+    unsigned getStepsPerRound() const override { return StepsPerRound * getMicroStepCount(); }
     // IStepperMotorController::IStepperMotor }}
 
 private:
@@ -63,8 +59,8 @@ public:
     static constexpr int      DefaultStepperMotorControllerI2cAddress   = 0x60;
     static constexpr unsigned DefaultStepperMotorControllerPwmFrequency = 1600;
 
-    MotorHAT(int i2cAddress = DefaultStepperMotorControllerI2cAddress,
-    		unsigned pwmFrequency = DefaultStepperMotorControllerPwmFrequency)
+    MotorHAT(int      i2cAddress   = DefaultStepperMotorControllerI2cAddress,
+             unsigned pwmFrequency = DefaultStepperMotorControllerPwmFrequency)
         : Adafruit_MotorHAT(i2cAddress, static_cast<int>(pwmFrequency), -1, -1),
           m_stepperMotors{AdafruitMotorControl(Adafruit_MotorHAT::getStepper(1)),
                           AdafruitMotorControl(Adafruit_MotorHAT::getStepper(2))}

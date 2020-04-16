@@ -18,7 +18,7 @@ Additional libraries not available as debian package:
 * azmq: https://github.com/zeromq/azmq
 * jsonrpcpp: https://github.com/badaix/jsonrpcpp.git
 
-### X86 installation
+### X86 Installation
 
 First you have to make sure the additional dependent libraries like azmq and
 librpcpp are available. For that create an sdk.x86 directory, step in and
@@ -30,7 +30,7 @@ the sdk.86 root path:
 > **HINT**: Apply the azmq patch from meta-moco first!
 
 ```bash
-cd sdk.x86
+cd $SDK_X86_PATH
 git clone https://github.com/zeromq/azmq
 cd azmq
 cmake . -Bbuild.x86 -DCMAKE_BUILD_TYPE=Debug \
@@ -41,7 +41,7 @@ cmake --build build.x86 -- install
 *jsonrpcpp:*
 
 ```bash
-cd sdk.x86
+cd $SDK_X86_PATH
 git clone https://github.com/badaix/jsonrpcpp.git
 cd jsonrpcpp
 cmake . -Bbuild.x86 -DCMAKE_BUILD_TYPE=Debug \
@@ -55,12 +55,12 @@ unit tests for example:
 
 ```bash
 cmake . -Bbuild.x86 -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_CXX_FLAGS="-I$PWD/sdk.x86/include" \
-  -DCMAKE_EXE_LINKER_FLAGS="-L$PWD/sdk.x86/lib"
+  -DCMAKE_CXX_FLAGS="-I$SDK_X86_PATH/include" \
+  -DCMAKE_EXE_LINKER_FLAGS="-L$SDK_X86_PATH/lib"
 cmake --build build -- all
 ```
 
-### Cross target installation (i.e. on Raspberry PI)
+### Cross Target Installation (i.e. on Raspberry PI)
 
 First you need an installed Yocto SDK. If 'LD_LIBRARY_PATH'
 has been set in your environment unset it first. Source the
@@ -68,10 +68,18 @@ contained environment configuration script and call
 cmake as follows:
 
 ```bash
-source .../sdk/environment-setup-...
+source $SDK_RPI_PATH/environment-setup-...
 cmake . -Bbuild.rpi -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_TOOLCHAIN_FILE=$OECORE_NATIVE_SYSROOT/usr/share/cmake/OEToolchainConfig.cmake
 cmake --build build.rpi -- all
+```
+
+#### Debugging
+
+For remote debugging you can use the GDB from SDK director:
+
+```bash
+$SDK_RPI_PATH/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux/arm-poky-linux-gdb
 ```
 
 ## Using

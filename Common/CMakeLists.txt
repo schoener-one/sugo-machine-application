@@ -4,6 +4,8 @@
 add_library (Common STATIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Thread.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ConfigurationParser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ConfigurationFileParser.cpp
     )
 target_include_directories (Common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(Common ${Boost_LIBRARIES})
@@ -12,6 +14,9 @@ target_link_libraries(Common ${Boost_LIBRARIES})
 if (NOT NO_UNITTEST)    
     add_executable(CommonTest
         test/CommonTest.cpp
+        test/ConfigurationTest.cpp
+        test/CommandLineParserTest.cpp
+        test/ConfigurationFileParserTest.cpp
         )
     target_compile_options(CommonTest PUBLIC "-DUNIT_TEST")
     target_link_libraries(CommonTest

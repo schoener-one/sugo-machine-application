@@ -174,7 +174,8 @@ bool SysfsGpioController::getPinState(unsigned pin, IGpioController::PinState& o
 
     if (success)
     {
-        outPinState = ((value - '0') == 0) ? PinState::Low : PinState::High;
+        const bool isLow = ((value - '0') == 0) ? m_isActiveHigh : !m_isActiveHigh;
+    	outPinState = isLow ? PinState::Low : PinState::High;
     }
 
     return success;

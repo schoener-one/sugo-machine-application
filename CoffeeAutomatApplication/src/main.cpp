@@ -11,10 +11,9 @@
 #include "Logger.hpp"
 #include "CoffeeAutomatApplication.hpp"
 
-int main(int argc, char **argv)
+int main(int argc, char const **argv)
 {
 	moco::Logger::init();
 	moco::CoffeeAutomatApplication application;
-	application.parseOptions(argc, argv);
-	return application.start();
+	return application.start(argc, argv) ? 0 : -1;
 }

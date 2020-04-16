@@ -6,8 +6,8 @@
  */
 
 #include "CupRotationTray.hpp"
-#include "ICupRotationTray.hpp"
 #include "CommandParameterParser.hpp"
+#include "ICupRotationTray.hpp"
 
 using namespace std;
 using namespace moco;
@@ -91,6 +91,20 @@ std::ostream& moco::operator<<(std::ostream& ostr, CupRotationTray::EventId cons
             ASSERT_NOT_REACHABLE;
     }
     return ostr;
+}
+
+void CupRotationTrayImpl::setConfiguration(IConfiguration& configuration)
+{
+    configuration.add(Option("cup-rotation-tray.stepper-motor.index", 0u,
+                             "CupRotationTray: stepper motor index"));
+    configuration.add(Option("cup-rotation-tray.stepper-motor.speed-rpm", 20u,
+                             "CupRotationTray: stepper motor speed in unit rpm"));
+    configuration.add(Option("cup-rotation-tray.position-switches.gpio-pin-1", 5u,
+                             "CupRotationTray: position switch position 1"));
+    configuration.add(Option("cup-rotation-tray.position-switches.gpio-pin-2", 6u,
+                             "CupRotationTray: position switch position 2"));
+    configuration.add(Option("cup-rotation-tray.position-switches.gpio-pin-3", 12u,
+                             "CupRotationTray: position switch position 3"));
 }
 
 CupRotationTrayImpl::CupRotationTrayImpl(ICommandMessageBroker&     messageBroker,
