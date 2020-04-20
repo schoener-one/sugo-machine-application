@@ -12,62 +12,29 @@
 
 #include <Command.pb.h>
 
-#include "CommandExecutionComponent.hpp"
 #include "ICircularMotionController.hpp"
 #include "ICommandMessageBroker.hpp"
 #include "IConfiguration.hpp"
-#include "Ident.hpp"
-#include "StateMachine.hpp"
+#include "ICupRotationTray.hpp"
+#include "StatedServiceComponent.hpp"
 
 namespace moco
 {
-struct CupRotationTray
-{
-    enum State
-    {
-        Off = 0,
-        Idle,
-        Test,
-        Initialization,
-        SelfTest,
-        Rotation,
-        Error
-    };
+std::ostream& operator<<(std::ostream& ostr, ICupRotationTray::State const& value);
+std::ostream& operator<<(std::ostream& ostr, ICupRotationTray::EventId const& value);
 
-    enum EventId
-    {
-        SwitchOff = 0,
-        SwitchOn,
-        SwitchOnTest,
-        Init,
-        InitFinished,
-        InitFailed,
-        RunSelfTest,
-        SelfTestSucceeded,
-        SelfTestFailed,
-        Rotate,
-        PositionReached,
-        RotationFailed,
-        TestRotation
-    };
-
-    using Event = moco::Ident<CupRotationTray::EventId>;
-    using Fsm   = moco::StateMachine<CupRotationTray::State, CupRotationTray::Event>;
-};
-
-std::ostream& operator<<(std::ostream& ostr, CupRotationTray::State const& value);
-std::ostream& operator<<(std::ostream& ostr, CupRotationTray::EventId const& value);
-
-class CupRotationTrayImpl final
-    : public CupRotationTray,
-      public CupRotationTray::Fsm,
-      public CommandExecutionComponent<CupRotationTray::State, CupRotationTray::Event>
+class CupRotationTray final
+    : public ICupRotationTray::Fsm,
+      public StatedServiceComponent<ICupRotationTray::State, ICupRotationTray::Event>
 {
 public:
-    static void setConfiguration(IConfiguration& configuration);
+    static void                  setConfiguration(IConfiguration& configuration);
+    static unsigned              getGpioPin(unsigned number, const IConfiguration& configuration);
+    static const IConfiguration& getStepperMotorConfiguration(
+        const IConfiguration& configuration, IConfiguration& extractedConfiguration);
 
-    CupRotationTrayImpl(ICommandMessageBroker&     messageBroker,
-                        ICircularMotionController& circularMotionController);
+    CupRotationTray(ICommandMessageBroker&     messageBroker,
+                    ICircularMotionController& circularMotionController);
 
 private:
     // Commands
@@ -81,14 +48,14 @@ private:
     message::CommandResponse onCommandTestRotation(const message::Command& command);
 
     // Transitions
-    void switchOn(const CupRotationTray::Event& event, const CupRotationTray::State& state);
-    void initialize(const CupRotationTray::Event& event, const CupRotationTray::State& state);
-    void switchOff(const CupRotationTray::Event& event, const CupRotationTray::State& state);
-    void runSelfTest(const CupRotationTray::Event& event, const CupRotationTray::State& state);
-    void handleFailure(const CupRotationTray::Event& event, const CupRotationTray::State& state);
-    void rotate(const CupRotationTray::Event& event, const CupRotationTray::State& state);
-    void finishSelfTest(const CupRotationTray::Event& event, const CupRotationTray::State& state);
-    void testRotation(const CupRotationTray::Event& event, const CupRotationTray::State& state);
+    void switchOn(const ICupRotationTray::Event& event, const ICupRotationTray::State& state);
+    void initialize(const ICupRotationTray::Event& event, const ICupRotationTray::State& state);
+    void switchOff(const ICupRotationTray::Event& event, const ICupRotationTray::State& state);
+    void runSelfTest(const ICupRotationTray::Event& event, const ICupRotationTray::State& state);
+    void handleFailure(const ICupRotationTray::Event& event, const ICupRotationTray::State& state);
+    void rotate(const ICupRotationTray::Event& event, const ICupRotationTray::State& state);
+    void finishSelfTest(const ICupRotationTray::Event& event, const ICupRotationTray::State& state);
+    void testRotation(const ICupRotationTray::Event& event, const ICupRotationTray::State& state);
 
 private:
     struct TestRotationParameters

@@ -8,9 +8,12 @@
 #ifndef COFFEEAUTOMATAPPLICATION_HPP_
 #define COFFEEAUTOMATAPPLICATION_HPP_
 
+#include <map>
 #include <memory>
+#include <typeindex>
 
 #include "Configuration.hpp"
+#include "Responder.hpp"
 
 namespace moco
 {
@@ -34,8 +37,11 @@ public:
 private:
     bool parseCommandLine(int argc, char const** argv);
     bool parseConfigurationFile();
+    bool run();
 
-    Configuration m_configuration;
+    Configuration                        m_configCommandLine;
+    Configuration                        m_configuration;
+    std::map<std::type_index, IOContext> m_ioContexts;
 };
 
 }  // namespace moco

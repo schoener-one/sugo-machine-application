@@ -14,8 +14,10 @@
 
 using namespace moco;
 
-StepperMotor::StepperMotor(unsigned motorSpeedRpm, unsigned motorIndex)
-    : m_motorIndex(motorIndex), m_motorSpeedRpm(motorSpeedRpm), m_isStopped(false)
+StepperMotor::StepperMotor(const IConfiguration& configuration)
+    : m_motorIndex(configuration["index"].get<unsigned>()),
+      m_motorSpeedRpm(configuration["speed-rpm"].get<unsigned>()),
+      m_isStopped(false)
 {
 }
 
@@ -34,12 +36,12 @@ unsigned StepperMotor::runSteps(unsigned steps, Direction direction, RunGuard ru
     auto& controller = hal.getStepperMotorController();
     m_isStopped      = false;
     assert(m_motorIndex < controller.getStepperMotorCount());
-    auto&      motor         = controller.getMotorControl(m_motorIndex);
+    auto&      motor         = controller.getStepperMotorControl(m_motorIndex);
     const auto timePerStepUs = motor.getTimePerStep(m_motorSpeedRpm);
     steps                    = motor.getMicroStepCount() * steps;  // Calculate raw steps
-    IStepperMotorController::IMotorControl::Direction motorDirection =
-        (direction == Forward) ? IStepperMotorController::IMotorControl::Forward
-                               : IStepperMotorController::IMotorControl::Backward;
+    IStepperMotorController::IStepperMotorControl::Direction motorDirection =
+        (direction == Forward) ? IStepperMotorController::IStepperMotorControl::Forward
+                               : IStepperMotorController::IStepperMotorControl::Backward;
     unsigned stepsDone = 0;
     for (; (stepsDone < steps) && (!m_isStopped); stepsDone++)
     {
@@ -77,5 +79,5 @@ unsigned StepperMotor::getStepsPerRound() const
 {
     auto& hal        = IHardwareAbstractionLayer::get();
     auto& controller = hal.getStepperMotorController();
-    return controller.getMotorControl(m_motorIndex).getStepsPerRound();
+    return controller.getStepperMotorControl(m_motorIndex).getStepsPerRound();
 }

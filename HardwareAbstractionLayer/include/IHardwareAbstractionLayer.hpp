@@ -26,7 +26,7 @@ public:
      * Sets the global HAL interface.
      * @param hal HAL interface instance.
      */
-    static void init(std::shared_ptr<IHardwareAbstractionLayer> hal) { s_hal = std::move(hal); }
+    static void init(IHardwareAbstractionLayer* hal) { s_hal = hal; }
 
     /**
      * Returns the global HAL interface.
@@ -46,7 +46,7 @@ public:
     virtual const IStepperMotorController& getStepperMotorController() const = 0;
 
 private:
-    static std::shared_ptr<IHardwareAbstractionLayer> s_hal;
+    static IHardwareAbstractionLayer* s_hal;
 };
 
 }  // namespace moco

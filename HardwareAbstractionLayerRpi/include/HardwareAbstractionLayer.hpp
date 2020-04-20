@@ -20,15 +20,17 @@ class HardwareAbstractionLayer : public IHardwareAbstractionLayer
 public:
     static void setConfiguration(IConfiguration& configuration);
 
-    explicit HardwareAbstractionLayer(bool isActiveHigh);
+    explicit HardwareAbstractionLayer(const IConfiguration& configuration);
     virtual ~HardwareAbstractionLayer();
 
     // IHardwareAbstractionLayer {{
-    IGpioController&         getGpioController() override { return *m_gpioController; }
+    IGpioController& getGpioController() override { return *m_gpioController; }
+
     IStepperMotorController& getStepperMotorController() override
     {
         return *m_stepperMotorController;
     }
+
     const IStepperMotorController& getStepperMotorController() const override
     {
         return *m_stepperMotorController;

@@ -10,16 +10,15 @@
 
 namespace moco
 {
-
 class IMotionController
 {
 protected:
-	IMotionController() {}
+    IMotionController() {}
 
 public:
-	virtual ~IMotionController() {}
+    virtual ~IMotionController() {}
 };
 
-}
+}  // namespace moco
 
 #endif /* IMOTIONCONTROLLER_HPP_ */

@@ -5,130 +5,107 @@
  *      Author: denis
  */
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include <string>
 #include <memory>
+#include <string>
+#include <thread>
 
-#include "ICupRotationTray.hpp"
-#include "IMessageBroker.hpp"
-#include "CoffeeAutomat.hpp"
-#include "ICoffeeAutomat.hpp"
 #include "CircularMotionController.hpp"
+#include "CommandMessageBroker.hpp"
+#include "ICupRotationTray.hpp"
+
+#include "CoffeeAutomatController.hpp"
+#include "IMessageBroker.hpp"
+#include "IOContextHelper.hpp"
 #include "Logger.hpp"
 
 namespace moco
 {
-class ICommandMessageBrokerMock : public IMessageBroker<message::Command, message::CommandResponse, std::string>
-{
-public:
-	using typename IMessageBroker<message::Command, message::CommandResponse, std::string>::Receiver;
-
-	MOCK_CONST_METHOD1(hasReceiver, bool(const std::string&));
-	MOCK_CONST_METHOD2(send, message::CommandResponse(const message::Command&, const std::string&));
-	MOCK_METHOD2(registerReceiver, void(const std::string&, Receiver&));
-	MOCK_METHOD2(registerReceiver, void(const std::string&, Receiver&&));
-	MOCK_METHOD1(unregisterReceiver, void(const std::string&));
-};
-
 class IStepperMotorMock : public IStepperMotor
 {
 public:
-	MOCK_METHOD0(reset, void());
-	MOCK_METHOD3(runSteps, unsigned(unsigned steps, Direction direction,
-			RunGuard runGuard));
-	MOCK_METHOD0(stop, void());
-	MOCK_METHOD0(runSelfTest, bool());
-	MOCK_CONST_METHOD0(getStepsPerRound, unsigned());
+    MOCK_METHOD0(reset, void());
+    MOCK_METHOD3(runSteps, unsigned(unsigned steps, Direction direction, RunGuard runGuard));
+    MOCK_METHOD0(stop, void());
+    MOCK_METHOD0(runSelfTest, bool());
+    MOCK_CONST_METHOD0(getStepsPerRound, unsigned());
 };
 
 class IPositionSwitchMock : public IPositionSwitch
 {
 public:
-	MOCK_CONST_METHOD0(isOpen, bool());
-	MOCK_CONST_METHOD1(waitForChange, bool(int));
+    MOCK_CONST_METHOD0(isOpen, bool());
+    MOCK_CONST_METHOD1(waitForChange, bool(int));
 };
-}
+}  // namespace moco
 
 using namespace moco;
 
-class CoffeeAutomatSmokeTest : public ::testing::Test
+class CoffeeAutomatSmokeTest : public ::testing::Test, public IOContextHelper
 {
 protected:
-	CoffeeAutomatSmokeTest() {}
+    CoffeeAutomatSmokeTest() {}
 
-	~CoffeeAutomatSmokeTest() override {}
+    ~CoffeeAutomatSmokeTest() override {}
 
-	static void SetUpTestCase()
-	{
-		Logger::init();
-	}
+    static void SetUpTestCase() { Logger::init(); }
 
-	void SetUp() override
-	{
-	}
+    void SetUp() override {}
 
-	void TearDown() override
-	{
-	}
+    void TearDown() override { stopIOContext(); }
+
+    void startIoService() {}
 };
 
 TEST_F(CoffeeAutomatSmokeTest, CoffeeAutomat_CommandResponse)
 {
-	CommandMessageBroker messageBroker;
-	CoffeeAutomatImpl coffeeAutomat(messageBroker);
-	message::Command command;
-	command.set_name(command::CoffeeAutomatSwitchOff);
-	const message::CommandResponse response1 = messageBroker.send(command, command::CoffeeAutomatSwitchOff);
-	EXPECT_EQ(message::CommandResponse::INVALID_STATE, response1.result());
+    CommandMessageBroker    messageBroker(ICoffeeAutomatController::Command::ReceiverId, {},
+                                       m_ioContext);
+    CoffeeAutomatController coffeeAutomatController(messageBroker);
+    EXPECT_TRUE(messageBroker.start());
+    startIOContext();
+    message::Command command;
+    command.set_name(ICoffeeAutomatController::Command::SwitchOff.command);
+    message::CommandResponse response;
+    EXPECT_TRUE(
+        messageBroker.send(command, ICoffeeAutomatController::Command::ReceiverId, response));
+    EXPECT_EQ(message::CommandResponse::INVALID_STATE, response.result());
 
-	messageBroker.registerReceiver(command::CupRotationTraySwitchOn,
-		[&](const message::Command&) -> message::CommandResponse{
-		message::CommandResponse response;
-		response.set_result(message::CommandResponse_Result_SUCCESS);
-		return response;
-	});
-	messageBroker.registerReceiver(command::CupRotationTrayReset,
-		[&](const message::Command&) -> message::CommandResponse{
-		message::CommandResponse response;
-		response.set_result(message::CommandResponse_Result_SUCCESS);
-		return response;
-	});
-	const message::CommandResponse response2 = messageBroker.send(command, command::CoffeeAutomatSwitchOn);
-	EXPECT_EQ(message::CommandResponse::SUCCESS, response2.result());
+    messageBroker.registerHandler(ICoffeeAutomatController::Command::SwitchOff.command,
+                                  [&](const message::Command&) -> message::CommandResponse {
+                                      message::CommandResponse response;
+                                      response.set_result(message::CommandResponse_Result_SUCCESS);
+                                      return response;
+                                  });
+    EXPECT_TRUE(
+        messageBroker.send(command, ICoffeeAutomatController::Command::ReceiverId, response));
+    EXPECT_EQ(message::CommandResponse::SUCCESS, response.result());
 }
 
 TEST_F(CoffeeAutomatSmokeTest, CircularMotionController_ResetNoMotion)
 {
-	IStepperMotorMock stepperMotorMock;
-	CircularMotionController::PositionSwitchArray positionSwitchArray =
-	{
-		std::make_shared<IPositionSwitchMock>(),
-		std::make_shared<IPositionSwitchMock>(),
-		std::make_shared<IPositionSwitchMock>()
-	};
-	CircularMotionController circularMotionController(stepperMotorMock,
-			positionSwitchArray);
-	::testing::InSequence s;
-	EXPECT_CALL(stepperMotorMock, reset).Times(1);
-	EXPECT_CALL(*std::static_pointer_cast<IPositionSwitchMock>(positionSwitchArray[0]),
-			isOpen()).WillRepeatedly(::testing::Return(false));
-	EXPECT_TRUE(circularMotionController.reset());
+    IStepperMotorMock                             stepperMotorMock;
+    CircularMotionController::PositionSwitchArray positionSwitchArray = {
+        std::make_unique<IPositionSwitchMock>(), std::make_unique<IPositionSwitchMock>(),
+        std::make_unique<IPositionSwitchMock>()};
+    CircularMotionController circularMotionController(stepperMotorMock, positionSwitchArray);
+    ::testing::InSequence    s;
+    EXPECT_CALL(stepperMotorMock, reset).Times(1);
+    IPositionSwitchMock* mock = static_cast<IPositionSwitchMock*>(positionSwitchArray[0].get());
+    EXPECT_CALL(*mock, isOpen).WillRepeatedly(::testing::Return(false));
+    EXPECT_TRUE(circularMotionController.reset());
 }
 
 TEST_F(CoffeeAutomatSmokeTest, CircularMotionController_ResetWithMotion)
 {
-	IStepperMotorMock stepperMotorMock;
-	CircularMotionController::PositionSwitchArray positionSwitchArray =
-	{
-		std::make_shared<IPositionSwitchMock>(),
-		std::make_shared<IPositionSwitchMock>(),
-		std::make_shared<IPositionSwitchMock>()
-	};
-	CircularMotionController circularMotionController(stepperMotorMock,
-			positionSwitchArray);
-	::testing::InSequence s;
-	EXPECT_CALL(stepperMotorMock, reset).Times(1);
-	EXPECT_TRUE(circularMotionController.reset());
+    IStepperMotorMock                             stepperMotorMock;
+    CircularMotionController::PositionSwitchArray positionSwitchArray = {
+        std::make_unique<IPositionSwitchMock>(), std::make_unique<IPositionSwitchMock>(),
+        std::make_unique<IPositionSwitchMock>()};
+    CircularMotionController circularMotionController(stepperMotorMock, positionSwitchArray);
+    ::testing::InSequence    s;
+    EXPECT_CALL(stepperMotorMock, reset).Times(1);
+    EXPECT_TRUE(circularMotionController.reset());
 }

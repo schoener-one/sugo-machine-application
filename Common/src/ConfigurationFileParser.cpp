@@ -67,7 +67,7 @@ public:
     po::basic_parsed_options<charT> parse(const po::options_description& desc)
     {
         po::parsed_options result(&desc);
-		parseJsonOptions(result);
+        parseJsonOptions(result);
         return po::basic_parsed_options<charT>(result);
     }
 
@@ -78,6 +78,6 @@ public:
 ConfigurationParser::ParsedOptions ConfigurationFileParser::runParser(
     const IConfiguration::OptionDescriptions& optionDescriptions)
 {
-	::JsonParser<char> parser(m_inStream);
-	return parser.parse(optionDescriptions);
+    ::JsonParser<char> parser(m_inStream);
+    return parser.parse(optionDescriptions);
 }

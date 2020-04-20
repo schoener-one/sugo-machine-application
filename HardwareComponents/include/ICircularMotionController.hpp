@@ -13,21 +13,20 @@
 
 namespace moco
 {
-
 class ICircularMotionController : public IMotionController
 {
 protected:
-	ICircularMotionController() {}
+    ICircularMotionController() {}
 
 public:
-	virtual ~ICircularMotionController() {}
+    virtual ~ICircularMotionController() {}
 
-	virtual bool reset() = 0;
-	virtual bool rotateTo(unsigned position) = 0;
-	virtual unsigned getPosition() const = 0;
-	virtual bool rotate(unsigned steps, IStepperMotor::Direction direction) = 0;
+    virtual bool     reset()                                                    = 0;
+    virtual bool     rotateTo(unsigned position)                                = 0;
+    virtual unsigned getPosition() const                                        = 0;
+    virtual bool     rotate(unsigned steps, IStepperMotor::Direction direction) = 0;
 };
 
-} // namespace moco
+}  // namespace moco
 
 #endif /* ICIRCULARMOTIONCONTROLLER_HPP_ */

@@ -10,16 +10,20 @@
 
 #include <string>
 
-#include "CommunicationService.hpp"
+#include <jsonrpcpp/jsonrpcpp.hpp>
+
+#include "ICoffeeAutomatService.hpp"
 #include "ICommandMessageBroker.hpp"
 #include "IConfiguration.hpp"
+#include "Responder.hpp"
+#include "ServiceComponent.hpp"
 
 namespace moco
 {
 /**
  * Class to offer the service interface on network.
  */
-class CoffeeAutomatService : public CommunicationService
+class CoffeeAutomatService : public ServiceComponent, public Responder::IMessageHandler
 {
 public:
     static void setConfiguration(IConfiguration& configuration);
@@ -28,20 +32,25 @@ public:
      * Creates a new instance
      */
     explicit CoffeeAutomatService(ICommandMessageBroker& messageBroker,
-                                  const IConfiguration&  configuration);
+                                  const IConfiguration& configuration, IOContext& ioContext);
 
-    /**
-     * Starts the service.
-     * @return true if service could be started.
-     */
-    bool start();
+    // IRunnable {{
+    bool start() override;
+
+    void stop() override;
+
+    bool isRunning() const override;
+    // IRunnable }}
 
 protected:
-    bool processMessage(const std::string& message) override;
+    // Responder {{
+    bool processReceived(StreamBuffer& in, StreamBuffer& out) override;
+    // Responder }}
 
 private:
-    ICommandMessageBroker& m_messageBroker;
-    const std::string      m_serviceAddress;
+    jsonrpcpp::Response processCommand(jsonrpcpp::request_ptr request);
+
+    Responder m_jsonRpcResponder;
 };
 }  // namespace moco
 

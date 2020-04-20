@@ -11,32 +11,30 @@
 #include <IStepperMotorController.hpp>
 #include <memory>
 
-
 namespace moco
 {
-
 /**
  * Class implements motor controlling for Adafruit motor HAT controller.
  */
 class AdafruitStepperMotorController : public IStepperMotorController
 {
 public:
-	constexpr static unsigned StepperMotorCount = 2u;
+    constexpr static unsigned StepperMotorCount = 2u;
 
-	AdafruitStepperMotorController();
-	~AdafruitStepperMotorController();
+    AdafruitStepperMotorController();
+    ~AdafruitStepperMotorController();
 
-	// IStepperMotorController {{
-	void reset() override;
-	unsigned getStepperMotorCount() const override { return StepperMotorCount; }
-	IMotorControl& getMotorControl(unsigned number) override;
-	// IStepperMotorController }}
+    // IStepperMotorController {{
+    void                  reset() override;
+    unsigned              getStepperMotorCount() const override { return StepperMotorCount; }
+    IStepperMotorControl& getStepperMotorControl(unsigned number) override;
+    // IStepperMotorController }}
 
 private:
-	class MotorHAT;
-	std::unique_ptr<MotorHAT> m_motorHat;
+    class MotorHAT;
+    std::unique_ptr<MotorHAT> m_motorHat;
 };
 
-} // namespace moco
+}  // namespace moco
 
 #endif /* ADAFRUITSTEPPERMOTORCONTROLLER_HPP_ */

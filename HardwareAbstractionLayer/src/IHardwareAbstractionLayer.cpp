@@ -9,6 +9,4 @@
 
 using namespace moco;
 
-std::shared_ptr<IHardwareAbstractionLayer> IHardwareAbstractionLayer::s_hal = nullptr;
-
-
+IHardwareAbstractionLayer* IHardwareAbstractionLayer::s_hal = nullptr;

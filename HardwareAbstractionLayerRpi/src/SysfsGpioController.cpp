@@ -175,7 +175,7 @@ bool SysfsGpioController::getPinState(unsigned pin, IGpioController::PinState& o
     if (success)
     {
         const bool isLow = ((value - '0') == 0) ? m_isActiveHigh : !m_isActiveHigh;
-    	outPinState = isLow ? PinState::Low : PinState::High;
+        outPinState      = isLow ? PinState::Low : PinState::High;
     }
 
     return success;
@@ -184,7 +184,7 @@ bool SysfsGpioController::getPinState(unsigned pin, IGpioController::PinState& o
 bool SysfsGpioController::setPinState(unsigned pin, PinState pinState)
 {
     assert(m_pinInfoList[pin].file != InvalidPin);
-    const char value     = (pinState == PinState::Low) ? '0' : '1';
+    const char    value     = (pinState == PinState::Low) ? '0' : '1';
     const ssize_t byteCount = ::write(m_pinInfoList[pin].file, &value, sizeof(value));
     return (byteCount == sizeof(value));
 }

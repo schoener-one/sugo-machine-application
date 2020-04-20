@@ -7,13 +7,13 @@
 
 #include <string>
 
+#include "CoffeeAutomatApplication.hpp"
 #include "Globals.hpp"
 #include "Logger.hpp"
-#include "CoffeeAutomatApplication.hpp"
 
 int main(int argc, char const **argv)
 {
-	moco::Logger::init();
-	moco::CoffeeAutomatApplication application;
-	return application.start(argc, argv) ? 0 : -1;
+    moco::Logger::init();
+    moco::CoffeeAutomatApplication application;
+    return application.start(argc, argv) ? 0 : -1;
 }

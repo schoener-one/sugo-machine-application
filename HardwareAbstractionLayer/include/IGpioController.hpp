@@ -10,40 +10,40 @@
 
 namespace moco
 {
-
 /**
  * Class for contolling GPIOs.
  */
 class IGpioController
 {
 public:
-	enum PinState
-	{
-		Low = 0,
-		High
-	};
-	enum PinDirection
-	{
-		In,
-		Out
-	};
+    enum PinState
+    {
+        Low = 0,
+        High
+    };
+    enum PinDirection
+    {
+        In,
+        Out
+    };
 
-	/// Infinite wait time for waitForPinStateChange.
-	constexpr static int InfiniteTimeout = -1;
+    /// Infinite wait time for waitForPinStateChange.
+    constexpr static int InfiniteTimeout = -1;
 
 protected:
-	IGpioController() {}
+    IGpioController() {}
 
 public:
-	virtual ~IGpioController() {}
+    virtual ~IGpioController() {}
 
-	virtual bool registerPin(unsigned pin, PinDirection pinDirection) = 0;
-	virtual bool unregisterPin(unsigned pin) = 0;
-	virtual bool getPinState(unsigned pin, PinState & outPinState) const = 0;
-	virtual bool setPinState(unsigned pin, PinState pinState) = 0;
-	virtual bool waitForPinStateChange(unsigned pin, PinState & outPinState, int timeoutMS) const = 0;
+    virtual bool registerPin(unsigned pin, PinDirection pinDirection)   = 0;
+    virtual bool unregisterPin(unsigned pin)                            = 0;
+    virtual bool getPinState(unsigned pin, PinState& outPinState) const = 0;
+    virtual bool setPinState(unsigned pin, PinState pinState)           = 0;
+    virtual bool waitForPinStateChange(unsigned pin, PinState& outPinState,
+                                       int timeoutMS) const             = 0;
 };
 
-} // namespace moco
+}  // namespace moco
 
 #endif /* IGPIOCONTROLLER_HPP_ */

@@ -12,7 +12,7 @@ target_link_libraries(CoffeeAutomatApplication
     MessageBroker
     CoffeeAutomatService
     CupRotationTray
-    CoffeeAutomat
+    CoffeeAutomatController
     HardwareComponents
     HardwareAbstractionLayer
     ${HardwareAbstractionLayerImpl}
@@ -26,11 +26,13 @@ if (NOT NO_UNITTEST)
     target_compile_options(CoffeeAutomatSmokeTest PUBLIC "-DUNIT_TEST")
     target_link_libraries(CoffeeAutomatSmokeTest
         Common
+        CommonMocks
         Protocol
         MessageBroker
+        MessageBrokerMocks
         CoffeeAutomatService
         CupRotationTray
-        CoffeeAutomat
+        CoffeeAutomatController
         ${Protobuf_LIBRARIES}
         ${Boost_LIBRARIES}
         pthread

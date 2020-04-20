@@ -7,8 +7,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMON_INCLUDE_CONFIGURATION_HPP_
-#define COMMON_INCLUDE_CONFIGURATION_HPP_
+#ifndef CONFIGURATION_HPP_
+#define CONFIGURATION_HPP_
 
 #include <cassert>
 #include <initializer_list>
@@ -27,6 +27,7 @@ class Configuration : public IConfiguration
 {
 public:
     Configuration() {}
+
     explicit Configuration(std::initializer_list<Option> list)
     {
         for (auto& option : list)
@@ -34,6 +35,7 @@ public:
             add(option);
         }
     }
+
     virtual ~Configuration() {}
 
     // IConfiguration {{
@@ -66,9 +68,10 @@ public:
     {
         return m_mapOptions.at(name);
     }
-    // IConfiguration }}
 
-    const Option& operator[](const std::string& name) { return getOption(name); }
+    const IConfiguration& extract(const std::string& prefix,
+                                  IConfiguration&    extractedConfiguration) const;
+    // IConfiguration }}
 
 private:
     /// List of options
@@ -78,4 +81,4 @@ private:
 
 }  // namespace moco
 
-#endif  // COMMON_INCLUDE_CONFIGURATION_HPP_
+#endif  // CONFIGURATION_HPP_

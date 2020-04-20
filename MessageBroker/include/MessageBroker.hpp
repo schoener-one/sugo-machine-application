@@ -1,76 +1,76 @@
-/*
- * MessageBroker.hpp
+///////////////////////////////////////////////////////////////////////////////
+/** @file
+ * @license: CLOSED
  *
- *  Created on: 02.11.2019
- *      Author: denis
+ * @author: denis
+ * @date:   02.11.2019
  */
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef MESSAGEBROKER_HPP_
 #define MESSAGEBROKER_HPP_
 
 #include <map>
-#include <cassert>
 
 #include "Globals.hpp"
 #include "IMessageBroker.hpp"
+#include "Requester.hpp"
+#include "Responder.hpp"
 
 namespace moco
 {
-
-template<class MessageT, class ResponseT = void, class ReceiverIdT = unsigned int>
+template <class MessageT, class ResponseT = void, class ReceiverIdT = unsigned int>
 class MessageBroker : public IMessageBroker<MessageT, ResponseT, ReceiverIdT>
+
 {
 public:
-	using typename IMessageBroker<MessageT, ResponseT, ReceiverIdT>::Receiver;
+    using typename IMessageBroker<MessageT, ResponseT, ReceiverIdT>::Handler;
 
-	// IMessageBroker {{
-	bool hasReceiver(const ReceiverIdT& receiverId) const override
-	{
-		return m_receivers.count(receiverId) > 0;
-	}
+    // IMessageBroker {{
+    void registerHandler(const ReceiverIdT& receiverId, Handler& handler) override
+    {
+        m_handlers[receiverId] = handler;
+    }
 
-	void notify(const MessageT& message, const ReceiverIdT& senderId) override
-	{
-		//TODO use a multimap for multiple receivers here!
-		LOG(debug) << "Sending message to " << senderId;
-		if (hasReceiver(senderId))
-		{
-			m_receivers[senderId](message);
-		}
-	}
+    void registerHandler(const ReceiverIdT& receiverId, Handler&& handler) override
+    {
+        m_handlers[receiverId] = handler;
+    }
 
-	ResponseT send(const MessageT& message, const ReceiverIdT& receiverId) override
-	{
-		LOG(debug) << "Sending message to " << receiverId;
-		assert(hasReceiver(receiverId));
-		return m_receivers[receiverId](message);
-	}
+    void unregisterHandler(const ReceiverIdT& receiverId) override
+    {
+        auto iter = m_handlers.find(receiverId);
+        if (iter != m_handlers.end())
+        {
+            m_handlers.erase(iter);
+        }
+    }
 
-	void registerReceiver(const ReceiverIdT& receiverId, Receiver& receiver) override
-	{
-		m_receivers[receiverId] = receiver;
-	}
+    bool hasRegisteredHandler(const ReceiverIdT& receiverId) const
+    {
+        auto iter = m_handlers.find(receiverId);
+        return (iter != m_handlers.end());
+    }
+    // IMessageBroker }}
 
-	void registerReceiver(const ReceiverIdT& receiverId, Receiver&& receiver) override
-	{
-		m_receivers[receiverId] = receiver;
-	}
-
-	void unregisterReceiver(const ReceiverIdT& receiverId) override
-	{
-		auto iter = m_receivers.find(receiverId);
-		if (iter != m_receivers.end())
-		{
-			m_receivers.erase(iter);
-		}
-	}
-	// IMessageBroker }}
+protected:
+    Handler* findHandler(const ReceiverIdT& receiverId)
+    {
+        Handler* handler = nullptr;
+        auto     iter    = m_handlers.find(receiverId);
+        if (iter != m_handlers.end())
+        {
+            handler = &(iter->second);
+        }
+        return handler;
+    }
 
 private:
-	using ReceiverMap = std::map<ReceiverIdT, Receiver>;
-	ReceiverMap m_receivers;
+    using MessageReceiverMap = std::map<ReceiverIdT, Handler>;
+
+    MessageReceiverMap m_handlers;
 };
 
-} // namespace moco
+}  // namespace moco
 
 #endif /* MESSAGEBROKER_HPP_ */

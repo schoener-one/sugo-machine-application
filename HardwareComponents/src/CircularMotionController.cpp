@@ -17,7 +17,7 @@ CircularMotionController::CircularMotionController(IStepperMotor&       stepperM
     : m_stepperMotor(stepperMotor),
       m_positionSwitches(positionSwitches),
       m_currentPosition(InvalidPosition),
-      m_motorStepsToNextPosition(stepperMotor.getStepsPerRound() +2 / 3)
+      m_motorStepsToNextPosition(stepperMotor.getStepsPerRound() + 2 / 3)
 {
 }
 
@@ -82,7 +82,7 @@ bool CircularMotionController::rotateTo(unsigned positionSwitchIndex)
 
 bool CircularMotionController::rotate(unsigned steps, IStepperMotor::Direction direction)
 {
-	const unsigned stepsDone = m_stepperMotor.runSteps(steps, direction);
-	m_stepperMotor.reset();  // turn motor control off again!
-	return (stepsDone == steps);
+    const unsigned stepsDone = m_stepperMotor.runSteps(steps, direction);
+    m_stepperMotor.reset();  // turn motor control off again!
+    return (stepsDone == steps);
 }

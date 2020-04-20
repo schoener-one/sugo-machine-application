@@ -27,12 +27,9 @@ protected:
 
     void SetUp() override
     {
-        m_config.add(
-            Option("value.unsigned", 6u, "integer"));
-        m_config.add(
-            Option("value.boolhar", 'L', "char"));
-        m_config.add(
-            Option("value.bool", true, "boolean"));
+        m_config.add(Option("value.unsigned", 6u, "integer"));
+        m_config.add(Option("value.boolhar", 'L', "char"));
+        m_config.add(Option("value.bool", true, "boolean"));
     }
 
     void TearDown() override {}
@@ -43,7 +40,7 @@ protected:
 TEST_F(ConfigurationTest, Configuration_AddOptions)
 {
     Configuration::OptionDescriptions descriptions = m_config.getOptionDescriptions();
-    const po::option_description*     p1           = descriptions.find_nothrow("value.unsigned", false);
+    const po::option_description*     p1 = descriptions.find_nothrow("value.unsigned", false);
     EXPECT_NE(p1, nullptr);
     const po::option_description* p2 = descriptions.find_nothrow("invalid", false);
     EXPECT_EQ(p2, nullptr);
@@ -58,6 +55,5 @@ TEST_F(ConfigurationTest, Configuration_GetValue)
 
 TEST_F(ConfigurationTest, Configuration_GetInvalidValue)
 {
-	EXPECT_THROW(m_config["invalid.value"].get<unsigned>(),
-			std::out_of_range);
+    EXPECT_THROW(m_config["invalid.value"].get<unsigned>(), std::out_of_range);
 }

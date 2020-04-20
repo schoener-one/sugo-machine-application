@@ -15,23 +15,32 @@
 
 using namespace moco;
 
-Thread::Thread(int priority) : m_isReady(false), m_thread(), m_priority(priority) {}
+Thread::Thread() : m_isReady(false), m_policy(PolicyCurrent) {}
 
-void Thread::start(Runnable function)
+bool Thread::start(Runnable function, Policy policy, int priority)
 {
-    m_isReady = false;
     std::unique_lock<std::mutex> lock(m_mutex);
+    m_isReady  = false;
+    m_runnable = function;
+    m_policy   = policy;
 
-    m_thread = std::thread([&] {
+    m_thread = std::thread([=] {
         Logger::reinit();
-        if (prepareRealTimeContext())
+        bool success = true;
+        if (m_policy == PolicyRealTime)
+        {
+            success = prepareRealTimeContext();
+        }
+
+        if (success)
         {
             // wait until thread is prepared for real-time context!
             std::unique_lock<std::mutex> lockThread(m_mutex);
             m_condVar.wait(lockThread, [&] { return m_isReady; });
             // now start...
-            LOG(debug) << "Starting new real-time thread: " << std::this_thread::get_id();
-            function();
+            LOG(debug) << "Starting new " << ((m_policy == PolicyRealTime) ? "real-time " : "")
+                       << "thread: " << std::this_thread::get_id();
+            m_runnable();
         }
         else
         {
@@ -39,30 +48,48 @@ void Thread::start(Runnable function)
         }
     });
     assert(m_thread.joinable() == true);
-    sched_param schedParam;
-    int         policy = 0;
-    pthread_getschedparam(m_thread.native_handle(), &policy, &schedParam);
 
-    policy = SCHED_FIFO;
-
-    int priority = m_priority;
-    if (priority == DefaultPriority)
+    if (policy == PolicyRealTime)
     {
-        priority = (sched_get_priority_max(policy) - sched_get_priority_min(policy)) / 2;
+        m_isReady = setRealTimePolicy(priority);
     }
-    LOG(debug) << "Creating new real-time thread " << getId() << " with priority " << priority;
-
-    schedParam.sched_priority = priority;
-    const int rv = pthread_setschedparam(m_thread.native_handle(), SCHED_FIFO, &schedParam);
-    assert(rv == 0);
+    else
+    {
+        m_isReady = true;
+    }
 
     // let the prepared thread run...
-    m_isReady = true;
     m_condVar.notify_one();
+    return m_isReady;
 }
 
 bool Thread::prepareRealTimeContext()
 {
     bool success = (::mlockall(MCL_CURRENT | MCL_FUTURE) == 0);
+    return success;
+}
+
+bool Thread::setRealTimePolicy(int priority)
+{
+    sched_param schedParam;
+    int         policy = 0;
+    bool success       = pthread_getschedparam(m_thread.native_handle(), &policy, &schedParam) == 0;
+
+    if (success)
+    {
+        LOG(debug) << "Creating new real-time thread " << getId() << " with priority " << priority;
+
+        schedParam.sched_priority = priority;
+        success = pthread_setschedparam(m_thread.native_handle(), SCHED_FIFO, &schedParam) == 0;
+
+        if (!success)
+        {
+            LOG(error) << "Failed to set scheduler parameters for thread " << std::hex << getId();
+        }
+    }
+    else
+    {
+        LOG(error) << "Failed to get scheduler parameters for thread " << getId();
+    }
     return success;
 }

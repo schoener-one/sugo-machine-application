@@ -9,17 +9,18 @@
 #define INCLUDE_GLOBALS_HPP_
 #include <boost/filesystem.hpp>
 #include <boost/log/trivial.hpp>
-#include <jsonrpcpp/json.hpp>
 #include <cassert>
+#include <jsonrpcpp/json.hpp>
 
 #include "Logger.hpp"
 
-#define ASSERT_NOT_REACHABLE \
-	LOG(fatal) << "Should not be reached"; assert(false)
+#define ASSERT_NOT_REACHABLE               \
+    LOG(fatal) << "Should not be reached"; \
+    assert(false)
 
 namespace moco
 {
-	using Json = nlohmann::json;
+using Json = nlohmann::json;
 }
 
 #endif /* INCLUDE_GLOBALS_HPP_ */
