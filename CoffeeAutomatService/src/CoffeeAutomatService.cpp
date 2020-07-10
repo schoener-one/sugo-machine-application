@@ -5,15 +5,26 @@
  *      Author: denis
  */
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <istream>
 #include <memory>
+#include <ostream>
 #include <string>
 
-#include <jsonrpcpp/jsonrpcpp.hpp>
+#include <Command.pb.h>
 
 #include "CoffeeAutomatService.hpp"
 #include "Globals.hpp"
+#include "String.hpp"
+
+namespace
+{
+constexpr unsigned MethodTokenCount      = 2u;  ///< method string: '<receiver-id>.<method-id>'
+constexpr unsigned MethodTokenReceiverId = 0u;
+constexpr unsigned MethodTokenMethodId   = 1u;
+}  // namespace
 
 using namespace moco;
 
@@ -25,71 +36,114 @@ void CoffeeAutomatService::setConfiguration(IConfiguration& configuration)
 }
 
 CoffeeAutomatService::CoffeeAutomatService(ICommandMessageBroker& messageBroker,
-                                           const IConfiguration&  configuration)
-    : m_messageBroker(messageBroker),
-      m_serviceAddress(
+                                           const IConfiguration&  configuration,
+                                           IOContext&             ioContext)
+    : ServiceComponent(messageBroker),
+      m_jsonRpcResponder(
           std::string("tcp://") +
-          configuration.getOption("coffee-automat-service.address").get<std::string>() +
-          std::to_string(configuration.getOption("coffee-automat-service.port").get<unsigned>()))
+              configuration.getOption("coffee-automat-service.address").get<std::string>() + ":" +
+              std::to_string(
+                  configuration.getOption("coffee-automat-service.port").get<unsigned>()),
+          *this, ioContext)
 {
 }
 
-bool CoffeeAutomatService::start() { return CommunicationService::start(m_serviceAddress); }
-
-bool CoffeeAutomatService::processMessage(const std::string& requestMessage)
+bool CoffeeAutomatService::start()
 {
-    std::string responseMessage;
+    bool success = ServiceComponent::start();
+
+    if (success)
+    {
+        LOG(info) << "Starting JSON-RPC service on address: " << m_jsonRpcResponder.getAddress();
+        success = m_jsonRpcResponder.start();
+    }
+
+    return success;
+}
+
+void CoffeeAutomatService::stop()
+{
+    ServiceComponent::stop();
+    m_jsonRpcResponder.stop();
+}
+
+bool CoffeeAutomatService::isRunning() const
+{
+    return ServiceComponent::isRunning() || m_jsonRpcResponder.isRunning();
+}
+
+bool CoffeeAutomatService::processReceived(StreamBuffer& inBuf, StreamBuffer& outBuf)
+{
+    std::string  requestMessage;
+    std::istream in(&inBuf);
+    std::copy(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>(),
+              std::back_inserter(requestMessage));
     LOG(info) << "Received request: '" << requestMessage << "'";
+    bool success = false;
+
     try
     {
         jsonrpcpp::entity_ptr entity = jsonrpcpp::Parser::do_parse(requestMessage);
         if (entity->is_request())
         {
             jsonrpcpp::request_ptr request = std::dynamic_pointer_cast<jsonrpcpp::Request>(entity);
-            jsonrpcpp::Response    response;
-            if (m_messageBroker.hasReceiver(request->method()))
-            {
-                message::Command command;
-                command.set_name(request->method());
-                command.set_id(request->id().int_id());
-                const jsonrpcpp::Parameter& parameter = request->params();
-                if (!parameter.is_null())
-                {
-                    command.set_parameters(parameter.to_json().dump());
-                }
-                const message::CommandResponse& commandResponse =
-                    m_messageBroker.send(command, request->method());
-                if (commandResponse.result() == message::CommandResponse_Result_SUCCESS)
-                {
-                    Json json;
-                    json["code"] = commandResponse.result();
-                    if (!commandResponse.response().empty())
-                    {
-                        json["data"] = Json::parse(commandResponse.response());
-                    }
-                    response = jsonrpcpp::Response(*request, json);
-                }
-                else
-                {
-                    response = jsonrpcpp::Response(
-                        *request, jsonrpcpp::Error(Json{{"message", commandResponse.response()},
-                                                        {"code", commandResponse.result()}}));
-                }
-            }
-            else
-            {
-                response = jsonrpcpp::Response(
-                    *request, jsonrpcpp::Error(
-                                  Json{{"message", "unknown command"},
-                                       {"code", message::CommandResponse_Result_INVALID_COMMAND}}));
-            }
-            responseMessage = response.to_json().dump();
+            const jsonrpcpp::Response response = processCommand(request);
+            const std::string         responseMessage(response.to_json().dump());
+            LOG(info) << "Sending response: '" << responseMessage << "'";
+            std::ostream out(&outBuf);
+            out << responseMessage;
+            success = true;
         }
     }
     catch (jsonrpcpp::ParseErrorException& ex)
     {
         LOG(error) << ex.what();
     }
-    LOG(info) << "Sending response: '" << responseMessage << "'";
-    return sendMessage(responseMessage);
+    return success;
+}
+
+jsonrpcpp::Response CoffeeAutomatService::processCommand(jsonrpcpp::request_ptr request)
+{
+    String::Tokens      tokens = String::split<'.'>(request->method());
+    jsonrpcpp::Response response;
+
+    if (tokens.size() == MethodTokenCount && (tokens[MethodTokenReceiverId].size() > 0) &&
+        (tokens[MethodTokenMethodId].size() > 0))
+    {
+        message::Command command;
+        command.set_name(tokens[MethodTokenMethodId]);
+        command.set_id(request->id().int_id());
+        const jsonrpcpp::Parameter& parameters = request->params();
+        if (!parameters.is_null())
+        {
+            command.set_parameters(parameters.to_json().dump());
+        }
+        message::CommandResponse commandResponse;
+        const bool               success =
+            getCommandMessageBroker().send(command, tokens[MethodTokenReceiverId], commandResponse);
+        if (success && (commandResponse.result() == message::CommandResponse_Result_SUCCESS))
+        {
+            Json json;
+            json["code"] = commandResponse.result();
+            if (!commandResponse.response().empty())
+            {
+                json["data"] = Json::parse(commandResponse.response());
+            }
+            response = jsonrpcpp::Response(*request, json);
+        }
+        else
+        {
+            response = jsonrpcpp::Response(
+                *request, jsonrpcpp::Error(Json{{"message", commandResponse.response()},
+                                                {"code", commandResponse.result()}}));
+        }
+    }
+    else
+    {
+        response = jsonrpcpp::Response(
+            *request,
+            jsonrpcpp::Error(Json{{"message", "invalid format"},
+                                  {"code", message::CommandResponse_Result_INVALID_COMMAND}}));
+    }
+    return response;
 }

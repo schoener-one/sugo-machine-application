@@ -7,35 +7,35 @@
 
 #include "CupRotationTray.hpp"
 #include "CommandParameterParser.hpp"
-#include "ICupRotationTray.hpp"
 
 using namespace std;
 using namespace moco;
-using Transition = CupRotationTray::Fsm::Transition;
+using namespace moco::ICupRotationTray;
+using Transition = ICupRotationTray::Fsm::Transition;
 
-std::ostream& moco::operator<<(std::ostream& ostr, CupRotationTray::State const& value)
+std::ostream& moco::operator<<(std::ostream& ostr, ICupRotationTray::State const& value)
 {
     switch (value)
     {
-        case CupRotationTray::State::Off:
+        case ICupRotationTray::State::Off:
             ostr << "Off";
             break;
-        case CupRotationTray::State::Idle:
+        case ICupRotationTray::State::Idle:
             ostr << "Idle";
             break;
-        case CupRotationTray::State::Test:
+        case ICupRotationTray::State::Test:
             ostr << "Test";
             break;
-        case CupRotationTray::State::Initialization:
+        case ICupRotationTray::State::Initialization:
             ostr << "Initialization";
             break;
-        case CupRotationTray::State::SelfTest:
+        case ICupRotationTray::State::SelfTest:
             ostr << "SelfTest";
             break;
-        case CupRotationTray::State::Rotation:
+        case ICupRotationTray::State::Rotation:
             ostr << "Rotation";
             break;
-        case CupRotationTray::State::Error:
+        case ICupRotationTray::State::Error:
             ostr << "Error";
             break;
         default:
@@ -44,47 +44,47 @@ std::ostream& moco::operator<<(std::ostream& ostr, CupRotationTray::State const&
     return ostr;
 }
 
-std::ostream& moco::operator<<(std::ostream& ostr, CupRotationTray::EventId const& value)
+std::ostream& moco::operator<<(std::ostream& ostr, ICupRotationTray::EventId const& value)
 {
     switch (value)
     {
-        case CupRotationTray::EventId::SwitchOff:
+        case ICupRotationTray::EventId::SwitchOff:
             ostr << "SwitchOff";
             break;
-        case CupRotationTray::EventId::SwitchOn:
+        case ICupRotationTray::EventId::SwitchOn:
             ostr << "SwitchOn";
             break;
-        case CupRotationTray::EventId::SwitchOnTest:
+        case ICupRotationTray::EventId::SwitchOnTest:
             ostr << "SwitchOnTest";
             break;
-        case CupRotationTray::EventId::Init:
+        case ICupRotationTray::EventId::Init:
             ostr << "Reset";
             break;
-        case CupRotationTray::EventId::InitFinished:
+        case ICupRotationTray::EventId::InitFinished:
             ostr << "InitFinished";
             break;
-        case CupRotationTray::EventId::InitFailed:
+        case ICupRotationTray::EventId::InitFailed:
             ostr << "InitFailed";
             break;
-        case CupRotationTray::EventId::RunSelfTest:
+        case ICupRotationTray::EventId::RunSelfTest:
             ostr << "RunSelfTest";
             break;
-        case CupRotationTray::EventId::SelfTestSucceeded:
+        case ICupRotationTray::EventId::SelfTestSucceeded:
             ostr << "SelfTestSucceeded";
             break;
-        case CupRotationTray::EventId::SelfTestFailed:
+        case ICupRotationTray::EventId::SelfTestFailed:
             ostr << "SelfTestFailed";
             break;
-        case CupRotationTray::EventId::Rotate:
+        case ICupRotationTray::EventId::Rotate:
             ostr << "Rotate";
             break;
-        case CupRotationTray::EventId::PositionReached:
+        case ICupRotationTray::EventId::PositionReached:
             ostr << "PositionReached";
             break;
-        case CupRotationTray::EventId::RotationFailed:
+        case ICupRotationTray::EventId::RotationFailed:
             ostr << "RotationFailed";
             break;
-        case CupRotationTray::EventId::TestRotation:
+        case ICupRotationTray::EventId::TestRotation:
             ostr << "TestRotation";
             break;
         default:
@@ -93,7 +93,7 @@ std::ostream& moco::operator<<(std::ostream& ostr, CupRotationTray::EventId cons
     return ostr;
 }
 
-void CupRotationTrayImpl::setConfiguration(IConfiguration& configuration)
+void CupRotationTray::setConfiguration(IConfiguration& configuration)
 {
     configuration.add(Option("cup-rotation-tray.stepper-motor.index", 0u,
                              "CupRotationTray: stepper motor index"));
@@ -107,80 +107,86 @@ void CupRotationTrayImpl::setConfiguration(IConfiguration& configuration)
                              "CupRotationTray: position switch position 3"));
 }
 
-CupRotationTrayImpl::CupRotationTrayImpl(ICommandMessageBroker&     messageBroker,
-                                         ICircularMotionController& circularMotionController)
+unsigned CupRotationTray::getGpioPin(unsigned number, const IConfiguration& configuration)
+{
+    const std::string key("cup-rotation-tray.position-switches.gpio-pin-" + std::to_string(number));
+    return configuration.getOption(key).get<unsigned>();
+}
+
+const IConfiguration& CupRotationTray::getStepperMotorConfiguration(
+    const IConfiguration& configuration, IConfiguration& extractedConfiguration)
+{
+    return configuration.extract("cup-rotation-tray.stepper-motor.", extractedConfiguration);
+}
+
+CupRotationTray::CupRotationTray(ICommandMessageBroker&     messageBroker,
+                                 ICircularMotionController& circularMotionController)
     : Fsm(Off,
           {
               // clang-format off
-        Transition(Off,            Initialization, Event(SwitchOn),         Fsm::MakeAction(&CupRotationTrayImpl::switchOn, this)),
-		Transition(Off,            Test,           Event(SwitchOnTest),     Fsm::MakeAction(&CupRotationTrayImpl::initialize, this)),
-		Transition(Initialization, Initialization, Event(Init),             Fsm::MakeAction(&CupRotationTrayImpl::initialize, this)),
-		Transition(Initialization, SelfTest,       Event(InitFinished),     Fsm::MakeAction(&CupRotationTrayImpl::runSelfTest, this)),
-		Transition(SelfTest,       Idle,           Event(SelfTestSucceeded), Fsm::MakeAction(&CupRotationTrayImpl::finishSelfTest, this)),
-		Transition(Idle,           Off,            Event(SwitchOff),        Fsm::MakeAction(&CupRotationTrayImpl::switchOff, this)),
-		Transition(Idle, 	       Initialization, Event(Init),             Fsm::MakeAction(&CupRotationTrayImpl::initialize, this)),
-		Transition(Idle, 	       Rotation,       Event(Rotate),           Fsm::MakeAction(&CupRotationTrayImpl::rotate, this)),
+        Transition(Off,            Initialization, Event(SwitchOn),         Fsm::MakeAction(&CupRotationTray::switchOn, this)),
+		Transition(Off,            Test,           Event(SwitchOnTest),     Fsm::MakeAction(&CupRotationTray::initialize, this)),
+		Transition(Initialization, Initialization, Event(Init),             Fsm::MakeAction(&CupRotationTray::initialize, this)),
+		Transition(Initialization, SelfTest,       Event(InitFinished),     Fsm::MakeAction(&CupRotationTray::runSelfTest, this)),
+		Transition(SelfTest,       Idle,           Event(SelfTestSucceeded), Fsm::MakeAction(&CupRotationTray::finishSelfTest, this)),
+		Transition(Idle,           Off,            Event(SwitchOff),        Fsm::MakeAction(&CupRotationTray::switchOff, this)),
+		Transition(Idle, 	       Initialization, Event(Init),             Fsm::MakeAction(&CupRotationTray::initialize, this)),
+		Transition(Idle, 	       Rotation,       Event(Rotate),           Fsm::MakeAction(&CupRotationTray::rotate, this)),
 		Transition(Rotation, 	   Idle,           Event(PositionReached)),
-		Transition(Rotation, 	   Error,          Event(RotationFailed),   Fsm::MakeAction(&CupRotationTrayImpl::handleFailure, this)),
-		Transition(SelfTest,       Error,          Event(SelfTestFailed),   Fsm::MakeAction(&CupRotationTrayImpl::handleFailure, this)),
-		Transition(Initialization, Error,          Event(InitFailed),       Fsm::MakeAction(&CupRotationTrayImpl::handleFailure, this)),
-		Transition(Error,          Off,            Event(SwitchOff),        Fsm::MakeAction(&CupRotationTrayImpl::switchOff, this)),
-		Transition(Error,          Initialization, Event(Init),             Fsm::MakeAction(&CupRotationTrayImpl::initialize, this)),
+		Transition(Rotation, 	   Error,          Event(RotationFailed),   Fsm::MakeAction(&CupRotationTray::handleFailure, this)),
+		Transition(SelfTest,       Error,          Event(SelfTestFailed),   Fsm::MakeAction(&CupRotationTray::handleFailure, this)),
+		Transition(Initialization, Error,          Event(InitFailed),       Fsm::MakeAction(&CupRotationTray::handleFailure, this)),
+		Transition(Error,          Off,            Event(SwitchOff),        Fsm::MakeAction(&CupRotationTray::switchOff, this)),
+		Transition(Error,          Initialization, Event(Init),             Fsm::MakeAction(&CupRotationTray::initialize, this)),
 		Transition(Test, 	       Test,           Event(InitFinished)),
-        Transition(Test, 	       Test,           Event(TestRotation),     Fsm::MakeAction(&CupRotationTrayImpl::testRotation, this)),
-        Transition(Test,           Off,            Event(SwitchOff),        Fsm::MakeAction(&CupRotationTrayImpl::switchOff, this)),
-        Transition(Test,           Off,            Event(InitFailed),       Fsm::MakeAction(&CupRotationTrayImpl::switchOff, this)),
+        Transition(Test, 	       Test,           Event(TestRotation),     Fsm::MakeAction(&CupRotationTray::testRotation, this)),
+        Transition(Test,           Off,            Event(SwitchOff),        Fsm::MakeAction(&CupRotationTray::switchOff, this)),
+        Transition(Test,           Off,            Event(InitFailed),       Fsm::MakeAction(&CupRotationTray::switchOff, this)),
               // clang-format on
           }),
-      CommandExecutionComponent<CupRotationTray::State, CupRotationTray::Event>(messageBroker),
+      StatedServiceComponent<ICupRotationTray::State, ICupRotationTray::Event>(messageBroker,
+                                                                               *this),
       m_circularMotionController(circularMotionController)
 {
-    registerReceiver(
-        command::CupRotationTraySwitchOn,
-        std::bind(&CupRotationTrayImpl::onCommandSwitchOn, this, std::placeholders::_1));
-    registerReceiver(
-        command::CupRotationTraySwitchOff,
-        std::bind(&CupRotationTrayImpl::onCommandSwitchOff, this, std::placeholders::_1));
-    registerReceiver(command::CupRotationTrayReset,
-                     std::bind(&CupRotationTrayImpl::onCommandReset, this, std::placeholders::_1));
-    registerReceiver(
-        command::CupRotationTrayGetState,
-        std::bind(&CupRotationTrayImpl::onCommandGetState, this, std::placeholders::_1));
-    registerReceiver(
-        command::CupRotationTraySetPosition,
-        std::bind(&CupRotationTrayImpl::onCommandSetPosition, this, std::placeholders::_1));
-    registerReceiver(
-        command::CupRotationTrayGetPosition,
-        std::bind(&CupRotationTrayImpl::onCommandGetPosition, this, std::placeholders::_1));
-    registerReceiver(
-        command::CupRotationTraySwitchOnTest,
-        std::bind(&CupRotationTrayImpl::onCommandSwitchOnTest, this, std::placeholders::_1));
-    registerReceiver(
-        command::CupRotationTrayTestRotation,
-        std::bind(&CupRotationTrayImpl::onCommandTestRotation, this, std::placeholders::_1));
+    registerCommandHandler(Command::SwitchOn, std::bind(&CupRotationTray::onCommandSwitchOn, this,
+                                                        std::placeholders::_1));
+    registerCommandHandler(Command::SwitchOff, std::bind(&CupRotationTray::onCommandSwitchOff, this,
+                                                         std::placeholders::_1));
+    registerCommandHandler(
+        Command::Reset, std::bind(&CupRotationTray::onCommandReset, this, std::placeholders::_1));
+    registerCommandHandler(Command::GetState, std::bind(&CupRotationTray::onCommandGetState, this,
+                                                        std::placeholders::_1));
+    registerCommandHandler(Command::SetPosition, std::bind(&CupRotationTray::onCommandSetPosition,
+                                                           this, std::placeholders::_1));
+    registerCommandHandler(Command::GetPosition, std::bind(&CupRotationTray::onCommandGetPosition,
+                                                           this, std::placeholders::_1));
+    registerCommandHandler(Command::SwitchOnTest, std::bind(&CupRotationTray::onCommandSwitchOnTest,
+                                                            this, std::placeholders::_1));
+    registerCommandHandler(Command::TestRotation, std::bind(&CupRotationTray::onCommandTestRotation,
+                                                            this, std::placeholders::_1));
 }
 
-message::CommandResponse CupRotationTrayImpl::onCommandSwitchOn(const message::Command& command)
+message::CommandResponse CupRotationTray::onCommandSwitchOn(const message::Command& command)
 {
-    return handleCommand(command, Event(SwitchOn), *this);
+    return handleStateChangeCommand(command, Event(SwitchOn));
 }
 
-message::CommandResponse CupRotationTrayImpl::onCommandSwitchOff(const message::Command& command)
+message::CommandResponse CupRotationTray::onCommandSwitchOff(const message::Command& command)
 {
-    return handleCommand(command, Event(SwitchOff), *this);
+    return handleStateChangeCommand(command, Event(SwitchOff));
 }
 
-message::CommandResponse CupRotationTrayImpl::onCommandReset(const message::Command& command)
+message::CommandResponse CupRotationTray::onCommandReset(const message::Command& command)
 {
-    return handleCommand(command, Event(Init), *this);
+    return handleStateChangeCommand(command, Event(Init));
 }
 
-message::CommandResponse CupRotationTrayImpl::onCommandGetState(const message::Command& command)
+message::CommandResponse CupRotationTray::onCommandGetState(const message::Command& command)
 {
-    return handleCommandGetState(command, *this);
+    return handleCommandGetState(command);
 }
 
-message::CommandResponse CupRotationTrayImpl::onCommandGetPosition(const message::Command& command)
+message::CommandResponse CupRotationTray::onCommandGetPosition(const message::Command& command)
 {
     Json json;
     json["position"]          = m_circularMotionController.getPosition();
@@ -188,7 +194,7 @@ message::CommandResponse CupRotationTrayImpl::onCommandGetPosition(const message
     return handleRequestCommand(command, resonse);
 }
 
-message::CommandResponse CupRotationTrayImpl::onCommandSetPosition(const message::Command& command)
+message::CommandResponse CupRotationTray::onCommandSetPosition(const message::Command& command)
 {
     message::CommandResponse response;
     try
@@ -196,7 +202,7 @@ message::CommandResponse CupRotationTrayImpl::onCommandSetPosition(const message
         CommandParameterParser parser(command.parameters());
         m_trayPosition = parser.get<unsigned>("position");
         LOG(debug) << "Received rotation request to position " << m_trayPosition;
-        response = handleCommand(command, Event(Rotate), *this);
+        response = handleStateChangeCommand(command, Event(Rotate));
     }
     catch (std::exception& ex)
     {
@@ -206,12 +212,12 @@ message::CommandResponse CupRotationTrayImpl::onCommandSetPosition(const message
     return response;
 }
 
-message::CommandResponse CupRotationTrayImpl::onCommandSwitchOnTest(const message::Command& command)
+message::CommandResponse CupRotationTray::onCommandSwitchOnTest(const message::Command& command)
 {
-    return handleCommand(command, Event(SwitchOnTest), *this);
+    return handleStateChangeCommand(command, Event(SwitchOnTest));
 }
 
-message::CommandResponse CupRotationTrayImpl::onCommandTestRotation(const message::Command& command)
+message::CommandResponse CupRotationTray::onCommandTestRotation(const message::Command& command)
 {
     message::CommandResponse response;
     try
@@ -223,7 +229,7 @@ message::CommandResponse CupRotationTrayImpl::onCommandTestRotation(const messag
             (direction == "backward") ? IStepperMotor::Backward : IStepperMotor::Forward;
         LOG(debug) << "Received test rotation request for " << m_testRotationParameters.steps
                    << " steps and direction " << m_testRotationParameters.direction;
-        response = handleCommand(command, Event(TestRotation), *this);
+        response = handleStateChangeCommand(command, Event(TestRotation));
     }
     catch (std::exception& ex)
     {
@@ -233,8 +239,8 @@ message::CommandResponse CupRotationTrayImpl::onCommandTestRotation(const messag
     return response;
 }
 
-void CupRotationTrayImpl::switchOn(const CupRotationTray::Event& event,
-                                   const CupRotationTray::State& state)
+void CupRotationTray::switchOn(const ICupRotationTray::Event& event,
+                               const ICupRotationTray::State& state)
 {
     (void)event;
     (void)state;
@@ -242,8 +248,8 @@ void CupRotationTrayImpl::switchOn(const CupRotationTray::Event& event,
     push(Event(Init));
 }
 
-void CupRotationTrayImpl::initialize(const CupRotationTray::Event& event,
-                                     const CupRotationTray::State& state)
+void CupRotationTray::initialize(const ICupRotationTray::Event& event,
+                                 const ICupRotationTray::State& state)
 {
     (void)event;
     LOG(info) << "Initializing CupRotationTray...";
@@ -263,16 +269,16 @@ void CupRotationTrayImpl::initialize(const CupRotationTray::Event& event,
     }
 }
 
-void CupRotationTrayImpl::switchOff(const CupRotationTray::Event& event,
-                                    const CupRotationTray::State& state)
+void CupRotationTray::switchOff(const ICupRotationTray::Event& event,
+                                const ICupRotationTray::State& state)
 {
     (void)event;
     (void)state;
     LOG(info) << "Switching off CupRotationTray...";
 }
 
-void CupRotationTrayImpl::runSelfTest(const CupRotationTray::Event& event,
-                                      const CupRotationTray::State& state)
+void CupRotationTray::runSelfTest(const ICupRotationTray::Event& event,
+                                  const ICupRotationTray::State& state)
 {
     (void)event;
     (void)state;
@@ -281,16 +287,16 @@ void CupRotationTrayImpl::runSelfTest(const CupRotationTray::Event& event,
     push(Event(SelfTestSucceeded));
 }
 
-void CupRotationTrayImpl::handleFailure(const CupRotationTray::Event& event,
-                                        const CupRotationTray::State& state)
+void CupRotationTray::handleFailure(const ICupRotationTray::Event& event,
+                                    const ICupRotationTray::State& state)
 {
     (void)event;
     (void)state;
     LOG(error) << "Handling failure...";
 }
 
-void CupRotationTrayImpl::rotate(const CupRotationTray::Event& event,
-                                 const CupRotationTray::State& state)
+void CupRotationTray::rotate(const ICupRotationTray::Event& event,
+                             const ICupRotationTray::State& state)
 {
     (void)event;
     (void)state;
@@ -307,17 +313,17 @@ void CupRotationTrayImpl::rotate(const CupRotationTray::Event& event,
     }
 }
 
-void CupRotationTrayImpl::finishSelfTest(const CupRotationTray::Event& event,
-                                         const CupRotationTray::State& state)
+void CupRotationTray::finishSelfTest(const ICupRotationTray::Event& event,
+                                     const ICupRotationTray::State& state)
 {
     (void)event;
     (void)state;
     LOG(info) << "Finishing self-test...";
-    notify(notification::CupRotationTraySelfTestFinished);
+    notify(Command::SelfTestFinished);
 }
 
-void CupRotationTrayImpl::testRotation(const CupRotationTray::Event& event,
-                                       const CupRotationTray::State& state)
+void CupRotationTray::testRotation(const ICupRotationTray::Event& event,
+                                   const ICupRotationTray::State& state)
 {
     (void)event;
     (void)state;
@@ -329,5 +335,5 @@ void CupRotationTrayImpl::testRotation(const CupRotationTray::Event& event,
     {
         LOG(error) << "Test rotation failed";
     }
-    notify(notification::CupRotationTrayTestRotationFinished);
+    notify(Command::TestRotationFinished);
 }

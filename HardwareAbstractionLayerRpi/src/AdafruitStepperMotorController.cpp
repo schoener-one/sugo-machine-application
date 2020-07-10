@@ -20,20 +20,20 @@ namespace moco
 /**
  * IStepperMotor implementation class
  */
-class AdafruitMotorControl : public IStepperMotorController::IMotorControl
+class AdafruitMotorControl : public IStepperMotorController::IStepperMotorControl
 {
 public:
     constexpr static unsigned StepsPerRound = 200u;
 
     explicit AdafruitMotorControl(Adafruit_StepperMotor& motor) : m_stepperMotor(motor) {}
 
-    static ::Direction toDirection(IMotorControl::Direction direction)
+    static ::Direction toDirection(IStepperMotorControl::Direction direction)
     {
         return (direction == Forward ? ::FORWARD : ::BACKWARD);
     }
 
     // IStepperMotorController::IStepperMotor {{
-    void step(IMotorControl::Direction direction) override
+    void step(IStepperMotorControl::Direction direction) override
     {
         m_stepperMotor.oneStep(toDirection(direction), MICROSTEP);
     }
@@ -83,8 +83,8 @@ AdafruitStepperMotorController::~AdafruitStepperMotorController() {}
 
 void AdafruitStepperMotorController::reset() { m_motorHat->resetAll(); }
 
-IStepperMotorController::IMotorControl& AdafruitStepperMotorController::getMotorControl(
-    unsigned number)
+IStepperMotorController::IStepperMotorControl&
+AdafruitStepperMotorController::getStepperMotorControl(unsigned number)
 {
     assert(number < StepperMotorCount);
     return m_motorHat->m_stepperMotors[number];

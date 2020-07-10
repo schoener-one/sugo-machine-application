@@ -13,8 +13,7 @@
 
 using namespace moco;
 
-PositionSwitch::PositionSwitch(unsigned switchGpioPin)
-    : m_switchGpioPin(switchGpioPin)
+PositionSwitch::PositionSwitch(unsigned switchGpioPin) : m_switchGpioPin(switchGpioPin)
 {
     IHardwareAbstractionLayer& hal = IHardwareAbstractionLayer::get();
     const bool success = hal.getGpioController().registerPin(m_switchGpioPin, IGpioController::In);

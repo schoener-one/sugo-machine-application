@@ -22,15 +22,30 @@ class Thread final
 {
 public:
     /// Default priority
-    constexpr static int DefaultPriority = 0;
+    enum Policy
+    {
+        PolicyCurrent,  ///< Keep current thread policy type.
+        PolicyRealTime  ///< Change to real time thread policy.
+    };
 
-    explicit Thread(int priority = DefaultPriority);
+    explicit Thread();
 
+    /// Runnable function
     using Runnable = std::function<void(void)>;
-    void            start(Runnable function);
-    void            join() { m_thread.join(); }
+
+    /**
+     * Starts a new thread with the runnable function.
+     *
+     * @param function Function to be executed within the thread context.
+     * @return true if the function could be started.
+     */
+    bool start(Runnable function, Policy policy = PolicyCurrent, int priority = 0);
+
+    void join() { m_thread.join(); }
+
     std::thread::id getId() { return m_thread.get_id(); }
 
+private:
     /**
      * Prepares the real-time thread context. Should be called from within
      * every real-time thread.
@@ -38,12 +53,19 @@ public:
      */
     static bool prepareRealTimeContext();
 
-private:
+    /**
+     * Switches the thread to real time policy.
+     * @param priority Priority to be set for real time thread.
+     * @return
+     */
+    bool setRealTimePolicy(int priority);
+
     std::mutex              m_mutex;
     std::condition_variable m_condVar;
     bool                    m_isReady;
     std::thread             m_thread;
-    const int               m_priority;
+    Runnable                m_runnable;
+    Policy                  m_policy;
 };
 }  // namespace moco
 

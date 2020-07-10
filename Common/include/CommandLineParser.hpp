@@ -7,8 +7,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMON_INCLUDE_COMMANDLINEPARSER_HPP_
-#define COMMON_INCLUDE_COMMANDLINEPARSER_HPP_
+#ifndef COMMANDLINEPARSER_HPP_
+#define COMMANDLINEPARSER_HPP_
 
 #include <iostream>
 
@@ -63,4 +63,4 @@ private:
 
 }  // namespace moco
 
-#endif  // COMMON_INCLUDE_COMMANDLINEPARSER_HPP_
+#endif  // COMMANDLINEPARSER_HPP_

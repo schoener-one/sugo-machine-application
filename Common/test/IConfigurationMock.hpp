@@ -23,7 +23,8 @@ public:
     MOCK_METHOD1(set, bool(const VariablesMap&));
     MOCK_METHOD1(add, void(const Option&));
     MOCK_CONST_METHOD1(getOption, const Option&(const std::string&));
+    MOCK_CONST_METHOD2(extract, const IConfiguration&(const std::string&, IConfiguration&));
 };
 }  // namespace moco
 
-#endif // COMMON_TEST_ICONFIGURATIONMOCK_HPP_
+#endif  // COMMON_TEST_ICONFIGURATIONMOCK_HPP_

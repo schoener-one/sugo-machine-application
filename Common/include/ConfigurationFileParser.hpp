@@ -7,8 +7,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMON_INCLUDE_CONFIGURATIONFILEPARSER_HPP_
-#define COMMON_INCLUDE_CONFIGURATIONFILEPARSER_HPP_
+#ifndef CONFIGURATIONFILEPARSER_HPP_
+#define CONFIGURATIONFILEPARSER_HPP_
 
 #include <istream>
 
@@ -23,17 +23,16 @@ namespace moco
 class ConfigurationFileParser : public ConfigurationParser
 {
 public:
-	/**
-	 * @param inStream Input stream to be parsed. The stream must be valid
-	 * until parsing has been don.
-	 */
-	explicit ConfigurationFileParser(std::istream& inStream) :m_inStream(inStream) {}
+    /**
+     * @param inStream Input stream to be parsed. The stream must be valid
+     * until parsing has been don.
+     */
+    explicit ConfigurationFileParser(std::istream& inStream) : m_inStream(inStream) {}
 
 protected:
-	// ConfigurationParser {{
-	ParsedOptions runParser(
-        const IConfiguration::OptionDescriptions& optionDescriptions) override;
-	// ConfigurationParser }}
+    // ConfigurationParser {{
+    ParsedOptions runParser(const IConfiguration::OptionDescriptions& optionDescriptions) override;
+    // ConfigurationParser }}
 
 private:
     std::istream& m_inStream;
@@ -41,4 +40,4 @@ private:
 
 }  // namespace moco
 
-#endif  // COMMON_INCLUDE_CONFIGURATIONFILEPARSER_HPP_
+#endif  // CONFIGURATIONFILEPARSER_HPP_

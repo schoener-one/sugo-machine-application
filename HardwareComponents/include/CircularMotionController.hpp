@@ -29,7 +29,7 @@ public:
     /// Maximum number of position switches.
     constexpr static unsigned MaxPositionSwitches = 3u;
 
-    using PositionSwitchArray = std::array<std::shared_ptr<IPositionSwitch>, MaxPositionSwitches>;
+    using PositionSwitchArray = std::array<std::unique_ptr<IPositionSwitch>, MaxPositionSwitches>;
 
     CircularMotionController(IStepperMotor& stepperMotor, PositionSwitchArray& positionSwitches);
 

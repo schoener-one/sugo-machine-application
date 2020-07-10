@@ -1,25 +1,26 @@
-/*
- * CoffeeMachineApplication.cpp
+///////////////////////////////////////////////////////////////////////////////
+/** @file
+ * @license: CLOSED
  *
- *  Created on: 01.12.2019
- *      Author: denis
+ * @author: denis
+ * @date:   01.12.2019
  */
+///////////////////////////////////////////////////////////////////////////////
 
 #include <fstream>
 #include <iostream>
 #include <string>
 
-#include "CoffeeAutomatApplication.hpp"
-
 #include "CircularMotionController.hpp"
-#include "CoffeeAutomat.hpp"
+#include "CoffeeAutomatApplication.hpp"
+#include "CoffeeAutomatController.hpp"
 #include "CoffeeAutomatService.hpp"
 #include "CommandLineParser.hpp"
+#include "CommandMessageBroker.hpp"
 #include "ConfigurationFileParser.hpp"
 #include "CupRotationTray.hpp"
 #include "Globals.hpp"
 #include "HardwareAbstractionLayer.hpp"
-#include "ICommandMessageBroker.hpp"
 #include "PositionSwitch.hpp"
 #include "StepperMotor.hpp"
 
@@ -27,21 +28,22 @@ namespace po = boost::program_options;
 using namespace moco;
 
 CoffeeAutomatApplication::CoffeeAutomatApplication()
-    : m_configuration(
-          {Option("config-file", std::string("CoffeeMachine.json"), "Configuration file")})
+    : m_configCommandLine(
+          {Option("config-file", std::string("CoffeeMachine.json"), "Configuration file"),
+           Option("real-time", false, "Indicates if the threads should run in real-time mode")})
 {
 }
 
 bool CoffeeAutomatApplication::parseCommandLine(int argc, char const** argv)
 {
     CommandLineParser parser(argc, argv);
-    parser.add(m_configuration);
+    parser.add(m_configCommandLine);
     return parser.parse();
 }
 
 bool CoffeeAutomatApplication::parseConfigurationFile()
 {
-    std::ifstream           inStream(m_configuration["config-file"].get<std::string>());
+    std::ifstream           inStream(m_configCommandLine["config-file"].get<std::string>());
     ConfigurationFileParser parser(inStream);
     parser.add(m_configuration);
 
@@ -53,7 +55,7 @@ bool CoffeeAutomatApplication::start(int argc, char const** argv)
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     CoffeeAutomatService::setConfiguration(m_configuration);
-    CupRotationTrayImpl::setConfiguration(m_configuration);
+    CupRotationTray::setConfiguration(m_configuration);
     HardwareAbstractionLayer::setConfiguration(m_configuration);
 
     LOG(info) << "Starting CoffeeAutomat application";
@@ -66,28 +68,86 @@ bool CoffeeAutomatApplication::start(int argc, char const** argv)
 
     if (success)
     {
-        CommandMessageBroker                       commandMessageBroker;
-        std::shared_ptr<IHardwareAbstractionLayer> hardwareAbstractionLayer =
-            std::make_shared<HardwareAbstractionLayer>(
-                m_configuration["hardware-abstraction-layer.gpio.logic-active-high"].get<bool>());
-        IHardwareAbstractionLayer::init(hardwareAbstractionLayer);
+        HardwareAbstractionLayer hardwareAbstractionLayer(m_configuration);
+        IHardwareAbstractionLayer::init(&hardwareAbstractionLayer);
 
-        StepperMotor stepperMotor(
-            m_configuration["cup-rotation-tray.stepper-motor.speed-rpm"].get<unsigned>(),
-            m_configuration["cup-rotation-tray.stepper-motor.index"].get<unsigned>());
+        const CommandMessageBroker::ReceiverIdList notificationReceivers = {
+            ICupRotationTray::Command::ReceiverId, ICoffeeAutomatController::Command::ReceiverId,
+            ICoffeeAutomatService::Command::ReceiverId};
+
+        // CupRotationTray
+        Configuration configuration;
+        StepperMotor  stepperMotor(
+            CupRotationTray::getStepperMotorConfiguration(m_configuration, configuration));
         CircularMotionController::PositionSwitchArray positionSwitcheArray = {
-            std::make_shared<PositionSwitch>(
-                m_configuration["cup-rotation-tray.position-switches.gpio-pin-1"].get<unsigned>()),
-            std::make_shared<PositionSwitch>(
-                m_configuration["cup-rotation-tray.position-switches.gpio-pin-2"].get<unsigned>()),
-            std::make_shared<PositionSwitch>(
-                m_configuration["cup-rotation-tray.position-switches.gpio-pin-3"].get<unsigned>())};
+            std::make_unique<PositionSwitch>(CupRotationTray::getGpioPin(1, m_configuration)),
+            std::make_unique<PositionSwitch>(CupRotationTray::getGpioPin(1, m_configuration)),
+            std::make_unique<PositionSwitch>(CupRotationTray::getGpioPin(1, m_configuration))};
         CircularMotionController circularMotionController(stepperMotor, positionSwitcheArray);
-        CupRotationTrayImpl      cupRotationTray(commandMessageBroker, circularMotionController);
-        CoffeeAutomatImpl        coffeeAutomat(commandMessageBroker);
-        CoffeeAutomatService     coffeeAutomatService(commandMessageBroker, m_configuration);
-        success = coffeeAutomatService.start();
+        CommandMessageBroker     cupRotationTrayMessageBroker(ICupRotationTray::Command::ReceiverId,
+                                                          notificationReceivers,
+                                                          m_ioContexts[typeid(CupRotationTray)]);
+        CupRotationTray cupRotationTray(cupRotationTrayMessageBroker, circularMotionController);
+        success = cupRotationTray.start();
+
+        // CoffeeAutomat
+        CommandMessageBroker coffeeAutomatControllerMessageBroker(
+            ICoffeeAutomatController::Command::ReceiverId, notificationReceivers,
+            m_ioContexts[typeid(CoffeeAutomatController)]);
+        CoffeeAutomatController coffeeAutomatController(coffeeAutomatControllerMessageBroker);
+        if (success)
+        {
+            success = coffeeAutomatController.start();
+        }
+
+        // CoffeeAutomateService
+        CommandMessageBroker coffeeAutomatServiceMessageBroker(
+            ICoffeeAutomatService::Command::ReceiverId, notificationReceivers,
+            m_ioContexts[typeid(CoffeeAutomatService)]);
+        CoffeeAutomatService coffeeAutomatService(coffeeAutomatServiceMessageBroker,
+                                                  m_configuration,
+                                                  m_ioContexts[typeid(CoffeeAutomatService)]);
+        if (success)
+        {
+            success = coffeeAutomatService.start();
+        }
+
+        if (success)
+        {
+            success = run();
+        }
     }
 
+    return success;
+}
+
+bool CoffeeAutomatApplication::run()
+{
+    Thread::Policy threadPolicy      = Thread::PolicyCurrent;
+    const bool     useRealTimePolicy = m_configCommandLine["real-time"].get<bool>();
+    if (useRealTimePolicy)
+    {
+        threadPolicy = Thread::PolicyRealTime;
+    }
+
+    bool success = true;
+    for (auto& ioContext : m_ioContexts)
+    {
+        success = ioContext.second.start(threadPolicy);
+        if (!success)
+        {
+            LOG(error) << "Failed to start IO context";
+            break;
+        }
+    }
+
+    // FIXME In case of an error stop all threads here!
+    if (success)
+    {
+        for (auto& ioContext : m_ioContexts)
+        {
+            ioContext.second.waitUntilFinish();
+        }
+    }
     return success;
 }

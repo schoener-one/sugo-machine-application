@@ -15,21 +15,20 @@
 
 namespace moco
 {
-
 class PositionSwitch : public IPositionSwitch
 {
 public:
-	explicit PositionSwitch(unsigned switchGpioPin);
+    explicit PositionSwitch(unsigned switchGpioPin);
 
-	// IPositionSwitch {{
-	bool isOpen() const override;
-	bool waitForChange(int timeoutMS) const override;
-	// IPositionSwitch }}
+    // IPositionSwitch {{
+    bool isOpen() const override;
+    bool waitForChange(int timeoutMS) const override;
+    // IPositionSwitch }}
 
 private:
-	const unsigned m_switchGpioPin;
+    const unsigned m_switchGpioPin;
 };
 
-} // namespace moco
+}  // namespace moco
 
 #endif /* POSITIONSWITCHOBSERVER_HPP_ */

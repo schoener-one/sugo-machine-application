@@ -7,8 +7,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMON_INCLUDE_OPTION_HPP_
-#define COMMON_INCLUDE_OPTION_HPP_
+#ifndef OPTION_HPP_
+#define OPTION_HPP_
 
 #include <boost/any.hpp>
 #include <boost/make_shared.hpp>
@@ -29,10 +29,12 @@ public:
     using ValueSemantic = boost::program_options::value_semantic;
 
     Option() {}
+
     Option(const Option& option) : m_description(option.m_description), m_value(option.m_value)
     {
         applyDefault();
     }
+
     template <class ValueT>
     Option(const std::string& name, ValueT value, const std::string& description)
         : m_description(boost::make_shared<boost::program_options::option_description>(
@@ -41,6 +43,7 @@ public:
     {
         applyDefault();
     }
+
     Option(const std::string& name, const ValueSemantic* semantic, const std::string& description)
         : m_description(boost::make_shared<boost::program_options::option_description>(
               name.c_str(), semantic, description.c_str()))
@@ -52,7 +55,7 @@ public:
 
     const boost::program_options::option_description& getDescription()
     {
-    	assert(m_description);
+        assert(m_description);
         return *m_description.get();
     }
 
@@ -80,4 +83,4 @@ private:
 
 }  // namespace moco
 
-#endif  // COMMON_INCLUDE_OPTION_HPP_
+#endif  // OPTION_HPP_

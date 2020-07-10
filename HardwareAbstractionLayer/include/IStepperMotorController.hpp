@@ -19,9 +19,9 @@ class IStepperMotorController
 {
 public:
     /**
-     * Class for controlling stepper motor.
+     * Class representing one stepper motor control.
      */
-    class IMotorControl
+    class IStepperMotorControl
     {
     public:
         enum Direction
@@ -31,10 +31,10 @@ public:
         };
 
     protected:
-        IMotorControl() {}
+        IStepperMotorControl() {}
 
     public:
-        virtual ~IMotorControl() {}
+        virtual ~IStepperMotorControl() {}
 
         virtual void              step(Direction direction) = 0;
         virtual unsigned          getMicroStepCount() const = 0;
@@ -52,9 +52,9 @@ protected:
 public:
     virtual ~IStepperMotorController() {}
 
-    virtual void           reset()                          = 0;
-    virtual unsigned       getStepperMotorCount() const     = 0;
-    virtual IMotorControl& getMotorControl(unsigned number) = 0;
+    virtual void                  reset()                                 = 0;
+    virtual unsigned              getStepperMotorCount() const            = 0;
+    virtual IStepperMotorControl& getStepperMotorControl(unsigned number) = 0;
 };
 
 }  // namespace moco

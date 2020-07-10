@@ -33,7 +33,7 @@ protected:
 
 TEST_F(CommandLineParserTest, CommandLineParser_Parse)
 {
-    char const*                        args[] = {"-f", "42", "--bar", "42"};
+    char const*       args[] = {"-f", "42", "--bar", "42"};
     CommandLineParser parser(sizeof(args) / sizeof(args[0]), args);
     parser.add(m_mockConfig);
     IConfiguration::OptionDescriptions descriptions;

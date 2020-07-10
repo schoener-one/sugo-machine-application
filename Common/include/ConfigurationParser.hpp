@@ -7,8 +7,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMON_INCLUDE_CONFIGURATIONPARSER_HPP_
-#define COMMON_INCLUDE_CONFIGURATIONPARSER_HPP_
+#ifndef CONFIGURATIONPARSER_HPP_
+#define CONFIGURATIONPARSER_HPP_
 
 #include <list>
 
@@ -61,4 +61,4 @@ protected:
 
 }  // namespace moco
 
-#endif  // COMMON_INCLUDE_CONFIGURATIONPARSER_HPP_
+#endif  // CONFIGURATIONPARSER_HPP_

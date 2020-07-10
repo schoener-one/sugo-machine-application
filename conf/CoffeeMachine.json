@@ -9,15 +9,9 @@
             "index" : 0
         },
         "position-switches" : {
-            "switch1" : {
-                "gpio-pin" : 5
-            },
-            "switch2" : {
-                "gpio-pin" : 6
-            },
-            "switch3" : {
-                "gpio-pin" : 12
-            } 
+            "gpio-pin-1" : 5,
+            "gpio-pin-2" : 6,
+            "gpio-pin-3" : 12
         }
     },
     "hardware-abstraction-layer": {

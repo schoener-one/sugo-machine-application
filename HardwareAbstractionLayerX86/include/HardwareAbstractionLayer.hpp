@@ -26,20 +26,27 @@ std::ostream& operator<<(std::ostream& ostr, IGpioController::PinState const& pi
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream&                                            ostr,
-                         IStepperMotorController::IMotorControl::Direction const& dir)
+std::ostream& operator<<(std::ostream&                                                   ostr,
+                         IStepperMotorController::IStepperMotorControl::Direction const& dir)
 {
-    ostr << (dir == IStepperMotorController::IMotorControl::Direction::Forward ? "Forward"
-                                                                               : "Backward");
+    ostr << (dir == IStepperMotorController::IStepperMotorControl::Direction::Forward ? "Forward"
+                                                                                      : "Backward");
     return ostr;
 }
 
+/**
+ *
+ */
 class HardwareAbstractionLayer : public IHardwareAbstractionLayer
 {
 public:
-    static void setConfiguration(IConfiguration& configuration) { (void)configuration; }
+    static void setConfiguration(IConfiguration& configuration)
+    {
+        configuration.add(Option("hardware-abstraction-layer.gpio.logic-active-high", false,
+                                 "HAL: Indicates if GPIO logic is active-high or -low"));
+    }
 
-    explicit HardwareAbstractionLayer(bool isActiveHigh) { (void)isActiveHigh; }
+    explicit HardwareAbstractionLayer(const IConfiguration& configuration) { (void)configuration; }
 
     // IHardwareAbstractionLayer {{
     IGpioController&         getGpioController() override { return m_gpioController; }
@@ -88,7 +95,7 @@ private:
     };
 
     class StepperMotorControllerStub : public IStepperMotorController,
-                                       public IStepperMotorController::IMotorControl
+                                       public IStepperMotorController::IStepperMotorControl
     {
     public:
         static constexpr unsigned MicroStepCount = 1u;
@@ -101,7 +108,8 @@ private:
             LOG(debug) << "Get stepper motor count ->(1)";
             return 1;
         }
-        IStepperMotorController::IMotorControl& getMotorControl(unsigned number) override
+        IStepperMotorController::IStepperMotorControl& getStepperMotorControl(
+            unsigned number) override
         {
             LOG(debug) << "Get stepper motor " << number;
             assert(number == 0);
@@ -109,11 +117,11 @@ private:
         }
         // IStepperMotorController }}
 
-        // IStepperMotorController::IMotorControl {{
+        // IStepperMotorController::IStepperMotorControl {{
         void     step(Direction direction) override { LOG(debug) << "Step motor " << direction; }
         unsigned getMicroStepCount() const override { return MicroStepCount; }
         unsigned getStepsPerRound() const override { return StepsPerRound; }
-        // IStepperMotorController::IMotorControl }}
+        // IStepperMotorController::IStepperMotorControl }}
     };
     GpioControllerStub         m_gpioController;
     StepperMotorControllerStub m_stepperMotorController;

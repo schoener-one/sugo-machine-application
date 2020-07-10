@@ -10,28 +10,60 @@
 
 #include <string>
 
-namespace moco
-{
-namespace command
-{
-const std::string CupRotationTraySwitchOn     = "CupRotationTray.SwitchOn";
-const std::string CupRotationTraySwitchOff    = "CupRotationTray.SwitchOff";
-const std::string CupRotationTrayReset        = "CupRotationTray.Reset";
-const std::string CupRotationTrayGetState     = "CupRotationTray.GetState";
-const std::string CupRotationTrayGetPosition  = "CupRotationTray.GetPosition";
-const std::string CupRotationTraySetPosition  = "CupRotationTray.SetPosition";
-const std::string CupRotationTraySwitchOnTest = "CupRotationTray.SwitchOnTest";
-const std::string CupRotationTrayTestRotation = "CupRotationTray.TestRotation";
-}  // namespace command
-}  // namespace moco
+#include "CommandId.hpp"
+#include "Ident.hpp"
+#include "StateMachine.hpp"
 
 namespace moco
 {
-namespace notification
+namespace ICupRotationTray
 {
-const std::string CupRotationTraySelfTestFinished = "CupRotationTray.SelfTestFinished";
-const std::string CupRotationTrayTestRotationFinished = "CupRotationTray.TestRotationFinished";
-}  // namespace notification
+namespace Command
+{
+static const std::string ReceiverId = "CupRotationTray";
+static const CommandId   SwitchOn(ReceiverId, "SwitchOn");
+static const CommandId   SwitchOff(ReceiverId, "SwitchOff");
+static const CommandId   Reset(ReceiverId, "Reset");
+static const CommandId   GetState(ReceiverId, "GetState");
+static const CommandId   GetPosition(ReceiverId, "GetPosition");
+static const CommandId   SetPosition(ReceiverId, "SetPosition");
+static const CommandId   SwitchOnTest(ReceiverId, "SwitchOnTest");
+static const CommandId   TestRotation(ReceiverId, "TestRotation");
+static const CommandId   SelfTestFinished(ReceiverId, "SelfTestFinished");
+static const CommandId   TestRotationFinished(ReceiverId, "TestRotationFinished");
+}  // namespace Command
+
+enum State
+{
+    Off = 0,
+    Idle,
+    Test,
+    Initialization,
+    SelfTest,
+    Rotation,
+    Error
+};
+
+enum EventId
+{
+    SwitchOff = 0,
+    SwitchOn,
+    SwitchOnTest,
+    Init,
+    InitFinished,
+    InitFailed,
+    RunSelfTest,
+    SelfTestSucceeded,
+    SelfTestFailed,
+    Rotate,
+    PositionReached,
+    RotationFailed,
+    TestRotation
+};
+
+using Event = moco::Ident<ICupRotationTray::EventId>;
+using Fsm   = moco::StateMachine<ICupRotationTray::State, ICupRotationTray::Event>;
+}  // namespace ICupRotationTray
 }  // namespace moco
 
 #endif /* ICUPROTATIONTRAY_HPP_ */
