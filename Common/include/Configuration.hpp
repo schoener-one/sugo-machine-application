@@ -46,7 +46,7 @@ public:
         {
             descriptions.add(option.second.m_description);
         }
-        return std::move(descriptions);
+        return descriptions;
     }
 
     virtual bool set(const VariablesMap& mapVariables) override

@@ -11,6 +11,11 @@ add_library (Common STATIC
 target_include_directories (Common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(Common ${Boost_LIBRARIES})
 
+# FIXME dependency to external libraries!
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
+    add_dependencies(Common jsonrpcpp)
+endif()
+
 # Common Mocks library
 add_library (CommonMocks INTERFACE)
 target_include_directories (CommonMocks INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/test)

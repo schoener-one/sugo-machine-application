@@ -9,55 +9,27 @@ Make sure you have installed all required packages on your system.
 For Ubuntu:
 
 ```bash
-sudo apt install gtest-dev gmock-dev libprotobuf-dev cmake libzmq5 \
+sudo apt install googletest libgtest-dev libgmock-dev \
+  protobuf-compiler libprotobuf-dev cmake libzmq5-dev \
   clang-format libboost-log-dev libboost-program-options-dev \
-  libboost-thread-dev libboost-system-dev 
+  libboost-thread-dev libboost-system-dev libboost-random-dev
 ```
 
-Additional libraries not available as debian package:
+Additional libraries which are not available as debian package:
 * azmq: https://github.com/zeromq/azmq
 * jsonrpcpp: https://github.com/badaix/jsonrpcpp.git
 
 ### X86 Installation
 
-First you have to make sure the additional dependent libraries like azmq and
-librpcpp are available. For that create an sdk.x86 directory, step in and
-clone both repositories. For every package build them and install them into
-the sdk.86 root path:
-
-*azmq:*
-
-> **HINT**: Apply the azmq patch from meta-moco first!
-
-```bash
-cd $SDK_X86_PATH
-git clone https://github.com/zeromq/azmq
-cd azmq
-cmake . -Bbuild.x86 -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_INSTALL_PREFIX:PATH=$PWD/.. -DAZMQ_NO_TESTS=1
-cmake --build build.x86 -- install
-```
-
-*jsonrpcpp:*
-
-```bash
-cd $SDK_X86_PATH
-git clone https://github.com/badaix/jsonrpcpp.git
-cd jsonrpcpp
-cmake . -Bbuild.x86 -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_INSTALL_PREFIX:PATH=$PWD/..
-cmake --build build.x86 -- install
-```
-
+The additional dependent libraries like azmq and librpcpp will be fetched from Git
+repository and build automatically within the project build folder.
 
 The CoffeeAutomat application can be build on host systems as well, to run the
 unit tests for example:
 
 ```bash
-cmake . -Bbuild.x86 -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_CXX_FLAGS="-I$SDK_X86_PATH/include" \
-  -DCMAKE_EXE_LINKER_FLAGS="-L$SDK_X86_PATH/lib"
-cmake --build build -- all
+cmake . -Bbuild.x86 -DCMAKE_BUILD_TYPE=Debug
+cmake --build build --target all
 ```
 
 ### Cross Target Installation (i.e. on Raspberry PI)
@@ -97,8 +69,11 @@ Example:
 CoffeeAutomatApp [-d] -c /etc/CoffeeAutomat.conf
 ```
 
+---
 **Important**: Before the I2C interface can be used, the two kernel modules
 'i2c-dev' and 'i2c-bcm2708' have to be loaded first.
+
+---
 
 ## Testing
 

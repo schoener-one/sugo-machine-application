@@ -11,21 +11,26 @@
 #define IOCONTEXTHELPER_HPP_
 
 #include <boost/asio.hpp>
+#include <mutex>
 #include <thread>
 
 #include "Logger.hpp"
-#include "Responder.hpp"
+#include "Server.hpp"
 
 namespace moco
 {
 class IOContextHelper
 {
-public:
+protected:
     void startIOContext()
     {
         m_contextThread = std::make_shared<std::thread>([&] {
             moco::Logger::init(Logger::Severity::error);
-            m_ioContext.run();
+            while (!m_ioContext.stopped())
+            {
+                std::lock_guard<std::mutex> lock(m_ioContextMutex);
+                m_ioContext.run_one();
+            }
         });
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -43,6 +48,7 @@ public:
         }
     }
 
+    std::mutex                   m_ioContextMutex;
     moco::IOContext              m_ioContext;
     std::shared_ptr<std::thread> m_contextThread;
 };

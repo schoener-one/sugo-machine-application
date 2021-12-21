@@ -18,9 +18,9 @@
 
 #include "CommandMessageBroker.hpp"
 
+#include "Client.hpp"
 #include "IOContextHelper.hpp"
 #include "Logger.hpp"
-#include "Requester.hpp"
 
 using namespace moco;
 
@@ -57,17 +57,17 @@ TEST_F(CommandMessageBrokerTest, CommandMessageBroker_RegisterHandler)
 TEST_F(CommandMessageBrokerTest, CommandMessageBroker_Connect)
 {
     CommandMessageBroker cmb("TestBroker", {}, m_ioContext);
-    Requester            requester(m_ioContext);
+    Client               client(m_ioContext);
     startIOContext();
     sleepFor(std::chrono::seconds(1));
-    EXPECT_TRUE(requester.connect(CommandMessageBroker::createAddress("TestBroker")));
+    EXPECT_TRUE(client.connect(CommandMessageBroker::createAddress("TestBroker")));
 }
 
 TEST_F(CommandMessageBrokerTest, CommandMessageBroker_RequestHandler)
 {
     const std::string    address = "test-address";
     CommandMessageBroker cmb(address, {}, m_ioContext);
-    Requester            requester(m_ioContext);
+    Client               client(m_ioContext);
     cmb.registerHandler("Wonderful.Day", [&](const message::Command& command) {
         message::CommandResponse dummy;
         dummy.set_id(command.id());
@@ -77,7 +77,7 @@ TEST_F(CommandMessageBrokerTest, CommandMessageBroker_RequestHandler)
     });
     EXPECT_TRUE(cmb.start());
     startIOContext();
-    EXPECT_TRUE(requester.connect(CommandMessageBroker::createAddress(address)));
+    EXPECT_TRUE(client.connect(CommandMessageBroker::createAddress(address)));
     message::Command command;
     command.set_id(42);
     command.set_name("Wonderful.Day");
@@ -85,7 +85,7 @@ TEST_F(CommandMessageBrokerTest, CommandMessageBroker_RequestHandler)
     StreamBuffer sendBuf, receiveBuf;
     std::ostream out(&sendBuf);
     EXPECT_TRUE(command.SerializeToOstream(&out));
-    EXPECT_TRUE(requester.send(sendBuf, receiveBuf));
+    EXPECT_TRUE(client.send(sendBuf, receiveBuf));
     std::istream             in(&receiveBuf);
     message::CommandResponse response;
     EXPECT_TRUE(response.ParseFromIstream(&in));

@@ -1,9 +1,11 @@
-/*
- * StepperMotor.hpp
+///////////////////////////////////////////////////////////////////////////////
+/** @file
+ * @license: CLOSED
  *
- *  Created on: 01.12.2019
- *      Author: denis
+ * @author: denis
+ * @date:   01.12.2019
  */
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef STEPPERMOTOR_HPP_
 #define STEPPERMOTOR_HPP_

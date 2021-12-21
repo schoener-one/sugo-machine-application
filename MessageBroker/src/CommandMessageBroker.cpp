@@ -21,7 +21,7 @@ bool CommandMessageBroker::send(const message::Command& message, const std::stri
 {
     LOG(debug) << "Sending message to " << receiverId;
     const std::string address = createAddress(receiverId);
-    bool              success = m_requester.connect(address);
+    bool              success = m_client.connect(address);
     if (success)
     {
         StreamBuffer outBuf;
@@ -31,7 +31,7 @@ bool CommandMessageBroker::send(const message::Command& message, const std::stri
         if (success)
         {
             StreamBuffer inBuf;
-            success = m_requester.send(outBuf, inBuf);
+            success = m_client.send(outBuf, inBuf);
 
             if (success)
             {
@@ -52,7 +52,7 @@ bool CommandMessageBroker::send(const message::Command& message, const std::stri
         {
             LOG(error) << "Failed to serialize command";
         }
-        success = m_requester.disconnect(address) && success;
+        success = m_client.disconnect(address) && success;
     }
 
     return success;

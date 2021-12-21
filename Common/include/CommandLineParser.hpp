@@ -34,7 +34,7 @@ protected:
     {
         IConfiguration::OptionDescriptions optionDescriptions("Allowed commandline options");
         optionDescriptions.add_options()("help", "this help message");
-        return std::move(optionDescriptions);
+        return optionDescriptions;
     }
 
     ParsedOptions runParser(const IConfiguration::OptionDescriptions& optionDescriptions) override

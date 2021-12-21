@@ -59,7 +59,7 @@ public:
         return *m_description.get();
     }
 
-    void applyDefault() { assert(m_description->semantic()->apply_default(m_value) == true); }
+    void applyDefault() { m_description->semantic()->apply_default(m_value); }
 
     template <class ValueT>
     const ValueT get() const

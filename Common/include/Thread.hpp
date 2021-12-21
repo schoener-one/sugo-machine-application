@@ -41,6 +41,12 @@ public:
      */
     bool start(Runnable function, Policy policy = PolicyCurrent, int priority = 0);
 
+    /**
+     * Indicates if thread is still running.
+     * @return true if thread is still running.
+     */
+    bool isRunning() const { return m_thread.joinable(); }
+
     void join() { m_thread.join(); }
 
     std::thread::id getId() { return m_thread.get_id(); }

@@ -34,12 +34,12 @@ public:
 
     virtual ~IStepperMotor() {}
 
-    virtual void     reset()                                             = 0;
-    virtual unsigned runSteps(unsigned steps, Direction direction,
-                              RunGuard runGuard = []() { return true; }) = 0;
-    virtual void     stop()                                              = 0;
-    virtual bool     runSelfTest()                                       = 0;
-    virtual unsigned getStepsPerRound() const                            = 0;
+    virtual void     reset() = 0;
+    virtual unsigned runSteps(
+        unsigned steps, Direction direction, RunGuard runGuard = []() { return true; }) = 0;
+    virtual void     stop()                                                             = 0;
+    virtual bool     runSelfTest()                                                      = 0;
+    virtual unsigned getStepsPerRound() const                                           = 0;
 };
 
 }  // namespace moco

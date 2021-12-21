@@ -6,27 +6,38 @@ set(PROJECT_BINARY_DIR "${PROJECT_SOURCE_DIR}/bin")
 message("Source path: ${PROJECT_SOURCE_DIR}")
 message("Binary path: ${PROJECT_BINARY_DIR}")
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb -O0")
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+include(cmake/CompilerConfig.cmake)
+include(cmake/Coverage.cmake)
+include(cmake/Testing.cmake)
 
-add_compile_options(-Wall -Wextra -Wpedantic -Wno-psabi) # -Werror
+## **********************************
+## Sub directories
+##
+list(APPEND PROJECT_SUBDIRS "")
 
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTARGET_X86")
+    list(APPEND PROJECT_SUBDIRS ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerX86)
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTARGET_RPI")
+    list(APPEND PROJECT_SUBDIRS ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerRpi)
 endif()
 
-if (NOT NO_UNITTEST)
-    enable_testing()
-    find_package(GTest REQUIRED)
-endif()
+list(APPEND PROJECT_SUBDIRS 
+    ${PROJECT_SOURCE_DIR}/Common
+    ${PROJECT_SOURCE_DIR}/Protocol
+    ${PROJECT_SOURCE_DIR}/MessageBroker
+    ${PROJECT_SOURCE_DIR}/ServiceComponents
+    ${PROJECT_SOURCE_DIR}/MachineService
+    ${PROJECT_SOURCE_DIR}/CupRotationTray
+    ${PROJECT_SOURCE_DIR}/MachineController
+    ${PROJECT_SOURCE_DIR}/HardwareComponents
+    ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer
+    ${PROJECT_SOURCE_DIR}/MachineApplication
+    )
 
 ## **********************************
 ## External libraries!
 ##
+include(cmake/ExternalLib.cmake)
 
 # AdafruiteStepperMotorHAT
 add_library (AdafruitStepperMotorHAT 
@@ -36,26 +47,16 @@ add_library (AdafruitStepperMotorHAT
 target_include_directories (AdafruitStepperMotorHAT PUBLIC ${PROJECT_SOURCE_DIR}/AdafruitStepperMotorHAT_CPP)
 include_directories(${PROJECT_SOURCE_DIR}/AdafruitStepperMotorHAT_CPP)
 
-# Boost
-set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF)
-add_definitions(-DBOOST_LOG_DYN_LINK)
-set(Boost_MIN_VERSION "1.61")
-find_package(Boost REQUIRED COMPONENTS log program_options system thread)
-message ("Boost libraries: ${Boost_INCLUDE_DIRS}")
-include_directories(${Boost_INCLUDE_DIRS})
-
-## **********************************
-## Tests
-##
-if (NOT NO_UNITTEST)
-enable_testing()
-endif()
+# Boost library
+include(cmake/LibBoost.cmake)
 
 ## **********************************
 ## The MOCO project!
 ##
+# TODO use automatic add_subdirectory!
+# foreach(subdir ${PROJECT_SUBDIRS})
+#     add_subdirectory(${subdir})
+# endforeach()
 
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
     add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerX86)
@@ -75,49 +76,12 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/Common)
 add_subdirectory(${PROJECT_SOURCE_DIR}/Protocol)
 add_subdirectory(${PROJECT_SOURCE_DIR}/MessageBroker)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ServiceComponents)
-add_subdirectory(${PROJECT_SOURCE_DIR}/CoffeeAutomatService)
+add_subdirectory(${PROJECT_SOURCE_DIR}/MachineService)
 add_subdirectory(${PROJECT_SOURCE_DIR}/CupRotationTray)
-add_subdirectory(${PROJECT_SOURCE_DIR}/CoffeeAutomatController)
+add_subdirectory(${PROJECT_SOURCE_DIR}/MachineController)
 add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareComponents)
 add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer)
-add_subdirectory(${PROJECT_SOURCE_DIR}/CoffeeAutomatApplication)
+add_subdirectory(${PROJECT_SOURCE_DIR}/MachineApplication)
 
-## **********************************
-## Static code analysis
-##
-find_program(CPPCHECK_EXEC NAMES cppcheck)
-if (CPPCHECK_EXEC)
-    file(GLOB_RECURSE SRC_ALL 
-        ${PROJECT_SOURCE_DIR}/CoffeeAutomatController/src/*.cpp
-        ${PROJECT_SOURCE_DIR}/CoffeeAutomatApplication/src/*.cpp
-        ${PROJECT_SOURCE_DIR}/CoffeeAutomatService/src/*.cpp
-        ${PROJECT_SOURCE_DIR}/Common/src/*.cpp
-        ${PROJECT_SOURCE_DIR}/ServiceComponents/src/*.cpp
-        ${PROJECT_SOURCE_DIR}/CupRotationTray/src/*.cpp
-        ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer/src/*.cpp
-        ${PROJECT_SOURCE_DIR}/HardwareComponents/src/*.cpp
-        ${PROJECT_SOURCE_DIR}/MessageBroker/src/*.cpp
-        )
-    message("Static code analysis enabled for '${CPPCHECK_EXEC}'.")
-    add_custom_target(
-        cppcheck
-        COMMAND ${CPPCHECK_EXEC}
-        --quiet
-        --enable=all
-        --std=c++11
-        --inline-suppr 
-        --template "{file}:{line}: {severity} {id}: {message}"
-        --suppress=missingIncludeSystem
-        -I ${PROJECT_SOURCE_DIR}/CoffeeAutomatController/include
-        -I ${PROJECT_SOURCE_DIR}/CoffeeAutomatApplication/include
-        -I ${PROJECT_SOURCE_DIR}/CoffeeAutomatService/include
-        -I ${PROJECT_SOURCE_DIR}/Common/include
-        -I ${PROJECT_SOURCE_DIR}/ServiceComponents/include
-        -I ${PROJECT_SOURCE_DIR}/CupRotationTray/include
-        -I ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer/include
-        -I ${PROJECT_SOURCE_DIR}/HardwareComponents/include
-        -I ${PROJECT_SOURCE_DIR}/MessageBroker/include
-        ${SRC_ALL}
-    )
-    add_dependencies(CoffeeAutomatApplication cppcheck)
-endif()
+include(cmake/Cppcheck.cmake)
+include(cmake/ClangFormatCheck.cmake)

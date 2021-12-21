@@ -100,7 +100,7 @@ protected:
         message::CommandResponse commandResponse;
         const bool success = m_messageBroker.send(command, commandId.receiver, commandResponse);
         assert(success);
-        return std::move(commandResponse);
+        return commandResponse;
     }
 
     bool notify(const CommandId& commandId) { return notify(commandId, ""); }

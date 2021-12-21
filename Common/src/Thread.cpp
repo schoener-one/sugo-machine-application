@@ -40,12 +40,20 @@ bool Thread::start(Runnable function, Policy policy, int priority)
             // now start...
             LOG(debug) << "Starting new " << ((m_policy == PolicyRealTime) ? "real-time " : "")
                        << "thread: " << std::this_thread::get_id();
-            m_runnable();
+            try
+            {
+                m_runnable();
+            }
+            catch (...)
+            {
+                LOG(error) << "Exception catched";
+            }
         }
         else
         {
             LOG(error) << "Failed to prepare real-time context";
         }
+        m_isReady = false;
     });
     assert(m_thread.joinable() == true);
 

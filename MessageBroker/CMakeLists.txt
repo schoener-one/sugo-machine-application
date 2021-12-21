@@ -2,13 +2,18 @@
 # Module: MessageBroker
 
 add_library (MessageBroker STATIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Responder.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Requester.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Server.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandMessageBroker.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/IOContext.cpp
     )
 target_include_directories (MessageBroker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(MessageBroker Common Protocol)
+
+# FIXME dependency to external libraries!
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
+    add_dependencies(MessageBroker azmq)
+endif()
 
 # Common Mocks library
 add_library (MessageBrokerMocks INTERFACE)
@@ -19,7 +24,7 @@ target_link_libraries(MessageBrokerMocks INTERFACE MessageBroker gmock)
 if (NOT NO_UNITTEST)    
     add_executable(MessageBrokerTest
         test/CommandMessageBrokerTest.cpp
-        test/RequesterResponderTest.cpp
+        test/ClientServerTest.cpp
         )
     target_compile_options(MessageBrokerTest PUBLIC "-DUNIT_TEST")
     target_link_libraries(MessageBrokerTest

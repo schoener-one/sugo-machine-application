@@ -12,18 +12,34 @@
 
 using namespace moco;
 
-bool IOContext::start(Thread::Policy policy, int priority)
+IOContext::~IOContext()
 {
+    if (isRunning())
+    {
+        stop();
+    }
+}
+
+bool IOContext::start()
+{
+    reset();
     return m_thread.start(
         [=] {
             try
             {
-                run();
+                (void)run();
+                LOG(debug) << "IO context has finished";
             }
             catch (boost::system::system_error& error)
             {
-                LOG(error) << "Failed to run asynchronous IO: " << error.what();
+                LOG(error) << "Failed to run IO context: " << error.what();
             }
         },
-        policy, priority);
+        m_policy, m_priority);
+}
+
+void IOContext::stop()
+{
+    boost::asio::io_service::stop();
+    waitUntilFinished();
 }

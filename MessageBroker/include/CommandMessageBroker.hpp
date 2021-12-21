@@ -15,9 +15,9 @@
 
 #include <Command.pb.h>
 
+#include "Client.hpp"
 #include "MessageBroker.hpp"
-#include "Requester.hpp"
-#include "Responder.hpp"
+#include "Server.hpp"
 
 namespace moco
 {
@@ -28,7 +28,7 @@ using CommandMessageBrokerT =
  * Class which handles command messages.
  * @todo Remove receiver-id list from interface.
  */
-class CommandMessageBroker : public CommandMessageBrokerT, public Responder::IMessageHandler
+class CommandMessageBroker : public CommandMessageBrokerT, public Server::IMessageHandler
 {
 public:
     /// Receiver list definition.
@@ -38,15 +38,15 @@ public:
     {
         std::string address("inproc://");
         address.append(receiverId);
-        return std::move(address);
+        return address;
     }
 
     // cppcheck-suppress passedByValue
     CommandMessageBroker(const std::string& receiverId, const ReceiverIdList& receiverIdList,
                          IOContext& ioContext)
         : CommandMessageBrokerT(),
-          m_responder(createAddress(receiverId), *this, ioContext),
-          m_requester(ioContext),
+          m_server(createAddress(receiverId), *this, ioContext),
+          m_client(ioContext),
           m_receiverId(receiverId),
           m_receiverIdList(receiverIdList)
     {
@@ -64,23 +64,23 @@ public:
     // IMessageBroker }}
 
     // IRunnable {{
-    bool start() override { return m_responder.start(); }
+    bool start() override { return m_server.start(); }
 
-    void stop() override { m_responder.stop(); }
+    void stop() override { m_server.stop(); }
 
-    bool isRunning() const override { return m_responder.isRunning(); }
+    bool isRunning() const override { return m_server.isRunning(); }
     // IRunnable }}
 
     const std::string& getReceiverId() const { return m_receiverId; }
 
 protected:
-    // Responder {{
+    // Server::IMessageHandler {{
     bool processReceived(StreamBuffer& in, StreamBuffer& out) override;
-    // Responder }}
+    // Server::IMessageHandler }}
 
 private:
-    Responder            m_responder;
-    Requester            m_requester;
+    Server               m_server;
+    Client               m_client;
     const std::string    m_receiverId;
     const ReceiverIdList m_receiverIdList;
 };

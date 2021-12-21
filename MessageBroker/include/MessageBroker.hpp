@@ -12,10 +12,10 @@
 
 #include <map>
 
+#include "Client.hpp"
 #include "Globals.hpp"
 #include "IMessageBroker.hpp"
-#include "Requester.hpp"
-#include "Responder.hpp"
+#include "Server.hpp"
 
 namespace moco
 {

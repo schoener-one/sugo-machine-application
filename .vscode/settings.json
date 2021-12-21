@@ -1,0 +1,29 @@
+{
+    "build.type": "DEBUG",
+    "build.directory.x86": "${workspaceFolder}/build.x86.${config:build.type}",
+    "build.directory.rpi": "${workspaceFolder}/build.rpi.${config:build.type}",
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "googletest.failed",
+                "settings": {
+                    "foreground": "#f00"
+                }
+            },
+            {
+                "scope": "googletest.passed",
+                "settings": {
+                    "foreground": "#0f0"
+                }
+            },
+            {
+                "scope": "googletest.run",
+                "settings": {
+                    "foreground": "#0f0"
+                }
+            }
+        ]
+    },
+    "testMate.cpp.test.executables": "build.*/**/*{test,Test,TEST}*",
+    "cmake.configureOnOpen": false
+}

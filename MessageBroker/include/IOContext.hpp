@@ -12,6 +12,7 @@
 
 #include <boost/asio.hpp>
 
+#include "IRunnable.hpp"
 #include "Thread.hpp"
 
 namespace moco
@@ -19,26 +20,55 @@ namespace moco
 /**
  * Class representing IO context.
  */
-class IOContext : public boost::asio::io_service
+class IOContext : public boost::asio::io_service, public IRunnable
 {
 public:
+    static constexpr Thread::Policy DefaultPolicy   = Thread::PolicyCurrent;
+    static constexpr int            DefaultPriority = 0;
+
+    virtual ~IOContext();
+
+    IOContext(Thread::Policy policy = DefaultPolicy, int priority = DefaultPriority)
+        : m_policy(policy), m_priority(priority)
+    {
+    }
+
     /**
-     * Starts the IO context thread.
-     * @param policy Thread policy.
-     * @param priority Thread priority.
-     * @return true if the IO context could be started.
+     * Sets a new policy. The policy will only be applied on next start.
+     * @param policy   New thread policy.
+     * @param priority New thread priority.
      */
-    bool start(Thread::Policy policy = Thread::PolicyCurrent, int priority = 0);
+    void setPolicy(Thread::Policy policy, int priority)
+    {
+        m_policy   = policy;
+        m_priority = priority;
+    }
+
+    // IRunnable {{
+    bool start() override;
+
+    void stop() override;
+
+    bool isRunning() const override { return m_thread.isRunning(); }
+    // IRunnable }}
 
     /**
      * Waits until IO context thread has finished.
      */
-    void waitUntilFinish() { m_thread.join(); }
+    void waitUntilFinished()
+    {
+        if (m_thread.isRunning())
+        {
+            m_thread.join();
+        }
+    }
 
     Thread& getThread() { return m_thread; }
 
 private:
-    Thread m_thread;
+    Thread         m_thread;
+    Thread::Policy m_policy;
+    int            m_priority;
 };
 
 }  // namespace moco

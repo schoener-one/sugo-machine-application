@@ -1,0 +1,26 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build.x86.init",
+            "type": "shell",
+            "command": "cmake -B${config:build.directory.x86} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type} -DCODE_COVERAGE=ON"
+        },
+        {
+            "label": "build.x86.all",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target all",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "build.x86.clean",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target clean"
+        }
+    ]
+}

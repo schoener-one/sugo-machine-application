@@ -13,6 +13,7 @@ using namespace moco;
 using namespace moco::ICupRotationTray;
 using Transition = ICupRotationTray::Fsm::Transition;
 
+// cppcheck-suppress unusedFunction
 std::ostream& moco::operator<<(std::ostream& ostr, ICupRotationTray::State const& value)
 {
     switch (value)
