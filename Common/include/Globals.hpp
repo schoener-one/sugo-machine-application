@@ -18,7 +18,7 @@
     LOG(fatal) << "Should not be reached"; \
     assert(false)
 
-namespace moco
+namespace sugo
 {
 using Json = nlohmann::json;
 }

@@ -17,7 +17,7 @@
 #include "ICommandMessageBroker.hpp"
 #include "IServiceComponent.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Class to receive command messages and to translate them to events.
@@ -122,6 +122,6 @@ private:
     ICommandMessageBroker& m_messageBroker;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // SERVICECOMPONENT_HPP_

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package moco.message;
+package sugo.message;
 
 message Command {
 	string name = 1;

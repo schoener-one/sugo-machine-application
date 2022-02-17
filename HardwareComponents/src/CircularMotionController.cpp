@@ -10,7 +10,7 @@
 #include "CircularMotionController.hpp"
 #include "Globals.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 CircularMotionController::CircularMotionController(IStepperMotor&       stepperMotor,
                                                    PositionSwitchArray& positionSwitches)

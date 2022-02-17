@@ -22,7 +22,7 @@
 #include "IOContextHelper.hpp"
 #include "Logger.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 class CommandMessageBrokerTest : public ::testing::Test, public IOContextHelper
 {

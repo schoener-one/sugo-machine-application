@@ -14,7 +14,7 @@
 
 #include "ConfigurationParser.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Class to parse command line arguments.
@@ -61,6 +61,6 @@ private:
     char const** m_arguments;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // COMMANDLINEPARSER_HPP_

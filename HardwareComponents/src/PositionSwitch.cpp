@@ -11,7 +11,7 @@
 #include "IHardwareAbstractionLayer.hpp"
 #include "PositionSwitch.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 PositionSwitch::PositionSwitch(unsigned switchGpioPin) : m_switchGpioPin(switchGpioPin)
 {

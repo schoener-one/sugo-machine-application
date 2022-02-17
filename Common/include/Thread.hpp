@@ -13,7 +13,7 @@
 #include <mutex>
 #include <thread>
 
-namespace moco
+namespace sugo
 {
 /**
  * Thread class for a real-time context.
@@ -73,6 +73,6 @@ private:
     Runnable                m_runnable;
     Policy                  m_policy;
 };
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* THREAD_HPP_ */

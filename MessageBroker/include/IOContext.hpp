@@ -15,7 +15,7 @@
 #include "IRunnable.hpp"
 #include "Thread.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Class representing IO context.
@@ -71,6 +71,6 @@ private:
     int            m_priority;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // IOCONTEXT_HPP_

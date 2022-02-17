@@ -15,11 +15,11 @@
 
 #include "IMessageBroker.hpp"
 
-namespace moco
+namespace sugo
 {
 /// Interface definition of the CommandMessageBroker.
 using ICommandMessageBroker =
     IMessageBroker<message::Command, message::CommandResponse, std::string>;
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // ICOMMANDMESSAGEBROKER_HPP_

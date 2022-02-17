@@ -14,7 +14,7 @@
 
 #include "ConfigurationParser.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Class to parse configuration files. The supported configuration file format
@@ -38,6 +38,6 @@ private:
     std::istream& m_inStream;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // CONFIGURATIONFILEPARSER_HPP_

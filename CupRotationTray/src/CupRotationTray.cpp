@@ -9,12 +9,12 @@
 #include "CommandParameterParser.hpp"
 
 using namespace std;
-using namespace moco;
-using namespace moco::ICupRotationTray;
+using namespace sugo;
+using namespace sugo::ICupRotationTray;
 using Transition = ICupRotationTray::Fsm::Transition;
 
 // cppcheck-suppress unusedFunction
-std::ostream& moco::operator<<(std::ostream& ostr, ICupRotationTray::State const& value)
+std::ostream& sugo::operator<<(std::ostream& ostr, ICupRotationTray::State const& value)
 {
     switch (value)
     {
@@ -45,7 +45,7 @@ std::ostream& moco::operator<<(std::ostream& ostr, ICupRotationTray::State const
     return ostr;
 }
 
-std::ostream& moco::operator<<(std::ostream& ostr, ICupRotationTray::EventId const& value)
+std::ostream& sugo::operator<<(std::ostream& ostr, ICupRotationTray::EventId const& value)
 {
     switch (value)
     {

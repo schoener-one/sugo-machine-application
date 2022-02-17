@@ -17,7 +17,7 @@
 #include "IMessageBroker.hpp"
 #include "Server.hpp"
 
-namespace moco
+namespace sugo
 {
 template <class MessageT, class ResponseT = void, class ReceiverIdT = unsigned int>
 class MessageBroker : public IMessageBroker<MessageT, ResponseT, ReceiverIdT>
@@ -71,6 +71,6 @@ private:
     MessageReceiverMap m_handlers;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* MESSAGEBROKER_HPP_ */

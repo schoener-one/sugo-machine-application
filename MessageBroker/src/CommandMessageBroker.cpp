@@ -14,7 +14,7 @@
 
 #include "CommandMessageBroker.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 bool CommandMessageBroker::send(const message::Command& message, const std::string& receiverId,
                                 message::CommandResponse& response)

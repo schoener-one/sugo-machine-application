@@ -17,7 +17,7 @@
 #include "Logger.hpp"
 #include "Server.hpp"
 
-namespace moco
+namespace sugo
 {
 class IOContextHelper
 {
@@ -25,7 +25,7 @@ protected:
     void startIOContext()
     {
         m_contextThread = std::make_shared<std::thread>([&] {
-            moco::Logger::init(Logger::Severity::error);
+            sugo::Logger::init(Logger::Severity::error);
             while (!m_ioContext.stopped())
             {
                 std::lock_guard<std::mutex> lock(m_ioContextMutex);
@@ -49,10 +49,10 @@ protected:
     }
 
     std::mutex                   m_ioContextMutex;
-    moco::IOContext              m_ioContext;
+    sugo::IOContext              m_ioContext;
     std::shared_ptr<std::thread> m_contextThread;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // IOCONTEXTHELPER_HPP_

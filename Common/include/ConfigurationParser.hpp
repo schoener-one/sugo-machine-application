@@ -15,7 +15,7 @@
 #include <boost/program_options/parsers.hpp>
 #include "IConfiguration.hpp"
 
-namespace moco
+namespace sugo
 {
 class ConfigurationParser
 {
@@ -59,6 +59,6 @@ protected:
     ConfigurationList m_configurationList;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // CONFIGURATIONPARSER_HPP_

@@ -18,7 +18,7 @@
 #include "Logger.hpp"
 
 namespace po = boost::program_options;
-using namespace moco;
+using namespace sugo;
 
 class ConfigurationFileParserTest : public ::testing::Test
 {

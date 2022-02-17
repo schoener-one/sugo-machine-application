@@ -13,7 +13,7 @@
 #include "IHardwareAbstractionLayer.hpp"
 #include "IPositionSwitch.hpp"
 
-namespace moco
+namespace sugo
 {
 class PositionSwitch : public IPositionSwitch
 {
@@ -29,6 +29,6 @@ private:
     const unsigned m_switchGpioPin;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* POSITIONSWITCHOBSERVER_HPP_ */

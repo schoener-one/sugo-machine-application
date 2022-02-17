@@ -14,7 +14,7 @@
 #include "IHardwareAbstractionLayer.hpp"
 #include "StepperMotor.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 StepperMotor::StepperMotor(const IConfiguration& configuration)
     : m_motorIndex(configuration["index"].get<unsigned>()),

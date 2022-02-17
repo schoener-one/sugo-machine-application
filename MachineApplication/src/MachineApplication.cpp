@@ -26,11 +26,11 @@
 #include "StepperMotor.hpp"
 
 namespace po = boost::program_options;
-using namespace moco;
+using namespace sugo;
 
 MachineApplication::MachineApplication()
     : m_configCommandLine(
-          {Option("config-file", std::string("CoffeeMachine.json"), "Configuration file"),
+          {Option("config-file", std::string("SugoMachine.json"), "Configuration file"),
            Option("real-time", false, "Indicates if the threads should run in real-time mode")})
 {
 }
@@ -59,7 +59,7 @@ bool MachineApplication::start(int argc, char const** argv)
     CupRotationTray::setConfiguration(m_configuration);
     HardwareAbstractionLayer::setConfiguration(m_configuration);
 
-    LOG(info) << "Starting CoffeeAutomat application";
+    LOG(info) << "Starting SugoMachine application";
     bool success = parseCommandLine(argc, argv);
 
     if (success)
@@ -91,7 +91,7 @@ bool MachineApplication::start(int argc, char const** argv)
         CupRotationTray cupRotationTray(cupRotationTrayMessageBroker, circularMotionController);
         success = cupRotationTray.start();
 
-        // CoffeeAutomat
+        // SugoMachine
         CommandMessageBroker machineControllerMessageBroker(
             IMachineController::Command::ReceiverId, notificationReceivers,
             m_ioContexts[typeid(MachineController)]);
@@ -101,7 +101,7 @@ bool MachineApplication::start(int argc, char const** argv)
             success = machineController.start();
         }
 
-        // CoffeeAutomateService
+        // SugoMachineeService
         CommandMessageBroker machineServiceMessageBroker(IMachineService::Command::ReceiverId,
                                                          notificationReceivers,
                                                          m_ioContexts[typeid(MachineService)]);

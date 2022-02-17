@@ -14,16 +14,16 @@
 
 #include "Globals.hpp"
 
-namespace moco
+namespace sugo
 {
 class ClientSocket : public azmq::req_socket
 {
 public:
     explicit ClientSocket(IOContext& ioContext) : azmq::req_socket(ioContext) {}
 };
-}  // namespace moco
+}  // namespace sugo
 
-using namespace moco;
+using namespace sugo;
 namespace asio = boost::asio;
 
 Client::Client(IOContext& ioContext) : m_socket(std::make_unique<ClientSocket>(ioContext)) {}

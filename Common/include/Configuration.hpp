@@ -18,7 +18,7 @@
 #include "IConfiguration.hpp"
 #include "Option.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Class which contains configuration options.
@@ -79,6 +79,6 @@ private:
     OptionMap m_mapOptions;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // CONFIGURATION_HPP_

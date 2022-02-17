@@ -15,7 +15,7 @@
 #include "IPositionSwitch.hpp"
 #include "IStepperMotor.hpp"
 
-namespace moco
+namespace sugo
 {
 class CircularMotionController : public ICircularMotionController
 {
@@ -47,6 +47,6 @@ private:
     unsigned             m_motorStepsToNextPosition;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* CIRCULARMOTIONCONTROLLER_HPP_ */

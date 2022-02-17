@@ -15,7 +15,7 @@
 
 int main(int argc, char const **argv)
 {
-    moco::Logger::init();
-    moco::MachineApplication application;
+    sugo::Logger::init();
+    sugo::MachineApplication application;
     return application.start(argc, argv) ? 0 : -1;
 }

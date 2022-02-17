@@ -19,7 +19,7 @@
 #include "MessageBroker.hpp"
 #include "Server.hpp"
 
-namespace moco
+namespace sugo
 {
 using CommandMessageBrokerT =
     MessageBroker<message::Command, message::CommandResponse, std::string>;
@@ -85,6 +85,6 @@ private:
     const ReceiverIdList m_receiverIdList;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // COMMANDMESSAGEBROKER_HPP_

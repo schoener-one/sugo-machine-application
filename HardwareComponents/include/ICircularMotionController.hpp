@@ -11,7 +11,7 @@
 #include "IMotionController.hpp"
 #include "IStepperMotor.hpp"
 
-namespace moco
+namespace sugo
 {
 class ICircularMotionController : public IMotionController
 {
@@ -27,6 +27,6 @@ public:
     virtual bool     rotate(unsigned steps, IStepperMotor::Direction direction) = 0;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* ICIRCULARMOTIONCONTROLLER_HPP_ */

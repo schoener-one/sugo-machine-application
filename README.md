@@ -1,6 +1,6 @@
-# MoCo CoffeeAutomat Project
+# MoCo SugoMachine Project
 
-This package contains the CoffeeAutomat project of MoCo.
+This package contains the SugoMachine project of MoCo.
 
 ## Installation
 
@@ -24,7 +24,7 @@ Additional libraries which are not available as debian package:
 The additional dependent libraries like azmq and librpcpp will be fetched from Git
 repository and build automatically within the project build folder.
 
-The CoffeeAutomat application can be build on host systems as well, to run the
+The SugoMachine application can be build on host systems as well, to run the
 unit tests for example:
 
 ```bash
@@ -66,7 +66,7 @@ it runs on!
 Example:
 
 ```bash
-CoffeeAutomatApp [-d] -c /etc/CoffeeAutomat.conf
+SugoMachineApp [-d] -c /etc/SugoMachine.conf
 ```
 
 ---

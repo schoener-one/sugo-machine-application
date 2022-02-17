@@ -12,7 +12,7 @@
 
 #include <boost/asio/streambuf.hpp>
 
-namespace moco
+namespace sugo
 {
 /**
  * Stream buffer class with fix buffer size.
@@ -26,6 +26,6 @@ public:
     StreamBuffer() : boost::asio::streambuf(MaxBufferSize) {}
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // STREAMBUFFER_HPP_

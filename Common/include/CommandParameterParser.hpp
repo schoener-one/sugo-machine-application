@@ -13,7 +13,7 @@
 
 #include "Globals.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Helper class for parsing JSON parameters.
@@ -52,6 +52,6 @@ private:
     const std::string& m_parameters;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* INCLUDE_COMMANDPARAMETERPARSER_HPP_ */

@@ -10,7 +10,7 @@
 
 #include <chrono>
 
-namespace moco
+namespace sugo
 {
 /**
  * Class for controlling stepper motor controller.
@@ -57,6 +57,6 @@ public:
     virtual IStepperMotorControl& getStepperMotorControl(unsigned number) = 0;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* ISTEPPERMOTORCONTROLLER_HPP_ */

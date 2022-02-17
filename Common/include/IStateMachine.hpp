@@ -12,7 +12,7 @@
 
 #include <functional>
 
-namespace moco
+namespace sugo
 {
 /**
  * Interface class for finite state machines.
@@ -48,6 +48,6 @@ public:
 protected:
     IStateMachine() {}
 };
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // ISTATEMACHINE_HPP_

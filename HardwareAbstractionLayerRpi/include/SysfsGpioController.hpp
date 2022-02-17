@@ -12,7 +12,7 @@
 
 #include "IGpioController.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Class implementing GPIO control on sysfs GPIO interface.
@@ -58,6 +58,6 @@ private:
     PinInfo    m_pinInfoList[MaxPinCount];
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* SYSFSGPIOCONTROLLER_HPP_ */

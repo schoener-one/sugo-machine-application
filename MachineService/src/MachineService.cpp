@@ -29,13 +29,13 @@ constexpr unsigned MethodTokenReceiverId = 0u;
 constexpr unsigned MethodTokenMethodId   = 1u;
 }  // namespace
 
-using namespace moco;
+using namespace sugo;
 
 void MachineService::setConfiguration(IConfiguration& configuration)
 {
-    configuration.add(Option("coffee-automat-service.address", std::string("*"),
+    configuration.add(Option("sugo-machine-service.address", std::string("*"),
                              "Network address of the service"));
-    configuration.add(Option("coffee-automat-service.port", 1234u, "Network port of the service"));
+    configuration.add(Option("sugo-machine-service.port", 1234u, "Network port of the service"));
 }
 
 MachineService::MachineService(ICommandMessageBroker& messageBroker,
@@ -43,9 +43,9 @@ MachineService::MachineService(ICommandMessageBroker& messageBroker,
     : ServiceComponent(messageBroker),
       m_jsonRpcServer(
           std::string("tcp://") +
-              configuration.getOption("coffee-automat-service.address").get<std::string>() + ":" +
+              configuration.getOption("sugo-machine-service.address").get<std::string>() + ":" +
               std::to_string(
-                  configuration.getOption("coffee-automat-service.port").get<unsigned>()),
+                  configuration.getOption("sugo-machine-service.port").get<unsigned>()),
           *this, ioContext)
 {
 }

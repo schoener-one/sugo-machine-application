@@ -17,10 +17,10 @@
 #include "Configuration.hpp"
 #include "Server.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
- * CoffeeAutomat application class.
+ * SugoMachine application class.
  */
 class MachineApplication final
 {
@@ -46,6 +46,6 @@ private:
     std::map<std::type_index, IOContext> m_ioContexts;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* MACHINEAPPLICATION_HPP_ */

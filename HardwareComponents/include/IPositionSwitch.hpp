@@ -8,7 +8,7 @@
 #ifndef IPOSITIONSWITCH_HPP_
 #define IPOSITIONSWITCH_HPP_
 
-namespace moco
+namespace sugo
 {
 class IPositionSwitch
 {
@@ -31,6 +31,6 @@ public:
     virtual bool waitForChange(int timeoutMS) const = 0;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* IPOSITIONSWITCH_HPP_ */

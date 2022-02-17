@@ -20,7 +20,7 @@
 #include "Server.hpp"
 #include "ServiceComponent.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Class to offer the service interface on network.
@@ -54,6 +54,6 @@ private:
 
     Server m_jsonRpcServer;
 };
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* MACHINESERVICE_HPP_ */

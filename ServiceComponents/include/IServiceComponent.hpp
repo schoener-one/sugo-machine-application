@@ -12,7 +12,7 @@
 
 #include "IRunnable.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Interface class of all service components.
@@ -25,6 +25,6 @@ protected:
 public:
     virtual ~IServiceComponent() {}
 };
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // ISERVICECOMPONENT_HPP_

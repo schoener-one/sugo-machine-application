@@ -13,7 +13,7 @@
 #include <ostream>
 #include <string>
 
-namespace moco
+namespace sugo
 {
 /**
  * Class represents a command identifier.
@@ -31,6 +31,6 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& ostr, CommandId const& commandId);
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // COMMANDID_HPP_

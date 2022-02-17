@@ -13,7 +13,7 @@
 #include "IConfiguration.hpp"
 #include "IHardwareAbstractionLayer.hpp"
 
-namespace moco
+namespace sugo
 {
 class HardwareAbstractionLayer : public IHardwareAbstractionLayer
 {
@@ -42,6 +42,6 @@ private:
     std::unique_ptr<IStepperMotorController> m_stepperMotorController;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* HARDWAREABSTRACTIONLAYER_HPP_ */

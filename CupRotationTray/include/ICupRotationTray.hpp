@@ -14,7 +14,7 @@
 #include "Ident.hpp"
 #include "StateMachine.hpp"
 
-namespace moco
+namespace sugo
 {
 namespace ICupRotationTray
 {
@@ -61,9 +61,9 @@ enum EventId
     TestRotation
 };
 
-using Event = moco::Ident<ICupRotationTray::EventId>;
-using Fsm   = moco::StateMachine<ICupRotationTray::State, ICupRotationTray::Event>;
+using Event = sugo::Ident<ICupRotationTray::EventId>;
+using Fsm   = sugo::StateMachine<ICupRotationTray::State, ICupRotationTray::Event>;
 }  // namespace ICupRotationTray
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* ICUPROTATIONTRAY_HPP_ */

@@ -13,7 +13,7 @@
 #include "Configuration.hpp"
 #include "Option.hpp"
 
-using namespace moco;
+using namespace sugo;
 namespace po = boost::program_options;
 
 class ConfigurationTest : public ::testing::Test

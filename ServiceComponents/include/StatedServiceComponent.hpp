@@ -16,7 +16,7 @@
 #include "IStateMachine.hpp"
 #include "ServiceComponent.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Class to receive handle state machine events from commands.
@@ -71,9 +71,9 @@ protected:
     }
 
 private:
-    moco::IStateMachine<StateT, EventT>& m_stateMachine;
+    sugo::IStateMachine<StateT, EventT>& m_stateMachine;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // STATEDSERVICECOMPONENT_HPP_

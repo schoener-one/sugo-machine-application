@@ -16,7 +16,7 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace moco
+namespace sugo
 {
 class Configuration;
 
@@ -81,6 +81,6 @@ private:
     boost::any                                                    m_value;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // OPTION_HPP_

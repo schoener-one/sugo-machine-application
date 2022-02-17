@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace moco
+namespace sugo
 {
 template <char delimiter>
 class Token : public std::string
@@ -51,6 +51,6 @@ public:
                                         std::istream_iterator<Token<delimiter>>());
     }
 };
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // STRING_HPP_

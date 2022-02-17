@@ -22,7 +22,7 @@
 #include "Logger.hpp"
 #include "MachineController.hpp"
 
-namespace moco
+namespace sugo
 {
 class IStepperMotorMock : public IStepperMotor
 {
@@ -40,9 +40,9 @@ public:
     MOCK_CONST_METHOD0(isOpen, bool());
     MOCK_CONST_METHOD1(waitForChange, bool(int));
 };
-}  // namespace moco
+}  // namespace sugo
 
-using namespace moco;
+using namespace sugo;
 
 class MachineSmokeTest : public ::testing::Test, public IOContextHelper
 {
@@ -61,7 +61,7 @@ protected:
 };
 
 // FIXME second send call keeps hanging
-// TEST_F(MachineSmokeTest, CoffeeAutomat_CommandResponse)
+// TEST_F(MachineSmokeTest, SugoMachine_CommandResponse)
 // {
 //     CommandMessageBroker messageBroker(IMachineController::Command::ReceiverId, {}, m_ioContext);
 //     MachineController    machineController(messageBroker);

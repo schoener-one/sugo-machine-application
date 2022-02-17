@@ -15,7 +15,7 @@
 
 #include "Option.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Interface class for configurations
@@ -49,6 +49,6 @@ public:
     const Option& operator[](const std::string& name) const { return getOption(name); }
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // ICONFIGURATION_HPP_

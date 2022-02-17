@@ -19,7 +19,7 @@
 #include "Globals.hpp"
 #include "IStateMachine.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Basic finite state machine.
@@ -170,6 +170,6 @@ private:
     std::queue<EventT> m_queueEvents;  ///< Pending events.
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // STATEMACHINE_HPP_

@@ -8,7 +8,7 @@
 #ifndef IMOTIONCONTROLLER_HPP_
 #define IMOTIONCONTROLLER_HPP_
 
-namespace moco
+namespace sugo
 {
 class IMotionController
 {
@@ -19,6 +19,6 @@ public:
     virtual ~IMotionController() {}
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* IMOTIONCONTROLLER_HPP_ */

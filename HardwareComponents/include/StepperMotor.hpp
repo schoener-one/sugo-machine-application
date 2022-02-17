@@ -16,7 +16,7 @@
 #include "IConfiguration.hpp"
 #include "IStepperMotor.hpp"
 
-namespace moco
+namespace sugo
 {
 class StepperMotor : public IStepperMotor
 {
@@ -39,6 +39,6 @@ private:
     bool     m_isStopped;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* STEPPERMOTOR_HPP_ */

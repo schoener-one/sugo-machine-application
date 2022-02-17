@@ -11,7 +11,7 @@
 
 #include "Configuration.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 const IConfiguration& Configuration::extract(const std::string& prefix,
                                              IConfiguration&    extractedConfiguration) const

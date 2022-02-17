@@ -10,7 +10,7 @@
 
 #include <functional>
 
-namespace moco
+namespace sugo
 {
 class IStepperMotor
 {
@@ -42,6 +42,6 @@ public:
     virtual unsigned getStepsPerRound() const                                           = 0;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* ISTEPPERMOTOR_HPP_ */

@@ -7,6 +7,6 @@
 
 #include "IHardwareAbstractionLayer.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 IHardwareAbstractionLayer* IHardwareAbstractionLayer::s_hal = nullptr;

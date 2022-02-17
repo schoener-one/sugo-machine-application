@@ -21,7 +21,7 @@
 #include "StateMachine.hpp"
 #include "StatedServiceComponent.hpp"
 
-namespace moco
+namespace sugo
 {
 std::ostream& operator<<(std::ostream& ostr, IMachineController::State const& value);
 std::ostream& operator<<(std::ostream& ostr, IMachineController::EventId const& value);
@@ -52,6 +52,6 @@ private:
                      const IMachineController::State& state);
 };
 
-} /* namespace moco */
+} /* namespace sugo */
 
 #endif /* MACHINECONTROLLER_HPP_ */

@@ -8,7 +8,7 @@
 #ifndef IDENT_HPP_
 #define IDENT_HPP_
 
-namespace moco
+namespace sugo
 {
 /**
  * Functor represents the comparator.
@@ -92,6 +92,6 @@ public:
     AnyIdent() : Ident<>(0) {}
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* IDENT_HPP_ */

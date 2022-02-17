@@ -16,17 +16,17 @@
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 
-namespace moco
+namespace sugo
 {
 namespace log
 {
 #define LOG(_severity)                                                             \
     BOOST_LOG_STREAM_WITH_PARAMS(                                                  \
         boost::log::trivial::logger::get(),                                        \
-        (moco::log::setThreadAttribute<std::string>(                               \
+        (sugo::log::setThreadAttribute<std::string>(                               \
             "File", boost::filesystem::path(__FILE__).filename().string()))(       \
-            moco::log::setThreadAttribute<int>("Line", __LINE__))(                 \
-            moco::log::setThreadAttribute<std::string>("Function", __FUNCTION__))( \
+            sugo::log::setThreadAttribute<int>("Line", __LINE__))(                 \
+            sugo::log::setThreadAttribute<std::string>("Function", __FUNCTION__))( \
             boost::log::keywords::severity = ::boost::log::trivial::_severity))
 
 template <typename ValueT>
@@ -51,6 +51,6 @@ private:
     Logger() {}
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* LOGGER_HPP_ */

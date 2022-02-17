@@ -14,7 +14,7 @@
 
 #include "Logger.hpp"
 
-using namespace moco;
+using namespace sugo;
 namespace po = boost::program_options;
 
 bool ConfigurationParser::parse()

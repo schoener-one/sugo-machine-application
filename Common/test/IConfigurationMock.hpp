@@ -14,7 +14,7 @@
 
 #include "IConfiguration.hpp"
 
-namespace moco
+namespace sugo
 {
 class IConfigurationMock : public IConfiguration
 {
@@ -25,6 +25,6 @@ public:
     MOCK_CONST_METHOD1(getOption, const Option&(const std::string&));
     MOCK_CONST_METHOD2(extract, const IConfiguration&(const std::string&, IConfiguration&));
 };
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // COMMON_TEST_ICONFIGURATIONMOCK_HPP_

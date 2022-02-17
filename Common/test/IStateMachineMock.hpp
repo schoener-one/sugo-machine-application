@@ -14,7 +14,7 @@
 
 #include "IStateMachine.hpp"
 
-namespace moco
+namespace sugo
 {
 namespace test
 {
@@ -41,6 +41,6 @@ public:
     MOCK_METHOD2(push, void(const test::Event &, Action));
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // COMMON_TEST_ISTATEMACHINEMOCK_HPP_

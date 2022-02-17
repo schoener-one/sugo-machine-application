@@ -8,7 +8,7 @@
 #include "HardwareAbstractionLayer.hpp"
 #include "SysfsGpioController.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 void HardwareAbstractionLayer::setConfiguration(IConfiguration& configuration)
 {

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(CoffeeMachine)
+project(SugoMachine)
 
 set(PROJECT_SOURCE_DIR "${PROJECT_SOURCE_DIR}")
 set(PROJECT_BINARY_DIR "${PROJECT_SOURCE_DIR}/bin")

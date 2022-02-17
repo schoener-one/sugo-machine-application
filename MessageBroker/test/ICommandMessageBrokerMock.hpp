@@ -16,7 +16,7 @@
 
 #include "ICommandMessageBroker.hpp"
 
-namespace moco
+namespace sugo
 {
 class ICommandMessageBrokerMock
     : public IMessageBroker<message::Command, message::CommandResponse, std::string>
@@ -36,6 +36,6 @@ public:
     MOCK_CONST_METHOD0(isRunning, bool());
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // ICOMMANDMESSAGEBROKERMOCK_HPP_

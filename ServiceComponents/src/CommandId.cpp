@@ -9,9 +9,9 @@
 
 #include "CommandId.hpp"
 
-using namespace moco;
+using namespace sugo;
 
-std::ostream& moco::operator<<(std::ostream& ostr, CommandId const& commandId)
+std::ostream& sugo::operator<<(std::ostream& ostr, CommandId const& commandId)
 {
     ostr << commandId.receiver << "." << commandId.command;
     return ostr;

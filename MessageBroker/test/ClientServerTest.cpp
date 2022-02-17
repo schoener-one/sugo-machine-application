@@ -23,7 +23,7 @@
 
 namespace bc = boost::container;
 
-namespace moco
+namespace sugo
 {
 class TestEchoServer : public Server::IMessageHandler
 {
@@ -43,9 +43,9 @@ public:
 };
 
 const std::string address = "inproc://server";
-}  // namespace moco
+}  // namespace sugo
 
-using namespace moco;
+using namespace sugo;
 
 class ClientServerTest : public ::testing::Test, public IOContextHelper
 {

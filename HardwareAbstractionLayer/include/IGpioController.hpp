@@ -8,7 +8,7 @@
 #ifndef IGPIOCONTROLLER_HPP_
 #define IGPIOCONTROLLER_HPP_
 
-namespace moco
+namespace sugo
 {
 /**
  * Class for contolling GPIOs.
@@ -44,6 +44,6 @@ public:
                                        int timeoutMS) const             = 0;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* IGPIOCONTROLLER_HPP_ */

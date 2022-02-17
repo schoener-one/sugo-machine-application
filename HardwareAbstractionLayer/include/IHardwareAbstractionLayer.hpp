@@ -14,7 +14,7 @@
 #include "IGpioController.hpp"
 #include "IStepperMotorController.hpp"
 
-namespace moco
+namespace sugo
 {
 class IHardwareAbstractionLayer
 {
@@ -49,6 +49,6 @@ private:
     static IHardwareAbstractionLayer* s_hal;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* IHARDWAREABSTRACTIONLAYER_HPP_ */

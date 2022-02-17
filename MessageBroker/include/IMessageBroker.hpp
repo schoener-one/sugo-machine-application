@@ -14,7 +14,7 @@
 
 #include "IRunnable.hpp"
 
-namespace moco
+namespace sugo
 {
 /**
  * Interface class to handle messaging between components.
@@ -77,6 +77,6 @@ public:
     virtual bool hasRegisteredHandler(const ReceiverIdT& messageId) const = 0;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* IMESSAGEBROKER_HPP_ */

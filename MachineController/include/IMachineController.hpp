@@ -16,7 +16,7 @@
 #include "Ident.hpp"
 #include "StateMachine.hpp"
 
-namespace moco
+namespace sugo
 {
 namespace IMachineController
 {
@@ -54,9 +54,9 @@ enum EventId
     SelfTestFailed
 };
 
-using Event = moco::Ident<EventId>;
-using Fsm   = moco::StateMachine<IMachineController::State, IMachineController::Event>;
+using Event = sugo::Ident<EventId>;
+using Fsm   = sugo::StateMachine<IMachineController::State, IMachineController::Event>;
 }  // namespace IMachineController
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* IMACHINECONTROLLER_HPP_ */

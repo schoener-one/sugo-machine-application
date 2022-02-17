@@ -10,7 +10,7 @@
 #include "IOContext.hpp"
 #include "Logger.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 IOContext::~IOContext()
 {

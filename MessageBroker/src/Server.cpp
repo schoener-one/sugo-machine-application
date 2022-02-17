@@ -13,7 +13,7 @@
 
 #include "Globals.hpp"
 
-namespace moco
+namespace sugo
 {
 class ServerSocket : public azmq::rep_socket
 {
@@ -21,9 +21,9 @@ public:
     explicit ServerSocket(IOContext& service) : azmq::rep_socket(service) {}
 };
 
-}  // namespace moco
+}  // namespace sugo
 
-using namespace moco;
+using namespace sugo;
 namespace asio = boost::asio;
 
 Server::Server(const std::string& address, IMessageHandler& messageHandler, IOContext& ioContext)

@@ -14,7 +14,7 @@
 
 #include "ConfigurationFileParser.hpp"
 
-using namespace moco;
+using namespace sugo;
 namespace pt = boost::property_tree;
 namespace po = boost::program_options;
 

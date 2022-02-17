@@ -16,7 +16,7 @@
 #include "Globals.hpp"
 #include "SysfsGpioController.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 const std::string SysfsGpioController::GpioBasePath("/sys/class/gpio");
 

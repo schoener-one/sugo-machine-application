@@ -18,7 +18,7 @@
 #include "ICupRotationTray.hpp"
 #include "StatedServiceComponent.hpp"
 
-namespace moco
+namespace sugo
 {
 std::ostream& operator<<(std::ostream& ostr, ICupRotationTray::State const& value);
 std::ostream& operator<<(std::ostream& ostr, ICupRotationTray::EventId const& value);
@@ -69,6 +69,6 @@ private:
     TestRotationParameters     m_testRotationParameters;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* CUPROTATIONTRAY_HPP_ */

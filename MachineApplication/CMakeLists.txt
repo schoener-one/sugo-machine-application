@@ -40,5 +40,5 @@ if (NOT NO_UNITTEST)
         GTest::GTest
         GTest::Main
         gmock)
-    gtest_add_tests(MachineSmokeTest "" AUTO TEST_LIST moco)
+    gtest_add_tests(MachineSmokeTest "" AUTO TEST_LIST sugo)
 endif()

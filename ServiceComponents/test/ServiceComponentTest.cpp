@@ -18,7 +18,7 @@
 #define protected public
 #include "StatedServiceComponent.hpp"
 
-namespace moco
+namespace sugo
 {
 class ServiceComponentTest;
 
@@ -40,7 +40,7 @@ protected:
 
     ~ServiceComponentTest() override {}
 
-    static void SetUpTestCase() { moco::Logger::init(); }
+    static void SetUpTestCase() { sugo::Logger::init(); }
 
     void SetUp() override {}
 
@@ -69,4 +69,4 @@ TEST_F(ServiceComponentTest, CommandExecutionComponent_Notify)
     const bool success = m_testComponent.notify(commandId, parameters);
     EXPECT_TRUE(success);
 }
-}  // namespace moco
+}  // namespace sugo

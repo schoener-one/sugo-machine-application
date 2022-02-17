@@ -23,7 +23,7 @@
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/file.hpp>
 
-using namespace moco;
+using namespace sugo;
 namespace logging = boost::log;
 namespace expr    = logging::expressions;
 

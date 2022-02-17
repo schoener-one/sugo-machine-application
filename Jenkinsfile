@@ -14,7 +14,7 @@ pipeline {
         }
     }
     parameters {
-        string(name: 'UPSTREAM_PROJECT_NAME', defaultValue: '/moco-system/master', description: 'Name of the upstream project')
+        string(name: 'UPSTREAM_PROJECT_NAME', defaultValue: '/sugo-system/master', description: 'Name of the upstream project')
         string(name: 'BUILD_NUMBER', description: 'Number of the build')
         string(name: 'IMAGE_ARTIFACTS', description: 'Name of the archived image artifact file')
     }
@@ -225,7 +225,7 @@ pipeline {
                 stage('Build documentation') {
                     steps {
                         sh 'doxygen doxygen.conf 2>&1 |grep \'^!!! \' | sed \'s/^!!! //\'|tee doxygen.warn.log'
-                        sh 'tar -zcf moco-coffee-machine.doc.tar.gz moco-coffee-machine.doc'
+                        sh 'tar -zcf sugo-machine.doc.tar.gz sugo-machine.doc'
                     }
                 }
                 stage('Build coverage report') {
@@ -247,7 +247,7 @@ pipeline {
             archiveArtifacts artifacts: 'annotations.log', fingerprint: true
             archiveArtifacts artifacts: 'coverage.xml', fingerprint: true
             archiveArtifacts artifacts: 'build.*.log', fingerprint: true
-            archiveArtifacts artifacts: 'moco-coffee-machine.doc.tar.gz', fingerprint: true
+            archiveArtifacts artifacts: 'sugo-machine.doc.tar.gz', fingerprint: true
 
             // TODO set appropriate filters for removing test files!
             recordIssues enabledForFailure: false, tool: gcc(pattern: 'build.*.log')

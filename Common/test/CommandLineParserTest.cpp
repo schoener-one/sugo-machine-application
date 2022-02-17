@@ -13,7 +13,7 @@
 #include "IConfigurationMock.hpp"
 
 namespace po = boost::program_options;
-using namespace moco;
+using namespace sugo;
 
 class CommandLineParserTest : public ::testing::Test
 {

@@ -10,7 +10,7 @@
 #ifndef IRUNNABLE_HPP_
 #define IRUNNABLE_HPP_
 
-namespace moco
+namespace sugo
 {
 /**
  * Interface class for runnable classes.
@@ -40,6 +40,6 @@ public:
 protected:
     IRunnable() {}
 };
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // IRUNNABLE_HPP_

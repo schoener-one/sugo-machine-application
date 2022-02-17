@@ -18,11 +18,11 @@
 #include "ICupRotationTray.hpp"
 
 using namespace std;
-using namespace moco;
-using namespace moco::IMachineController;
+using namespace sugo;
+using namespace sugo::IMachineController;
 using Transition = IMachineController::Fsm::Transition;
 
-std::ostream& moco::operator<<(std::ostream& ostr, IMachineController::State const& value)
+std::ostream& sugo::operator<<(std::ostream& ostr, IMachineController::State const& value)
 {
     switch (value)
     {
@@ -47,7 +47,7 @@ std::ostream& moco::operator<<(std::ostream& ostr, IMachineController::State con
     return ostr;
 }
 
-std::ostream& moco::operator<<(std::ostream& ostr, IMachineController::EventId const& value)
+std::ostream& sugo::operator<<(std::ostream& ostr, IMachineController::EventId const& value)
 {
     switch (value)
     {
@@ -149,7 +149,7 @@ void MachineController::switchOn(const IMachineController::Event& event,
 {
     (void)event;
     (void)state;
-    LOG(info) << "Switching on coffee automat...";
+    LOG(info) << "Switching on machine controller...";
     const message::CommandResponse response = send(Command::SwitchOn);
     if (response.result() == message::CommandResponse_Result_SUCCESS)
     {

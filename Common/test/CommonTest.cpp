@@ -18,7 +18,7 @@
 #include "Logger.hpp"
 #include "Thread.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 class CommonTest : public ::testing::Test
 {

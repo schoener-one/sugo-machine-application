@@ -18,7 +18,7 @@
 #include "IRunnable.hpp"
 #include "StreamBuffer.hpp"
 
-namespace moco
+namespace sugo
 {
 class ServerSocket;
 
@@ -85,6 +85,6 @@ private:
     StreamBuffer                  m_sendBuf;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // SERVER_HPP_

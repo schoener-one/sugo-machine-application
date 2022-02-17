@@ -12,7 +12,7 @@
 
 #include <string>
 
-namespace moco
+namespace sugo
 {
 namespace IMachineService
 {
@@ -21,6 +21,6 @@ namespace Command
 static const std::string ReceiverId = "MachineService";
 }
 }  // namespace IMachineService
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // IMACHINESERVICE_HPP_

@@ -13,7 +13,7 @@
 
 #include "Globals.hpp"
 
-using namespace moco;
+using namespace sugo;
 
 Thread::Thread() : m_isReady(false), m_policy(PolicyCurrent) {}
 

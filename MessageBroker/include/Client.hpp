@@ -18,7 +18,7 @@
 #include "IOContext.hpp"
 #include "StreamBuffer.hpp"
 
-namespace moco
+namespace sugo
 {
 class ClientSocket;
 
@@ -67,6 +67,6 @@ private:
     std::unique_ptr<ClientSocket> m_socket;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif  // CLIENT_HPP_

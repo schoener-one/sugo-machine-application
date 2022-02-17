@@ -12,7 +12,7 @@
 #include "IConfiguration.hpp"
 #include "IHardwareAbstractionLayer.hpp"
 
-namespace moco
+namespace sugo
 {
 std::ostream& operator<<(std::ostream& ostr, IGpioController::PinDirection const& pinDir)
 {
@@ -127,6 +127,6 @@ private:
     StepperMotorControllerStub m_stepperMotorController;
 };
 
-}  // namespace moco
+}  // namespace sugo
 
 #endif /* HARDWAREABSTRACTIONLAYERSTUB_HPP_ */
