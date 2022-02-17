@@ -6,7 +6,6 @@
  */
 
 #include "HardwareAbstractionLayer.hpp"
-#include "AdafruitStepperMotorController.hpp"
 #include "SysfsGpioController.hpp"
 
 using namespace moco;
@@ -19,8 +18,8 @@ void HardwareAbstractionLayer::setConfiguration(IConfiguration& configuration)
 
 HardwareAbstractionLayer::HardwareAbstractionLayer(const IConfiguration& configuration)
     : m_gpioController(std::make_unique<SysfsGpioController>(
-          configuration["hardware-abstraction-layer.gpio.logic-active-high"].get<bool>())),
-      m_stepperMotorController(std::make_unique<AdafruitStepperMotorController>())
+          configuration["hardware-abstraction-layer.gpio.logic-active-high"].get<bool>()))
+    // , m_stepperMotorController(std::make_unique<AdafruitStepperMotorController>())
 {
 }
 

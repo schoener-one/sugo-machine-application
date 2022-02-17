@@ -39,14 +39,6 @@ list(APPEND PROJECT_SUBDIRS
 ##
 include(cmake/ExternalLib.cmake)
 
-# AdafruiteStepperMotorHAT
-add_library (AdafruitStepperMotorHAT 
-    AdafruitStepperMotorHAT_CPP/Adafruit_MotorHAT.cpp 
-    AdafruitStepperMotorHAT_CPP/PWM.cpp
-    )
-target_include_directories (AdafruitStepperMotorHAT PUBLIC ${PROJECT_SOURCE_DIR}/AdafruitStepperMotorHAT_CPP)
-include_directories(${PROJECT_SOURCE_DIR}/AdafruitStepperMotorHAT_CPP)
-
 # Boost library
 include(cmake/LibBoost.cmake)
 
@@ -64,12 +56,6 @@ if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
 else()
     add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerRpi)
     set(HardwareAbstractionLayerImpl HardwareAbstractionLayerRpi)
-endif()
-
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-    target_link_libraries(AdafruitStepperMotorHAT ${HardwareAbstractionLayerImpl})
-else()
-    target_link_libraries(AdafruitStepperMotorHAT wiringPi)
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/Common)
