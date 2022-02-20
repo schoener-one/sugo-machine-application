@@ -1,9 +1,12 @@
-/*
- * IHardwareAbstractionLayer.hpp
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @file
+ * @license: CLOSED
  *
- *  Created on: 13.10.2019
- *      Author: denis
+ * @author: denis@schoener-one.de
+ * @date:   2019-10-13
  */
+///////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 

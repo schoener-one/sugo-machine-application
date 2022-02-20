@@ -10,7 +10,7 @@ target_link_libraries(ServiceComponents Common MessageBroker)
 # Google Unittests
 if (NOT NO_UNITTEST)    
     add_executable(ServiceComponentsTest
-        test/ServiceComponentTest.cpp
+        test/StatedServiceComponentTest.cpp
         )
     target_compile_options(ServiceComponentsTest PUBLIC "-DUNIT_TEST")
     target_link_libraries(ServiceComponentsTest

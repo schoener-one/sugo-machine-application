@@ -70,7 +70,7 @@ public:
     }
 
     const IConfiguration& extract(const std::string& prefix,
-                                  IConfiguration&    extractedConfiguration) const;
+                                  IConfiguration&    extractedConfiguration) const override;
     // IConfiguration }}
 
 private:

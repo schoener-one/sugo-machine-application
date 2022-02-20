@@ -1,12 +1,14 @@
-/*
- * IStepperMotorController.hpp
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @file
+ * @license: CLOSED
  *
- *  Created on: 15.12.2019
- *      Author: denis
+ * @author: denis@schoener-one.de
+ * @date:   2019-12-15
  */
+///////////////////////////////////////////////////////////////////////////////
 
-#ifndef ISTEPPERMOTORCONTROLLER_HPP_
-#define ISTEPPERMOTORCONTROLLER_HPP_
+#pragma once
 
 #include <chrono>
 
