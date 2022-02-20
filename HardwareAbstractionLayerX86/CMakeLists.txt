@@ -1,6 +1,0 @@
-# CMake configuration file
-# Module: HardwareAbstractionLayerX86
-
-add_library (HardwareAbstractionLayerX86 INTERFACE)
-target_include_directories (HardwareAbstractionLayerX86 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(HardwareAbstractionLayerX86 INTERFACE Common HardwareAbstractionLayer)

@@ -15,7 +15,6 @@ target_link_libraries(MachineApplication
     MachineController
     HardwareComponents
     HardwareAbstractionLayer
-    ${HardwareAbstractionLayerImpl}
     )
     
  # Google Unittests

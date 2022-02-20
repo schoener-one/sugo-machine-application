@@ -13,14 +13,6 @@ include(cmake/Testing.cmake)
 ## **********************************
 ## Sub directories
 ##
-list(APPEND PROJECT_SUBDIRS "")
-
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-    list(APPEND PROJECT_SUBDIRS ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerX86)
-else()
-    list(APPEND PROJECT_SUBDIRS ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerRpi)
-endif()
-
 list(APPEND PROJECT_SUBDIRS 
     ${PROJECT_SOURCE_DIR}/Common
     ${PROJECT_SOURCE_DIR}/Protocol
@@ -49,14 +41,6 @@ include(cmake/LibBoost.cmake)
 # foreach(subdir ${PROJECT_SUBDIRS})
 #     add_subdirectory(${subdir})
 # endforeach()
-
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-    add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerX86)
-    set(HardwareAbstractionLayerImpl HardwareAbstractionLayerX86)
-else()
-    add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayerRpi)
-    set(HardwareAbstractionLayerImpl HardwareAbstractionLayerRpi)
-endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/Common)
 add_subdirectory(${PROJECT_SOURCE_DIR}/Protocol)

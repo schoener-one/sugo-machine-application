@@ -1,12 +1,14 @@
-/*
- * HardwareAbstractionLayer.hpp
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @file
+ * @license: CLOSED
  *
- *  Created on: 03.01.2020
- *      Author: denis
+ * @author: denis@schoener-one.de
+ * @date:   2020-01-03
  */
+///////////////////////////////////////////////////////////////////////////////
 
-#ifndef HARDWAREABSTRACTIONLAYERSTUB_HPP_
-#define HARDWAREABSTRACTIONLAYERSTUB_HPP_
+#pragma once
 
 #include "Globals.hpp"
 #include "IConfiguration.hpp"
@@ -37,18 +39,13 @@ std::ostream& operator<<(std::ostream&                                          
 /**
  *
  */
-class HardwareAbstractionLayer : public IHardwareAbstractionLayer
+class HardwareAbstractionLayerStub : public IHardwareAbstractionLayer
 {
 public:
-    static void setConfiguration(IConfiguration& configuration)
-    {
-        configuration.add(Option("hardware-abstraction-layer.gpio.logic-active-high", false,
-                                 "HAL: Indicates if GPIO logic is active-high or -low"));
-    }
-
-    explicit HardwareAbstractionLayer(const IConfiguration& configuration) { (void)configuration; }
+    HardwareAbstractionLayerStub() {}
 
     // IHardwareAbstractionLayer {{
+    void                     init(const IConfiguration&) override {}
     IGpioController&         getGpioController() override { return m_gpioController; }
     IStepperMotorController& getStepperMotorController() override
     {
@@ -128,5 +125,3 @@ private:
 };
 
 }  // namespace sugo
-
-#endif /* HARDWAREABSTRACTIONLAYERSTUB_HPP_ */

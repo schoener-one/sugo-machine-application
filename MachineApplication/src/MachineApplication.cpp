@@ -19,7 +19,7 @@
 #include "ConfigurationFileParser.hpp"
 #include "CupRotationTray.hpp"
 #include "Globals.hpp"
-#include "HardwareAbstractionLayer.hpp"
+#include "IHardwareAbstractionLayer.hpp"
 #include "MachineController.hpp"
 #include "MachineService.hpp"
 #include "PositionSwitch.hpp"
@@ -57,7 +57,7 @@ bool MachineApplication::start(int argc, char const** argv)
 
     MachineService::setConfiguration(m_configuration);
     CupRotationTray::setConfiguration(m_configuration);
-    HardwareAbstractionLayer::setConfiguration(m_configuration);
+    IHardwareAbstractionLayer::setConfiguration(m_configuration);
 
     LOG(info) << "Starting SugoMachine application";
     bool success = parseCommandLine(argc, argv);
@@ -69,8 +69,7 @@ bool MachineApplication::start(int argc, char const** argv)
 
     if (success)
     {
-        HardwareAbstractionLayer hardwareAbstractionLayer(m_configuration);
-        IHardwareAbstractionLayer::init(&hardwareAbstractionLayer);
+        IHardwareAbstractionLayer::get().init(m_configuration);
 
         const CommandMessageBroker::ReceiverIdList notificationReceivers = {
             ICupRotationTray::Command::ReceiverId, IMachineController::Command::ReceiverId,

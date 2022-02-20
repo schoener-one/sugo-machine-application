@@ -1,5 +1,5 @@
 /*
- * HardwareAbstractionLayer.hpp
+ * HardwareAbstractionLayerImpl.hpp
  *
  *  Created on: 13.10.2019
  *      Author: denis
@@ -15,15 +15,17 @@
 
 namespace sugo
 {
-class HardwareAbstractionLayer : public IHardwareAbstractionLayer
+class HardwareAbstractionLayerImpl : public IHardwareAbstractionLayer
 {
 public:
     static void setConfiguration(IConfiguration& configuration);
 
-    explicit HardwareAbstractionLayer(const IConfiguration& configuration);
-    virtual ~HardwareAbstractionLayer();
+    HardwareAbstractionLayerImpl();
+    virtual ~HardwareAbstractionLayerImpl();
 
     // IHardwareAbstractionLayer {{
+    void init(const IConfiguration&) override {}
+
     IGpioController& getGpioController() override { return *m_gpioController; }
 
     IStepperMotorController& getStepperMotorController() override

@@ -5,12 +5,12 @@
  *      Author: denis
  */
 
-#ifndef IHARDWAREABSTRACTIONLAYER_HPP_
-#define IHARDWAREABSTRACTIONLAYER_HPP_
+#pragma once
 
 #include <cassert>
 #include <memory>
 
+#include "IConfiguration.hpp"
 #include "IGpioController.hpp"
 #include "IStepperMotorController.hpp"
 
@@ -23,32 +23,25 @@ protected:
 
 public:
     /**
-     * Sets the global HAL interface.
-     * @param hal HAL interface instance.
+     * @brief Set the Configuration object.
+     *
+     * @param configuration Configuration to be set.
      */
-    static void init(IHardwareAbstractionLayer* hal) { s_hal = hal; }
+    static void setConfiguration(IConfiguration& configuration);
 
     /**
      * Returns the global HAL interface.
      * @return The global HAL interface.
      */
-    static IHardwareAbstractionLayer& get()
-    {
-        assert(s_hal != nullptr);
-        return *s_hal;
-    }
+    static IHardwareAbstractionLayer& get();
 
 public:
     virtual ~IHardwareAbstractionLayer() {}
 
-    virtual IGpioController&               getGpioController()               = 0;
-    virtual IStepperMotorController&       getStepperMotorController()       = 0;
-    virtual const IStepperMotorController& getStepperMotorController() const = 0;
-
-private:
-    static IHardwareAbstractionLayer* s_hal;
+    virtual void                           init(const IConfiguration& configuration) = 0;
+    virtual IGpioController&               getGpioController()                       = 0;
+    virtual IStepperMotorController&       getStepperMotorController()               = 0;
+    virtual const IStepperMotorController& getStepperMotorController() const         = 0;
 };
 
 }  // namespace sugo
-
-#endif /* IHARDWAREABSTRACTIONLAYER_HPP_ */
