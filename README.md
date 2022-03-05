@@ -28,8 +28,8 @@ The SugoMachine application can be build on host systems as well, to run the
 unit tests for example:
 
 ```bash
-cmake . -Bbuild.x86 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --target all
+cmake . -Bbuild.x86 -GNinja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build.x86 --target all
 ```
 
 ### Cross Target Installation (i.e. on Raspberry PI)
@@ -41,7 +41,7 @@ cmake as follows:
 
 ```bash
 source $SDK_RPI_PATH/environment-setup-...
-cmake . -Bbuild.rpi -DCMAKE_BUILD_TYPE=Debug \
+cmake . -Bbuild.rpi -GNinja -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_TOOLCHAIN_FILE=$OECORE_NATIVE_SYSROOT/usr/share/cmake/OEToolchainConfig.cmake
 cmake --build build.rpi -- all
 ```

@@ -163,7 +163,7 @@ bool SysfsGpioController::unregisterPin(unsigned pin)
     return success;
 }
 
-bool SysfsGpioController::getPinState(unsigned pin, IGpioController::PinState& outPinState) const
+bool SysfsGpioController::getPinState(unsigned pin, IGpioControl::PinState& outPinState) const
 {
     assert(m_pinInfoList[pin].file != InvalidPin);
     char value = 0;
@@ -189,8 +189,8 @@ bool SysfsGpioController::setPinState(unsigned pin, PinState pinState)
     return (byteCount == sizeof(value));
 }
 
-bool SysfsGpioController::waitForPinStateChange(unsigned                   pin,
-                                                IGpioController::PinState& outPinState,
+bool SysfsGpioController::waitForChange(unsigned                   pin,
+                                                IGpioControl::PinState& outPinState,
                                                 int                        timeoutMS) const
 {
     struct pollfd pollInfo;

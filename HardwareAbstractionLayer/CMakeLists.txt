@@ -5,8 +5,12 @@ add_library(HardwareAbstractionLayerInterface INTERFACE)
 target_include_directories (HardwareAbstractionLayerInterface INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(HardwareAbstractionLayerInterface INTERFACE Common)
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HardwareAbstractionLayerCommon)
+
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
+    message("Using HardwareAbstractionLayerStub (x86)")
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HardwareAbstractionLayerStub)
 else()
+message("Using HardwareAbstractionLayerImpl (RPI)")
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HardwareAbstractionLayerImpl)
 endif()

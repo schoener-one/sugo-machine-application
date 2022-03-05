@@ -23,18 +23,24 @@ namespace sugo
 class IConfiguration
 {
 protected:
-    IConfiguration() {}
+    IConfiguration()
+    {
+    }
 
 public:
-    virtual ~IConfiguration() {}
+    virtual ~IConfiguration()
+    {
+    }
 
     using OptionDescriptions = boost::program_options::options_description;
     using VariablesMap       = boost::program_options::variables_map;
+    using OptionList         = std::vector<Option>;
 
     virtual OptionDescriptions getOptionDescriptions() const            = 0;
     virtual bool               set(const VariablesMap& vm)              = 0;
     virtual void               add(const Option& option)                = 0;
     virtual const Option&      getOption(const std::string& name) const = 0;
+
     /**
      * Extracts all options with the passed prefix and returns a temporary configuration
      * object which contains the subset of options according to the prefix.
@@ -46,7 +52,10 @@ public:
     virtual const IConfiguration& extract(const std::string& prefix,
                                           IConfiguration&    extractedConfiguration) const = 0;
 
-    const Option& operator[](const std::string& name) const { return getOption(name); }
+    const Option& operator[](const std::string& name) const
+    {
+        return getOption(name);
+    }
 };
 
 }  // namespace sugo

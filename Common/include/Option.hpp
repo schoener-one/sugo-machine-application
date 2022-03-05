@@ -10,6 +10,9 @@
 #ifndef OPTION_HPP_
 #define OPTION_HPP_
 
+#include <cassert>
+#include <vector>
+
 #include <boost/any.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
@@ -28,7 +31,9 @@ class Option
 public:
     using ValueSemantic = boost::program_options::value_semantic;
 
-    Option() {}
+    Option()
+    {
+    }
 
     Option(const Option& option) : m_description(option.m_description), m_value(option.m_value)
     {
@@ -36,9 +41,13 @@ public:
     }
 
     template <class ValueT>
-    Option(const std::string& name, ValueT value, const std::string& description)
+    Option(const std::string& name, ValueT value, const std::string& description,
+           bool isMultitoken = false)
         : m_description(boost::make_shared<boost::program_options::option_description>(
-              name.c_str(), boost::program_options::value<ValueT>()->default_value(value),
+              name.c_str(),
+              (isMultitoken
+                   ? boost::program_options::value<ValueT>()->multitoken()->default_value(value)
+                   : boost::program_options::value<ValueT>()->default_value(value)),
               description.c_str()))
     {
         applyDefault();
@@ -51,7 +60,10 @@ public:
         applyDefault();
     }
 
-    const std::string& getName() const { return m_description->long_name(); }
+    const std::string& getName() const
+    {
+        return m_description->long_name();
+    }
 
     const boost::program_options::option_description& getDescription()
     {
@@ -59,7 +71,10 @@ public:
         return *m_description.get();
     }
 
-    void applyDefault() { m_description->semantic()->apply_default(m_value); }
+    void applyDefault()
+    {
+        m_description->semantic()->apply_default(m_value);
+    }
 
     template <class ValueT>
     const ValueT get() const

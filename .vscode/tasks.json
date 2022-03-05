@@ -18,6 +18,15 @@
             "group": "build"
         },
         {
+            "label": "x86_build-HardwareAbstractionLayerTest",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayerTest",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        {
             "label": "x86_build-all",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target all",

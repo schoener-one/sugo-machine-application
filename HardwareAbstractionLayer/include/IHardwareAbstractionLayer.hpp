@@ -10,21 +10,41 @@
 
 #pragma once
 
-#include <cassert>
+#include <map>
 #include <memory>
+#include <string>
 
+#include "IAdcControl.hpp"
 #include "IConfiguration.hpp"
-#include "IGpioController.hpp"
-#include "IStepperMotorController.hpp"
+#include "IGpioControl.hpp"
+#include "IHalObject.hpp"
+#include "IStepperMotorControl.hpp"
 
-namespace sugo
+namespace sugo::hal
 {
+/**
+ * @brief Interface class for the hardware abstraction layer
+ *
+ */
 class IHardwareAbstractionLayer
 {
-protected:
-    IHardwareAbstractionLayer() {}
-
 public:
+    /// GPIO controller map
+    using GpioControllerMap = std::map<IHalObject::Identifier, std::unique_ptr<IGpioControl>>;
+    /// Stepper motor controller map
+    using StepperMotorControllerMap =
+        std::map<IHalObject::Identifier, std::unique_ptr<IStepperMotorControl>>;
+    /// ADC input controller map
+    using AdcControllerMap = std::map<IHalObject::Identifier, std::unique_ptr<IAdcControl>>;
+
+    /**
+     * @brief Destroy the IHardwareAbstractionLayer object
+     *
+     */
+    virtual ~IHardwareAbstractionLayer()
+    {
+    }
+
     /**
      * @brief Set the Configuration object.
      *
@@ -33,18 +53,34 @@ public:
     static void setConfiguration(IConfiguration& configuration);
 
     /**
-     * Returns the global HAL interface.
-     * @return The global HAL interface.
+     * @brief Returns a map of available GPIO controllers.
+     *
+     * @return const GpioControllerMap& Map of available controllers.
      */
-    static IHardwareAbstractionLayer& get();
+    virtual const GpioControllerMap& getGpioControllerMap() const = 0;
 
-public:
-    virtual ~IHardwareAbstractionLayer() {}
+    /**
+     * @brief Returns a map of available stepper motor controllers.
+     *
+     * @return const StepperMotorControllerMap& Map of available controllers.
+     */
+    virtual const StepperMotorControllerMap& getStepperMotorControllerMap() const = 0;
 
-    virtual void                           init(const IConfiguration& configuration) = 0;
-    virtual IGpioController&               getGpioController()                       = 0;
-    virtual IStepperMotorController&       getStepperMotorController()               = 0;
-    virtual const IStepperMotorController& getStepperMotorController() const         = 0;
+    /**
+     * @brief Returns a map of available ADC controllers.
+     *
+     * @return const AdcControllerMap& Map of available controllers.
+     */
+    virtual const AdcControllerMap& getAdcControllerMap() const = 0;
+
+protected:
+    /**
+     * @brief Construct a new IHardwareAbstractionLayer object
+     *
+     */
+    IHardwareAbstractionLayer()
+    {
+    }
 };
 
-}  // namespace sugo
+}  // namespace sugo::hal

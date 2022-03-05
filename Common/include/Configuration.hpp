@@ -10,10 +10,10 @@
 #ifndef CONFIGURATION_HPP_
 #define CONFIGURATION_HPP_
 
-#include <cassert>
 #include <initializer_list>
 #include <map>
 #include <string>
+#include <vector>
 
 #include "IConfiguration.hpp"
 #include "Option.hpp"
@@ -26,7 +26,9 @@ namespace sugo
 class Configuration : public IConfiguration
 {
 public:
-    Configuration() {}
+    Configuration()
+    {
+    }
 
     explicit Configuration(std::initializer_list<Option> list)
     {
@@ -36,7 +38,9 @@ public:
         }
     }
 
-    virtual ~Configuration() {}
+    virtual ~Configuration()
+    {
+    }
 
     // IConfiguration {{
     virtual OptionDescriptions getOptionDescriptions() const override
@@ -62,7 +66,10 @@ public:
         return true;
     }
 
-    void add(const Option& option) override { m_mapOptions[option.getName()] = option; }
+    void add(const Option& option) override
+    {
+        m_mapOptions.insert({option.getName(), option});
+    }
 
     const Option& getOption(const std::string& name) const override
     {

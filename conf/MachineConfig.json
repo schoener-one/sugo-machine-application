@@ -1,22 +1,127 @@
 {
-    "sugo-machine-service" : {
-        "address" : "*",
-        "port" : 1234
+    "sugo-machine-service": {
+        "address": "*",
+        "port": 1234
     },
     "cup-rotation-tray": {
-        "stepper-motor" : {
-            "speed-rpm" : 20,
-            "index" : 0
-        },
-        "position-switches" : {
-            "gpio-pin-1" : 5,
-            "gpio-pin-2" : 6,
-            "gpio-pin-3" : 12
+        "stepper-motor": {
+            "speed-rpm": 20,
+            "index": 0
         }
     },
     "hardware-abstraction-layer": {
-        "gpio" : {
-            "logic-active-high" : false
+        "gpio-control": {
+            "pins-enabled": [
+                "adc-control-data-ready",
+                "adc-control-reset"
+            ],
+            "pins": {
+                "adc-control-data-ready": {
+                    "pin": 17,
+                    "direction": "in",
+                    "active-high": false
+                },
+                "adc-control-reset": {
+                    "pin": 18,
+                    "direction": "out"
+                },
+                "adc-control-chipselect": {
+                    "pin": 22,
+                    "direction": "out"
+                },
+                "unused": {
+                    "pin": 4,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 5,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 6,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 12,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 13,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 16,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 17,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 19,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 20,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 21,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 23,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 24,
+                    "direction": "in"
+                },
+                "unused": {
+                    "pin": 27,
+                    "direction": "in"
+                }
+            }
+        },
+        "stepper-motor-control": {
+            "motors-enabled": [
+                "feeder",
+                "coiler"
+            ],
+            "motors": {
+                "feeder": {
+                    "i2c-id": 14,
+                    "direction": "forward",
+                    "speed-rpm": "100"
+                },
+                "coiler": {
+                    "i2c-id": 15,
+                    "direction": "forward",
+                    "speed-rpm": "100"
+                }
+            }
+        },
+        "adc-control": {
+            "temperature-feeder": {
+                "id": 0,
+                "filter": "ntc-celcius"
+            },
+            "temperature-merger": {
+                "id": 1,
+                "filter": "ntc-celcius"
+            },
+            "temperature-hot-filament": {
+                "id": 2,
+                "filter": "ntc-celcius"
+            },
+            "temperature-cool-filament": {
+                "id": 3,
+                "filter": "ntc-celcius"
+            },
+            "tension-filament": {
+                "id": 4,
+                "filter": "pot-degree"
+            }
         }
     }
 }

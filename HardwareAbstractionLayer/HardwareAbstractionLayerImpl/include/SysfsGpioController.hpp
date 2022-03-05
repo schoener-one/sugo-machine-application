@@ -17,20 +17,20 @@ namespace sugo
 /**
  * Class implementing GPIO control on sysfs GPIO interface.
  */
-class SysfsGpioController : public IGpioController
+class SysfsGpioController : public IGpioControl
 {
 public:
     static const std::string GpioBasePath;
 
     explicit SysfsGpioController(bool isActiveHigh) : m_isActiveHigh(isActiveHigh) {}
 
-    // IHardwareAbstractionLayer::IStepperMotorController::IGpioController {{
+    // IHardwareAbstractionLayer::IStepperMotorControl::IGpioControl {{
     bool registerPin(unsigned pin, PinDirection pinDirection) override;
     bool unregisterPin(unsigned pin) override;
     bool getPinState(unsigned pin, PinState& outPinState) const override;
     bool setPinState(unsigned pin, PinState pinState) override;
-    bool waitForPinStateChange(unsigned pin, PinState& outPinState, int timeoutMS) const override;
-    // IHardwareAbstractionLayer::IStepperMotorController::IGpioController }}
+    bool waitForChange(unsigned pin, PinState& outPinState, int timeoutMS) const override;
+    // IHardwareAbstractionLayer::IStepperMotorControl::IGpioControl }}
 
 private:
     constexpr static int      InvalidPin  = UINT32_MAX;

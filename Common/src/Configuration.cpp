@@ -16,14 +16,11 @@ using namespace sugo;
 const IConfiguration& Configuration::extract(const std::string& prefix,
                                              IConfiguration&    extractedConfiguration) const
 {
-    for (auto item : m_mapOptions)
+    for (const auto& item : m_mapOptions)
     {
         if (boost::starts_with(item.first, prefix))
         {
-            Option option(item.first.substr(prefix.size()),
-                          item.second.m_description->semantic().get(),
-                          item.second.m_description->description());
-            extractedConfiguration.add(option);
+            extractedConfiguration.add(item.second);
         }
     }
     return extractedConfiguration;
