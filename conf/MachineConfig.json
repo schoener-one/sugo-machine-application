@@ -11,11 +11,11 @@
     },
     "hardware-abstraction-layer": {
         "gpio-control": {
-            "pins-enabled": [
+            "pin-enabled": [
                 "adc-control-data-ready",
                 "adc-control-reset"
             ],
-            "pins": {
+            "pin": {
                 "adc-control-data-ready": {
                     "pin": 17,
                     "direction": "in",
@@ -27,6 +27,18 @@
                 },
                 "adc-control-chipselect": {
                     "pin": 22,
+                    "direction": "out"
+                },
+                "relay-switch-heater-feeder": {
+                    "pin": 26,
+                    "direction": "out"
+                },
+                "relay-switch-heater-merger": {
+                    "pin": 20,
+                    "direction": "out"
+                },
+                "relay-switch-ch3": {
+                    "pin": 21,
                     "direction": "out"
                 },
                 "unused": {
@@ -62,14 +74,6 @@
                     "direction": "in"
                 },
                 "unused": {
-                    "pin": 20,
-                    "direction": "in"
-                },
-                "unused": {
-                    "pin": 21,
-                    "direction": "in"
-                },
-                "unused": {
                     "pin": 23,
                     "direction": "in"
                 },
@@ -84,43 +88,50 @@
             }
         },
         "stepper-motor-control": {
-            "motors-enabled": [
+            "motor-enabled": [
                 "feeder",
                 "coiler"
             ],
-            "motors": {
+            "motor": {
                 "feeder": {
                     "i2c-id": 14,
-                    "direction": "forward",
-                    "speed-rpm": "100"
+                    "max-speed-rpm": "100"
                 },
                 "coiler": {
                     "i2c-id": 15,
-                    "direction": "forward",
-                    "speed-rpm": "100"
+                    "max-speed-rpm": "100"
                 }
             }
         },
         "adc-control": {
-            "temperature-feeder": {
-                "id": 0,
-                "filter": "ntc-celcius"
-            },
-            "temperature-merger": {
-                "id": 1,
-                "filter": "ntc-celcius"
-            },
-            "temperature-hot-filament": {
-                "id": 2,
-                "filter": "ntc-celcius"
-            },
-            "temperature-cool-filament": {
-                "id": 3,
-                "filter": "ntc-celcius"
-            },
-            "tension-filament": {
-                "id": 4,
-                "filter": "pot-degree"
+            "adc-enabled": [
+                "temperature-feeder",
+                "temperature-merger",
+                "temperature-hot-filament",
+                "temperature-cool-filament",
+                "tension-filament"
+            ],
+            "adc": {
+                "temperature-feeder": {
+                    "id": 0,
+                    "filter": "ntc-celcius"
+                },
+                "temperature-merger": {
+                    "id": 1,
+                    "filter": "ntc-celcius"
+                },
+                "temperature-hot-filament": {
+                    "id": 2,
+                    "filter": "ntc-celcius"
+                },
+                "temperature-cool-filament": {
+                    "id": 3,
+                    "filter": "ntc-celcius"
+                },
+                "tension-filament": {
+                    "id": 4,
+                    "filter": "pot-degree"
+                }
             }
         }
     }
