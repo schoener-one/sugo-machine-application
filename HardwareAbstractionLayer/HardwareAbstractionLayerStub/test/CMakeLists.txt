@@ -9,7 +9,6 @@ if (NOT NO_UNITTEST)
     target_compile_options(HardwareAbstractionLayerTest PUBLIC "-DUNIT_TEST")
     target_link_libraries(HardwareAbstractionLayerTest
         HardwareAbstractionLayer
-        HardwareAbstractionLayerCommon
         Common
         GTest::GTest
         GTest::Main

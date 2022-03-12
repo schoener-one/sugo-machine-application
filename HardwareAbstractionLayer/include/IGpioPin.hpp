@@ -21,9 +21,12 @@ namespace sugo::hal
  * @brief Interface class for GPIO pins
  *
  */
-class IGpioPin : virtual public IHalObject
+class IGpioPin : public IHalObject
 {
 public:
+    /// Indicates an invalid pin
+    constexpr static unsigned InvalidPin = 0xffffffff;
+
     /**
      * @brief GPIO pin state
      *
@@ -76,9 +79,7 @@ public:
             std::chrono::microseconds timeout = std::chrono::microseconds(0)) = 0;
 
 protected:
-    IGpioPin()
-    {
-    }
+    using IHalObject::IHalObject;
 };
 
 }  // namespace sugo::hal

@@ -43,7 +43,7 @@ public:
      * @param in Input string.
      * @return Tokens splitted from the string.
      */
-    template <char delimiter>
+    template <char delimiter = ' '>
     static Tokens split(const std::string& in)
     {
         std::istringstream iss(in);

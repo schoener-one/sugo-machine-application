@@ -1,5 +1,5 @@
 # CMake configuration file
-# Module: HardwareAbstractionLayerStub
+# Module: HardwareAbstractionLayerRpi
 
 add_library (HardwareAbstractionLayer STATIC 
     src/GpioControl.cpp
@@ -15,5 +15,3 @@ target_link_libraries(HardwareAbstractionLayer
     HardwareAbstractionLayerInterface
     Common
     )
-
-add_subdirectory(test)

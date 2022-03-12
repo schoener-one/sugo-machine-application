@@ -48,7 +48,7 @@ public:
         OptionDescriptions descriptions;
         for (auto& option : m_mapOptions)
         {
-            descriptions.add(option.second.m_description);
+            descriptions.add(option.second.getDescription());
         }
         return descriptions;
     }
@@ -60,7 +60,7 @@ public:
             auto option = m_mapOptions.find(item.first);
             if (option != m_mapOptions.end())
             {
-                option->second.m_value = item.second.value();
+                option->second.setValue(item.second.value());
             }
         }
         return true;

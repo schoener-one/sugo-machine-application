@@ -26,7 +26,7 @@ namespace sugo::hal
  * @brief Interface class for the hardware abstraction layer
  *
  */
-class IHardwareAbstractionLayer
+class IHardwareAbstractionLayer : public IHalObject
 {
 public:
     /// GPIO controller map
@@ -74,13 +74,7 @@ public:
     virtual const AdcControllerMap& getAdcControllerMap() const = 0;
 
 protected:
-    /**
-     * @brief Construct a new IHardwareAbstractionLayer object
-     *
-     */
-    IHardwareAbstractionLayer()
-    {
-    }
+    using IHalObject::IHalObject;
 };
 
 }  // namespace sugo::hal

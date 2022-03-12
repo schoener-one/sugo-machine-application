@@ -8,6 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <fstream>
+#include <cassert>
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -24,22 +25,27 @@ template <class charT>
 class JsonParser
 {
 public:
-    explicit JsonParser(std::basic_istream<charT>& inStream) : m_inStream(inStream) {}
-
-    static void parseChildren(std::string prefix, pt::ptree& tree, po::parsed_options& options)
+    explicit JsonParser(std::basic_istream<charT>& inStream) : m_inStream(inStream)
     {
-        if (tree.size() == 0)
+    }
+
+    static void pushOption(const std::basic_string<charT>& name,
+                           const std::basic_string<charT>& value, po::parsed_options& options)
+    {
+        // unregistered not allowed!
+        if (options.description->find_nothrow(name, false) == nullptr)
         {
-            // cut first dot
-            std::basic_string<charT> name  = prefix.substr(1);
-            std::basic_string<charT> value = tree.data();
+            boost::throw_exception(po::unknown_option(name));
+        }
 
-            // unregistered not allowed!
-            if (options.description->find_nothrow(name, false) == nullptr)
-            {
-                boost::throw_exception(po::unknown_option(name));
-            }
-
+        if (!options.options.empty() && options.options.back().string_key == name)
+        {
+            auto& option = options.options.back();
+            assert(!option.value.empty());
+            option.value.push_back(value);
+        }
+        else
+        {
             po::basic_option<charT> opt;
             opt.string_key = name;
             opt.value.push_back(value);
@@ -48,11 +54,26 @@ public:
             opt.case_insensitive = true;
             options.options.push_back(opt);
         }
+    }
+
+    static void parseChildren(std::string prefix, pt::ptree& tree, po::parsed_options& options)
+    {
+        if (tree.size() == 0)
+        {
+            pushOption(prefix.substr(1), tree.data(), options);
+        }
         else
         {
             for (auto it = tree.begin(); it != tree.end(); ++it)
             {
-                parseChildren(prefix + "." + it->first, it->second, options);
+                if (it->first.empty())
+                {
+                    pushOption(prefix.substr(1), it->second.data(), options);
+                }
+                else
+                {
+                    parseChildren(prefix + "." + it->first, it->second, options);
+                }
             }
         }
     }

@@ -10,12 +10,12 @@
 
 #pragma once
 
-#include <string>
 #include <map>
 #include <memory>
+#include <string>
 
-#include "IHalObject.hpp"
 #include "IAdcInput.hpp"
+#include "IHalObject.hpp"
 
 namespace sugo::hal
 {
@@ -23,17 +23,19 @@ namespace sugo::hal
  * @brief Interface class for ADC input devices.
  *
  */
-class IAdcControl : virtual public IHalObject
+class IAdcControl : public IHalObject
 {
 public:
-    /// GPIO controller map
-    using AdcInputMap = std::map<Identifier, std::unique_ptr<IAdcInput>>;
+    /// ADC input map
+    using AdcInputMap = IHalObject::Map<IAdcInput>;
 
     /**
      * @brief Destroy the IAdcControl object.
      *
      */
-    virtual ~IAdcControl() {}
+    virtual ~IAdcControl()
+    {
+    }
 
     /**
      * @brief Returns a map of available ADC inputs
@@ -43,11 +45,7 @@ public:
     virtual const AdcInputMap& getAdcInputMap() = 0;
 
 protected:
-    /**
-     * @brief Construct a new IAdcControl object
-     *
-     */
-    IAdcControl() {}
+    using IHalObject::IHalObject;
 };
 
 }  // namespace sugo::hal

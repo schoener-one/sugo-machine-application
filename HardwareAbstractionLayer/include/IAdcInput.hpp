@@ -10,10 +10,6 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-#include <memory>
-
 #include "IHalObject.hpp"
 
 namespace sugo::hal
@@ -25,8 +21,8 @@ namespace sugo::hal
 class IAdcInput : public IHalObject
 {
 public:
-    /// GPIO controller map
-    using AdcInputMap = std::map<Identifier, std::unique_ptr<IAdcInput>>;
+    /// Invalid input value
+    constexpr static unsigned InvalidInput = 0xffffffff;
 
     /// Value type
     using AdcValueType = uint32_t;
@@ -35,21 +31,19 @@ public:
      * @brief Destroy the IAdcInput object.
      *
      */
-    virtual ~IAdcInput() {}
+    virtual ~IAdcInput()
+    {
+    }
 
-   /**
-    * @brief Returns the raw ADC value
-    * 
-    * @return AdcValueType 
-    */
+    /**
+     * @brief Returns the raw ADC value
+     *
+     * @return AdcValueType
+     */
     virtual AdcValueType getRawValue() const = 0;
 
 protected:
-    /**
-     * @brief Construct a new IAdcInput object
-     *
-     */
-    IAdcInput() {}
+    using IHalObject::IHalObject;
 };
 
 }  // namespace sugo::hal

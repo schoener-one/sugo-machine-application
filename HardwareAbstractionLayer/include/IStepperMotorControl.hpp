@@ -10,9 +10,6 @@
 
 #pragma once
 
-#include <map>
-#include <memory>
-
 #include "IHalObject.hpp"
 #include "IStepperMotor.hpp"
 
@@ -21,17 +18,19 @@ namespace sugo::hal
 /**
  * Class for controlling stepper motor controller.
  */
-class IStepperMotorControl : virtual public IHalObject
+class IStepperMotorControl : public IHalObject
 {
 public:
-    /// Analog input controller
-    using StepperMotorMap = std::map<Identifier, std::unique_ptr<IStepperMotor>>;
+    /// Stepper motor map
+    using StepperMotorMap = IHalObject::Map<IStepperMotor>;
 
     /**
      * @brief Destroy the IStepperMotorControl object
      *
      */
-    virtual ~IStepperMotorControl() {}
+    virtual ~IStepperMotorControl()
+    {
+    }
 
     /**
      * @brief Resets the controller and devices
@@ -47,7 +46,7 @@ public:
     virtual const StepperMotorMap& getStepperMotorMap() = 0;
 
 protected:
-    IStepperMotorControl() {}
+    using IHalObject::IHalObject;
 };
 
 }  // namespace sugo::hal

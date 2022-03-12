@@ -20,7 +20,8 @@ const IConfiguration& Configuration::extract(const std::string& prefix,
     {
         if (boost::starts_with(item.first, prefix))
         {
-            extractedConfiguration.add(item.second);
+            auto newPrefix = item.first.substr(prefix.size());
+            extractedConfiguration.add(Option(newPrefix, item.second));
         }
     }
     return extractedConfiguration;

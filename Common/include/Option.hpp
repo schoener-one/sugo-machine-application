@@ -11,7 +11,7 @@
 #define OPTION_HPP_
 
 #include <cassert>
-#include <vector>
+#include <string>
 
 #include <boost/any.hpp>
 #include <boost/make_shared.hpp>
@@ -29,51 +29,46 @@ class Configuration;
 class Option
 {
 public:
-    using ValueSemantic = boost::program_options::value_semantic;
+    using OptionDescription = boost::program_options::option_description;
+    using Description       = boost::shared_ptr<OptionDescription>;
 
     Option()
     {
     }
 
-    Option(const Option& option) : m_description(option.m_description), m_value(option.m_value)
+    Option(const Option& option)
+        : m_description(option.m_description), m_value(option.m_value), m_name(option.m_name)
     {
-        applyDefault();
+    }
+
+    Option(const std::string newName, const Option& option)
+        : m_description(option.m_description), m_value(option.m_value), m_name(newName)
+    {
     }
 
     template <class ValueT>
     Option(const std::string& name, ValueT value, const std::string& description,
            bool isMultitoken = false)
-        : m_description(boost::make_shared<boost::program_options::option_description>(
+        : m_description(boost::make_shared<OptionDescription>(
               name.c_str(),
               (isMultitoken
                    ? boost::program_options::value<ValueT>()->multitoken()->default_value(value)
                    : boost::program_options::value<ValueT>()->default_value(value)),
-              description.c_str()))
-    {
-        applyDefault();
-    }
-
-    Option(const std::string& name, const ValueSemantic* semantic, const std::string& description)
-        : m_description(boost::make_shared<boost::program_options::option_description>(
-              name.c_str(), semantic, description.c_str()))
+              description.c_str())),
+          m_name(m_description->long_name())
     {
         applyDefault();
     }
 
     const std::string& getName() const
     {
-        return m_description->long_name();
+        return m_name;
     }
 
-    const boost::program_options::option_description& getDescription()
+    const Description& getDescription() const
     {
         assert(m_description);
-        return *m_description.get();
-    }
-
-    void applyDefault()
-    {
-        m_description->semantic()->apply_default(m_value);
+        return m_description;
     }
 
     template <class ValueT>
@@ -82,18 +77,22 @@ public:
         return boost::any_cast<ValueT>(m_value);
     }
 
-    Option& operator=(const Option& option)
+    void setValue(boost::any newValue)
     {
-        m_description = option.m_description;
-        m_value       = option.m_value;
-        return *this;
+        m_value = newValue;
     }
 
-    friend Configuration;
+    Option& operator=(const Option&) = default;
 
 private:
-    boost::shared_ptr<boost::program_options::option_description> m_description;
-    boost::any                                                    m_value;
+    void applyDefault()
+    {
+        m_description->semantic()->apply_default(m_value);
+    }
+
+    Description m_description;
+    boost::any  m_value;
+    std::string m_name;
 };
 
 }  // namespace sugo

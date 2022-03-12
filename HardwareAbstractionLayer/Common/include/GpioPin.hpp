@@ -11,38 +11,21 @@
 #pragma once
 
 #include "IGpioPin.hpp"
-#include "HalObject.hpp"
 
 namespace sugo::hal
 {
 /**
- * @brief Base class for GPIO pins
+ * @brief Class represents a GPIO pin
  *
  */
-class GpioPin : public HalObject, public IGpioPin
+class GpioPin : public IGpioPin
 {
 public:
-    constexpr static unsigned InvalidPin = 0xffffffff;
+    using IGpioPin::IGpioPin;
 
-    GpioPin(unsigned pin) : m_pin(pin) {}
-    virtual ~GpioPin() {}
+    bool init(const IConfiguration& configuration) override;
 
-    bool init(Direction direction, State state, bool activeHigh = true);
-
-    /**
-     * @brief Returns the state of the pin.
-     *
-     * @return State of the pin
-     */
-    State getState() const override;
-
-    /**
-     * @brief Set the State of the GPIO
-     *
-     * @param state
-     * @return true
-     * @return false
-     */
+    State     getState() const override;
     bool      setState(State state) override;
     Direction getDirection() const override;
     bool      setDirection(Direction direction) override;
