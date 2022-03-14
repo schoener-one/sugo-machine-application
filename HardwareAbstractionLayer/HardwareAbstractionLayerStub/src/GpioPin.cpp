@@ -15,14 +15,12 @@ using namespace sugo::hal;
 
 bool GpioPin::init(const IConfiguration& configuration)
 {
-    m_pin        = configuration.getOption("pin").get<unsigned>();
-    m_activeHigh = configuration.getOption("active-high").get<bool>();
     m_direction =
         (configuration.getOption("direction").get<std::string>() == "in" ? Direction::In
                                                                          : Direction::Out);
-    LOG(debug) << getId() << ".pin: " << m_pin;
+    LOG(debug) << getId() << ".pin: " << configuration.getOption("pin").get<unsigned>();
     LOG(debug) << getId() << ".direction: " << m_direction;
-    LOG(debug) << getId() << ".activate-high: " << m_activeHigh;
+    LOG(debug) << getId() << ".activate-high: " << configuration.getOption("active-high").get<bool>();
     return true;
 }
 
@@ -39,17 +37,10 @@ bool GpioPin::setState(GpioPin::State state)
 
 IGpioPin::Direction GpioPin::getDirection() const
 {
-    return Direction::In;
+    return m_direction;
 }
 
-bool GpioPin::setDirection(GpioPin::Direction direction)
+IGpioPin::Event GpioPin::waitForEvent(std::chrono::nanoseconds timeout)
 {
-    (void)direction;
-    return false;
-}
-
-IGpioPin::Event GpioPin::waitForEvent(std::chrono::microseconds timeout)
-{
-    (void)timeout;
-    return Event::TimeoutEvent;
+    return Event{timeout, EventType::TimeoutEvent};
 }

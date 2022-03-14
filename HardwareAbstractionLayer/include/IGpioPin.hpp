@@ -47,11 +47,27 @@ public:
         Out  ///< Output direction
     };
 
-    enum Event
+    /**
+     * @brief Type of an GPIO event
+     *
+     */
+    enum EventType
     {
         TimeoutEvent,  ///< Timeout event
         RisingEdge,    ///< Rising edge event
         FallingEdge    ///< Falling edge event
+    };
+
+    /**
+     * @brief Gpio event object
+     *
+     */
+    struct Event
+    {
+        /// Time when the event occurred.
+        std::chrono::nanoseconds timestamp = std::chrono::nanoseconds(0);
+        /// Type of the event.
+        EventType type = EventType::TimeoutEvent;
     };
 
     virtual ~IGpioPin()
@@ -72,15 +88,13 @@ public:
      * @return true
      * @return false
      */
-    virtual bool      setState(State state)             = 0;
-    virtual Direction getDirection() const              = 0;
-    virtual bool      setDirection(Direction direction) = 0;
-    virtual Event     waitForEvent(
-            std::chrono::microseconds timeout = std::chrono::microseconds(0)) = 0;
+    virtual bool      setState(State state)                          = 0;
+    virtual Direction getDirection() const                           = 0;
+    virtual Event     waitForEvent(std::chrono::nanoseconds timeout) = 0;
 
 protected:
     using IHalObject::IHalObject;
-};
+};  // namespace sugo::hal
 
 }  // namespace sugo::hal
 

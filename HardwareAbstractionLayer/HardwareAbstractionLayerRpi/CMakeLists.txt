@@ -14,4 +14,5 @@ target_link_libraries(HardwareAbstractionLayer
     PUBLIC
     HardwareAbstractionLayerInterface
     Common
+    gpiod
     )

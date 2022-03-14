@@ -45,50 +45,8 @@
             "label": "x86_build-clean-prestine",
             "type": "shell",
             "command": "rm -rf ${config:build.directory.x86}"
-        }
-        // X86
-        {
-            "label": "x86_build-init",
-            "type": "shell",
-            "command": "cmake -B${config:build.directory.x86} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type} -DCODE_COVERAGE=ON"
         },
-        {
-            "label": "x86_build-HardwareAbstractionLayer",
-            "type": "shell",
-            "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayer",
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": "build"
-        },
-        {
-            "label": "x86_build-HardwareAbstractionLayerTest",
-            "type": "shell",
-            "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayerTest",
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": "build"
-        },
-        {
-            "label": "x86_build-all",
-            "type": "shell",
-            "command": "cmake --build ${config:build.directory.x86} --target all",
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": "build"
-        },
-        {
-            "label": "x86_build-clean",
-            "type": "shell",
-            "command": "cmake --build ${config:build.directory.x86} --target clean"
-        },
-        {
-            "label": "x86_build-clean-prestine",
-            "type": "shell",
-            "command": "rm -rf ${config:build.directory.x86}"
-        },
+        
         // RPI
         {
             "label": "rpi_build-init",

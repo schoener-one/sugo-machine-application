@@ -8,48 +8,99 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <gpiod.hpp>
+
 #include "GpioPin.hpp"
 #include "Logger.hpp"
 
 using namespace sugo::hal;
 
+GpioPin::~GpioPin()
+{
+    finalize();
+}
+
 bool GpioPin::init(const IConfiguration& configuration)
 {
-    m_pin        = configuration.getOption("pin").get<unsigned>();
-    m_activeHigh = configuration.getOption("active-high").get<bool>();
+    if (m_line)
+    {
+        finalize();
+    }
+
+    const unsigned pin = configuration.getOption("pin").get<unsigned>();
+    LOG(debug) << getId() << ": initializing gpio pin " << pin;
+
+    m_line = m_chip.get_line(pin);
+
+    if (!m_line || m_line.is_used())
+    {
+        LOG(error) << getId() << ": failed to initialize pin";
+        return false;
+    }
+
+    const bool activeHigh = configuration.getOption("active-high").get<bool>();
     m_direction =
         (configuration.getOption("direction").get<std::string>() == "in" ? Direction::In
                                                                          : Direction::Out);
-    LOG(debug) << getId() << ".pin: " << m_pin;
-    LOG(debug) << getId() << ".direction: " << m_direction;
-    LOG(debug) << getId() << ".activate-high: " << m_activeHigh;
+    LOG(debug) << getId() << ": direction set to " << m_direction;
+    LOG(debug) << getId() << ": activate-high set to " << activeHigh;
+
+    gpiod::line_request lineConf = {
+        getId().c_str(),
+        (m_direction == Direction::In ? gpiod::line_request::EVENT_BOTH_EDGES
+                                      : gpiod::line_request::DIRECTION_OUTPUT),
+        ((activeHigh) ? 0 : gpiod::line_request::FLAG_ACTIVE_LOW)};
+
+    m_line.request(lineConf);
+    if (!m_line.is_requested())
+    {
+        LOG(error) << getId() << ": failed to request pin";
+        finalize();
+        return false;
+    }
+
     return true;
+}
+
+void GpioPin::finalize()
+{
+    if (m_line)
+    {
+        LOG(debug) << getId() << ": finalizing gpio pin " << m_line.name();
+        m_line.release();
+        m_line.reset();
+    }
 }
 
 IGpioPin::State GpioPin::getState() const
 {
-    return State::Low;
+    return (m_line.get_value() == 0) ? State::Low : State::High;
 }
 
 bool GpioPin::setState(GpioPin::State state)
 {
-    (void)state;
-    return false;
+    assert(getDirection() == Direction::Out);
+    m_line.set_value((State::Low == state) ? 0 : 1);
+    return (state == getState());
 }
 
 IGpioPin::Direction GpioPin::getDirection() const
 {
-    return Direction::In;
+    return (m_line.direction() == gpiod::line::DIRECTION_INPUT) ? Direction::In : Direction::Out;
 }
 
-bool GpioPin::setDirection(GpioPin::Direction direction)
+IGpioPin::Event GpioPin::waitForEvent(std::chrono::nanoseconds timeout)
 {
-    (void)direction;
-    return false;
-}
+    if (m_line.event_wait(timeout))
+    {
+        return Event{timeout, EventType::TimeoutEvent};
+    }
 
-IGpioPin::Event GpioPin::waitForEvent(std::chrono::microseconds timeout)
-{
-    (void)timeout;
-    return Event::TimeoutEvent;
+    auto event = m_line.event_read();
+    return Event
+    {
+        event.timestamp, (event.event_type == gpiod::line_event::RISING_EDGE)
+                             ? EventType::RisingEdge
+                             : EventType::FallingEdge
+    };
 }
