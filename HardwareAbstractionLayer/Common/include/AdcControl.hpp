@@ -24,7 +24,11 @@ class AdcControl : public IAdcControl
 public:
     using IAdcControl::IAdcControl;
 
+    ~AdcControl() override;
+
     bool init(const IConfiguration& configuration) override;
+
+    void finalize();
 
     const AdcInputMap& getAdcInputMap() override
     {
@@ -32,7 +36,8 @@ public:
     }
 
 private:
-    AdcInputMap m_adcInputMap;
+    AdcInputMap  m_adcInputMap;
+    AdcFilterMap m_adcFilterMap;
 };
 
 }  // namespace sugo::hal

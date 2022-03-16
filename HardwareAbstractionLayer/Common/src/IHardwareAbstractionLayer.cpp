@@ -70,8 +70,8 @@ void IHardwareAbstractionLayer::setConfiguration(IConfiguration& configuration)
     configuration.add(Option(adc + "-enabled",  std::vector<std::string>{}, "HAL: List of stepper-motor names to be enabled", true));
     for (const auto& name : {".temperature-feeder", ".temperature-merger", ".temperature-hot-filament", ".temperature-cool-filament", ".tension-filament"})
     {
-        configuration.add(Option(adc + name + ".input",  IAdcInput::InvalidInput,  "HAL: ADC input identifier"));
-        configuration.add(Option(adc + name + ".filter", std::string(""),          "HAL: ADC value filter"));
+        configuration.add(Option(adc + name + ".channel", 0xffffffffu,     "HAL: ADC channel identifier"));
+        configuration.add(Option(adc + name + ".filter",  std::string(""), "HAL: ADC value filter"));
     }
     // clang-format on
 }

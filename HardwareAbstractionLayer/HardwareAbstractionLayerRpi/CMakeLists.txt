@@ -15,4 +15,7 @@ target_link_libraries(HardwareAbstractionLayer
     HardwareAbstractionLayerInterface
     Common
     gpiod
+    wsadhat
     )
+
+add_subdirectory(test)

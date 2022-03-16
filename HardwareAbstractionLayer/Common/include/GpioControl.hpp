@@ -32,14 +32,14 @@ public:
 
     bool init(const IConfiguration& configuration) override;
 
+    void finalize();
+
     const GpioPinMap& getGpioMap() override
     {
         return m_gpioPinMap;
     }
 
 private:
-    void finalize();
-
     gpiod::chip* m_chip = nullptr;
     GpioPinMap   m_gpioPinMap;
 };

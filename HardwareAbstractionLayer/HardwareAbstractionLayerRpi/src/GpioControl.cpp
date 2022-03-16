@@ -46,6 +46,8 @@ bool GpioControl::init(const IConfiguration& configuration)
 
 void GpioControl::finalize()
 {
+    m_gpioPinMap.clear();
+    
     if (m_chip != nullptr)
     {
         delete m_chip;

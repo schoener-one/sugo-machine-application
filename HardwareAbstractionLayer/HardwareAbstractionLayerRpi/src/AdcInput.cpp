@@ -8,21 +8,34 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <wsadhat/ADS1263.h>
+
 #include "AdcInput.hpp"
 #include "Logger.hpp"
+
+namespace
+{
+constexpr unsigned s_maxNumberOfChannels = 10u;
+}
 
 using namespace sugo::hal;
 
 bool AdcInput::init(const IConfiguration& configuration)
 {
-    m_input  = configuration.getOption("input").get<unsigned>();
-    m_filter = configuration.getOption("filter").get<std::string>();
-    LOG(debug) << getId() << ".input: " << m_input;
-    LOG(debug) << getId() << ".filter: " << m_filter;
+    m_channel = configuration.getOption("channel").get<unsigned>();
+    m_filter  = configuration.getOption("adc-filter").get<std::string>();
+    LOG(debug) << getId() << ": m_channel set to " << m_channel;
+    LOG(debug) << getId() << ": filter set to " << m_filter;
+
+    if (m_channel >= s_maxNumberOfChannels)
+    {
+        LOG(error) << getId() << ": invalid m_channel number " << m_channel;
+        return false;
+    }
     return true;
 }
 
-IAdcInput::AdcValueType AdcInput::getRawValue() const
+IAdcFilter::RawValueType AdcInput::getRawValue() const
 {
-    return 0;
+    return ADS1263_GetChannalValue(m_channel);
 }

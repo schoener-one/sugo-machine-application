@@ -31,14 +31,14 @@ public:
 
     bool init(const IConfiguration& configuration) override;
 
+    void finalize();
+
     State     getState() const override;
     bool      setState(State state) override;
     Direction getDirection() const override;
     Event     waitForEvent(std::chrono::nanoseconds timeout = std::chrono::nanoseconds(0)) override;
 
 private:
-    void finalize();
-
     gpiod::chip m_chip;
     gpiod::line m_line;
     Direction   m_direction = Direction::In;

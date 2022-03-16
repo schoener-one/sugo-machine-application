@@ -10,26 +10,44 @@
 
 #pragma once
 
+#include "IAdcFilter.hpp"
 #include "IAdcInput.hpp"
 
 namespace sugo::hal
 {
 /**
- * @brief Class represents an ADC input
+ * @brief Type which represents a list of filters
+ *
+ */
+using AdcFilterMap = IHalObject::Map<IAdcFilter>;
+
+/**
+ * @brief Class represents an ADC channel
  *
  */
 class AdcInput : public IAdcInput
 {
 public:
-    using IAdcInput::IAdcInput;
+    constexpr static unsigned InvalidChannel = 0xffffffffu;
+
+    AdcInput(const Identifier& id, const AdcFilterMap& filterProvider)
+        : IAdcInput(id), m_filterProvider(filterProvider)
+    {
+    }
 
     bool init(const IConfiguration& configuration) override;
 
-    AdcValueType getRawValue() const override;
+    IAdcFilter::RawValueType getRawValue() const override;
+
+    IAdcFilter::ValueType getValue() const override
+    {
+        return m_filterProvider.at(m_filter)->convert(getRawValue());
+    }
 
 private:
-    unsigned    m_input = InvalidInput;
-    std::string m_filter;
+    const AdcFilterMap& m_filterProvider;
+    std::string         m_filter;
+    unsigned            m_channel = InvalidChannel;
 };
 
 }  // namespace sugo::hal

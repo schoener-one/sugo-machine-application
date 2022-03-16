@@ -9,12 +9,30 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "AdcControl.hpp"
+#include "AdcFilter.hpp"
 #include "AdcInput.hpp"
 #include "HalHelper.hpp"
 
 using namespace sugo::hal;
 
+AdcControl::~AdcControl()
+{
+}
+
 bool AdcControl::init(const IConfiguration& configuration)
 {
-    return initEnabledSubComponents<IAdcInput, AdcInput>(configuration, "adc", m_adcInputMap);
+    bool success = initEnabledSubComponents<IAdcFilter, AdcFilter>(configuration, "adc-filter",
+                                                                   m_adcFilterMap);
+
+    if (success)
+    {
+        success = initEnabledSubComponents<IAdcInput, AdcInput, const AdcFilterMap&>(
+            configuration, "adc", m_adcInputMap, m_adcFilterMap);
+    }
+
+    return success;
+}
+
+void AdcControl::finalize()
+{
 }

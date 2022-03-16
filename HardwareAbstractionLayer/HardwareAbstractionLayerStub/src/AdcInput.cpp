@@ -15,14 +15,14 @@ using namespace sugo::hal;
 
 bool AdcInput::init(const IConfiguration& configuration)
 {
-    m_input  = configuration.getOption("input").get<unsigned>();
+    m_channel  = configuration.getOption("input").get<unsigned>();
     m_filter = configuration.getOption("filter").get<std::string>();
-    LOG(debug) << getId() << ".input: " << m_input;
-    LOG(debug) << getId() << ".filter: " << m_filter;
+    LOG(debug) << getId() << ": channel set to " << m_channel;
+    LOG(debug) << getId() << ": filter set to " << m_filter;
     return true;
 }
 
-IAdcInput::AdcValueType AdcInput::getRawValue() const
+IAdcFilter::RawValueType AdcInput::getRawValue() const
 {
-    return 0;
+    return 0u;
 }

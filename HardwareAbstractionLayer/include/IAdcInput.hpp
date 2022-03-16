@@ -10,7 +10,9 @@
 
 #pragma once
 
+#include "IAdcFilter.hpp"
 #include "IHalObject.hpp"
+#include "UnitValue.hpp"
 
 namespace sugo::hal
 {
@@ -21,12 +23,6 @@ namespace sugo::hal
 class IAdcInput : public IHalObject
 {
 public:
-    /// Invalid input value
-    constexpr static unsigned InvalidInput = 0xffffffff;
-
-    /// Value type
-    using AdcValueType = uint32_t;
-
     /**
      * @brief Destroy the IAdcInput object.
      *
@@ -38,9 +34,16 @@ public:
     /**
      * @brief Returns the raw ADC value
      *
-     * @return AdcValueType
+     * @return IAdcFilter::AdcValueType Raw ADC value
      */
-    virtual AdcValueType getRawValue() const = 0;
+    virtual IAdcFilter::RawValueType getRawValue() const = 0;
+
+    /**
+     * @brief Returns a unit translated value according to the used filter.
+     *
+     * @return IAdcFilter::ValueType Unit translated value.
+     */
+    virtual IAdcFilter::ValueType getValue() const = 0;
 
 protected:
     using IHalObject::IHalObject;

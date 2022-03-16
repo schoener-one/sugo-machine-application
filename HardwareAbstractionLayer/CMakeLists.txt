@@ -20,4 +20,5 @@ target_sources(HardwareAbstractionLayer
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/src/IHardwareAbstractionLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/src/HardwareAbstractionLayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Common/src/AdcFilter.cpp
     )
