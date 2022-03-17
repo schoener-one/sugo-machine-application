@@ -82,9 +82,10 @@ you just have to build the project as previously described. After that
 you have to change to the build directory (e.g. 'build.x86') and just
 call 'ctest', which runs all tests.
 
-## Development
+## System Documentation
 
-**Architecture documentation**: [Architecture.md](doc/Architecture.md)
+* [Architecture](doc/Architecture.md)
+* [HardwareAbstractionLayer](HardwareAbstractionLayer/doc/README.md)
 
 # Contributing
 
