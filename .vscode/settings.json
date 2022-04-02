@@ -2,7 +2,11 @@
     "build.type": "DEBUG",
     "build.directory.x86": "${workspaceFolder}/build.x86.${config:build.type}",
     "build.directory.rpi": "${workspaceFolder}/build.rpi.${config:build.type}",
-    "build.sdk.env": "${workspaceFolder}/../sdk/environment-setup-cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi",
+    "sdk.directory": "${workspaceFolder}/../sdk",
+    "sdk.env": "${config:sdk.directory}/environment-setup-cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi",
+    "sdk.gdb": "{config:sdk.directory}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gdb",
+    "remote.host": "raspberrypi3",
+    "remote.port": 1234,
     "editor.tokenColorCustomizations": {
         "textMateRules": [
             {

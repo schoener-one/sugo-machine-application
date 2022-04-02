@@ -51,12 +51,21 @@
         {
             "label": "rpi_build-init",
             "type": "shell",
-            "command": ". ${config:build.sdk.env}; cmake -B${config:build.directory.rpi} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type} -DCODE_COVERAGE=ON"
+            "command": ". ${config:sdk.env}; cmake -B${config:build.directory.rpi} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type} -DCODE_COVERAGE=ON"
         },
         {
             "label": "rpi_build-HardwareAbstractionLayer",
             "type": "shell",
-            "command": ". ${config:build.sdk.env}; cmake --build ${config:build.directory.rpi} --target HardwareAbstractionLayer",
+            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target HardwareAbstractionLayer",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "rpi_build-HardwareAbstractionLayerSmokeTest",
+            "type": "shell",
+            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target HardwareAbstractionLayerSmokeTest",
             "problemMatcher": [
                 "$gcc"
             ],
@@ -65,21 +74,50 @@
         {
             "label": "rpi_build-all",
             "type": "shell",
-            "command": ". ${config:build.sdk.env}; cmake --build ${config:build.directory.rpi} --target all",
+            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target all",
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": "build"
+            "group": "build", "options": {}
         },
         {
             "label": "rpi_build-clean",
             "type": "shell",
-            "command": ". ${config:build.sdk.env}; cmake --build ${config:build.directory.rpi} --target clean"
+            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target clean"
         },
         {
             "label": "rpi_build-clean-prestine",
             "type": "shell",
             "command": "rm -rf ${config:build.directory.rpi}"
+        },
+        {
+            "label": "remote-gdbserver-killall",
+            "type": "shell",
+            "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"killall gdbserver || true\""
+        },
+        {
+            "label": "remote-upload-HardwareAbstractionLayerSmokeTest",
+            "type": "shell",
+            "command": "scp -o StrictHostKeyChecking=no \"${config:build.directory.rpi}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest\" \"root@${config:remote.host}:HardwareAbstractionLayerSmokeTest\""
+        },
+        {
+            "label": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest",
+            "type": "shell",
+            "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest\"",
+            "dependsOn": [
+                "remote-gdbserver-killall",
+                "remote-upload-HardwareAbstractionLayerSmokeTest"
+            ],
+            "dependsOrder": "sequence",
+            "isBackground": false
+        }
+    ],
+    "inputs": [
+        {
+            "id": "exec_path",
+            "type": "promptString",
+            "default": "${config:build.directory.rpi}",
+            "description": "path to the executable"
         }
     ]
 }
