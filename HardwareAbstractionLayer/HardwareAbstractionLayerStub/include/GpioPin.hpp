@@ -31,7 +31,8 @@ public:
     Event     waitForEvent(std::chrono::nanoseconds timeout = std::chrono::nanoseconds(0)) override;
 
 private:
-    Direction m_direction = Direction::In;
+    Direction      m_direction = Direction::In;
+    GpioPin::State m_state     = GpioPin::State::Low;
 };
 
 }  // namespace sugo::hal

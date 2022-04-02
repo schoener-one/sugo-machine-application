@@ -28,6 +28,15 @@
             "group": "build"
         },
         {
+            "label": "x86_build-HardwareAbstractionLayerSmokeTest",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayerSmokeTest",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        {
             "label": "x86_build-all",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target all",
@@ -90,6 +99,8 @@
             "type": "shell",
             "command": "rm -rf ${config:build.directory.rpi}"
         },
+
+        // Remote Debugging
         {
             "label": "remote-gdbserver-killall",
             "type": "shell",

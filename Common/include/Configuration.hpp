@@ -73,7 +73,9 @@ public:
 
     const Option& getOption(const std::string& name) const override
     {
-        return m_mapOptions.at(name);
+        const auto it = m_mapOptions.find(name);
+        assert(it != m_mapOptions.end());
+        return it->second;
     }
 
     const IConfiguration& extract(const std::string& prefix,

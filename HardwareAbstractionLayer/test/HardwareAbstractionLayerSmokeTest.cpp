@@ -43,6 +43,7 @@ protected:
     void SetUp() override
     {
         std::ifstream           inStream(m_configFile);
+        ASSERT_TRUE(inStream.is_open());
         ConfigurationFileParser parser(inStream);
 
         IHardwareAbstractionLayer::setConfiguration(m_configuration);
@@ -55,7 +56,7 @@ protected:
     {
     }
 
-    constexpr static char m_configFile[] = "MachineConfig.json";
+    constexpr static char m_configFile[] = "HardwareAbstractionLayer/conf/MachineConfig.json";
 
     Configuration m_configuration;
 };

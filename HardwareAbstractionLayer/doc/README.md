@@ -157,9 +157,9 @@ header board which can be mounted onto the Raspberry Pi pin header.
 
 | Channel | Device                 | Device type            | Color  |
 |---------|------------------------|------------------------|--------|
-| 0       | ntc-temperature-feeder | NTC temperature sensor | red    |
-| 1       | ntc-temperature-merger | NTC temperature sensor | orange |
-| 2       | pot-rotation-angle     | potentiometer          | yellow |
+| 0       | temperature-feeder     | NTC temperature sensor | red    |
+| 1       | temperature-merger     | NTC temperature sensor | orange |
+| 2       | tension-filament       | potentiometer          | yellow |
 | 3       | _unused_               |                        | green  |
 | 4       | _unused_               |                        | blue   |
 | 5       | _unused_               |                        | violet |

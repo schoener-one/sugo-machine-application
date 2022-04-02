@@ -142,7 +142,7 @@ TEST_F(HardwareAbstractionLayerTest, IHardwareAbstractionLayer_SetConfiguration)
     parser.add(config);
     EXPECT_TRUE(parser.parse());
     const std::vector<std::string>& pinEnabled =
-        config.getOption("hardware-abstraction-layer.gpio-control.pin-enabled")
+        config.getOption("hardware-abstraction-layer.gpio-control.gpio-pin-enabled")
             .get<const std::vector<std::string>&>();
     EXPECT_EQ(pinEnabled.size(), 2);
     unsigned pinValue =

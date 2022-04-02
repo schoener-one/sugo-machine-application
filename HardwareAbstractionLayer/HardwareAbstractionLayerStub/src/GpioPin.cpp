@@ -26,12 +26,12 @@ bool GpioPin::init(const IConfiguration& configuration)
 
 IGpioPin::State GpioPin::getState() const
 {
-    return State::Low;
+    return m_state;
 }
 
 bool GpioPin::setState(GpioPin::State state)
 {
-    (void)state;
+    m_state = state;
     return false;
 }
 

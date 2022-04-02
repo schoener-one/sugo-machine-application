@@ -21,7 +21,7 @@ using namespace sugo::hal;
 bool AdcFilter::init(const IConfiguration& configuration)
 {
     m_refVoltage = configuration.getOption("ref-voltage").get<int>();
-    m_gain = configuration.getOption("gain").get<unsigned>();
+    m_gain = configuration.getOption("gain").get<float>();
     m_mainResistance = configuration.getOption("resistance").get<unsigned>();
     m_divResistance = configuration.getOption("divider-resistance").get<unsigned>();
     std::string unitName = configuration.getOption("unit").get<std::string>();

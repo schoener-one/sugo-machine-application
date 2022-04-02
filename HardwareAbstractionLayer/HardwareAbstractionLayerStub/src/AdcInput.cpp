@@ -15,10 +15,10 @@ using namespace sugo::hal;
 
 bool AdcInput::init(const IConfiguration& configuration)
 {
-    m_channel  = configuration.getOption("input").get<unsigned>();
-    m_filter = configuration.getOption("filter").get<std::string>();
+    m_channel  = configuration.getOption("channel").get<unsigned>();
+    m_filter = configuration.getOption("adc-filter").get<std::string>();
     LOG(debug) << getId() << ": channel set to " << m_channel;
-    LOG(debug) << getId() << ": filter set to " << m_filter;
+    LOG(debug) << getId() << ": ADC filter set to " << m_filter;
     return true;
 }
 

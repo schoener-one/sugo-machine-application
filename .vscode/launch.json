@@ -5,13 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug HAL SmokeTest",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${config:build.directory.x86}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest",
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "MIMode": "gdb"
+        },
+        {
             "name": "Debug HAL SmokeTest (remote)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${config:build.directory.rpi}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest",
             "miDebuggerServerAddress": "${config:remote.host}:${config:remote.port}",
             "cwd": "${workspaceFolder}",
-            "externalConsole": true,
             "stopAtEntry": false,
             "miDebuggerPath": "${workspaceFolder}/../sdk/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gdb",
             "MIMode": "gdb",
@@ -24,6 +32,6 @@
                 }
             ],
             //"preLaunchTask": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest"
-          }
+        }
     ]
 }

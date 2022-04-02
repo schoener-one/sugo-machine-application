@@ -1,37 +1,15 @@
 {
     "hardware-abstraction-layer": {
         "gpio-control": {
-            "pin-enabled": [
+            "gpio-pin-enabled": [
                 "relay-switch-heater-feeder",
                 "relay-switch-heater-merger",
-                "relay-switch-signal-light"
+                "relay-switch-light-run",
+                "relay-switch-light-on",
+                "signal-button-start",
+                "signal-button-stop"
             ],
-            "pin": {
-                "adc-control-data-ready": {
-                    "pin": 17,
-                    "direction": "in",
-                    "active-high": false
-                },
-                "adc-control-reset": {
-                    "pin": 18,
-                    "direction": "out"
-                },
-                "adc-control-chipselect": {
-                    "pin": 22,
-                    "direction": "out"
-                },
-                "relay-switch-heater-feeder": {
-                    "pin": 26,
-                    "direction": "out"
-                },
-                "relay-switch-heater-merger": {
-                    "pin": 20,
-                    "direction": "out"
-                },
-                "relay-switch-light-on": {
-                    "pin": 21,
-                    "direction": "out"
-                },
+            "gpio-pin": {
                 "relay-switch-light-run": {
                     "pin": 4,
                     "direction": "out"
@@ -44,37 +22,17 @@
                     "pin": 6,
                     "direction": "in"
                 },
-                "unused": {
-                    "pin": 12,
-                    "direction": "in"
+                "relay-switch-heater-merger": {
+                    "pin": 20,
+                    "direction": "out"
                 },
-                "unused": {
-                    "pin": 13,
-                    "direction": "in"
+                "relay-switch-light-on": {
+                    "pin": 21,
+                    "direction": "out"
                 },
-                "unused": {
-                    "pin": 16,
-                    "direction": "in"
-                },
-                "unused": {
-                    "pin": 17,
-                    "direction": "in"
-                },
-                "unused": {
-                    "pin": 19,
-                    "direction": "in"
-                },
-                "unused": {
-                    "pin": 23,
-                    "direction": "in"
-                },
-                "unused": {
-                    "pin": 24,
-                    "direction": "in"
-                },
-                "unused": {
-                    "pin": 27,
-                    "direction": "in"
+                "relay-switch-heater-feeder": {
+                    "pin": 26,
+                    "direction": "out"
                 }
             }
         },
@@ -98,8 +56,6 @@
             "adc-enabled": [
                 "temperature-feeder",
                 "temperature-merger",
-                "temperature-hot-filament",
-                "temperature-cool-filament",
                 "tension-filament"
             ],
             "adc": {
@@ -111,34 +67,26 @@
                     "channel": 1,
                     "adc-filter": "ntc-temperature"
                 },
-                "temperature-hot-filament": {
-                    "channel": 2,
-                    "adc-filter": "ntc-temperature"
-                },
-                "temperature-cool-filament": {
-                    "channel": 3,
-                    "adc-filter": "ntc-temperature"
-                },
                 "tension-filament": {
-                    "channel": 4,
-                    "adc-filter": "rotation-angle"
+                    "channel": 2,
+                    "adc-filter": "pot-rotation-angle"
                 }
             },
             "adc-filter-enabled": [
                 "ntc-temperature",
-                "rotation-angle"
+                "pot-rotation-angle"
             ],
             "adc-filter": {
                 "ntc-temperature": {
                     "ref-voltage": 5000,
-                    "gain": 1000,
+                    "gain": 1.0,
                     "resistance": 100000,
                     "divider-resistance": 100000,
                     "unit": "celcius"
                 },
-                "rotation-angle": {
+                "pot-rotation-angle": {
                     "ref-voltage": 5000,
-                    "gain": 1000,
+                    "gain": 1.0,
                     "resistance": 100000,
                     "divider-resistance": 100000,
                     "unit": "degree"
