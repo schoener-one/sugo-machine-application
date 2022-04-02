@@ -15,6 +15,7 @@ target_link_libraries(HardwareAbstractionLayer
     HardwareAbstractionLayerInterface
     Common
     gpiod
+    gpiodcxx
     wsadhat
     )
 

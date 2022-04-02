@@ -8,8 +8,11 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
+extern "C"
+{
 #include <wsadhat/ADS1263.h>
 #include <wsadhat/DEV_Config.h>
+}
 
 #include "AdcControl.hpp"
 #include "AdcFilter.hpp"

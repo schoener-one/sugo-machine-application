@@ -41,7 +41,7 @@ public:
      *
      * @return const GpioPinMap& Map of available GPIOs.
      */
-    virtual const GpioPinMap& getGpioMap() = 0;
+    virtual const GpioPinMap& getGpioPinMap() = 0;
 
 protected:
     using IHalObject::IHalObject;

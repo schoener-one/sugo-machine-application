@@ -32,48 +32,48 @@ The I2C, SPI and UART interfaces are provided over the GPIO pin header.
 
 ### GPIO pin header
 
-| Pin | Name      | Connection                   | \| | Connection   |   Name | Pin |
-|:----|:----------|:-----------------------------|:--:|-------------:|-------:|----:|
-| 01  | 3.3V DC   |                              | \| |             | 5V DC   | 02 |
-| 03  | SDA1 (I2C)|                              | \| |             | 5V DC   | 04 |
-| 05  | SCL1 (I2C)|                              | \| |             | GND     | 06 |
-| 07  | GPIO 04   | relay-switch-light-run (out) | \| |             | TXD     | 08 |
-| 09  | GND       |                              | \| |             | RXD     | 10 |
-| 11  | GPIO 17   | adc-control-data-ready (in)  | \| | adc-control-reset (out) | GPIO 18 | 12 |
-| 13  | GPIO 27   |                              | \| |             | GND     | 14 |
+| Pin | Name      | Connection                   | \| | Connection                       |   Name | Pin |
+|:----|:----------|:-----------------------------|:--:|---------------------------------:|-------:|----:|
+| 01  | 3.3V DC   |                              | \| | signal-board-dc                  | 5V DC   | 02 |
+| 03  | SDA1 (I2C)|                              | \| | relay-board-dc                   | 5V DC   | 04 |
+| 05  | SCL1 (I2C)|                              | \| | serial-com-gnd                   | GND     | 06 |
+| 07  | GPIO 04   | relay-switch-light-run (out) | \| | serial-com-txd                   | TXD     | 08 |
+| 09  | GND       | signal-board-gnd             | \| | serial-com-rxd                   | RXD     | 10 |
+| 11  | GPIO 17   | adc-control-data-ready (in)  | \| | adc-control-reset (out)          | GPIO 18 | 12 |
+| 13  | GPIO 27   |                              | \| | relay-board                      | GND     | 14 |
 | 15  | GPIO 22   | adc-control-chipselect (out) | \| | stepper-motor-control-error (in) | GPIO 23 | 16 |
 | 17  | 3.3V DC   |                              | \| | stepper-motor-control-reset (out)| GPIO 24 | 18 |
-| 19  | MOSI (SPI)|                              | \| |             | GND     | 20 |
-| 21  | MISO (SPI)|                              | \| | _reserved_  | GPIO 25 | 22 |
-| 23  | CLK (SPI) |                              | \| |             | GPIO 08 | 24 |
-| 25  | GND       |                              | \| |             | GPIO 07 | 26 |
-| 27  | ID_SD     |                              | \| |             | ID_SC   | 28 |
-| 29  | GPIO 05   | signal-button-start (in)     | \| |             | GND     | 30 |
-| 31  | GPIO 06   | signal-button-stop (in)      | \| |             | GPIO 12 | 32 |
-| 33  | GPIO 13   |                              | \| |             | GND     | 34 |
-| 35  | GPIO 19   |                              | \| |             | GPIO 16 | 36 |
+| 19  | MOSI (SPI)|                              | \| |                                  | GND     | 20 |
+| 21  | MISO (SPI)|                              | \| | _reserved-for-enc28J60_ (in)     | GPIO 25 | 22 |
+| 23  | CLK (SPI) |                              | \| |                                  | GPIO 08 | 24 |
+| 25  | GND       |                              | \| |                                  | GPIO 07 | 26 |
+| 27  | ID_SD     |                              | \| |                                  | ID_SC   | 28 |
+| 29  | GPIO 05   | signal-button-start (in)     | \| |                                  | GND     | 30 |
+| 31  | GPIO 06   | signal-button-stop (in)      | \| |                                  | GPIO 12 | 32 |
+| 33  | GPIO 13   |                              | \| |                                  | GND     | 34 |
+| 35  | GPIO 19   |                              | \| |                                  | GPIO 16 | 36 |
 | 37  | GPIO 26   | relay-switch-heater-feeder (out) | \| | relay-switch-heater-merger (out) | GPIO 20 | 38 |
-| 39  | GND       |                              | \| | relay-switch-light-on (out) | GPIO 21 | 40 |
+| 39  | GND       |                              | \| | relay-switch-light-on (out)      | GPIO 21 | 40 |
 |||||||
 
 ### UART console interface
 
-The UART interface can be used to directly connect with a USB FTTI adapter 
+The UART interface can be used to directly connect with a USB _FTDI_ adapter 
 to a console of the device for debugging reason.
 
 **FTTI USB cable:**
-| Pin  | Color |
-|------|-------|
-| TXD  | white |
-| RXD  | green |
-| -    | red   |
-| GND  | black |
+| Pin            | Color |
+|----------------|-------|
+| serial-com-txd | white |
+| serial-com-rxd | green |
+| -              | red   |
+| serial-com-gnd | black |
 |||
 
 ---
-## Relay board
+## SSR (_Solid-State-Relay_) board
 
-The relay board is a 8 channel solid-state-relay board, which is used to switch the power
+The SSR board is a 8 channel solid-state-relay board, which is used to switch the power
 of different devices like heater and signal lights.
 
 **Properties:**
@@ -88,8 +88,8 @@ of different devices like heater and signal lights.
 |---------|------------------|-----------------|---------------|-------------|--------|
 | 0       | heater-feeder    | filament heater | 12V           | 40W         | red    |
 | 1       | heater-merger    | filament heater | 12V           | 40W         | orange |
-| 2       | signal-light-on  | LED light       | 3.3V          | -           | yellow |
-| 3       | signal-light-run | LED light       | 3.3V          | -           | green  |
+| 2       | light-power      | LED light       | 3.3V          | -           | yellow |
+| 3       | light-run        | LED light       | 3.3V          | -           | green  |
 | 4       | _unused_         |                 |               |             | blue   |
 | 5       | _unused_         |                 |               |             | violet |
 | 6       | _unused_         |                 |               |             | gray   |

@@ -22,3 +22,4 @@ target_sources(HardwareAbstractionLayer
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/src/HardwareAbstractionLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/src/AdcFilter.cpp
     )
+add_subdirectory(test)

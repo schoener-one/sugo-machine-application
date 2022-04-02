@@ -8,7 +8,10 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
+extern "C"
+{
 #include <wsadhat/ADS1263.h>
+}
 
 #include "AdcInput.hpp"
 #include "Logger.hpp"

@@ -34,7 +34,7 @@ public:
 
     void finalize();
 
-    const GpioPinMap& getGpioMap() override
+    const GpioPinMap& getGpioPinMap() override
     {
         return m_gpioPinMap;
     }
