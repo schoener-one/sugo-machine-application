@@ -42,8 +42,8 @@ bool GpioPin::init(const IConfiguration& configuration)
     m_direction =
         (configuration.getOption("direction").get<std::string>() == "in" ? Direction::In
                                                                          : Direction::Out);
-    LOG(debug) << getId() << ": direction set to " << m_direction;
-    LOG(debug) << getId() << ": activate-high set to " << activeHigh;
+    LOG(debug) << getId() << ": direction=" << m_direction;
+    LOG(debug) << getId() << ": activate-high=" << activeHigh;
 
     gpiod::line_request lineConf = {
         getId().c_str(),
@@ -57,6 +57,18 @@ bool GpioPin::init(const IConfiguration& configuration)
         LOG(error) << getId() << ": failed to request pin";
         finalize();
         return false;
+    }
+
+    const std::string defaultState = configuration.getOption("state").get<std::string>();
+    if (m_direction == Direction::Out && !defaultState.empty())
+    {
+        State state = (defaultState == "high" ? State::High : State::Low);
+        LOG(debug) << getId() << ": state=" << state;
+        if (!setState(state))
+        {
+            LOG(error) << getId() << "failed to set default state";
+            return false;
+        }
     }
 
     return true;

@@ -13,6 +13,11 @@
 #include "IAdcFilter.hpp"
 #include "IAdcInput.hpp"
 
+namespace wsadhat
+{
+class AdcHat;
+}  // namespace wsadhat
+
 namespace sugo::hal
 {
 /**
@@ -30,8 +35,8 @@ class AdcInput : public IAdcInput
 public:
     constexpr static unsigned InvalidChannel = 0xffffffffu;
 
-    AdcInput(const Identifier& id, const AdcFilterMap& filterProvider)
-        : IAdcInput(id), m_filterProvider(filterProvider)
+    AdcInput(const Identifier& id, const AdcFilterMap& filterProvider, wsadhat::AdcHat& adcHat)
+        : IAdcInput(id), m_filterProvider(filterProvider), m_adcHat(adcHat)
     {
     }
 
@@ -46,6 +51,7 @@ public:
 
 private:
     const AdcFilterMap& m_filterProvider;
+    wsadhat::AdcHat&    m_adcHat;
     std::string         m_filter;
     unsigned            m_channel = InvalidChannel;
 };

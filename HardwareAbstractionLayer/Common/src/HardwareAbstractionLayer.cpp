@@ -13,8 +13,8 @@
 #include "AdcControl.hpp"
 #include "Configuration.hpp"
 #include "GpioControl.hpp"
-#include "StepperMotorControl.hpp"
 #include "HalHelper.hpp"
+#include "StepperMotorControl.hpp"
 
 using namespace sugo::hal;
 
@@ -24,8 +24,17 @@ bool HardwareAbstractionLayer::init(const IConfiguration& configuration)
         configuration, getId(), "gpio-control", m_gpioControllerMap);
     if (success)
     {
-        initSubComponents<IAdcControl, AdcControl>(configuration, getId(), "adc-control",
-                                                   m_adcControllerMap);
+        auto& pinMap = m_gpioControllerMap.at("gpio-control")->getGpioPinMap();
+        success      = (pinMap.count("adc-control-chipselect") == 1) &&
+                  (pinMap.count("adc-control-data-ready") == 1) &&
+                  (pinMap.count("adc-control-reset") == 1);
+        if (success)
+        {
+            success = initSubComponents<IAdcControl, AdcControl>(
+                configuration, getId(), "adc-control", m_adcControllerMap,
+                *pinMap.at("adc-control-chipselect"), *pinMap.at("adc-control-reset"),
+                *pinMap.at("adc-control-data-ready"));
+        }
     }
     if (success)
     {

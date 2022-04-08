@@ -1,18 +1,23 @@
 {
     "hardware-abstraction-layer": {
         "gpio-control": {
+            "device": "gpiochip0",
             "gpio-pin-enabled": [
                 "relay-switch-heater-feeder",
                 "relay-switch-heater-merger",
                 "relay-switch-light-run",
                 "relay-switch-light-on",
                 "signal-button-start",
-                "signal-button-stop"
+                "signal-button-stop",
+                "adc-control-chipselect",
+                "adc-control-data-ready",
+                "adc-control-reset"
             ],
             "gpio-pin": {
                 "relay-switch-light-run": {
                     "pin": 4,
-                    "direction": "out"
+                    "direction": "out",
+                    "state": "low"
                 },
                 "signal-button-start": {
                     "pin": 5,
@@ -22,13 +27,30 @@
                     "pin": 6,
                     "direction": "in"
                 },
+                "adc-control-data-ready": {
+                    "pin": 17,
+                    "direction": "in",
+                    "active-high": false
+                },
+                "adc-control-reset": {
+                    "pin": 18,
+                    "direction": "out",
+                    "active-high": false
+                },
                 "relay-switch-heater-merger": {
                     "pin": 20,
                     "direction": "out"
                 },
                 "relay-switch-light-on": {
                     "pin": 21,
-                    "direction": "out"
+                    "direction": "out",
+                    "state": "high"
+                },
+                "adc-control-chipselect": {
+                    "pin": 22,
+                    "direction": "out",
+                    "active-high": false,
+                    "state": "high"
                 },
                 "relay-switch-heater-feeder": {
                     "pin": 26,
@@ -53,6 +75,7 @@
             }
         },
         "adc-control": {
+            "device": "spidev0.0",
             "adc-enabled": [
                 "temperature-feeder",
                 "temperature-merger",

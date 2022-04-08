@@ -8,20 +8,12 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-extern "C"
-{
-#include <wsadhat/ADS1263.h>
-}
-
 #include "AdcInput.hpp"
 #include "Logger.hpp"
-
-namespace
-{
-constexpr unsigned s_maxNumberOfChannels = 10u;
-}
+#include "AdcHat.hpp"
 
 using namespace sugo::hal;
+using namespace wsadhat;
 
 bool AdcInput::init(const IConfiguration& configuration)
 {
@@ -30,7 +22,7 @@ bool AdcInput::init(const IConfiguration& configuration)
     LOG(debug) << getId() << ": m_channel set to " << m_channel;
     LOG(debug) << getId() << ": filter set to " << m_filter;
 
-    if (m_channel >= s_maxNumberOfChannels)
+    if (m_channel >= AdcHat::MaxChannels)
     {
         LOG(error) << getId() << ": invalid m_channel number " << m_channel;
         return false;
@@ -40,5 +32,5 @@ bool AdcInput::init(const IConfiguration& configuration)
 
 IAdcFilter::RawValueType AdcInput::getRawValue() const
 {
-    return ADS1263_GetChannalValue(m_channel);
+    return static_cast<IAdcFilter::RawValueType>(m_adcHat.getChannelValue(m_channel));
 }

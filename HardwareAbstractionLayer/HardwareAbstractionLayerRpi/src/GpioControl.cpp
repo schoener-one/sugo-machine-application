@@ -30,18 +30,18 @@ bool GpioControl::init(const IConfiguration& configuration)
         finalize();
     }
 
-    auto chipName = configuration.getOption("chip-name").get<std::string>();
-    LOG(debug) << getId() << ": open chip '" << chipName << "'";
-    m_chip = new gpiod::chip(chipName);
+    auto deviceName = configuration.getOption("device").get<std::string>();
+    LOG(debug) << getId() << ": open device '" << deviceName << "'";
+    m_chip = new gpiod::chip(deviceName);
 
     if (!m_chip or m_chip->num_lines() == 0)
     {
-        LOG(error) << getId() << ": failed to open chip";
+        LOG(error) << getId() << ": failed to open device";
         finalize();
         return false;
     }
 
-    return initEnabledSubComponents<IGpioPin, GpioPin, gpiod::chip>(configuration, "pin", m_gpioPinMap, *m_chip);
+    return initEnabledSubComponents<IGpioPin, GpioPin, gpiod::chip>(configuration, "gpio-pin", m_gpioPinMap, *m_chip);
 }
 
 void GpioControl::finalize()

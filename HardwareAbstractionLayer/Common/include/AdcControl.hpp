@@ -12,6 +12,13 @@
 
 #include "AdcInput.hpp"
 #include "IAdcControl.hpp"
+#include "IGpioPin.hpp"
+
+namespace wsadhat
+{
+class SpiControl;
+class AdcHat;
+}  // namespace wsadhat
 
 namespace sugo::hal
 {
@@ -22,8 +29,14 @@ namespace sugo::hal
 class AdcControl : public IAdcControl
 {
 public:
-    using IAdcControl::IAdcControl;
-
+    AdcControl(const Identifier& id, IGpioPin& ioAdcHatCs, IGpioPin& ioAdcHatRst,
+               IGpioPin& ioAdcHatRdy)
+        : IAdcControl(id),
+          m_ioAdcHatCs(ioAdcHatCs),
+          m_ioAdcHatRst(ioAdcHatRst),
+          m_ioAdcHatRdy(ioAdcHatRdy)
+    {
+    }
     ~AdcControl() override;
 
     bool init(const IConfiguration& configuration) override;
@@ -36,8 +49,14 @@ public:
     }
 
 private:
-    AdcInputMap  m_adcInputMap;
-    AdcFilterMap m_adcFilterMap;
+    IGpioPin&            m_ioAdcHatCs;
+    IGpioPin&            m_ioAdcHatRst;
+    IGpioPin&            m_ioAdcHatRdy;
+    AdcInputMap          m_adcInputMap;
+    AdcFilterMap         m_adcFilterMap;
+    std::string          m_device;
+    wsadhat::SpiControl* m_spiControl = nullptr;
+    wsadhat::AdcHat*     m_adcHat     = nullptr;
 };
 
 }  // namespace sugo::hal

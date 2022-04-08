@@ -112,12 +112,21 @@
             "command": "scp -o StrictHostKeyChecking=no \"${config:build.directory.rpi}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest\" \"root@${config:remote.host}:HardwareAbstractionLayerSmokeTest\""
         },
         {
+            "label": "remote-upload-MachineConfig",
+            "type": "shell",
+            "command": [
+                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"mkdir -p HardwareAbstractionLayer/conf\";",
+                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/HardwareAbstractionLayer/conf/MachineConfig.json\" \"root@${config:remote.host}:HardwareAbstractionLayer/conf/MachineConfig.json\""
+            ]
+        },
+        {
             "label": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest",
             "type": "shell",
             "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest\"",
             "dependsOn": [
                 "remote-gdbserver-killall",
-                "remote-upload-HardwareAbstractionLayerSmokeTest"
+                "remote-upload-HardwareAbstractionLayerSmokeTest",
+                "remote-upload-MachineConfig"
             ],
             "dependsOrder": "sequence",
             "isBackground": false
