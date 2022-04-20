@@ -18,9 +18,10 @@ namespace sugo::hal
  */
 enum class Unit
 {
-    MilliVolt,
+    Unknown = 0,
     Celcius,
-    Degree
+    Volt,
+    Ohm
 };
 
 /**
@@ -50,22 +51,22 @@ public:
 
     UnitValue<ValueT>& operator=(UnitValue<ValueT>&& other) = default;
 
-    ValueT getValue()
+    ValueT getValue() const
     {
         return m_value;
     }
 
-    Unit getUnit()
+    Unit getUnit() const
     {
         return m_unit;
     }
 
-    operator ValueT()
+    operator ValueT() const
     {
         return m_value;
     }
 
-    operator Unit()
+    operator Unit() const
     {
         return m_unit;
     }

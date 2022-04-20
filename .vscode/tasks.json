@@ -130,6 +130,13 @@
             ],
             "dependsOrder": "sequence",
             "isBackground": false
+        },
+        {
+            "label": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest-direct",
+            "type": "shell",
+            "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest\"",
+            "dependsOrder": "sequence",
+            "isBackground": false
         }
     ],
     "inputs": [

@@ -75,20 +75,19 @@ void IHardwareAbstractionLayer::setConfiguration(IConfiguration& configuration)
     configuration.add(Option(adcControl + ".device", std::string("spidev0.0"), "HAL: ADC device name"));
     const static std::string adc = "hardware-abstraction-layer.adc-control.adc";
     configuration.add(Option(adc + "-enabled",  std::vector<std::string>{}, "HAL: List of ADC channels to be enabled", true));
-    for (const auto& name : {".temperature-feeder", ".temperature-merger", ".tension-filament"})
+    for (const auto& name : {".temperature-feeder", ".temperature-merger", ".test-resistance-100k", ".test-resistance-none"})
     {
         configuration.add(Option(adc + name + ".channel",     0xffffffffu,     "HAL: ADC channel identifier"));
         configuration.add(Option(adc + name + ".adc-filter",  std::string(""), "HAL: ADC value filter"));
     }
     const static std::string adcFilter = "hardware-abstraction-layer.adc-control.adc-filter";
     configuration.add(Option(adcFilter + "-enabled",  std::vector<std::string>{}, "HAL: List of ADC filters to be enabled", true));
-    for (const auto& name : {".ntc-temperature", ".pot-rotation-angle"})
+    for (const auto& name : {".ntc-temperature", ".voltage-divider", ".voltage"})
     {
-        configuration.add(Option(adcFilter + name + ".ref-voltage",        0,    "HAL: Reference voltage [mV]"));
-        configuration.add(Option(adcFilter + name + ".gain",               1.0f, "HAL: Gain factor"));
-        configuration.add(Option(adcFilter + name + ".resistance",         0u,   "HAL: Resistance [mO]"));
-        configuration.add(Option(adcFilter + name + ".divider-resistance", 0u,   "HAL: Divider resistance [mO]"));
-        configuration.add(Option(adcFilter + name + ".unit",               std::string(""), "HAL: Unit of the final value"));
+        configuration.add(Option(adcFilter + name + ".ref-voltage",                      0, "HAL: Reference voltage [mV]"));
+        configuration.add(Option(adcFilter + name + ".translation",        std::string(""), "HAL: Translation to be used"));
+        configuration.add(Option(adcFilter + name + ".resistance",                      0u, "HAL: Resistance [mO]"));
+        configuration.add(Option(adcFilter + name + ".divider-resistance",              0u, "HAL: Divider resistance [mO]"));
     }
     // clang-format on
 }

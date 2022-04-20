@@ -44,7 +44,7 @@ public:
 
     IAdcFilter::RawValueType getRawValue() const override;
 
-    IAdcFilter::ValueType getValue() const override
+    IAdcFilter::ValueType getUnitValue() const override
     {
         return m_filterProvider.at(m_filter)->convert(getRawValue());
     }

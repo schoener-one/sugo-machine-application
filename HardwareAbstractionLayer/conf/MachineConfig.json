@@ -21,11 +21,13 @@
                 },
                 "signal-button-start": {
                     "pin": 5,
-                    "direction": "in"
+                    "direction": "in",
+                    "active-high": false
                 },
                 "signal-button-stop": {
                     "pin": 6,
-                    "direction": "in"
+                    "direction": "in",
+                    "active-high": false
                 },
                 "adc-control-data-ready": {
                     "pin": 17,
@@ -79,7 +81,8 @@
             "adc-enabled": [
                 "temperature-feeder",
                 "temperature-merger",
-                "tension-filament"
+                "test-resistance-100k",
+                "test-resistance-none"
             ],
             "adc": {
                 "temperature-feeder": {
@@ -90,29 +93,36 @@
                     "channel": 1,
                     "adc-filter": "ntc-temperature"
                 },
-                "tension-filament": {
+                "test-resistance-100k": {
                     "channel": 2,
-                    "adc-filter": "pot-rotation-angle"
+                    "adc-filter": "voltage-divider"
+                },
+                "test-resistance-none": {
+                    "channel": 3,
+                    "adc-filter": "voltage-divider"
                 }
             },
             "adc-filter-enabled": [
                 "ntc-temperature",
-                "pot-rotation-angle"
+                "voltage-divider",
+                "voltage"
             ],
             "adc-filter": {
                 "ntc-temperature": {
-                    "ref-voltage": 5000,
-                    "gain": 1.0,
+                    "ref-voltage": 4920,
                     "resistance": 100000,
                     "divider-resistance": 100000,
-                    "unit": "celcius"
+                    "translation": "ntc-100k-temperature"
                 },
-                "pot-rotation-angle": {
-                    "ref-voltage": 5000,
-                    "gain": 1.0,
+                "voltage-divider": {
+                    "ref-voltage": 4920,
                     "resistance": 100000,
                     "divider-resistance": 100000,
-                    "unit": "degree"
+                    "translation": "voltage-divider-resistance"
+                },
+                "voltage": {
+                    "ref-voltage": 4920,
+                    "translation": "voltage"
                 }
             }
         }

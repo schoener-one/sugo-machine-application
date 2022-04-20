@@ -12,10 +12,18 @@
 #include "AdcHat.hpp"
 #include "Logger.hpp"
 
+#include <boost/format.hpp>
 #include <unistd.h>
 
 using namespace wsadhat;
 using namespace sugo::hal;
+
+// TODO Remove magic numbers
+
+namespace
+{
+constexpr uint8_t  StatusBitADC1DataReady     = 0x40u;
+constexpr unsigned MicrosecondsPerMillisecond = 1000u;
 
 enum Reg
 {
@@ -69,11 +77,7 @@ enum Cmd
     WREG    = 0x40,  // Write registers 010r rrrr (40h+000r rrrr)
     WREG2   = 0x00,  // number of registers to write minus 1, 000n nnnn
 };
-
-namespace
-{
-constexpr unsigned MicrosecondsPerMillisecond = 1000u;
-}
+}  // namespace
 
 void AdcHat::reset(void)
 {
@@ -103,14 +107,12 @@ void AdcHat::writeSpiRegister(uint8_t reg, uint8_t data)
 
 uint8_t AdcHat::readSpiData(uint8_t reg)
 {
-    uint8_t temp = 0;
     m_ioCs.setState(IGpioPin::State::High);
     m_spi.writeByte(Cmd::RREG | reg);
     m_spi.writeByte(0x00);
-    // usleep(MicrosecondsPerMillisecond *  1);
-    temp = m_spi.readByte();
+    uint8_t regValue = m_spi.readByte();
     m_ioCs.setState(IGpioPin::State::Low);
-    return temp;
+    return regValue;
 }
 
 uint8_t AdcHat::getChecksum(uint32_t val, uint8_t byte)
@@ -128,58 +130,59 @@ uint8_t AdcHat::getChecksum(uint32_t val, uint8_t byte)
 
 uint8_t AdcHat::readChipId(void)
 {
-    uint8_t id = readSpiData(Reg::ID);
-    return (id >> 5u);
+    return readSpiData(Reg::ID);
 }
 
 bool AdcHat::config(Gain gain, DataRate drate, Delay delay)
 {
-    uint8_t MODE2 = 0x80;  // 0x80:PGA bypassed, 0x00:PGA enabled
-    MODE2 |= (gain << 4) | drate;
-    writeSpiRegister(Reg::MODE2, MODE2);
-    usleep(MicrosecondsPerMillisecond * 1);
-    if (readSpiData(Reg::MODE2) != MODE2)
+    uint8_t mode2 = 0x80u;  // 0x80:PGA bypassed, 0x00:PGA enabled
+    mode2 |= (gain << 4) | drate;
+    writeSpiRegister(Reg::MODE2, mode2);
+    usleep(MicrosecondsPerMillisecond);
+    if (readSpiData(Reg::MODE2) != mode2)
     {
         LOG(error) << "AdcHat: Reg::MODE2 unsuccess";
-		return false;
+        return false;
     }
 
-    uint8_t REFMUX = 0x24;  // 0x00:+-2.5V as REF, 0x24:VDD,VSS as REF
-    writeSpiRegister(Reg::REFMUX, REFMUX);
-    usleep(MicrosecondsPerMillisecond * 1);
-    if (readSpiData(Reg::REFMUX) != REFMUX)
+    uint8_t refMux = 0x24u;  // 0x00:+-2.5V as REF, 0x24:VDD,VSS as REF
+    writeSpiRegister(Reg::REFMUX, refMux);
+    usleep(MicrosecondsPerMillisecond);
+    if (readSpiData(Reg::REFMUX) != refMux)
     {
         LOG(debug) << "AdcHat: Reg::REFMUX unsuccess";
-		return false;
+        return false;
     }
 
-    uint8_t MODE0 = delay;
-    writeSpiRegister(Reg::MODE0, MODE0);
-    usleep(MicrosecondsPerMillisecond * 1);
-    if (readSpiData(Reg::MODE0) == MODE0)
+    uint8_t mode0 = delay;
+    writeSpiRegister(Reg::MODE0, mode0);
+    usleep(MicrosecondsPerMillisecond);
+    if (readSpiData(Reg::MODE0) != mode0)
     {
         LOG(debug) << "AdcHat: Reg::MODE0 unsuccess";
-		return false;
+        return false;
     }
 
-	return true;
+    return true;
 }
 
 bool AdcHat::init(DataRate rate)
 {
     reset();
-    if (readChipId() != 1)
+    const uint8_t chipId = readChipId();
+    if ((chipId >> 5u) != 1u)
     {
         LOG(error) << "AdcHat: Read chip id failed";
         return false;
     }
+    LOG(debug) << "AdcHat: Chip ID: " << boost::format("0x%02x") % static_cast<uint32_t>(chipId);
     writeSpiCmd(Cmd::STOP1);
     const bool success = config(Gain::G1, rate, Delay::D35us);
 
-	if (success)
-	{
-    	writeSpiCmd(Cmd::START1);
-	}
+    if (success)
+    {
+        writeSpiCmd(Cmd::START1);
+    }
     return success;
 }
 
@@ -190,43 +193,44 @@ bool AdcHat::setChannel(uint8_t channel)
         LOG(error) << "AdcHat: Invalid channel number";
         return false;
     }
-    uint8_t INPMUX = (channel << 4) | 0x0a;  // 0x0a:VCOM as Negative Input
-    writeSpiRegister(Reg::INPMUX, INPMUX);
-    if (readSpiData(Reg::INPMUX) != INPMUX)
+    uint8_t inpmux = (channel << 4) | 0x0a;  // 0x0a:VCOM as Negative Input
+    writeSpiRegister(Reg::INPMUX, inpmux);
+    if (readSpiData(Reg::INPMUX) != inpmux)
     {
         LOG(error) << "AdcHat: Set channel failed";
-		return false;
+        return false;
     }
-	return true;
+    return true;
 }
 
 uint32_t AdcHat::readData()
 {
     uint32_t read   = 0;
     uint8_t  buf[4] = {0, 0, 0, 0};
-    uint8_t  Status, CRC;
+    uint8_t  status, crc;
     m_ioCs.setState(IGpioPin::State::High);
     do
     {
+        usleep(MicrosecondsPerMillisecond);
         m_spi.writeByte(Cmd::RDATA1);
-        usleep(MicrosecondsPerMillisecond * 1);
-        Status = m_spi.readByte();
-    } while ((Status & 0x40) == 0);
+        status = m_spi.readByte();
+    } while ((status & StatusBitADC1DataReady) == 0);
 
     buf[0] = m_spi.readByte();
     buf[1] = m_spi.readByte();
     buf[2] = m_spi.readByte();
     buf[3] = m_spi.readByte();
-    CRC    = m_spi.readByte();
+    crc    = m_spi.readByte();
     m_ioCs.setState(IGpioPin::State::Low);
     read |= ((uint32_t)buf[0] << 24);
     read |= ((uint32_t)buf[1] << 16);
     read |= ((uint32_t)buf[2] << 8);
     read |= (uint32_t)buf[3];
 
-    if (getChecksum(read, CRC) != 0)
+    if (getChecksum(read, crc) != 0)
     {
         LOG(error) << "AdcHat: Data read error!";
+        return 0u;
     }
     return read;
 }
@@ -234,13 +238,10 @@ uint32_t AdcHat::readData()
 uint32_t AdcHat::getChannelValue(uint8_t channel)
 {
     if (!setChannel(channel))
-	{
-		return 0u;
-	}
-    // usleep(MicrosecondsPerMillisecond *  2);
-    // writeSpiCmd(Cmd::START1);
-    // usleep(MicrosecondsPerMillisecond *  2);
-    m_ioRdy.waitForEvent(std::chrono::milliseconds(10));
+    {
+        return 0u;
+    }
+
     return readData();
 }
 
@@ -249,7 +250,5 @@ void AdcHat::getAll(AdcHat::ValueList& values)
     for (uint32_t i = 0; i < MaxChannels; i++)
     {
         values[i] = getChannelValue(i);
-        // writeSpiCmd(Cmd::STOP1);
-        // usleep(MicrosecondsPerMillisecond *  20);
     }
 }

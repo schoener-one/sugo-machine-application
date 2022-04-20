@@ -122,8 +122,8 @@ main board from over voltage damages.
 
 | Channel | Device            | Device type | Color  |
 |---------|-------------------|-------------|--------|
-| 0       | start-button      | button      | red    |
-| 1       | stop-button       | button      | orange |
+| 0       | button-start      | button      | red    |
+| 1       | button-stop       | button      | orange |
 | 2       | _unused_          |             | yellow |
 | 3       | _unused_          |             | green  |
 | 4       | _unused_          |             | blue   |
@@ -159,8 +159,8 @@ header board which can be mounted onto the Raspberry Pi pin header.
 |---------|------------------------|------------------------|--------|
 | 0       | temperature-feeder     | NTC temperature sensor | red    |
 | 1       | temperature-merger     | NTC temperature sensor | orange |
-| 2       | tension-filament       | potentiometer          | yellow |
-| 3       | _unused_               |                        | green  |
+| 2       | test-resistance-100k   | 100k resistance        | yellow |
+| 3       | test-resistance-none   | none                   | green  |
 | 4       | _unused_               |                        | blue   |
 | 5       | _unused_               |                        | violet |
 | 6       | _unused_               |                        | gray   |
@@ -179,7 +179,7 @@ This NTC temperature sensor is used to measure the heater temperature.
 * NTC sensor
 * Resistance: 100K
 
-### Potentiometer rotation sensor
+### Rotation encoder sensor
 
 ...
 

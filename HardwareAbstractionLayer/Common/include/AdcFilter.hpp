@@ -25,16 +25,21 @@ public:
 
     bool init(const IConfiguration& configuration) override;
 
-    ValueType convert(RawValueType rawValue) const override
-    {
-        return ValueType(rawValue, Unit::Degree);  // FIXME
-    }
+    ValueType convert(RawValueType rawValue) const override;
 
 private:
-    int      m_refVoltage     = 0;
-    unsigned m_gain           = 0;
-    unsigned m_mainResistance = 0;
-    unsigned m_divResistance  = 0;
+    enum AdcValueTranslation
+    {
+        Ident,
+        Voltage,
+        Resistance,
+        Ntc100k
+    };
+
+    int                 m_refVoltage     = 0;
+    unsigned            m_mainResistance = 0;
+    unsigned            m_divResistance  = 0;
+    AdcValueTranslation m_translation    = AdcValueTranslation::Ident;
 };
 
 }  // namespace sugo::hal

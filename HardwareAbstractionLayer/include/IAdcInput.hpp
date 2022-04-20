@@ -43,7 +43,7 @@ public:
      *
      * @return IAdcFilter::ValueType Unit translated value.
      */
-    virtual IAdcFilter::ValueType getValue() const = 0;
+    virtual IAdcFilter::ValueType getUnitValue() const = 0;
 
 protected:
     using IHalObject::IHalObject;
