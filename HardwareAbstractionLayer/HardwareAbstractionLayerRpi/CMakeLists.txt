@@ -8,12 +8,14 @@ add_library (HardwareAbstractionLayer STATIC
     src/GpioPin.cpp
     src/AdcInput.cpp
     src/StepperMotor.cpp
-    external/libwsadhat/src/AdcHat.cpp
-    external/libwsadhat/src/SpiControl.cpp
+    src/AdcHat.cpp
+    src/SpiControl.cpp
+    src/I2cControl.cpp
+    src/TicController.cpp
+    src/StepperMotor.cpp
     )
 target_include_directories (HardwareAbstractionLayer PRIVATE
     include
-    external/libwsadhat/include
     )
 target_link_libraries(HardwareAbstractionLayer
     PUBLIC

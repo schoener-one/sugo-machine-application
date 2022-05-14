@@ -13,36 +13,40 @@
             "label": "x86_build-HardwareAbstractionLayer",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayer",
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
             "group": "build"
         },
         {
             "label": "x86_build-HardwareAbstractionLayerTest",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayerTest",
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
             "group": "build"
         },
         {
             "label": "x86_build-HardwareAbstractionLayerSmokeTest",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayerSmokeTest",
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
             "group": "build"
         },
         {
             "label": "x86_build-all",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target all",
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
             "group": "build"
         },
         {
@@ -66,27 +70,30 @@
             "label": "rpi_build-HardwareAbstractionLayer",
             "type": "shell",
             "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target HardwareAbstractionLayer",
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.rpi}" ]
+            },
             "group": "build"
         },
         {
             "label": "rpi_build-HardwareAbstractionLayerSmokeTest",
             "type": "shell",
             "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target HardwareAbstractionLayerSmokeTest",
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.rpi}" ]
+            },
             "group": "build"
         },
         {
             "label": "rpi_build-all",
             "type": "shell",
             "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target all",
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.rpi}" ]
+            },
             "group": "build", "options": {}
         },
         {

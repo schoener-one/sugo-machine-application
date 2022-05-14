@@ -15,8 +15,12 @@
 #include <stdint.h>
 #include <string>
 
-namespace wsadhat
+namespace sugo::hal
 {
+/**
+ * @brief Control class for SPI interface
+ *
+ */
 class SpiControl
 {
 public:
@@ -73,4 +77,4 @@ private:
     uint16_t                m_mode;
 };
 
-}  // namespace wsadhat
+}  // namespace sugo::hal

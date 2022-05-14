@@ -12,9 +12,12 @@
 
 #include "IConfiguration.hpp"
 #include "IStepperMotorControl.hpp"
+#include "IGpioPin.hpp"
 
 namespace sugo::hal
 {
+class I2cControl;
+
 /**
  * @brief Class for contolling stepper motors
  *
@@ -22,9 +25,14 @@ namespace sugo::hal
 class StepperMotorControl : public IStepperMotorControl
 {
 public:
-    using IStepperMotorControl::IStepperMotorControl;
+    StepperMotorControl(const Identifier& id, IGpioPin& ioErr, IGpioPin& ioRst)
+        : IStepperMotorControl(id), m_ioErr(ioErr), m_ioRst(ioRst)
+    {
+    }
 
     bool init(const IConfiguration& configuration) override;
+
+    void finalize();
 
     void reset() override;
 
@@ -34,6 +42,9 @@ public:
     }
 
 private:
+    IGpioPin&       m_ioErr;
+    IGpioPin&       m_ioRst;
+    I2cControl*     m_i2c = nullptr;
     StepperMotorMap m_stepperMotorMap;
 };
 

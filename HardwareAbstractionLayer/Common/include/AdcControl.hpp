@@ -14,14 +14,11 @@
 #include "IAdcControl.hpp"
 #include "IGpioPin.hpp"
 
-namespace wsadhat
+namespace sugo::hal
 {
 class SpiControl;
 class AdcHat;
-}  // namespace wsadhat
 
-namespace sugo::hal
-{
 /**
  * @brief Class for contolling ADC input devices
  *
@@ -49,14 +46,13 @@ public:
     }
 
 private:
-    IGpioPin&            m_ioAdcHatCs;
-    IGpioPin&            m_ioAdcHatRst;
-    IGpioPin&            m_ioAdcHatRdy;
-    AdcInputMap          m_adcInputMap;
-    AdcFilterMap         m_adcFilterMap;
-    std::string          m_device;
-    wsadhat::SpiControl* m_spiControl = nullptr;
-    wsadhat::AdcHat*     m_adcHat     = nullptr;
+    IGpioPin&    m_ioAdcHatCs;
+    IGpioPin&    m_ioAdcHatRst;
+    IGpioPin&    m_ioAdcHatRdy;
+    AdcInputMap  m_adcInputMap;
+    AdcFilterMap m_adcFilterMap;
+    SpiControl*  m_spiControl = nullptr;
+    AdcHat*      m_adcHat     = nullptr;
 };
 
 }  // namespace sugo::hal

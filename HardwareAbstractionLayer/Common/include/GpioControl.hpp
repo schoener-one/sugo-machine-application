@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    gpiod::chip* m_chip = nullptr;
+    gpiod::chip* m_device = nullptr;
     GpioPinMap   m_gpioPinMap;
 };
 

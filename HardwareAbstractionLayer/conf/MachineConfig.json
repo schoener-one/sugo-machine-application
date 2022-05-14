@@ -7,11 +7,16 @@
                 "relay-switch-heater-merger",
                 "relay-switch-light-run",
                 "relay-switch-light-on",
+                "relay-switch-light-ready",
                 "signal-button-start",
                 "signal-button-stop",
+                "signal-filament-tension-low",
+                "signal-filament-tension-high",
                 "adc-control-chipselect",
                 "adc-control-data-ready",
-                "adc-control-reset"
+                "adc-control-reset",
+                "motor-control-error",
+                "motor-control-reset"
             ],
             "gpio-pin": {
                 "relay-switch-light-run": {
@@ -29,10 +34,26 @@
                     "direction": "in",
                     "active-high": false
                 },
+                "signal-filament-tension-low": {
+                    "pin": 12,
+                    "direction": "in"
+                },
+                "motor-control-error": {
+                    "pin": 13,
+                    "direction": "in"
+                },
+                "signal-filament-tension-high": {
+                    "pin": 16,
+                    "direction": "in"
+                },
                 "adc-control-data-ready": {
                     "pin": 17,
                     "direction": "in",
                     "active-high": false
+                },
+                "motor-control-reset": {
+                    "pin": 19,
+                    "direction": "out"
                 },
                 "adc-control-reset": {
                     "pin": 18,
@@ -54,6 +75,10 @@
                     "active-high": false,
                     "state": "high"
                 },
+                "relay-switch-light-ready": {
+                    "pin": 24,
+                    "direction": "out"
+                },
                 "relay-switch-heater-feeder": {
                     "pin": 26,
                     "direction": "out"
@@ -61,17 +86,18 @@
             }
         },
         "stepper-motor-control": {
+            "device": "i2c-3",
             "motor-enabled": [
                 "feeder",
                 "coiler"
             ],
             "motor": {
                 "feeder": {
-                    "i2c-id": 14,
+                    "i2c-address": 15,
                     "max-speed-rpm": "100"
                 },
                 "coiler": {
-                    "i2c-id": 15,
+                    "i2c-address": 14,
                     "max-speed-rpm": "100"
                 }
             }
@@ -82,7 +108,7 @@
                 "temperature-feeder",
                 "temperature-merger",
                 "test-resistance-100k",
-                "test-resistance-none"
+                "test-resistance-0k"
             ],
             "adc": {
                 "temperature-feeder": {
@@ -97,7 +123,7 @@
                     "channel": 2,
                     "adc-filter": "voltage-divider"
                 },
-                "test-resistance-none": {
+                "test-resistance-0k": {
                     "channel": 3,
                     "adc-filter": "voltage-divider"
                 }

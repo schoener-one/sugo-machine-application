@@ -27,7 +27,9 @@ bool HardwareAbstractionLayer::init(const IConfiguration& configuration)
         auto& pinMap = m_gpioControllerMap.at("gpio-control")->getGpioPinMap();
         success      = (pinMap.count("adc-control-chipselect") == 1) &&
                   (pinMap.count("adc-control-data-ready") == 1) &&
-                  (pinMap.count("adc-control-reset") == 1);
+                  (pinMap.count("adc-control-reset") == 1) &&
+                  (pinMap.count("motor-control-error") == 1) &&
+                  (pinMap.count("motor-control-reset") == 1);
         if (success)
         {
             success = initSubComponents<IAdcControl, AdcControl>(
@@ -35,11 +37,14 @@ bool HardwareAbstractionLayer::init(const IConfiguration& configuration)
                 *pinMap.at("adc-control-chipselect"), *pinMap.at("adc-control-reset"),
                 *pinMap.at("adc-control-data-ready"));
         }
+
+        if (success)
+        {
+            success = initSubComponents<IStepperMotorControl, StepperMotorControl>(
+                configuration, getId(), "stepper-motor-control", m_stepperMotorControllerMap,
+                *pinMap.at("motor-control-error"), *pinMap.at("motor-control-reset"));
+        }
     }
-    if (success)
-    {
-        initSubComponents<IStepperMotorControl, StepperMotorControl>(
-            configuration, getId(), "stepper-motor-control", m_stepperMotorControllerMap);
-    }
+
     return success;
 }

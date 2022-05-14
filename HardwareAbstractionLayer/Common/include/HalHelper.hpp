@@ -44,8 +44,8 @@ inline bool initEnabledSubComponents(
     const auto& subIds = option.get<const std::vector<std::string>&>();
     for (auto& subId : subIds)
     {
-        if (!initSubComponents<ISubCompT, SubCompT, SubCompParams...>(
-                configuration, prefixId, subId, map, params...))
+        if (!initSubComponents<ISubCompT, SubCompT, SubCompParams...>(configuration, prefixId,
+                                                                      subId, map, params...))
         {
             return false;
         }

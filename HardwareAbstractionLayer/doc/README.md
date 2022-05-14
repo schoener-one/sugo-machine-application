@@ -32,28 +32,28 @@ The I2C, SPI and UART interfaces are provided over the GPIO pin header.
 
 ### GPIO pin header
 
-| Pin | Name      | Connection                   | \| | Connection                       |   Name | Pin |
-|:----|:----------|:-----------------------------|:--:|---------------------------------:|-------:|----:|
-| 01  | 3.3V DC   |                              | \| | signal-board-dc                  | 5V DC   | 02 |
-| 03  | SDA1 (I2C)|                              | \| | relay-board-dc                   | 5V DC   | 04 |
-| 05  | SCL1 (I2C)|                              | \| | serial-com-gnd                   | GND     | 06 |
-| 07  | GPIO 04   | relay-switch-light-run (out) | \| | serial-com-txd                   | TXD     | 08 |
-| 09  | GND       | signal-board-gnd             | \| | serial-com-rxd                   | RXD     | 10 |
-| 11  | GPIO 17   | adc-control-data-ready (in)  | \| | adc-control-reset (out)          | GPIO 18 | 12 |
-| 13  | GPIO 27   |                              | \| | relay-board                      | GND     | 14 |
-| 15  | GPIO 22   | adc-control-chipselect (out) | \| | stepper-motor-control-error (in) | GPIO 23 | 16 |
-| 17  | 3.3V DC   |                              | \| | stepper-motor-control-reset (out)| GPIO 24 | 18 |
-| 19  | MOSI (SPI)|                              | \| |                                  | GND     | 20 |
-| 21  | MISO (SPI)|                              | \| | _reserved-for-enc28J60_ (in)     | GPIO 25 | 22 |
-| 23  | CLK (SPI) |                              | \| |                                  | GPIO 08 | 24 |
-| 25  | GND       |                              | \| |                                  | GPIO 07 | 26 |
-| 27  | ID_SD     |                              | \| |                                  | ID_SC   | 28 |
-| 29  | GPIO 05   | signal-button-start (in)     | \| |                                  | GND     | 30 |
-| 31  | GPIO 06   | signal-button-stop (in)      | \| |                                  | GPIO 12 | 32 |
-| 33  | GPIO 13   |                              | \| |                                  | GND     | 34 |
-| 35  | GPIO 19   |                              | \| |                                  | GPIO 16 | 36 |
+| Pin | Name      | Connection                       | \| | Connection                       |   Name | Pin |
+|:----|:----------|:---------------------------------|:--:|---------------------------------:|-------:|----:|
+| 01  | 3.3V DC   |                                  | \| | signal-board-dc                  | 5V DC   | 02 |
+| 03  | SDA1 (I2C)| motor-control-i2c-sda            | \| | relay-board-dc                   | 5V DC   | 04 |
+| 05  | SCL1 (I2C)| motor-control-i2c-scl            | \| | serial-com-gnd                   | GND     | 06 |
+| 07  | GPIO 04   | relay-switch-light-run (out)     | \| | serial-com-txd                   | TXD     | 08 |
+| 09  | GND       | signal-board-gnd                 | \| | serial-com-rxd                   | RXD     | 10 |
+| 11  | GPIO 17   | adc-control-data-ready (in)      | \| | adc-control-reset (out)          | GPIO 18 | 12 |
+| 13  | GPIO 27   |                                  | \| | relay-board                      | GND     | 14 |
+| 15  | GPIO 22   | adc-control-chipselect (out)     | \| |                                  | GPIO 23 | 16 |
+| 17  | 3.3V DC   |                                  | \| | relay-switch-light-ready (out)   | GPIO 24 | 18 |
+| 19  | MOSI (SPI)|                                  | \| |                                  | GND     | 20 |
+| 21  | MISO (SPI)|                                  | \| | _reserved-for-enc28J60_ (in)     | GPIO 25 | 22 |
+| 23  | CLK (SPI) |                                  | \| |                                  | GPIO 08 | 24 |
+| 25  | GND       |                                  | \| |                                  | GPIO 07 | 26 |
+| 27  | ID_SD     |                                  | \| |                                  | ID_SC   | 28 |
+| 29  | GPIO 05   | signal-button-start (in)         | \| |                                  | GND     | 30 |
+| 31  | GPIO 06   | signal-button-stop (in)          | \| | signal-filament-tension-low (in) | GPIO 12 | 32 |
+| 33  | GPIO 13   | motor-control-error (in)         | \| |                                  | GND     | 34 |
+| 35  | GPIO 19   | motor-control-reset (out)        | \| | signal-filament-tension-high (in)| GPIO 16 | 36 |
 | 37  | GPIO 26   | relay-switch-heater-feeder (out) | \| | relay-switch-heater-merger (out) | GPIO 20 | 38 |
-| 39  | GND       |                              | \| | relay-switch-light-on (out)      | GPIO 21 | 40 |
+| 39  | GND       |                                  | \| | relay-switch-light-on (out)      | GPIO 21 | 40 |
 |||||||
 
 ### UART console interface
@@ -90,7 +90,7 @@ of different devices like heater and signal lights.
 | 1       | heater-merger    | filament heater | 12V           | 40W         | orange |
 | 2       | light-power      | LED light       | 3.3V          | -           | yellow |
 | 3       | light-run        | LED light       | 3.3V          | -           | green  |
-| 4       | _unused_         |                 |               |             | blue   |
+| 4       | light-ready      | LED light       | 3.3V          | -           | blue   |
 | 5       | _unused_         |                 |               |             | violet |
 | 6       | _unused_         |                 |               |             | gray   |
 | 7       | _unused_         |                 |               |             | white  |
@@ -101,7 +101,7 @@ of different devices like heater and signal lights.
 ### Filament heater
 
 The heater is used to heat the filament up to ~200°C for melting. To control the temperature the heater element
-contains a [NTC 100K 3950 temperature sensor](Hot_End_Heater/NTC-3950-100K.pdf). The temperature resistance values
+contains a [NTC-3950 100K temperature sensor](Hot_End_Heater/NTC-3950-100K.pdf). The temperature resistance values
 are listed in a [CSV list](Hot_End_Heater/NTC100K_3950.csv) file.
 
 ![Heater hot end](images/Long-Distance-J-Head-V6-Hot-End.jpg)
@@ -120,18 +120,18 @@ main board from over voltage damages.
 
 **Channel occupancy:**
 
-| Channel | Device            | Device type | Color  |
-|---------|-------------------|-------------|--------|
-| 0       | button-start      | button      | red    |
-| 1       | button-stop       | button      | orange |
-| 2       | _unused_          |             | yellow |
-| 3       | _unused_          |             | green  |
-| 4       | _unused_          |             | blue   |
-| 5       | _unused_          |             | violet |
-| 6       | _unused_          |             | gray   |
-| 7       | _unused_          |             | white  |
-| GND     | ground            |             | black  |
-| DC      | power-supply 3.3V |             | brown  |
+| Channel | Device                | Device type | Color  |
+|---------|-----------------------|-------------|--------|
+| 0       | button-start          | button      | red    |
+| 1       | button-stop           | button      | orange |
+| 2       | filament-tension-low  |             | yellow |
+| 3       | filament-tension-high |             | green  |
+| 4       | _unused_              |             | blue   |
+| 5       | _unused_              |             | violet |
+| 6       | _unused_              |             | gray   |
+| 7       | _unused_              |             | white  |
+| GND     | ground                |             | black  |
+| DC      | power-supply 3.3V     |             | brown  |
 |||||
 
 ### Button
@@ -157,31 +157,20 @@ header board which can be mounted onto the Raspberry Pi pin header.
 
 | Channel | Device                 | Device type            | Color  |
 |---------|------------------------|------------------------|--------|
-| 0       | temperature-feeder     | NTC temperature sensor | red    |
-| 1       | temperature-merger     | NTC temperature sensor | orange |
-| 2       | test-resistance-100k   | 100k resistance        | yellow |
-| 3       | test-resistance-none   | none                   | green  |
-| 4       | _unused_               |                        | blue   |
-| 5       | _unused_               |                        | violet |
-| 6       | _unused_               |                        | gray   |
-| 7       | _unused_               |                        | white  |
-| 8       | _unused_               |                        | black  |
-| 9       | _unused_               |                        | brown  |
-||||
+| AVSS    |                        | 0V  reference          | black  |
+| AVDD    |                        | +5V reference          | white  |
+| 0       | temperature-feeder     | NTC-3950 100K temperature sensor | green  |
+| 1       | temperature-merger     | NTC-3950 100K temperature sensor | blue   |
+| 2       | test-resistance-100k   | 100K test resistance (+2.5V voltage) | violet |
+| 3       | test-resistance-0k     | +5V test voltage       | gray   |
+| 4       | _unused_               |                        |        |
+| 5       | _unused_               |                        |        |
+| 6       | _unused_               |                        |        |
+| 7       | _unused_               |                        |        |
+| 8       | _unused_               |                        |        |
+| 9       | _unused_               |                        |        |
+|||||
 
-
-### NTC temperature sensor
-
-This NTC temperature sensor is used to measure the heater temperature.
-
-**Properaties:**
-
-* NTC sensor
-* Resistance: 100K
-
-### Rotation encoder sensor
-
-...
 
 ---
 ## Stepper motor control board
@@ -190,6 +179,13 @@ The stepper motor control board is a [Pololu Tic T249](Pololu_Tic_T249/UserGuide
 a [TB67S249FTG](Pololu_Tic_T249/TB67S249FTG_datasheet_en.pdf) chip board.
 
 ### Stepper motor
+
+The [stepper motor](Stepper_Motor/StepperMotor_17HS15-1504S-X1.pdf) is used to feed or coil the filament.
+
+**Properties**:
+Type: Nema 17
+Amps: 1.5A (per phase)
+Volt: 12V
 
 ---
 ## Power supply

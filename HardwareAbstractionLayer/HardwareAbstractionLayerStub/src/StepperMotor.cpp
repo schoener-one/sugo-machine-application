@@ -14,44 +14,55 @@
 
 using namespace sugo::hal;
 
+StepperMotor::~StepperMotor()
+{
+    finalize();
+}
+
 bool StepperMotor::init(const sugo::IConfiguration& configuration)
 {
-    m_i2cId    = configuration.getOption("i2c-id").get<unsigned>();
-    m_maxSpeed = configuration.getOption("max-speed-rpm").get<unsigned>();
-    LOG(debug) << getId() << ".i2c-id: " << m_i2cId;
-    LOG(debug) << getId() << ".max-speed-rpm: " << m_maxSpeed;
+    const uint8_t address =
+        static_cast<uint8_t>(configuration.getOption("i2c-address").get<unsigned>());
+    m_maxSpeed = StepperMotor::StepperMotor::Speed(
+        configuration.getOption("max-speed-rpm").get<unsigned>(), Unit::Rpm);
+    LOG(debug) << getId() << ".i2c-address: " << address;
+    LOG(debug) << getId() << ".max-speed-rpm: " << m_maxSpeed.getValue();
+    m_curPosition = 0;
     return true;
 }
 
-unsigned StepperMotor::rotate(unsigned steps, Direction direction, unsigned speed)
+void StepperMotor::finalize()
 {
-    (void)steps;
+}
+
+bool StepperMotor::rotateToPosition(Position position)
+{
+    m_curPosition += position;
+    return true;
+}
+
+bool StepperMotor::rotate(Direction direction)
+{
     (void)direction;
-    (void)speed;
-    return 0;
+    return true;
 }
 
 bool StepperMotor::stop()
 {
-    return false;
+    return true;
 }
 
 unsigned StepperMotor::getMicroStepCount() const
 {
-    return 0;
+    return 1u;
 }
 
 unsigned StepperMotor::getStepsPerRound() const
 {
-    return 0;
+    return 200u;
 }
 
-unsigned StepperMotor::getSpeed() const
+StepperMotor::Speed StepperMotor::getSpeed() const
 {
-    return 0;
-}
-
-unsigned StepperMotor::getMaxSpeed() const
-{
-    return 0;
+    return Speed(0u, Unit::Rpm);
 }

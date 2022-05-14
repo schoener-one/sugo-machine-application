@@ -9,7 +9,9 @@ add_library (HardwareAbstractionLayer STATIC
     src/AdcInput.cpp
     src/StepperMotor.cpp
     )
-target_include_directories (HardwareAbstractionLayer PRIVATE include)
+target_include_directories (HardwareAbstractionLayer PRIVATE
+    include
+    )
 target_link_libraries(HardwareAbstractionLayer
     PUBLIC
     HardwareAbstractionLayerInterface

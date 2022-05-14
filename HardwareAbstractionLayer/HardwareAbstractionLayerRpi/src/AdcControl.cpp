@@ -17,7 +17,6 @@
 #include "SpiControl.hpp"
 
 using namespace sugo::hal;
-using namespace wsadhat;
 
 AdcControl::~AdcControl()
 {
@@ -26,18 +25,16 @@ AdcControl::~AdcControl()
 
 bool AdcControl::init(const IConfiguration& configuration)
 {
-    if (!m_device.empty())
-    {
-        finalize();
-    }
+    assert(m_spiControl == nullptr);
+    assert(m_adcHat == nullptr);
 
-    m_device = std::string("/dev/") + configuration.getOption("device").get<std::string>();
-    LOG(debug) << getId() << ": using SPI device '" << m_device << "'";
+    const std::string device = std::string("/dev/") + configuration.getOption("device").get<std::string>();
+    LOG(debug) << getId() << ": using SPI device '" << device << "'";
 
     m_spiControl = new SpiControl;
-    if (!m_spiControl->init(m_device))
+    if (!m_spiControl->init(device))
     {
-        LOG(error) << getId() << ": Failed to initialize SPI device: " << m_device;
+        LOG(error) << getId() << ": Failed to initialize SPI device: " << device;
         finalize();
         return false;
     }
@@ -55,7 +52,7 @@ bool AdcControl::init(const IConfiguration& configuration)
 
     if (success)
     {
-        success = initEnabledSubComponents<IAdcInput, AdcInput, const AdcFilterMap&>(
+        success = initEnabledSubComponents<IAdcInput, AdcInput, const AdcFilterMap&, AdcHat&>(
             configuration, "adc", m_adcInputMap, m_adcFilterMap, *m_adcHat);
     }
 
@@ -76,5 +73,4 @@ void AdcControl::finalize()
     }
     m_adcInputMap.clear();
     m_adcFilterMap.clear();
-    m_device.clear();
 }

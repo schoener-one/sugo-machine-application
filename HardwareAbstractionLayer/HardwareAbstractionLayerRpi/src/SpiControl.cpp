@@ -23,8 +23,9 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <cassert>
 
-using namespace wsadhat;
+using namespace sugo::hal;
 
 SpiControl::~SpiControl()
 {
@@ -36,10 +37,11 @@ SpiControl::~SpiControl()
 
 bool SpiControl::init(const std::string& device)
 {
-    // device
+    assert(m_fd == InvalidFileDescriptor);
+
     if ((m_fd = open(device.c_str(), O_RDWR)) < 0)
     {
-        LOG(error) << "SpiControl: Failed to open SPI device";
+        LOG(error) << "SpiControl: Failed to open device '" << device << "'";
         return false;
     }
     m_mode = 0;

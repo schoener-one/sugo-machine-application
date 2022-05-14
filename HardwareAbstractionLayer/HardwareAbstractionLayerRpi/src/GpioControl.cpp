@@ -25,32 +25,32 @@ GpioControl::~GpioControl()
 
 bool GpioControl::init(const IConfiguration& configuration)
 {
-    if (m_chip != nullptr)
+    if (m_device != nullptr)
     {
         finalize();
     }
 
     auto deviceName = configuration.getOption("device").get<std::string>();
     LOG(debug) << getId() << ": open device '" << deviceName << "'";
-    m_chip = new gpiod::chip(deviceName);
+    m_device = new gpiod::chip(deviceName);
 
-    if (!m_chip or m_chip->num_lines() == 0)
+    if (!m_device or m_device->num_lines() == 0)
     {
         LOG(error) << getId() << ": failed to open device";
         finalize();
         return false;
     }
 
-    return initEnabledSubComponents<IGpioPin, GpioPin, gpiod::chip>(configuration, "gpio-pin", m_gpioPinMap, *m_chip);
+    return initEnabledSubComponents<IGpioPin, GpioPin, gpiod::chip>(configuration, "gpio-pin", m_gpioPinMap, *m_device);
 }
 
 void GpioControl::finalize()
 {
     m_gpioPinMap.clear();
     
-    if (m_chip != nullptr)
+    if (m_device != nullptr)
     {
-        delete m_chip;
-        m_chip = nullptr;
+        delete m_device;
+        m_device = nullptr;
     }
 }

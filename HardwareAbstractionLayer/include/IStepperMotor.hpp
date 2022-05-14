@@ -14,6 +14,7 @@
 #include <ostream>
 
 #include "IHalObject.hpp"
+#include "UnitValue.hpp"
 
 namespace sugo::hal
 {
@@ -23,9 +24,11 @@ namespace sugo::hal
 class IStepperMotor : public IHalObject
 {
 public:
-    /// Invalid I2C identifier.
-    constexpr static unsigned InvalidI2cId = 0u;
-
+    /// Speed value type
+    using Speed = UnitValue<unsigned>;
+    /// Position type
+    using Position = int32_t;
+    
     /// Direction of rotation.
     enum Direction
     {
@@ -42,16 +45,27 @@ public:
     }
 
     /**
-     * @brief Rotates the stepper motor. The method blocks the caller
+     * @brief Rotates the stepper motor to passed position. The method blocks the caller
      *        until the end of rotation is reached.
      *
-     * @param steps Number of steps to rotate.
+     * @param position Position which should be reached.
      * @param direction Direction of rotation.
-     * @param speed Speed of rotation in RPM. The speed cannot be higher then the maximum!
-     * @return unsigned The number of steps rotated. If the returned value does not match the
-     * passed, the rotation has been stopped earlier!
+     * @return true If the position could be reached.
+     * @return false If the position could not be reached.
+     * @note Before the rotation can be done, the speed has to be properly set!
      */
-    virtual unsigned rotate(unsigned steps, Direction direction, unsigned speed) = 0;
+    virtual bool rotateToPosition(Position position) = 0;
+
+    /**
+     * @brief Starts rotating the stepper motor continuously. 
+     * The caller will not be blocked by that call. The rotation has to be
+     * stopped by a stop() call.
+     * 
+     * @param direction Direction of rotation.
+     * @return true If the motor could be started.
+     * @return false If the motor could not be started.
+     */
+    virtual bool rotate(Direction direction) = 0;
 
     /**
      * @brief Stops a running rotation. The method blocks the caller
@@ -62,10 +76,48 @@ public:
      */
     virtual bool stop() = 0;
 
+    /**
+     * @brief Returns the current position of the motor.
+     * 
+     * @return Position Current position of the motor.
+     */
+    virtual Position getPosition() const = 0;
+
+    /**
+     * @brief Returns the micro steps per step for the motor.
+     *
+     * @return unsigned Number of micro steps per step
+     */
     virtual unsigned getMicroStepCount() const = 0;
-    virtual unsigned getStepsPerRound() const  = 0;
-    virtual unsigned getSpeed() const          = 0;
-    virtual unsigned getMaxSpeed() const       = 0;
+
+    /**
+     * @brief Returns the complete number of steps to be used for a 360° turn.
+     * If micro steps are used, that value returns the micro step count per round.
+     *
+     * @return unsigned Number of steps per round
+     */
+    virtual unsigned getStepsPerRound() const = 0;
+
+    /**
+     * @brief Returns the current motor speed.
+     *
+     * @return Speed The current motor speed.
+     */
+    virtual Speed getSpeed() const = 0;
+
+    /**
+     * @brief Returns the max motor speed
+     *
+     * @return unsigned Maximum motor speed in RPM.
+     */
+    virtual Speed getMaxSpeed() const = 0;
+
+    /**
+     * @brief Set the max motor speed.
+     *
+     * @param maxSpeed Sets the max speed in RPMs.
+     */
+    virtual void setMaxSpeed(Speed maxSpeed) = 0;
 
     /**
      * @brief Returns the time between one step to the next step position.

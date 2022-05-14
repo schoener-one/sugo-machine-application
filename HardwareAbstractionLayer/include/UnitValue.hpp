@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <cassert>
+
 namespace sugo::hal
 {
 /**
@@ -21,7 +23,8 @@ enum class Unit
     Unknown = 0,
     Celcius,
     Volt,
-    Ohm
+    Ohm,
+    Rpm
 };
 
 /**
@@ -72,8 +75,8 @@ public:
     }
 
 private:
-    ValueT     m_value;
-    const Unit m_unit;
+    ValueT m_value;
+    Unit   m_unit;
 };
 
 }  // namespace sugo::hal

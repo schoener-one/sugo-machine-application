@@ -13,7 +13,6 @@
 #include "AdcHat.hpp"
 
 using namespace sugo::hal;
-using namespace wsadhat;
 
 bool AdcInput::init(const IConfiguration& configuration)
 {

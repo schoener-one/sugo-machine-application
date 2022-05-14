@@ -12,13 +12,13 @@
 #include "AdcHat.hpp"
 #include "Logger.hpp"
 
-#include <boost/format.hpp>
 #include <unistd.h>
+#include <boost/format.hpp>
 
-using namespace wsadhat;
 using namespace sugo::hal;
 
 // TODO Remove magic numbers
+// TODO move usleep to std::thread::sleep_for()
 
 namespace
 {

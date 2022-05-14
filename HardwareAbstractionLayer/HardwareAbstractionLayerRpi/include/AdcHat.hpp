@@ -16,7 +16,7 @@
 #include "IGpioPin.hpp"
 #include "SpiControl.hpp"
 
-namespace wsadhat
+namespace sugo::hal
 {
 /**
  * @brief
@@ -76,8 +76,7 @@ public:
     constexpr static uint32_t MaxChannels = 10u;
     using ValueList                       = std::array<uint32_t, MaxChannels>;
 
-    AdcHat(SpiControl& spi, sugo::hal::IGpioPin& ioCs, sugo::hal::IGpioPin& ioRst,
-           sugo::hal::IGpioPin& ioRdy)
+    AdcHat(SpiControl& spi, IGpioPin& ioCs, IGpioPin& ioRst, IGpioPin& ioRdy)
         : m_spi(spi), m_ioCs(ioCs), m_ioRst(ioRst), m_ioRdy(ioRdy)
     {
     }
@@ -99,10 +98,10 @@ private:
     bool           setChannel(uint8_t channel);
     uint32_t       readData();
 
-    SpiControl&          m_spi;
-    sugo::hal::IGpioPin& m_ioCs;
-    sugo::hal::IGpioPin& m_ioRst;
-    sugo::hal::IGpioPin& m_ioRdy;
+    SpiControl& m_spi;
+    IGpioPin&   m_ioCs;
+    IGpioPin&   m_ioRst;
+    IGpioPin&   m_ioRdy;
 };
 
-}  // namespace wsadhat
+}  // namespace sugo::hal
