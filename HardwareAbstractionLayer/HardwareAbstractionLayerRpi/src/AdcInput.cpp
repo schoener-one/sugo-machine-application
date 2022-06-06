@@ -9,8 +9,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "AdcInput.hpp"
-#include "Logger.hpp"
 #include "AdcHat.hpp"
+#include "Logger.hpp"
 
 using namespace sugo::hal;
 
@@ -31,5 +31,10 @@ bool AdcInput::init(const IConfiguration& configuration)
 
 IAdcFilter::RawValueType AdcInput::getRawValue() const
 {
-    return static_cast<IAdcFilter::RawValueType>(m_adcHat.getChannelValue(m_channel));
+    constexpr IAdcFilter::RawValueType absMaxValue =
+        std::numeric_limits<IAdcFilter::RawValueType>::max();
+    const IAdcFilter::RawValueType value = static_cast<IAdcFilter::RawValueType>(m_adcHat.getChannelValue(m_channel));
+    const IAdcFilter::RawValueType correctedValue =
+        (value - m_valueOffset) * (absMaxValue / (m_valueMax - m_valueOffset));
+    return correctedValue;
 }

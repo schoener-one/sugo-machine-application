@@ -13,6 +13,8 @@
 #include "IAdcFilter.hpp"
 #include "IAdcInput.hpp"
 
+#include <limits>
+
 namespace sugo::hal
 {
 class AdcHat;
@@ -46,11 +48,19 @@ public:
         return m_filterProvider.at(m_filter)->convert(getRawValue());
     }
 
+    void setCorrectionValues(IAdcFilter::RawValueType valueOffset, IAdcFilter::RawValueType valueMax)
+    {
+        m_valueOffset = valueOffset;
+        m_valueMax = valueMax;
+    }
+
 private:
-    const AdcFilterMap& m_filterProvider;
-    AdcHat&             m_adcHat;
-    std::string         m_filter;
-    unsigned            m_channel = InvalidChannel;
+    const AdcFilterMap&      m_filterProvider;
+    AdcHat&                  m_adcHat;
+    std::string              m_filter;
+    unsigned                 m_channel     = InvalidChannel;
+    IAdcFilter::RawValueType m_valueOffset = 0u;
+    IAdcFilter::RawValueType m_valueMax    = std::numeric_limits<IAdcFilter::RawValueType>::max();
 };
 
 }  // namespace sugo::hal

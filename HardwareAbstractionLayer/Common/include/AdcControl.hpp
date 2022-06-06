@@ -46,6 +46,8 @@ public:
     }
 
 private:
+    void calibrate();
+
     IGpioPin&    m_ioAdcHatCs;
     IGpioPin&    m_ioAdcHatRst;
     IGpioPin&    m_ioAdcHatRdy;

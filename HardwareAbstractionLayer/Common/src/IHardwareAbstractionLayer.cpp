@@ -81,7 +81,7 @@ void IHardwareAbstractionLayer::setConfiguration(IConfiguration& configuration)
     configuration.add(Option(adcControl + ".device", std::string("spidev0.0"), "HAL: ADC device name"));
     const static std::string adc = "hardware-abstraction-layer.adc-control.adc";
     configuration.add(Option(adc + "-enabled",  std::vector<std::string>{}, "HAL: List of ADC channels to be enabled", true));
-    for (const auto& name : {".temperature-feeder", ".temperature-merger", ".test-resistance-100k", ".test-resistance-0k"})
+    for (const auto& name : {".temperature-feeder", ".temperature-merger", ".reference-2_5v", ".reference-5v", ".reference-0v"})
     {
         configuration.add(Option(adc + name + ".channel",     0xffffffffu,     "HAL: ADC channel identifier"));
         configuration.add(Option(adc + name + ".adc-filter",  std::string(""), "HAL: ADC value filter"));

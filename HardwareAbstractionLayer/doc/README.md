@@ -161,9 +161,9 @@ header board which can be mounted onto the Raspberry Pi pin header.
 | AVDD    |                        | +5V reference          | white  |
 | 0       | temperature-feeder     | NTC-3950 100K temperature sensor | green  |
 | 1       | temperature-merger     | NTC-3950 100K temperature sensor | blue   |
-| 2       | test-resistance-100k   | 100K test resistance (+2.5V voltage) | violet |
-| 3       | test-resistance-0k     | +5V test voltage       | gray   |
-| 4       | _unused_               |                        |        |
+| 2       | reference-2_5v         | +2.5V reference voltage| violet |
+| 3       | reference-5v           | +5V reference voltage  | gray   |
+| 4       | reference-0v           | 0V reference voltage   | -      |
 | 5       | _unused_               |                        |        |
 | 6       | _unused_               |                        |        |
 | 7       | _unused_               |                        |        |

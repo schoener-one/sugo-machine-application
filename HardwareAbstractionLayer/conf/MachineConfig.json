@@ -107,8 +107,9 @@
             "adc-enabled": [
                 "temperature-feeder",
                 "temperature-merger",
-                "test-resistance-100k",
-                "test-resistance-0k"
+                "reference-2_5v",
+                "reference-5v",
+                "reference-0v"
             ],
             "adc": {
                 "temperature-feeder": {
@@ -119,13 +120,17 @@
                     "channel": 1,
                     "adc-filter": "ntc-temperature"
                 },
-                "test-resistance-100k": {
+                "reference-2_5v": {
                     "channel": 2,
-                    "adc-filter": "voltage-divider"
+                    "adc-filter": "voltage"
                 },
-                "test-resistance-0k": {
+                "reference-5v": {
                     "channel": 3,
-                    "adc-filter": "voltage-divider"
+                    "adc-filter": "voltage"
+                },
+                "reference-0v": {
+                    "channel": 4,
+                    "adc-filter": "voltage"
                 }
             },
             "adc-filter-enabled": [
@@ -135,19 +140,19 @@
             ],
             "adc-filter": {
                 "ntc-temperature": {
-                    "ref-voltage": 4920,
+                    "ref-voltage": 4990,
                     "resistance": 100000,
                     "divider-resistance": 100000,
                     "translation": "ntc-100k-temperature"
                 },
                 "voltage-divider": {
-                    "ref-voltage": 4920,
+                    "ref-voltage": 4990,
                     "resistance": 100000,
                     "divider-resistance": 100000,
                     "translation": "voltage-divider-resistance"
                 },
                 "voltage": {
-                    "ref-voltage": 4920,
+                    "ref-voltage": 4990,
                     "translation": "voltage"
                 }
             }
