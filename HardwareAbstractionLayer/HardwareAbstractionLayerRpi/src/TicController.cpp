@@ -20,7 +20,8 @@
 
 namespace
 {
-constexpr char Me[] = "TicController";
+constexpr char   Me[]         = "TicController";
+constexpr size_t MaxBlockSize = 15u;  ///< Maximum size a read response at once!
 
 template <class ValueT = int32_t>
 constexpr void writeToBuffer(ValueT value, sugo::hal::ByteBuffer& buffer, unsigned offset)
@@ -31,23 +32,17 @@ constexpr void writeToBuffer(ValueT value, sugo::hal::ByteBuffer& buffer, unsign
     buffer[3 + offset] = static_cast<sugo::hal::Byte>(value >> 24 & 0xff);
 }
 
-enum OperationState
-{
-    Reset             = 0,
-    DeEnergize        = 2,
-    SoftError         = 4,
-    WaitingForErrLine = 6,
-    StartingUp        = 8,
-    Normal            = 10
-};
-
 const std::map<sugo::hal::Byte, std::string> s_operationStateName = {
-    {static_cast<sugo::hal::Byte>(OperationState::Reset), "Reset"},
-    {static_cast<sugo::hal::Byte>(OperationState::DeEnergize), "DeEnergize"},
-    {static_cast<sugo::hal::Byte>(OperationState::SoftError), "SoftError"},
-    {static_cast<sugo::hal::Byte>(OperationState::WaitingForErrLine), "WaitingForErrLine"},
-    {static_cast<sugo::hal::Byte>(OperationState::StartingUp), "StartingUp"},
-    {static_cast<sugo::hal::Byte>(OperationState::Normal), "Normal"},
+    {static_cast<sugo::hal::Byte>(sugo::hal::TicController::OperationState::Reset), "Reset"},
+    {static_cast<sugo::hal::Byte>(sugo::hal::TicController::OperationState::DeEnergize),
+     "DeEnergize"},
+    {static_cast<sugo::hal::Byte>(sugo::hal::TicController::OperationState::SoftError),
+     "SoftError"},
+    {static_cast<sugo::hal::Byte>(sugo::hal::TicController::OperationState::WaitingForErrLine),
+     "WaitingForErrLine"},
+    {static_cast<sugo::hal::Byte>(sugo::hal::TicController::OperationState::StartingUp),
+     "StartingUp"},
+    {static_cast<sugo::hal::Byte>(sugo::hal::TicController::OperationState::Normal), "Normal"},
 };
 }  // namespace
 
@@ -79,38 +74,54 @@ bool TicController::init()
 
     if (!reset())
     {
-        LOG(error) << m_me << "Failed to reset device";
+        LOG(error) << m_me << "Failed to reset controller";
         return false;
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));  // wait for reset finished
 
+    bool success = resetCommandTimeout();
+    success      = exitSafeStart() && success;
+
+    if (!success)
+    {
+        LOG(error) << m_me << "Failed to enable controller";
+        return false;
+    }
+
     // clear position
     if (!haltAndSetPosition(0))
     {
-        LOG(error) << m_me << "Failed to halt and set position on device";
+        LOG(error) << m_me << "Failed to halt and set position";
         return false;
     }
 
-    (void)setTargetPosition(0);
-    (void)setTargetVelocity(0);
     (void)setStepMode(StepMode::Step1_8);
-    (void)exitSafeStart();
 
-    ByteBuffer data(1);
-    if (!getVariableAndClearErrors(VariableOffset::OperationState, data))
+    State state;
+    if (!getState(state))
     {
-        LOG(error) << m_me << "Failed to get operation state on device";
+        LOG(error) << m_me << "Failed to get operation state";
         return false;
     }
 
-    if (data.at(0) != static_cast<Byte>(OperationState::Normal))
+    showState(state);
+
+    if (state.operationState != OperationState::Normal)
     {
-        LOG(warning) << m_me << "Bad operation state: " << s_operationStateName.at(data.at(0));
-        checkError();
+        LOG(warning) << m_me << "Bad operation state";
+        success = false;
     }
 
-    return true;
+    success = checkError() && success;
+
+    if (!enterSafeStart())
+    {
+        LOG(error) << m_me << "Failed to disable controller";
+        return false;
+    }
+
+    return success;
 }
 
 void TicController::finalize()
@@ -119,6 +130,15 @@ void TicController::finalize()
     {
         m_ioRst.setState(IGpioPin::State::Low);  // turn off
     }
+}
+
+void TicController::showState(const State& state) const
+{
+    LOG(info) << m_me << "Current status: [operationState=" << std::hex
+              << static_cast<uint32_t>(state.operationState)
+              << ", miscFlags=" << static_cast<uint32_t>(state.miscFlags)
+              << ", errorStatus=" << static_cast<uint32_t>(state.errorStatus)
+              << ", errorsOccurred=" << state.errorsOccurred << "]";
 }
 
 bool TicController::setTargetPosition(int32_t position)
@@ -245,18 +265,33 @@ bool TicController::setStepMode(StepMode stepMode)
     return success;
 }
 
-bool TicController::getVariable(VariableOffset variableOff, ByteBuffer& receiveData)
+bool TicController::setCurrentLimit(uint16_t currentLimit)
+{
+    if (currentLimit > 4480u)  // Tic249 limit!
+    {
+        LOG(error) << m_me << "Current limit set to high";
+        return false;
+    }
+    static constexpr Byte commandId = 0x91;
+    // For Tic249 the limit is in units of 40mA!
+    Byte       value = static_cast<Byte>(currentLimit / 40u);
+    ByteBuffer commandData{commandId, value};
+    const bool success = m_i2c.write(m_address, commandData);
+    return success;
+}
+
+bool TicController::getVariable(Byte variableOff, ByteBuffer& receiveData) const
 {
     static constexpr Byte commandId = 0xA1;
-    ByteBuffer            commandData{commandId, static_cast<Byte>(variableOff)};
+    ByteBuffer            commandData{commandId, variableOff};
     const bool            success = m_i2c.read(m_address, commandData, receiveData);
     return success;
 }
 
-bool TicController::getVariableAndClearErrors(VariableOffset variableOff, ByteBuffer& receiveData)
+bool TicController::getVariableAndClearErrors(Byte variableOff, ByteBuffer& receiveData) const
 {
     static constexpr Byte commandId = 0xA2;
-    ByteBuffer            commandData{commandId, static_cast<Byte>(variableOff)};
+    ByteBuffer            commandData{commandId, variableOff};
     const bool            success = m_i2c.read(m_address, commandData, receiveData);
     return success;
 }
@@ -273,13 +308,12 @@ bool TicController::checkError()
     bool errorState = false;
     if (m_ioErr.getState() == IGpioPin::State::High)
     {
-        errorState = true;
-        ByteBuffer  buffer(2);
-        const bool  success = getVariable(VariableOffset::ErrorStatus, buffer);
+        State       state;
+        const bool  success = getState(state);
         std::string errors;
         if (success)
         {
-            const std::bitset<8> bit(buffer.at(0));
+            const std::bitset<8> bit(state.errorStatus);
             if (bit[0])
             {
                 errors += "INTENT_DEENERGIZED ";
@@ -325,10 +359,31 @@ bool TicController::checkError()
 
         if (errorState)
         {
-            const Byte flags = buffer.at(1);
             LOG(error) << m_me << "Error state: " << errors << " (" << std::hex << std::setw(2)
-                       << std::setfill('0') << static_cast<unsigned>(flags) << ")";
+                       << std::setfill('0') << static_cast<unsigned>(state.miscFlags) << ")";
         }
     }
     return !errorState;
+}
+
+bool TicController::getState(TicController::State& state) const
+{
+    assert(sizeof(TicController::State) < 256u);
+    size_t remainingBytes = sizeof(State);
+    size_t offset         = 0;  // Operation state offset!
+
+    while (remainingBytes > 0)
+    {
+        const size_t nextBytes = (remainingBytes > MaxBlockSize) ? MaxBlockSize : remainingBytes;
+        ByteBuffer   buffer(nextBytes, static_cast<Byte>(0xff));
+        if (!getVariable(static_cast<Byte>(offset), buffer))
+        {
+            return false;
+        }
+        std::copy(buffer.begin(), buffer.end(), reinterpret_cast<Byte*>(&state) + offset);
+        remainingBytes -= nextBytes;
+        offset += nextBytes;
+    }
+
+    return true;
 }

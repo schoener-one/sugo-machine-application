@@ -129,7 +129,7 @@
         {
             "label": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest",
             "type": "shell",
-            "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest --gtest_filter=HardwareAbstractionLayerSmokeTest.Test_AdcControl\"",
+            "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest --gtest_filter=HardwareAbstractionLayerSmokeTest.Test_MotorControl\"",
             "dependsOn": [
                 "remote-gdbserver-killall",
                 "remote-upload-HardwareAbstractionLayerSmokeTest",
@@ -141,7 +141,7 @@
         {
             "label": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest-direct",
             "type": "shell",
-            "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest --gtest_filter=HardwareAbstractionLayerSmokeTest.Test_AdcControl\"",
+            "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest --gtest_filter=HardwareAbstractionLayerSmokeTest.Test_MotorControl\"",
             "dependsOrder": "sequence",
             "isBackground": false
         }

@@ -32,8 +32,8 @@ public:
     bool init(const std::string& device);
     void finalize(void);
 
-    bool read(Address address, const ByteBuffer& command, ByteBuffer& retValue);
-    bool write(Address address, const ByteBuffer& command);
+    bool read(Address address, const ByteBuffer& command, ByteBuffer& retValue) const;
+    bool write(Address address, const ByteBuffer& command) const;
     
 private:
     constexpr static int InvalidFileDescriptor = -1;

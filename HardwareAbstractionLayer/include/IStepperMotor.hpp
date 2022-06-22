@@ -24,6 +24,7 @@ namespace sugo::hal
 class IStepperMotor : public IHalObject
 {
 public:
+    using StepCount = unsigned;
     /// Speed value type
     using Speed = UnitValue<unsigned>;
     /// Position type
@@ -71,10 +72,12 @@ public:
      * @brief Stops a running rotation. The method blocks the caller
      *        until the motor has stopped rotation.
      *
+     * @param stopImmediately Indicates if the motor should be stopped immediately (true) or
+     *                        by decreasing speed (false).
      * @return true If the motor was rotating and has been stopped
      * @return false If the motor was not rotating
      */
-    virtual bool stop() = 0;
+    virtual bool stop(bool stopImmediately) = 0;
 
     /**
      * @brief Returns the current position of the motor.
@@ -88,7 +91,7 @@ public:
      *
      * @return unsigned Number of micro steps per step
      */
-    virtual unsigned getMicroStepCount() const = 0;
+    virtual StepCount getMicroStepCount() const = 0;
 
     /**
      * @brief Returns the complete number of steps to be used for a 360° turn.
@@ -96,7 +99,7 @@ public:
      *
      * @return unsigned Number of steps per round
      */
-    virtual unsigned getStepsPerRound() const = 0;
+    virtual StepCount getStepsPerRound() const = 0;
 
     /**
      * @brief Returns the current motor speed.

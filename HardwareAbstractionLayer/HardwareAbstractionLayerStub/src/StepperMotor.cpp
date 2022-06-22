@@ -52,12 +52,12 @@ bool StepperMotor::stop()
     return true;
 }
 
-unsigned StepperMotor::getMicroStepCount() const
+StepCount StepperMotor::getMicroStepCount() const
 {
     return 1u;
 }
 
-unsigned StepperMotor::getStepsPerRound() const
+StepCount StepperMotor::getStepsPerRound() const
 {
     return 200u;
 }

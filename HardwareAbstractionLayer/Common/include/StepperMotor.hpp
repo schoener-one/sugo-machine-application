@@ -34,17 +34,14 @@ public:
     bool init(const IConfiguration& configuration) override;
     void finalize();
 
-    bool     rotateToPosition(Position position) override;
-    bool     rotate(Direction direction) override;
-    bool     stop() override;
-    Position getPosition() const override
-    {
-        return m_curPosition;
-    }
-    unsigned getMicroStepCount() const override;
-    unsigned getStepsPerRound() const override;
-    Speed    getSpeed() const override;
-    Speed    getMaxSpeed() const override
+    bool      rotateToPosition(Position position) override;
+    bool      rotate(Direction direction) override;
+    bool      stop(bool stopImmediately = false) override;
+    Position  getPosition() const override;
+    StepCount getMicroStepCount() const override;
+    StepCount getStepsPerRound() const override;
+    Speed     getSpeed() const override;
+    Speed     getMaxSpeed() const override
     {
         return m_maxSpeed;
     }
@@ -54,12 +51,14 @@ public:
     }
 
 private:
+    bool prepareForMotion();
+    bool waitAndShutdown(std::chrono::milliseconds remainingMotionTime, bool stopImmediately = false);
+    
     I2cControl&    m_i2cControl;
     IGpioPin&      m_ioErr;
     IGpioPin&      m_ioRst;
-    TicController* m_controller  = nullptr;
-    Speed          m_maxSpeed    = Speed(0, Unit::Rpm);
-    Position       m_curPosition = 0;
+    TicController* m_controller = nullptr;
+    Speed          m_maxSpeed   = Speed(0, Unit::Rpm);
 };
 
 }  // namespace sugo::hal

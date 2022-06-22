@@ -61,7 +61,7 @@ void I2cControl::finalize(void)
     }
 }
 
-bool I2cControl::read(Address address, const ByteBuffer& command, ByteBuffer& readBuffer)
+bool I2cControl::read(Address address, const ByteBuffer& command, ByteBuffer& readBuffer) const
 {
     ByteBuffer tmpCommand(command);
     i2c_msg    messages[] = {
@@ -70,7 +70,7 @@ bool I2cControl::read(Address address, const ByteBuffer& command, ByteBuffer& re
     };
     i2c_rdwr_ioctl_data ioctl_data = {messages, 2};
 
-    const int retValue = ioctl(m_fd, I2C_RDWR, &ioctl_data);
+    const int retValue = ::ioctl(m_fd, I2C_RDWR, &ioctl_data);
     if (retValue != 2)
     {
         LOG(error) << Me << "Failed to read from device address: " << std::hex << std::setw(2)
@@ -81,13 +81,13 @@ bool I2cControl::read(Address address, const ByteBuffer& command, ByteBuffer& re
     return true;
 }
 
-bool I2cControl::write(Address address, const ByteBuffer& command)
+bool I2cControl::write(Address address, const ByteBuffer& command) const
 {
     ByteBuffer tmpCommand(command);
     i2c_msg    message = {address, 0, static_cast<uint16_t>(tmpCommand.size()), tmpCommand.data()};
     i2c_rdwr_ioctl_data ioctl_data = {&message, 1};
 
-    const int retValue = ioctl(m_fd, I2C_RDWR, &ioctl_data);
+    const int retValue = ::ioctl(m_fd, I2C_RDWR, &ioctl_data);
     if (retValue != 1)
     {
         LOG(error) << Me << "Failed to write to device address: " << std::hex << std::setw(2)

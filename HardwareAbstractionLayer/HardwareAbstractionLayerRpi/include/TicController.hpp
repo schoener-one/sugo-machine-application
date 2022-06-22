@@ -16,6 +16,13 @@
 #include "IGpioPin.hpp"
 #include "IStepperMotor.hpp"
 
+#include <assert.h>
+#include <algorithm>
+
+#ifndef PACKED
+#define PACKED __attribute__((packed, aligned(1)))
+#endif  // PACKED
+
 namespace sugo::hal
 {
 /**
@@ -41,17 +48,63 @@ public:
         Step1_8 = 3   ///< 1/8 step mode
     };
 
-    /// Variable offsets
-    enum VariableOffset
+    /// Operation states
+    enum OperationState
     {
-        OperationState  = 0x00,  ///< Operation state (unsigned 8-bit)
-        MiscFlags       = 0x01,  ///< Misc flags (unsigned 8-bit)
-        ErrorStatus     = 0x02,  ///< Error status (unsigned 16-bit)
-        ErrorsOccurred  = 0x04,  ///< Error occurred (unsigned 32-bit)
-        CurrentPosition = 0x22,  ///< Current position (signed 32-bit)
-        CurrentVelocity = 0x26,  ///< Current velocity (signed 32-bit)
-        InputState      = 0x4C,  ///< Input state (unsigned 8-bit)
+        Reset             = 0,
+        DeEnergize        = 2,
+        SoftError         = 4,
+        WaitingForErrLine = 6,
+        StartingUp        = 8,
+        Normal            = 10
     };
+
+    /// State flags
+    enum StateFlags : uint8_t
+    {
+        Energized          = 0x01,  ///< Motor is energized
+        PositionUncertain  = 0x02,  ///< Position is uncertain
+        ForwardLimitActive = 0x04,  ///< One of the forward limit switches is active
+        ReverseLimitActive = 0x08,  ///< One of the reverse limit switches is active
+        HomingActive       = 0x10,  ///< Homing active
+    };
+
+    /// Motion planning mode
+    enum PlanningMode : uint8_t
+    {
+        Off            = 0,  ///< No planning currently processed
+        TargetPosition = 1,  ///< Target position
+        TargetVelocity = 2,  ///< Target velocity
+    };
+
+    /// Contains the current controller state
+    struct State
+    {
+        uint8_t  operationState  = 0;  ///< Current operation state
+        uint8_t  miscFlags       = 0;  ///< Misc set flags
+        uint16_t errorStatus     = 0;  ///< Current error set
+        uint32_t errorsOccurred  = 0;  ///< Indicate the errors set since last error clear!
+        uint8_t  reserved        = 0;
+        uint8_t  planningMode    = 0;  ///< Planning mode
+        int32_t  targetPosition  = 0;  ///< Target position
+        int32_t  targetVelocity  = 0;  ///< Target velocity
+        uint32_t startingSpeed   = 0;  ///< Starting speed
+        uint32_t maxSpeed        = 0;  ///< Maximum speed
+        uint32_t maxDeceleration = 0;  ///< Maximum deceleration
+        uint32_t maxAcceleration = 0;  ///< Maximum acceleration
+        int32_t  currentPosition = 0;  ///< Current position
+        int32_t  currentVelocity = 0;  ///< Current velocity
+
+        bool isEnergized()
+        {
+            return ((miscFlags & StateFlags::Energized) != 0);
+        }
+
+        bool isPositionUncertain()
+        {
+            return ((miscFlags & StateFlags::PositionUncertain) != 0);
+        }
+    } PACKED;
 
     /**
      * @brief This command sets the target position of the Tic, in microsteps.
@@ -254,26 +307,15 @@ public:
     bool setStepMode(StepMode stepMode);
 
     /**
-     * @brief This command reads a block of data from the Tic’s variables; the block starts from the
-     * specified offset and can have a variable length
-     *
-     * @param variableOff Offset type of the variable to read out.
-     * @param receiveData Buffer for the received data.
+     * @brief This command temporarily sets the stepper motor coil current limit of the driver on the
+     * Tic. The provided value will override the corresponding setting from the Tic’s non-volatile memory
+     * until the next Reset (or Reinitialize) command or full microcontroller reset.
+     * 
+     * @param currentLimit Current limit to be set (7-bit) in milli-Amper (mA).
      * @return true if succeeded
      * @return false if failed
      */
-    bool getVariable(VariableOffset variableOff, ByteBuffer& receiveData);
-
-    /**
-     * @brief This command is identical to the Get variable command, except that it also clears the
-     * “Errors occurred” variable at the same time.
-     *
-     * @param variableOff Offset type of the variable to read out.
-     * @param receiveData Buffer for the received data.
-     * @return true if succeeded
-     * @return false if failed
-     */
-    bool getVariableAndClearErrors(VariableOffset variableOff, ByteBuffer& receiveData);
+    bool setCurrentLimit(uint16_t currentLimit);
 
     /**
      * @brief Checks if an error condition occurred.
@@ -282,6 +324,44 @@ public:
      * @return false No error condition occurred.
      */
     bool checkError();
+
+    /**
+     * @brief Requests the current state from the controller
+     *
+     * @param[out] state Current state
+     * @return true if succeeded
+     * @return false if failed
+     */
+    bool getState(State& state) const;
+
+    /**
+     * @brief Logs the passed state.
+     *
+     * @param state State to be shown.
+     */
+    void showState(const State& state) const;
+
+    /**
+     * @brief This command reads a block of data from the Tic’s variables; the block starts from the
+     * specified offset and can have a variable length
+     *
+     * @param variableOff Offset of the variable to read out.
+     * @param receiveData Buffer for the received data.
+     * @return true if succeeded
+     * @return false if failed
+     */
+    bool getVariable(Byte variableOff, ByteBuffer& receiveData) const;
+
+    /**
+     * @brief This command is identical to the Get variable command, except that it also clears the
+     * “Errors occurred” variable at the same time.
+     *
+     * @param variableOff Offset of the variable to read out.
+     * @param receiveData Buffer for the received data.
+     * @return true if succeeded
+     * @return false if failed
+     */
+    bool getVariableAndClearErrors(Byte variableOff, ByteBuffer& receiveData) const;
 
 private:
     bool runSimpleCommand(Byte commandId);
