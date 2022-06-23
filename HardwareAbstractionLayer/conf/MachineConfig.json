@@ -3,26 +3,26 @@
         "gpio-control": {
             "device": "gpiochip0",
             "gpio-pin-enabled": [
+                "relay-switch-fan-feeder",
+                "relay-switch-fan-merger",
                 "relay-switch-heater-feeder",
                 "relay-switch-heater-merger",
                 "relay-switch-light-run",
-                "relay-switch-light-on",
+                "relay-switch-light-power",
                 "relay-switch-light-ready",
                 "signal-button-start",
                 "signal-button-stop",
                 "signal-filament-tension-low",
                 "signal-filament-tension-high",
-                "adc-control-chipselect",
-                "adc-control-data-ready",
-                "adc-control-reset",
+                "temperature-sensor-control-cs-feeder",
+                "temperature-sensor-control-cs-merger",
                 "motor-control-error",
                 "motor-control-reset"
             ],
             "gpio-pin": {
-                "relay-switch-light-run": {
+                "relay-switch-heater-merger": {
                     "pin": 4,
-                    "direction": "out",
-                    "state": "low"
+                    "direction": "out"
                 },
                 "signal-button-start": {
                     "pin": 5,
@@ -46,42 +46,46 @@
                     "pin": 16,
                     "direction": "in"
                 },
-                "adc-control-data-ready": {
+                "relay-switch-light-run": {
                     "pin": 17,
-                    "direction": "in",
-                    "active-high": false
+                    "direction": "out"
+                },
+                "relay-switch-light-ready": {
+                    "pin": 18,
+                    "direction": "out"
                 },
                 "motor-control-reset": {
                     "pin": 19,
                     "direction": "out"
                 },
-                "adc-control-reset": {
-                    "pin": 18,
-                    "direction": "out",
-                    "active-high": false
-                },
-                "relay-switch-heater-merger": {
+                "relay-switch-fan-merger": {
                     "pin": 20,
                     "direction": "out"
                 },
-                "relay-switch-light-on": {
+                "relay-switch-heater-feeder": {
                     "pin": 21,
-                    "direction": "out",
-                    "state": "high"
+                    "direction": "out"
                 },
-                "adc-control-chipselect": {
+                "temperature-sensor-control-cs-merger": {
                     "pin": 22,
                     "direction": "out",
                     "active-high": false,
+                    "state": "low"
+                },
+                "relay-switch-light-power": {
+                    "pin": 24,
+                    "direction": "out",
                     "state": "high"
                 },
-                "relay-switch-light-ready": {
-                    "pin": 24,
-                    "direction": "out"
-                },
-                "relay-switch-heater-feeder": {
+                "relay-switch-fan-feeder": {
                     "pin": 26,
                     "direction": "out"
+                },
+                "temperature-sensor-control-cs-feeder": {
+                    "pin": 27,
+                    "direction": "out",
+                    "active-high": false,
+                    "state": "low"
                 }
             }
         },
@@ -102,58 +106,18 @@
                 }
             }
         },
-        "adc-control": {
+        "temperature-sensor-control": {
             "device": "spidev0.0",
-            "adc-enabled": [
-                "temperature-feeder",
-                "temperature-merger",
-                "reference-2_5v",
-                "reference-5v",
-                "reference-0v"
+            "temperature-sensor-enabled": [
+                "temperature-sensor-feeder",
+                "temperature-sensor-merger"
             ],
-            "adc": {
-                "temperature-feeder": {
-                    "channel": 0,
-                    "adc-filter": "ntc-temperature"
+            "temperature-sensor": {
+                "temperature-sensor-feeder": {
+                    "chip-select": "temperature-sensor-control-cs-feeder"
                 },
-                "temperature-merger": {
-                    "channel": 1,
-                    "adc-filter": "ntc-temperature"
-                },
-                "reference-2_5v": {
-                    "channel": 2,
-                    "adc-filter": "voltage"
-                },
-                "reference-5v": {
-                    "channel": 3,
-                    "adc-filter": "voltage"
-                },
-                "reference-0v": {
-                    "channel": 4,
-                    "adc-filter": "voltage"
-                }
-            },
-            "adc-filter-enabled": [
-                "ntc-temperature",
-                "voltage-divider",
-                "voltage"
-            ],
-            "adc-filter": {
-                "ntc-temperature": {
-                    "ref-voltage": 4990,
-                    "resistance": 100000,
-                    "divider-resistance": 100000,
-                    "translation": "ntc-100k-temperature"
-                },
-                "voltage-divider": {
-                    "ref-voltage": 4990,
-                    "resistance": 100000,
-                    "divider-resistance": 100000,
-                    "translation": "voltage-divider-resistance"
-                },
-                "voltage": {
-                    "ref-voltage": 4990,
-                    "translation": "voltage"
+                "temperature-sensor-merger": {
+                    "chip-select": "temperature-sensor-control-cs-merger"
                 }
             }
         }

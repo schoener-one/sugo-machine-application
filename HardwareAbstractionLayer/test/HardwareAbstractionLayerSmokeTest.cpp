@@ -18,11 +18,10 @@
 #include "Configuration.hpp"
 #include "ConfigurationFileParser.hpp"
 #include "HardwareAbstractionLayer.hpp"
-#include "IAdcControl.hpp"
-#include "IAdcFilter.hpp"
-#include "IAdcInput.hpp"
 #include "IGpioControl.hpp"
 #include "IGpioPin.hpp"
+#include "ITemperatureSensor.hpp"
+#include "ITemperatureSensorControl.hpp"
 #include "Logger.hpp"
 
 using namespace sugo::hal;
@@ -54,6 +53,7 @@ protected:
         parser.add(m_configuration);
 
         ASSERT_TRUE(parser.parse());
+        ASSERT_TRUE(m_hal.init(m_configuration));
     }
 
     void TearDown() override
@@ -62,21 +62,19 @@ protected:
 
     constexpr static char m_configFile[] = "HardwareAbstractionLayer/conf/MachineConfig.json";
 
-    Configuration m_configuration;
+    Configuration            m_configuration;
+    HardwareAbstractionLayer m_hal;
 };
 
 TEST_F(HardwareAbstractionLayerSmokeTest, Test_GpioControl)
 {
-    HardwareAbstractionLayer hal;
-    EXPECT_TRUE(hal.init(m_configuration));
-
     // GPIO control
-    auto& gpioControl = hal.getGpioControllerMap().at("gpio-control");
+    auto& gpioControl = m_hal.getGpioControllerMap().at("gpio-control");
     EXPECT_TRUE(gpioControl);
     // GPIO in-pins
-    for (auto& pin : std::vector<std::string>{
-             "signal-button-start", "signal-button-stop", "signal-filament-tension-low",
-             "signal-filament-tension-high", "adc-control-data-ready", "motor-control-error"})
+    for (const std::string pin :
+         {"signal-button-start", "signal-button-stop", "signal-filament-tension-low",
+          "signal-filament-tension-high", "motor-control-error"})
     {
         std::cout << "GPIO IN pin: " << pin << std::endl;
         auto& gpioInPin = gpioControl->getGpioPinMap().at(pin);
@@ -85,17 +83,17 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_GpioControl)
         std::cout << "GPIO IN pin state: " << gpioInPin->getState() << std::endl;
     }
     // GPIO out-pins
-    for (auto& pin : std::vector<std::string>{
-             "relay-switch-heater-feeder", "relay-switch-heater-merger", "relay-switch-light-run",
-             "relay-switch-light-on", "relay-switch-light-ready", "adc-control-chipselect",
-             "adc-control-reset", "motor-control-reset"})
+    for (const std::string pin :
+         {"relay-switch-fan-feeder", "relay-switch-fan-merger", "relay-switch-heater-feeder",
+          "relay-switch-heater-merger", "relay-switch-light-power", "relay-switch-light-run",
+          "relay-switch-light-ready"})
     {
         std::cout << "GPIO OUT pin: " << pin << std::endl;
-        auto& gpioInPin = gpioControl->getGpioPinMap().at(pin);
-        EXPECT_TRUE(gpioInPin);
-        EXPECT_EQ(gpioInPin->getDirection(), IGpioPin::Direction::Out);
-        auto gpioState = gpioInPin->getState();
-        if ((pin == "relay-switch-light-on") || (pin == "motor-control-reset"))
+        auto& gpioOutPin = gpioControl->getGpioPinMap().at(pin);
+        EXPECT_TRUE(gpioOutPin);
+        EXPECT_EQ(gpioOutPin->getDirection(), IGpioPin::Direction::Out);
+        auto gpioState = gpioOutPin->getState();
+        if (pin == "relay-switch-light-power")
         {
             EXPECT_EQ(gpioState, IGpioPin::State::High);
         }
@@ -103,26 +101,27 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_GpioControl)
         {
             EXPECT_EQ(gpioState, IGpioPin::State::Low);
         }
+        IGpioPin::State nextState =
+            gpioState == IGpioPin::State::Low ? IGpioPin::State::High : IGpioPin::State::Low;
+        EXPECT_TRUE(gpioOutPin->setState(nextState));
+        EXPECT_EQ(nextState, gpioOutPin->getState());
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        nextState =
+            gpioState == IGpioPin::State::Low ? IGpioPin::State::Low : IGpioPin::State::High;
+        EXPECT_TRUE(gpioOutPin->setState(nextState));
     }
-    auto& gpioSigLightRun = gpioControl->getGpioPinMap().at("relay-switch-light-run");
-    EXPECT_TRUE(gpioSigLightRun);
-    EXPECT_EQ(gpioSigLightRun->getDirection(), IGpioPin::Direction::Out);
-    EXPECT_TRUE(gpioSigLightRun->setState(IGpioPin::State::High));
-    EXPECT_TRUE(gpioSigLightRun->setState(IGpioPin::State::Low));
 }
 
 TEST_F(HardwareAbstractionLayerSmokeTest, Test_MotorControl)
 {
-    HardwareAbstractionLayer hal;
-    EXPECT_TRUE(hal.init(m_configuration));
     // Stepper motor control
-    auto& stepperMotorControl = hal.getStepperMotorControllerMap().at("stepper-motor-control");
+    auto& stepperMotorControl = m_hal.getStepperMotorControllerMap().at("stepper-motor-control");
     EXPECT_TRUE(stepperMotorControl);
     const unsigned    maxSpeed      = 100u;
     constexpr int32_t stepsPerRound = 1600;
 
     // Stepper motors
-    for (auto& motorName : std::vector<std::string>{"feeder", "coiler"})
+    for (const std::string motorName : {"feeder", "coiler"})
     {
         std::cout << "Stepper motor: " << motorName << std::endl;
         auto& stepperMotor = stepperMotorControl->getStepperMotorMap().at(motorName);
@@ -161,5 +160,21 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_MotorControl)
         EXPECT_TRUE(stepperMotor->stop(false));
         std::this_thread::sleep_for(std::chrono::seconds(1));
         EXPECT_EQ(stepperMotor->getSpeed().getValue(), 0);
+    }
+}
+
+TEST_F(HardwareAbstractionLayerSmokeTest, Test_TemperatureSensorControl)
+{
+    auto& tempSensorControl =
+        m_hal.getTemperatureSensorControllerMap().at("temperature-sensor-control");
+    EXPECT_TRUE(tempSensorControl);
+
+    for (const std::string sensorName : {"temperature-sensor-feeder", "temperature-sensor-merger"})
+    {
+        auto& tempSensor = tempSensorControl->getTemperatureSensorMap().at(sensorName);
+        EXPECT_TRUE(tempSensor);
+        const auto temperature = tempSensor->getTemperature();
+        EXPECT_EQ(temperature.getUnit(), Unit::Celcius);
+        EXPECT_NEAR(temperature.getValue(), 25, 10);
     }
 }

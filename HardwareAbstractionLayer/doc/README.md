@@ -22,8 +22,8 @@ The main board supports the following interfaces.
 |-----------|---------------------------------|
 | Ethernet  | -                               |
 | I2C       | stepper motor controller boards (1/2) |
-| SPI       | ADC board                       |
-| GPIO      | relay board, signal input board, ADC board control |
+| SPI       | SPI RTD temperature sensor board |
+| GPIO      | relay board, signal input board, SPI RTD temperature sensor board control |
 | USB       | -                               |
 | UART      | control host                    |
 |||
@@ -34,26 +34,26 @@ The I2C, SPI and UART interfaces are provided over the GPIO pin header.
 
 | Pin | Name      | Connection                       | \| | Connection                       |   Name | Pin |
 |:----|:----------|:---------------------------------|:--:|---------------------------------:|-------:|----:|
-| 01  | 3.3V DC   |                                  | \| | signal-board-dc                  | 5V DC   | 02 |
+| 01  | 3.3V DC   | motor-control-dc                 | \| | signal-board-dc                  | 5V DC   | 02 |
 | 03  | SDA1 (I2C)| motor-control-i2c-sda            | \| | relay-board-dc                   | 5V DC   | 04 |
 | 05  | SCL1 (I2C)| motor-control-i2c-scl            | \| | serial-com-gnd                   | GND     | 06 |
-| 07  | GPIO 04   | relay-switch-light-run (out)     | \| | serial-com-txd                   | TXD     | 08 |
+| 07  | GPIO 04   | relay-switch-heater-merger (out) | \| | serial-com-txd                   | TXD     | 08 |
 | 09  | GND       | signal-board-gnd                 | \| | serial-com-rxd                   | RXD     | 10 |
-| 11  | GPIO 17   | adc-control-data-ready (in)      | \| | adc-control-reset (out)          | GPIO 18 | 12 |
-| 13  | GPIO 27   |                                  | \| | relay-board                      | GND     | 14 |
-| 15  | GPIO 22   | adc-control-chipselect (out)     | \| |                                  | GPIO 23 | 16 |
-| 17  | 3.3V DC   |                                  | \| | relay-switch-light-ready (out)   | GPIO 24 | 18 |
-| 19  | MOSI (SPI)|                                  | \| |                                  | GND     | 20 |
-| 21  | MISO (SPI)|                                  | \| | _reserved-for-enc28J60_ (in)     | GPIO 25 | 22 |
-| 23  | CLK (SPI) |                                  | \| |                                  | GPIO 08 | 24 |
-| 25  | GND       |                                  | \| |                                  | GPIO 07 | 26 |
+| 11  | GPIO 17   | relay-switch-light-run (out)     | \| | relay-switch-light-ready (out)   | GPIO 18 | 12 |
+| 13  | GPIO 27   | temperature-sensor-control-cs-feeder (out)  | \| | relay-board           | GND     | 14 |
+| 15  | GPIO 22   | temperature-sensor-control-cs-merger (out)  | \| |                       | GPIO 23 | 16 |
+| 17  | 3.3V DC   | temperature-sensor-control-dc    | \| | relay-switch-light-power (out)   | GPIO 24 | 18 |
+| 19  | MOSI (SPI)| temperature-sensor-control-spi-sdi  | \| |                               | GND     | 20 |
+| 21  | MISO (SPI)| temperature-sensor-control-spi-sdo  | \| | _reserved-for-enc28J60_ (in)  | GPIO 25 | 22 |
+| 23  | CLK (SPI) | temperature-sensor-control-spi-clk  | \| |                               | GPIO 08 | 24 |
+| 25  | GND       | temperature-sensor-control-gnd   | \| |                                  | GPIO 07 | 26 |
 | 27  | ID_SD     |                                  | \| |                                  | ID_SC   | 28 |
 | 29  | GPIO 05   | signal-button-start (in)         | \| |                                  | GND     | 30 |
 | 31  | GPIO 06   | signal-button-stop (in)          | \| | signal-filament-tension-low (in) | GPIO 12 | 32 |
 | 33  | GPIO 13   | motor-control-error (in)         | \| |                                  | GND     | 34 |
 | 35  | GPIO 19   | motor-control-reset (out)        | \| | signal-filament-tension-high (in)| GPIO 16 | 36 |
-| 37  | GPIO 26   | relay-switch-heater-feeder (out) | \| | relay-switch-heater-merger (out) | GPIO 20 | 38 |
-| 39  | GND       |                                  | \| | relay-switch-light-on (out)      | GPIO 21 | 40 |
+| 37  | GPIO 26   | relay-switch-fan-feeder (out)    | \| | relay-switch-fan-merger (out)    | GPIO 20 | 38 |
+| 39  | GND       | motor-control-gnd                | \| | relay-switch-heater-feeder (out) | GPIO 21 | 40 |
 |||||||
 
 ### UART console interface
@@ -86,13 +86,13 @@ of different devices like heater and signal lights.
 
 | Channel | Device           | Device type     | Voltage (out) | Power (out) | Color  |
 |---------|------------------|-----------------|---------------|-------------|--------|
-| 0       | heater-feeder    | filament heater | 12V           | 40W         | red    |
-| 1       | heater-merger    | filament heater | 12V           | 40W         | orange |
-| 2       | light-power      | LED light       | 3.3V          | -           | yellow |
-| 3       | light-run        | LED light       | 3.3V          | -           | green  |
-| 4       | light-ready      | LED light       | 3.3V          | -           | blue   |
-| 5       | _unused_         |                 |               |             | violet |
-| 6       | _unused_         |                 |               |             | gray   |
+| 0       | fan-feeder       | fan             | 12V           | ?W          | red    |
+| 1       | fan-merger       | fan             | 12V           | ?W          | orange |
+| 2       | heater-feeder    | filament heater | 12V           | 40W         | yellow |
+| 3       | heater-merger    | filament heater | 12V           | 40W         | green  |
+| 4       | light-power      | LED light       | 3.3V          | -           | blue   |
+| 5       | light-run        | LED light       | 3.3V          | -           | violet |
+| 6       | light-ready      | LED light       | 3.3V          | -           | gray   |
 | 7       | _unused_         |                 |               |             | white  |
 | GND     | ground           |                 |               |             | black  |
 | DC      | power-supply 5V  |                 |               |             | brown  |
@@ -130,8 +130,8 @@ main board from over voltage damages.
 | 5       | _unused_              |             | violet |
 | 6       | _unused_              |             | gray   |
 | 7       | _unused_              |             | white  |
-| GND     | ground                |             | black  |
-| DC      | power-supply 3.3V     |             | brown  |
+| GND     | gnd                   |             | brown  |
+| DC      | power-supply 5V       |             | black  |
 |||||
 
 ### Button
@@ -139,38 +139,30 @@ main board from over voltage damages.
 Simple press button device for interaction with the user.
 
 ---
-## ADC board
+## SPI RTD temperature sensor board
 
-The ADC board is a [Waveshare high-precision AD Hat](Waveshare/RPi_Hight_Precision_AD_Hat/High-Precision_AD_HAT-Doc.pdf) with a
-[ADS1263](Waveshare/RPi_Hight_Precision_AD_Hat/Ads126x.pdf) chip, which supports 10 ADC channels. It is constructed as a pin
-header board which can be mounted onto the Raspberry Pi pin header. 
+The [SPI RTD temperature sensor board](Temperature_Sensor/MAX31865_RTD_Board.pdf) contains a [MAX31865](Temperature_Sensor/MAX31865.pdf) chip
+and is used to measure temperatures on a [PT100 sensor](Temperature_Sensor/ETP-RT-4-24-PT100B.pdf). 
 
 **Properties:**
 
-* Board power supply: 5V (RPI 5V out)
-* 10 high-precision ADC channels
-* Voltage range: 0V - 5V
-* ADC resolution: 32 bit
-* Max. sample rate: 38kSPS
+* Board power supply: 3-5V (RPI 5V out)
+* Sensor types: PT100 (2/3/4 wire)
+* Communication: SPI
 
-**Channel occupancy:**
+**PINs:**
 
-| Channel | Device                 | Device type            | Color  |
-|---------|------------------------|------------------------|--------|
-| AVSS    |                        | 0V  reference          | black  |
-| AVDD    |                        | +5V reference          | white  |
-| 0       | temperature-feeder     | NTC-3950 100K temperature sensor | green  |
-| 1       | temperature-merger     | NTC-3950 100K temperature sensor | blue   |
-| 2       | reference-2_5v         | +2.5V reference voltage| violet |
-| 3       | reference-5v           | +5V reference voltage  | gray   |
-| 4       | reference-0v           | 0V reference voltage   | -      |
-| 5       | _unused_               |                        |        |
-| 6       | _unused_               |                        |        |
-| 7       | _unused_               |                        |        |
-| 8       | _unused_               |                        |        |
-| 9       | _unused_               |                        |        |
+| PIN     | Connection              | Color  |
+|---------|-------------------------|--------|
+| 0       | power-supply 3.3V (VIN) | white  |
+| 1       | gnd                     | gray   |
+| 2       | _unused_                | -      |
+| 3       | spi-clk                 | violet |
+| 4       | spi-sdo                 | blue   |
+| 5       | spi-sdi                 | green  |
+| 6       | cs                      | yellow |
+| 7       | _unused_                | white  |
 |||||
-
 
 ---
 ## Stepper motor control board

@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include "IAdcFilter.hpp"
 #include "IHalObject.hpp"
 #include "UnitValue.hpp"
 
@@ -20,30 +19,28 @@ namespace sugo::hal
  * @brief Interface class for analog input devices.
  *
  */
-class IAdcInput : public IHalObject
+class ITemperatureSensor : public IHalObject
 {
 public:
+    /// Raw value type
+    using RawValueType = int32_t;
+    /// Translated value type
+    using ValueType = UnitValue<RawValueType>;
+
     /**
-     * @brief Destroy the IAdcInput object.
+     * @brief Destroy the ITemperatureSensor object.
      *
      */
-    virtual ~IAdcInput()
+    virtual ~ITemperatureSensor()
     {
     }
 
     /**
-     * @brief Returns the raw ADC value
-     *
-     * @return IAdcFilter::AdcValueType Raw ADC value
-     */
-    virtual IAdcFilter::RawValueType getRawValue() const = 0;
-
-    /**
      * @brief Returns a unit translated value according to the used filter.
      *
-     * @return IAdcFilter::ValueType Unit translated value.
+     * @return ValueType Unit translated value.
      */
-    virtual IAdcFilter::ValueType getUnitValue() const = 0;
+    virtual ValueType getTemperature() const = 0;
 
 protected:
     using IHalObject::IHalObject;

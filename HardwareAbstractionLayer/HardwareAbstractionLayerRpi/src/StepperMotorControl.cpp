@@ -17,6 +17,11 @@
 
 using namespace sugo::hal;
 
+StepperMotorControl::~StepperMotorControl()
+{
+    finalize();
+}
+
 bool StepperMotorControl::init(const IConfiguration& configuration)
 {
     assert(m_i2c == nullptr);

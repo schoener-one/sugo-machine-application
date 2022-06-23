@@ -23,6 +23,11 @@ public:
 
 using namespace sugo::hal;
 
+StepperMotorControl::~StepperMotorControl()
+{
+    finalize();
+}
+
 bool StepperMotorControl::init(const IConfiguration& configuration)
 {
     static I2cControl s_i2cControlDummy;

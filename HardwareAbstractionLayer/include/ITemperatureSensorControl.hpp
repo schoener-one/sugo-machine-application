@@ -14,7 +14,7 @@
 #include <memory>
 #include <string>
 
-#include "IAdcInput.hpp"
+#include "ITemperatureSensor.hpp"
 #include "IHalObject.hpp"
 
 namespace sugo::hal
@@ -23,26 +23,26 @@ namespace sugo::hal
  * @brief Interface class for ADC input devices.
  *
  */
-class IAdcControl : public IHalObject
+class ITemperatureSensorControl : public IHalObject
 {
 public:
     /// ADC input map
-    using AdcInputMap = IHalObject::Map<IAdcInput>;
+    using TemperatureSensorMap = IHalObject::Map<ITemperatureSensor>;
 
     /**
-     * @brief Destroy the IAdcControl object.
+     * @brief Destroy the ITemperatureSensorControl object.
      *
      */
-    virtual ~IAdcControl()
+    virtual ~ITemperatureSensorControl()
     {
     }
 
     /**
      * @brief Returns a map of available ADC inputs
      *
-     * @return const AdcInputMap& Map of available ADC inputs
+     * @return const TemperatureSensorMap& Map of available ADC inputs
      */
-    virtual const AdcInputMap& getAdcInputMap() = 0;
+    virtual const TemperatureSensorMap& getTemperatureSensorMap() = 0;
 
 protected:
     using IHalObject::IHalObject;

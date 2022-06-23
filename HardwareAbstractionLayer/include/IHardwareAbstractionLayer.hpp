@@ -14,7 +14,7 @@
 #include <memory>
 #include <string>
 
-#include "IAdcControl.hpp"
+#include "ITemperatureSensorControl.hpp"
 #include "IConfiguration.hpp"
 #include "IGpioControl.hpp"
 #include "IHalObject.hpp"
@@ -35,7 +35,7 @@ public:
     using StepperMotorControllerMap =
         std::map<IHalObject::Identifier, std::unique_ptr<IStepperMotorControl>>;
     /// ADC input controller map
-    using AdcControllerMap = std::map<IHalObject::Identifier, std::unique_ptr<IAdcControl>>;
+    using TemperatureSensorControllerMap = std::map<IHalObject::Identifier, std::unique_ptr<ITemperatureSensorControl>>;
 
     /**
      * @brief Destroy the IHardwareAbstractionLayer object
@@ -69,9 +69,9 @@ public:
     /**
      * @brief Returns a map of available ADC controllers.
      *
-     * @return const AdcControllerMap& Map of available controllers.
+     * @return const TemperatureSensorControllerMap& Map of available controllers.
      */
-    virtual const AdcControllerMap& getAdcControllerMap() const = 0;
+    virtual const TemperatureSensorControllerMap& getTemperatureSensorControllerMap() const = 0;
 
 protected:
     using IHalObject::IHalObject;

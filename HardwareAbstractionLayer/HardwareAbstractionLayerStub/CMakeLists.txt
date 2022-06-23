@@ -3,10 +3,10 @@
 
 add_library (HardwareAbstractionLayer STATIC 
     src/GpioControl.cpp
-    src/AdcControl.cpp
+    src/TemperatureSensorControl.cpp
     src/StepperMotorControl.cpp
     src/GpioPin.cpp
-    src/AdcInput.cpp
+    src/TemperatureSensor.cpp
     src/StepperMotor.cpp
     )
 target_include_directories (HardwareAbstractionLayer PRIVATE

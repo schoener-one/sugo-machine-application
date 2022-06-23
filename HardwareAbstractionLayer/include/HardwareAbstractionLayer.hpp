@@ -37,15 +37,15 @@ public:
         return m_stepperMotorControllerMap;
     }
 
-    const AdcControllerMap& getAdcControllerMap() const override
+    const TemperatureSensorControllerMap& getTemperatureSensorControllerMap() const override
     {
-        return m_adcControllerMap;
+        return m_temperatureSensorControllerMap;
     }
 
 private:
-    GpioControllerMap         m_gpioControllerMap;
-    StepperMotorControllerMap m_stepperMotorControllerMap;
-    AdcControllerMap          m_adcControllerMap;
+    GpioControllerMap              m_gpioControllerMap;
+    StepperMotorControllerMap      m_stepperMotorControllerMap;
+    TemperatureSensorControllerMap m_temperatureSensorControllerMap;
 };
 
 }  // namespace sugo::hal

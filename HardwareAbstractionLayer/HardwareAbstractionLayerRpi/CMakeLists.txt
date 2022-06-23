@@ -3,12 +3,12 @@
 
 add_library (HardwareAbstractionLayer STATIC 
     src/GpioControl.cpp
-    src/AdcControl.cpp
+    src/TemperatureSensorControl.cpp
     src/StepperMotorControl.cpp
     src/GpioPin.cpp
-    src/AdcInput.cpp
+    src/TemperatureSensor.cpp
     src/StepperMotor.cpp
-    src/AdcHat.cpp
+    src/Max31865.cpp
     src/SpiControl.cpp
     src/I2cControl.cpp
     src/TicController.cpp

@@ -29,7 +29,8 @@ public:
         : IStepperMotorControl(id), m_ioErr(ioErr), m_ioRst(ioRst)
     {
     }
-
+    ~StepperMotorControl() override;
+    
     bool init(const IConfiguration& configuration) override;
 
     void finalize();

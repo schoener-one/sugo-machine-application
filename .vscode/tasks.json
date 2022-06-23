@@ -127,9 +127,13 @@
             ]
         },
         {
-            "label": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest",
+            "label": "remote-start-HardwareAbstractionLayerSmokeTest.GpioControl",
             "type": "shell",
-            "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest --gtest_filter=HardwareAbstractionLayerSmokeTest.Test_MotorControl\"",
+            "command": [
+                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_GpioControl\""
+            ],
             "dependsOn": [
                 "remote-gdbserver-killall",
                 "remote-upload-HardwareAbstractionLayerSmokeTest",
@@ -139,9 +143,67 @@
             "isBackground": false
         },
         {
-            "label": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest-direct",
+            "label": "remote-start-HardwareAbstractionLayerSmokeTest.GpioControl-direct",
             "type": "shell",
-            "command": "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest --gtest_filter=HardwareAbstractionLayerSmokeTest.Test_MotorControl\"",
+            "command": [
+                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_GpioControl\""
+            ],
+            "dependsOrder": "sequence",
+            "isBackground": false
+        },
+        {
+            "label": "remote-start-HardwareAbstractionLayerSmokeTest.MotorControl",
+            "type": "shell",
+            "command": [
+                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_MotorControl\""
+            ],
+            "dependsOn": [
+                "remote-gdbserver-killall",
+                "remote-upload-HardwareAbstractionLayerSmokeTest",
+                "remote-upload-MachineConfig"
+            ],
+            "dependsOrder": "sequence",
+            "isBackground": false
+        },
+        {
+            "label": "remote-start-HardwareAbstractionLayerSmokeTest.MotorControl-direct",
+            "type": "shell",
+            "command": [
+                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_MotorControl\""
+            ],
+            "dependsOrder": "sequence",
+            "isBackground": false
+        },
+        {
+            "label": "remote-start-HardwareAbstractionLayerSmokeTest.TemperatureSensorControl",
+            "type": "shell",
+            "command": [
+                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_TemperatureSensorControl\""
+            ],
+            "dependsOn": [
+                "remote-gdbserver-killall",
+                "remote-upload-HardwareAbstractionLayerSmokeTest",
+                "remote-upload-MachineConfig"
+            ],
+            "dependsOrder": "sequence",
+            "isBackground": false
+        },
+        {
+            "label": "remote-start-HardwareAbstractionLayerSmokeTest.TemperatureSensorControl-direct",
+            "type": "shell",
+            "command": [
+                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_TemperatureSensorControl\""
+            ],
             "dependsOrder": "sequence",
             "isBackground": false
         }

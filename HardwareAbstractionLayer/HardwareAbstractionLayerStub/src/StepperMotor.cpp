@@ -12,6 +12,10 @@
 #include "IConfiguration.hpp"
 #include "Logger.hpp"
 
+namespace
+{
+    sugo::hal::IStepperMotor::Position s_curPosition = 0;
+}
 using namespace sugo::hal;
 
 StepperMotor::~StepperMotor()
@@ -27,7 +31,7 @@ bool StepperMotor::init(const sugo::IConfiguration& configuration)
         configuration.getOption("max-speed-rpm").get<unsigned>(), Unit::Rpm);
     LOG(debug) << getId() << ".i2c-address: " << address;
     LOG(debug) << getId() << ".max-speed-rpm: " << m_maxSpeed.getValue();
-    m_curPosition = 0;
+    s_curPosition = 0;
     return true;
 }
 
@@ -37,7 +41,7 @@ void StepperMotor::finalize()
 
 bool StepperMotor::rotateToPosition(Position position)
 {
-    m_curPosition += position;
+    s_curPosition += position;
     return true;
 }
 
@@ -47,17 +51,23 @@ bool StepperMotor::rotate(Direction direction)
     return true;
 }
 
-bool StepperMotor::stop()
+bool StepperMotor::stop(bool stopImmediately)
 {
+    (void)stopImmediately;
     return true;
 }
 
-StepCount StepperMotor::getMicroStepCount() const
+StepperMotor::Position StepperMotor::getPosition() const
+{
+    return s_curPosition;
+}
+
+StepperMotor::StepCount StepperMotor::getMicroStepCount() const
 {
     return 1u;
 }
 
-StepCount StepperMotor::getStepsPerRound() const
+StepperMotor::StepCount StepperMotor::getStepsPerRound() const
 {
     return 200u;
 }
