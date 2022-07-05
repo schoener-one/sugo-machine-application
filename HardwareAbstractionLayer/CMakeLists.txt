@@ -18,7 +18,6 @@ endif()
 target_include_directories(HardwareAbstractionLayer PRIVATE Common/include)
 target_sources(HardwareAbstractionLayer 
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/Common/src/IHardwareAbstractionLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/src/HardwareAbstractionLayer.cpp
     )
 add_subdirectory(test)

@@ -15,7 +15,6 @@
 #include <string>
 
 #include "ITemperatureSensorControl.hpp"
-#include "IConfiguration.hpp"
 #include "IGpioControl.hpp"
 #include "IHalObject.hpp"
 #include "IStepperMotorControl.hpp"
@@ -44,13 +43,6 @@ public:
     virtual ~IHardwareAbstractionLayer()
     {
     }
-
-    /**
-     * @brief Set the Configuration object.
-     *
-     * @param configuration Configuration to be set.
-     */
-    static void setConfiguration(IConfiguration& configuration);
 
     /**
      * @brief Returns a map of available GPIO controllers.

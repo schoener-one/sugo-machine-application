@@ -71,16 +71,30 @@ to a console of the device for debugging reason.
 |||
 
 ---
-## SSR (_Solid-State-Relay_) board
+## Relay switch board
 
-The SSR board is a 8 channel solid-state-relay board, which is used to switch the power
+The relay switch board is a 8 (2 x 4) channel MOSFET board, which is used to switch the power
 of different devices like heater and signal lights.
 
 **Properties:**
 
 * Board power supply: 5V
-* 8 input channels (from main board): 0-0.5V: OFF (low) / 0.5-2.5V: ON (high)
-* 8 ouput channels of [Omron G3MB-202P](solid_state_relay/omron-g3mb-202p-ssr-datasheet.pdf) relays: 2A at 100 to 240V AC (50/60Hz)
+* 4-Channel MOS FET PLC Amplifier Board Driver Module PWM 3-20V to 3.7-27V DC 10A Optocoupler Isolation
+* Strong anti-interference ability, stable performance, input signal and output isolation.
+* Input signal: PWM signal between 3~20V
+* Output capacity: DC 3.7V~27V, current within 10A per channel
+* PWM frequency: 0~200Hz
+* Indicator light: with input signal and output indicator light
+* Size: 56 x 50 x 10mm
+
+**Connections**
+
+* DC+: The positive pole of the device's DC power supply
+* DC-: the negative pole of the device's DC power supply
+* PWM: signal input terminal (connected to MCU IO port, PLC interface, DC power supply, etc.)
+* GND: signal negative terminal
+* OUT+: Positive output terminal (connected to the positive pole of the device)
+* OUT-: The negative pole of the output terminal (connect to the negative pole of the device)
 
 **Channel occupancy:**
 

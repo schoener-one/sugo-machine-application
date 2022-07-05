@@ -49,7 +49,7 @@ protected:
         ASSERT_TRUE(inStream.is_open());
         ConfigurationFileParser parser(inStream);
 
-        IHardwareAbstractionLayer::setConfiguration(m_configuration);
+        HardwareAbstractionLayer::setConfiguration(m_configuration);
         parser.add(m_configuration);
 
         ASSERT_TRUE(parser.parse());
