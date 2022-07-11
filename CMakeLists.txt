@@ -9,6 +9,7 @@ message("Binary path: ${PROJECT_BINARY_DIR}")
 include(cmake/CompilerConfig.cmake)
 include(cmake/Coverage.cmake)
 include(cmake/Testing.cmake)
+include(cmake/GenerateServiceComponent.cmake)
 
 ## **********************************
 ## Sub directories
@@ -18,10 +19,8 @@ list(APPEND PROJECT_SUBDIRS
     ${PROJECT_SOURCE_DIR}/Protocol
     ${PROJECT_SOURCE_DIR}/MessageBroker
     ${PROJECT_SOURCE_DIR}/ServiceComponents
-    ${PROJECT_SOURCE_DIR}/MachineService
-    ${PROJECT_SOURCE_DIR}/CupRotationTray
-    ${PROJECT_SOURCE_DIR}/MachineController
-    ${PROJECT_SOURCE_DIR}/HardwareComponents
+#    ${PROJECT_SOURCE_DIR}/MachineService
+#    ${PROJECT_SOURCE_DIR}/HardwareServiceComponents
     ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer
     ${PROJECT_SOURCE_DIR}/MachineApplication
     )
@@ -35,7 +34,7 @@ include(cmake/ExternalLib.cmake)
 include(cmake/LibBoost.cmake)
 
 ## **********************************
-## The MOCO project!
+## The Sugo project!
 ##
 # TODO use automatic add_subdirectory!
 # foreach(subdir ${PROJECT_SUBDIRS})
@@ -46,10 +45,8 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/Common)
 add_subdirectory(${PROJECT_SOURCE_DIR}/Protocol)
 add_subdirectory(${PROJECT_SOURCE_DIR}/MessageBroker)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ServiceComponents)
-add_subdirectory(${PROJECT_SOURCE_DIR}/MachineService)
-add_subdirectory(${PROJECT_SOURCE_DIR}/CupRotationTray)
-add_subdirectory(${PROJECT_SOURCE_DIR}/MachineController)
-add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareComponents)
+#add_subdirectory(${PROJECT_SOURCE_DIR}/MachineService)
+#add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareServiceComponents)
 add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer)
 add_subdirectory(${PROJECT_SOURCE_DIR}/MachineApplication)
 

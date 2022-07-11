@@ -7,8 +7,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMANDID_HPP_
-#define COMMANDID_HPP_
+#pragma once
 
 #include <ostream>
 #include <string>
@@ -32,5 +31,3 @@ public:
 
 std::ostream& operator<<(std::ostream& ostr, CommandId const& commandId);
 }  // namespace sugo
-
-#endif  // COMMANDID_HPP_

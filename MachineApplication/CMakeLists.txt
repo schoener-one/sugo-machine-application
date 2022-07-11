@@ -1,19 +1,26 @@
 # CMake configuration file
-# Module: MachineApplication
-
-add_executable(MachineApplication
+# Module: ${MODULE_NAME}
+set(MODULE_NAME "MachineApplication")
+generate_service_component(
+    TARGET ${MODULE_NAME}
+    CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/MachineServiceComponents.yaml"
+    )
+add_executable(${MODULE_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineController.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineApplication.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     )
-target_include_directories (MachineApplication PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(MachineApplication
+target_include_directories (${MODULE_NAME}
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
+target_link_libraries(${MODULE_NAME}
     Common
     Protocol
     MessageBroker
     MachineService
-    CupRotationTray
     MachineController
-    HardwareComponents
+    ${MODULE_NAME}-GenLib
     HardwareAbstractionLayer
     )
     
@@ -30,7 +37,6 @@ if (NOT NO_UNITTEST)
         MessageBroker
         MessageBrokerMocks
         MachineService
-        CupRotationTray
         MachineController
         ${Protobuf_LIBRARIES}
         ${Boost_LIBRARIES}

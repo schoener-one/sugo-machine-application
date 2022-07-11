@@ -58,11 +58,11 @@ bool CommandMessageBroker::send(const message::Command& message, const std::stri
     return success;
 }
 
-bool CommandMessageBroker::notify(const message::Command& message)
+bool CommandMessageBroker::notify(const message::Command& message, const ReceiverIdList& receivers)
 {
     message::CommandResponse response;
     bool                     success = true;
-    for (auto receiverId : m_receiverIdList)
+    for (const auto& receiverId : receivers)
     {
         if (receiverId != m_receiverId)
         {

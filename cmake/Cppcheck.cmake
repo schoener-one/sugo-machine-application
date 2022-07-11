@@ -12,7 +12,7 @@ file(GLOB_RECURSE SRC_ALL
     ${PROJECT_SOURCE_DIR}/ServiceComponents/*.cpp
     ${PROJECT_SOURCE_DIR}/CupRotationTray/*.cpp
     ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer/*.cpp
-    ${PROJECT_SOURCE_DIR}/HardwareComponents/*.cpp
+    ${PROJECT_SOURCE_DIR}/HardwareServiceComponents/*.cpp
     ${PROJECT_SOURCE_DIR}/MessageBroker/*.cpp
     )
 file(GLOB_RECURSE HDR_ALL 
@@ -23,7 +23,7 @@ file(GLOB_RECURSE HDR_ALL
     ${PROJECT_SOURCE_DIR}/ServiceComponents/*.hpp
     ${PROJECT_SOURCE_DIR}/CupRotationTray/*.hpp
     ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer/*.hpp
-    ${PROJECT_SOURCE_DIR}/HardwareComponents/*.hpp
+    ${PROJECT_SOURCE_DIR}/HardwareServiceComponents/*.hpp
     ${PROJECT_SOURCE_DIR}/MessageBroker/*.hpp
     )
 
@@ -45,7 +45,7 @@ if (CPPCHECK_EXEC)
         -I ${PROJECT_SOURCE_DIR}/ServiceComponents/include
         -I ${PROJECT_SOURCE_DIR}/CupRotationTray/include
         -I ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer/include
-        -I ${PROJECT_SOURCE_DIR}/HardwareComponents/include
+        -I ${PROJECT_SOURCE_DIR}/HardwareServiceComponents/include
         -I ${PROJECT_SOURCE_DIR}/MessageBroker/include
         ${SRC_ALL}
     )

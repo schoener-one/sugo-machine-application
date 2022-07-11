@@ -1,6 +1,6 @@
-# MoCo SugoMachine Project
+# Sugo SugoMachine Project
 
-This package contains the SugoMachine project of MoCo.
+This package contains the SugoMachine project of Sugo.
 
 ## Installation
 

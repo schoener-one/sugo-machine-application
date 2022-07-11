@@ -7,8 +7,12 @@ add_library (MessageBroker STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandMessageBroker.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/IOContext.cpp
     )
-target_include_directories (MessageBroker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(MessageBroker Common Protocol)
+target_include_directories (MessageBroker PUBLIC include)
+target_link_libraries(MessageBroker
+    PUBLIC
+    Common
+    Protocol
+    )
 
 # FIXME dependency to external libraries!
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")

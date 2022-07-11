@@ -10,6 +10,16 @@
             "command": "cmake -B${config:build.directory.x86} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type} -DCODE_COVERAGE=ON"
         },
         {
+            "label": "x86_build-MachineApplication",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target MachineApplication",
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
             "label": "x86_build-HardwareAbstractionLayer",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayer",
@@ -67,9 +77,9 @@
             "command": ". ${config:sdk.env}; cmake -B${config:build.directory.rpi} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type} -DCODE_COVERAGE=ON"
         },
         {
-            "label": "rpi_build-HardwareAbstractionLayer",
+            "label": "rpi_build-HardwareAbstractionLayerTest",
             "type": "shell",
-            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target HardwareAbstractionLayer",
+            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target HardwareAbstractionLayerTest",
             "problemMatcher": {
                 "base": "$gcc",
                 "fileLocation": [ "relative", "${config:build.directory.rpi}" ]

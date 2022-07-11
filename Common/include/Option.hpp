@@ -41,7 +41,7 @@ public:
     {
     }
 
-    Option(const std::string newName, const Option& option)
+    Option(const std::string& newName, const Option& option)
         : m_description(option.m_description), m_value(option.m_value), m_name(newName)
     {
     }

@@ -21,7 +21,6 @@ namespace sugo
 {
 template <class MessageT, class ResponseT = void, class ReceiverIdT = unsigned int>
 class MessageBroker : public IMessageBroker<MessageT, ResponseT, ReceiverIdT>
-
 {
 public:
     using typename IMessageBroker<MessageT, ResponseT, ReceiverIdT>::Handler;

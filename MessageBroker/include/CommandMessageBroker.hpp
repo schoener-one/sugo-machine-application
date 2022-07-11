@@ -31,9 +31,6 @@ using CommandMessageBrokerT =
 class CommandMessageBroker : public CommandMessageBrokerT, public Server::IMessageHandler
 {
 public:
-    /// Receiver list definition.
-    using ReceiverIdList = std::list<std::string>;
-
     static std::string createAddress(const std::string& receiverId)
     {
         std::string address("inproc://");
@@ -42,17 +39,17 @@ public:
     }
 
     // cppcheck-suppress passedByValue
-    CommandMessageBroker(const std::string& receiverId, const ReceiverIdList& receiverIdList,
-                         IOContext& ioContext)
+    CommandMessageBroker(const std::string& receiverId, IOContext& ioContext)
         : CommandMessageBrokerT(),
           m_server(createAddress(receiverId), *this, ioContext),
           m_client(ioContext),
-          m_receiverId(receiverId),
-          m_receiverIdList(receiverIdList)
+          m_receiverId(receiverId)
     {
     }
 
-    ~CommandMessageBroker() {}
+    ~CommandMessageBroker()
+    {
+    }
 
     using typename CommandMessageBrokerT::Handler;
 
@@ -60,18 +57,30 @@ public:
     bool send(const message::Command& message, const std::string& receiverId,
               message::CommandResponse& response) override;
 
-    bool notify(const message::Command& message) override;
+    bool notify(const message::Command& message, const ReceiverIdList& receivers) override;
     // IMessageBroker }}
 
     // IRunnable {{
-    bool start() override { return m_server.start(); }
+    bool start() override
+    {
+        return m_server.start();
+    }
 
-    void stop() override { m_server.stop(); }
+    void stop() override
+    {
+        m_server.stop();
+    }
 
-    bool isRunning() const override { return m_server.isRunning(); }
+    bool isRunning() const override
+    {
+        return m_server.isRunning();
+    }
     // IRunnable }}
 
-    const std::string& getReceiverId() const { return m_receiverId; }
+    const std::string& getReceiverId() const
+    {
+        return m_receiverId;
+    }
 
 protected:
     // Server::IMessageHandler {{
@@ -82,7 +91,6 @@ private:
     Server               m_server;
     Client               m_client;
     const std::string    m_receiverId;
-    const ReceiverIdList m_receiverIdList;
 };
 
 }  // namespace sugo

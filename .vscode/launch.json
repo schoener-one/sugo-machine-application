@@ -5,6 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "ServiceComponentGenerator ListOnly",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponent.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/MachineApplication",
+            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "generated", "-l"]
+        },
+        {
+            "name": "ServiceComponentGenerator",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponent.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/MachineApplication",
+            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "generated"]
+        },
+        {
             "name": "Debug HAL SmokeTest",
             "type": "cppdbg",
             "request": "launch",

@@ -1,0 +1,330 @@
+components:
+  - MachineController:
+      description: "Controls the whole machine components"
+      commands:
+        - SwitchOn
+        - SwitchOff
+        - GetState
+        - FilamentMergerControl.MotorRunning
+        - FilamentMergerControl.MotorStopped
+      events:
+        - SwitchOff
+        - SwitchOn
+        - SwitchOnSucceeded
+        - SwitchOnFailed
+        - SelfTestSucceeded
+        - SelfTestFailed
+        - StartingSucceeded
+        - StartingFailed
+        - WaitForStarted
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - SelfTest
+          - Starting
+          - WaitingForStarted
+          - Running
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: Initialization
+            next: SelfTest
+            event: SwitchOnSucceeded
+            action: runSelfTest
+          - state: Initialization
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: SelfTest
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: SelfTest
+            next: Starting
+            event: SelfTestSucceeded
+            action: startMachine
+          - state: Starting
+            next: WaitingForStarted
+            event: WaitForStarted
+          - state: WaitingForStarted
+            next: WaitingForStarted
+            event: WaitForStarted
+            action: waitForStarted
+          - state: WaitingForStarted
+            next: Running
+            event: StartingSucceeded
+          - state: WaitingForStarted
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: WaitingForStarted
+            next: Error
+            event: StartingFailed
+            action: handleError
+          - state: Starting
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Running
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Starting
+            next: Error
+            event: StartingFailed
+            action: handleError
+          - state: Initialization
+            next: Error
+            event: SwitchOnFailed
+            action: handleError
+          - state: SelfTest
+            next: Error
+            event: SelfTestFailed
+            action: handleError
+          - state: Error
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+
+
+  - FilamentMergerControl:
+      description: "Basic controller for the filament merger unit"
+      commands:
+        - SwitchOn
+        - SwitchOff
+        - StartMotor
+        - StopMotor
+        - GetState
+        - GetTemperatures
+      notifications:
+        - MotorRunning
+        - MotorStopped
+      events:
+        - SwitchOff
+        - SwitchOn
+        - SwitchOnFailed
+        - SwitchOnSucceeded
+        - HeatingUpSucceeded
+        - HeatingUpFailed
+        - StartingMotorSucceeded
+        - StartingMotorFailed
+        - RunningFailed
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - HeatingUp
+          - StartingMotor
+          - Running
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: Initialization
+            next: HeatingUp
+            event: SwitchOnSucceeded
+            action: heatingUp
+          - state: HeatingUp
+            next: StartingMotor
+            event: HeatingUpSucceeded
+            action: startMotor
+          - state: HeatingUp
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: StartingMotor
+            next: Running
+            event: StartingMotorSucceeded
+          - state: StartingMotor
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Running
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: HeatingUp
+            next: Error
+            event: HeatingUpFailed
+            action: handleError
+          - state: StartingMotor
+            next: Error
+            event: StartingMotorFailed
+            action: handleError
+          - state: Running
+            next: Error
+            event: RunningFailed
+            action: handleError
+          - state: Initialization
+            next: Error
+            event: SwitchOnFailed
+            action: handleError
+          - state: Error
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+
+
+  - FilamentFeederMotor:
+      description: "Feeder motor control of the filament merger unit"
+      commands:
+        - SwitchOn
+        - SwitchOff
+        - GetState
+        - StartMotor
+        - StopMotor
+        - SetMotorSpeed
+      notifications:
+        - StartMotorSucceeded
+        - StartMotorFailed
+      events:
+        - SwitchOff
+        - SwitchOn
+        - SwitchOnFailed
+        - SwitchOnSucceeded
+        - StartMotor
+        - StartMotorSucceeded
+        - StartMotorFailed
+        - RunMotorFailed
+        - StopMotor
+        - SetMotorSpeed
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - Stopped
+          - Starting
+          - Running
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: Initialization
+            next: Stopped
+            event: SwitchOnSucceeded
+          - state: Stopped
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Stopped
+            next: Starting
+            event: StartMotor
+            action: startMotor
+          - state: Starting
+            next: Running
+            event: StartMotorSucceeded
+          - state: Starting
+            next: Error
+            event: StartMotorFailed
+            action: startMotor
+          - state: Running
+            next: Stopped
+            event: StopMotor
+            action: stopMotor
+          - state: Initialization
+            next: Error
+            event: SwitchOnFailed
+            action: handleError
+          - state: Running
+            next: Error
+            event: RunMotorFailed
+            action: handleError
+          - state: Error
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+
+
+  - FilamentPreHeater:
+      description: "Pre-heater control of the feeder merger unit"
+      commands:
+        - Unknown
+      events:
+        - Unknown
+      statemachine:
+        start: Start
+        states:
+          - Start
+        transitions:
+          - state: Start
+            next: Start
+            event: Unknown
+
+
+  - FilamentMergerHeater:
+      description: "Merger heater control of the feeder merger unit"
+      commands:
+        - Unknown
+      events:
+        - Unknown
+      statemachine:
+        start: Start
+        states:
+          - Start
+        transitions:
+          - state: Start
+            next: Start
+            event: Unknown
+
+
+  - FilamentCoilControl:
+      description: "Basic controller for the coil unit"
+      commands:
+        - SwitchOn
+        - SwitchOff
+        - StartMotor
+        - StopMotor
+        - GetState
+      events:
+        - Unknown
+      statemachine:
+        start: Start
+        states:
+          - Start
+        transitions:
+          - state: Start
+            next: Start
+            event: Unknown
+
+
+  - FilamentCoilMotor:
+      description: "Filament coil motor control of the coil control unit"
+      commands:
+        - Unknown
+      events:
+        - Unknown
+      statemachine:
+        start: Start
+        states:
+          - Start
+        transitions:
+          - state: Start
+            next: Start
+            event: Unknown
+
+
+  - FilamentStrainSensor:
+      description: "Pre-heater control of the coil control unit"
+      commands:
+        - Unknown
+      events:
+        - Unknown
+      statemachine:
+        start: Start
+        states:
+          - Start
+        transitions:
+          - state: Start
+            next: Start
+            event: Unknown

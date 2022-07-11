@@ -13,17 +13,13 @@
 #include <iostream>
 #include <string>
 
-#include "CircularMotionController.hpp"
 #include "CommandLineParser.hpp"
 #include "CommandMessageBroker.hpp"
 #include "ConfigurationFileParser.hpp"
-#include "CupRotationTray.hpp"
 #include "Globals.hpp"
-#include "IHardwareAbstractionLayer.hpp"
+#include "HardwareAbstractionLayer.hpp"
 #include "MachineController.hpp"
 #include "MachineService.hpp"
-#include "PositionSwitch.hpp"
-#include "StepperMotor.hpp"
 
 namespace po = boost::program_options;
 using namespace sugo;
@@ -55,69 +51,59 @@ bool MachineApplication::start(int argc, char const** argv)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    MachineService::setConfiguration(m_configuration);
-    CupRotationTray::setConfiguration(m_configuration);
+    // MachineService::setConfiguration(m_configuration);
+    // CupRotationTray::setConfiguration(m_configuration);
     IHardwareAbstractionLayer::setConfiguration(m_configuration);
 
     LOG(info) << "Starting SugoMachine application";
-    bool success = parseCommandLine(argc, argv);
-
-    if (success)
+    if (!parseCommandLine(argc, argv))
     {
-        success = parseConfigurationFile();
+        return false;
     }
 
-    if (success)
+    if (!parseConfigurationFile())
     {
-        IHardwareAbstractionLayer::get().init(m_configuration);
-
-        const CommandMessageBroker::ReceiverIdList notificationReceivers = {
-            ICupRotationTray::Command::ReceiverId, IMachineController::Command::ReceiverId,
-            IMachineService::Command::ReceiverId};
-
-        // CupRotationTray
-        Configuration configuration;
-        StepperMotor  stepperMotor(
-            CupRotationTray::getStepperMotorConfiguration(m_configuration, configuration));
-        CircularMotionController::PositionSwitchArray positionSwitcheArray = {
-            std::make_unique<PositionSwitch>(CupRotationTray::getGpioPin(1, m_configuration)),
-            std::make_unique<PositionSwitch>(CupRotationTray::getGpioPin(1, m_configuration)),
-            std::make_unique<PositionSwitch>(CupRotationTray::getGpioPin(1, m_configuration))};
-        CircularMotionController circularMotionController(stepperMotor, positionSwitcheArray);
-        CommandMessageBroker     cupRotationTrayMessageBroker(ICupRotationTray::Command::ReceiverId,
-                                                          notificationReceivers,
-                                                          m_ioContexts[typeid(CupRotationTray)]);
-        CupRotationTray cupRotationTray(cupRotationTrayMessageBroker, circularMotionController);
-        success = cupRotationTray.start();
-
-        // SugoMachine
-        CommandMessageBroker machineControllerMessageBroker(
-            IMachineController::Command::ReceiverId, notificationReceivers,
-            m_ioContexts[typeid(MachineController)]);
-        MachineController machineController(machineControllerMessageBroker);
-        if (success)
-        {
-            success = machineController.start();
-        }
-
-        // SugoMachineeService
-        CommandMessageBroker machineServiceMessageBroker(IMachineService::Command::ReceiverId,
-                                                         notificationReceivers,
-                                                         m_ioContexts[typeid(MachineService)]);
-        MachineService       machineService(machineServiceMessageBroker, m_configuration,
-                                      m_ioContexts[typeid(MachineService)]);
-        if (success)
-        {
-            success = machineService.start();
-        }
-
-        if (success)
-        {
-            success = run();
-        }
+        return false;
     }
 
-    return success;
+    // HardwareAbstractionLayer hal;
+    // Configuration            halConfiguration;
+    // hal.getHardwareConfiguration(m_configuration, halConfiguration);
+    // if (!hal.init(halConfiguration))
+    // {
+    //     return false;
+    // }
+
+    // ServiceLocator locator;
+    // locator.register(hal);
+
+    // SugoMachine
+    CommandMessageBroker machineControllerMessageBroker(IMachineController::Command::ReceiverId,
+                                                        m_ioContexts[typeid(MachineController)]);
+    MachineController    machineController(machineControllerMessageBroker);
+    if (!machineController.start())
+    {
+        return false;
+    }
+
+    // MachineService
+    CommandMessageBroker machineServiceMessageBroker(IMachineService::Command::ReceiverId,
+                                                     m_ioContexts[typeid(MachineService)]);
+    MachineService       machineService(machineServiceMessageBroker, m_configuration,
+                                  m_ioContexts[typeid(MachineService)]);
+    if (!machineService.start())
+    {
+        LOG(error) << "Failed to start machine service";
+        return false;
+    }
+
+    if (!run())
+    {
+        LOG(error) << "Failed to start running the application";
+        return false;
+    }
+
+    return true;
 }
 
 bool MachineApplication::run()

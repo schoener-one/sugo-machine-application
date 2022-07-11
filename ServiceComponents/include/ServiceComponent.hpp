@@ -113,7 +113,9 @@ protected:
         {
             command.set_parameters(parameters);
         }
-        return m_messageBroker.notify(command);
+        //FIXME
+        // return m_messageBroker.notify(command);
+        return true;
     }
 
     ICommandMessageBroker& getCommandMessageBroker() { return m_messageBroker; }

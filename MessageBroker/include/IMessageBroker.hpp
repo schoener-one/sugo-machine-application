@@ -11,6 +11,7 @@
 #define IMESSAGEBROKER_HPP_
 
 #include <functional>
+#include <list>
 
 #include "IRunnable.hpp"
 
@@ -31,13 +32,16 @@ protected:
 public:
     /// Handler definition which reacts to a request.
     using Handler = std::function<ResponseT(const MessageT&)>;
+    /// Receiver list definition.
+    using ReceiverIdList = std::list<ReceiverIdT>;
 
     /**
      * Notifies all receiver instances.
      * @param message Notification message.
+     * @param receivers List of receivers to be notified
      * @return true if the notification could be sent.
      */
-    virtual bool notify(const MessageT& message) = 0;
+    virtual bool notify(const MessageT& message, const ReceiverIdList& receivers) = 0;
 
     /**
      * Sends a synchronous request message to a receiver instance and returns there response.
