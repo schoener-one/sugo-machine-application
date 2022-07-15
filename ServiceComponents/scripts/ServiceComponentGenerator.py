@@ -109,7 +109,7 @@ public:
 {Generator._generate_notifications(context.component.notifications) if len(context.component.notifications) else ''}
     
     // Constructor / Destructor
-    I{context.name}(ICommandMessageBroker& messageBroker);
+    explicit I{context.name}(ICommandMessageBroker& messageBroker);
     virtual ~I{context.name}(){{}}
 
     I{context.name}(const I{context.name}&) = default;
@@ -118,11 +118,9 @@ public:
     I{context.name}& operator=(I{context.name}&&) = default;
     
 protected:
-    // Command handlers
-{newline.join(f'    virtual message::CommandResponse onCommand{command}(const message::Command& command);' for command in context.component.commands)}
-
-    // Transition actions
-{newline.join(f'    virtual void {action}(const I{context.name}::Event& event, const I{context.name}::State& state);' for action in context.actions)}
+    
+{Generator._generate_command_handler_declarations(context.component.commands)}
+{Generator._generate_trans_actions_declarations(context.actions, context.name)}
 }};
 
 }}  // namespace sugo
@@ -141,6 +139,21 @@ protected:
         for notification in notifications:
             notif_name = notification.replace('.', '')
             out_str += f'    inline static const CommandId Command{notif_name}{{ReceiverId, "{notif_name}"}};\n'
+        return out_str
+
+    @staticmethod
+    def _generate_command_handler_declarations(commands):
+        out_str = '    // Command handlers\n'
+        for command in commands:
+            command_name = command.replace('.', '')
+            out_str += f'    virtual message::CommandResponse onCommand{command_name}(const message::Command& command);\n'
+        return out_str
+
+    @staticmethod
+    def _generate_trans_actions_declarations(actions, component_name):
+        out_str = '    // Transition actions\n'
+        for action in actions:
+            out_str += f'    virtual void {action}(const I{component_name}::Event& event, const I{component_name}::State& state);\n'
         return out_str
 
     def _generate_source(self, context):

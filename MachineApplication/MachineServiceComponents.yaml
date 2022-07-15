@@ -1,12 +1,24 @@
 components:
-  - MachineController:
-      description: "Controls the whole machine components"
+  - MachineControl:
+      description: "Service component to controls the whole machine"
       commands:
         - SwitchOn
         - SwitchOff
         - GetState
-        - FilamentMergerControl.MotorRunning
-        - FilamentMergerControl.MotorStopped
+        - FilamentMergerControl.FeedingRunning
+        - FilamentMergerControl.FeedingStopped
+        - FilamentMergerControl.ErrorOccurred
+        - FilamentCoilControl.CoilRunning
+        - FilamentCoilControl.CoilStopped
+        - FilamentCoilControl.ErrorOccurred
+        - UserInterfaceControl.UserSwitchOn
+        - UserInterfaceControl.UserSwitchOff
+        - UserInterfaceControl.UserIncreaseMotorSpeed
+        - UserInterfaceControl.UserDecreaseMotorSpeed
+      notifications:
+        - Starting
+        - Running
+        - SwitchedOff
       events:
         - SwitchOff
         - SwitchOn
@@ -16,6 +28,7 @@ components:
         - SelfTestFailed
         - StartingSucceeded
         - StartingFailed
+        - RunningFailed
         - WaitForStarted
       statemachine:
         start: 'Off'
@@ -74,6 +87,10 @@ components:
             next: 'Off'
             event: SwitchOff
             action: switchOff
+          - state: Running
+            next: Error
+            event: RunningFailed
+            action: handleError
           - state: Starting
             next: Error
             event: StartingFailed
@@ -93,17 +110,27 @@ components:
 
 
   - FilamentMergerControl:
-      description: "Basic controller for the filament merger unit"
+      description: "Hardware service component to control the filament merger unit"
       commands:
         - SwitchOn
         - SwitchOff
-        - StartMotor
-        - StopMotor
+        - StartFeeding
+        - StopFeeding
         - GetState
         - GetTemperatures
+        - FilamentPreHeater.TargetTemperatureReached
+        - FilamentPreHeater.HeatingStopped
+        - FilamentPreHeater.ErrorOccurred
+        - FilamentMergerHeater.TargetTemperatureReached
+        - FilamentMergerHeater.HeatingStopped
+        - FilamentMergerHeater.ErrorOccurred
+        - FilamentFeederMotor.StartMotorSucceeded
+        - FilamentFeederMotor.StartMotorFailed
+        - FilamentFeederMotor.ErrorOccurred
       notifications:
-        - MotorRunning
-        - MotorStopped
+        - FeedingRunning
+        - FeedingStopped
+        - ErrorOccurred
       events:
         - SwitchOff
         - SwitchOn
@@ -111,8 +138,12 @@ components:
         - SwitchOnSucceeded
         - HeatingUpSucceeded
         - HeatingUpFailed
+        - StartMotor
         - StartingMotorSucceeded
         - StartingMotorFailed
+        - StopMotor
+        - StopMotorSucceeded
+        - StopMotorFailed
         - RunningFailed
       statemachine:
         start: 'Off'
@@ -120,6 +151,7 @@ components:
           - 'Off'
           - Initialization
           - HeatingUp
+          - MotorStopped
           - StartingMotor
           - Running
           - Error
@@ -133,10 +165,17 @@ components:
             event: SwitchOnSucceeded
             action: heatingUp
           - state: HeatingUp
-            next: StartingMotor
+            next: MotorStopped
             event: HeatingUpSucceeded
-            action: startMotor
           - state: HeatingUp
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: MotorStopped
+            next: StartingMotor
+            event: StartMotor
+            action: startMotor
+          - state: MotorStopped
             next: 'Off'
             event: SwitchOff
             action: switchOff
@@ -147,6 +186,10 @@ components:
             next: 'Off'
             event: SwitchOff
             action: switchOff
+          - state: Running
+            next: MotorStopped
+            event: StopMotor
+            action: stopMotor
           - state: Running
             next: 'Off'
             event: SwitchOff
@@ -174,7 +217,7 @@ components:
 
 
   - FilamentFeederMotor:
-      description: "Feeder motor control of the filament merger unit"
+      description: "Hardware service component to control the feeder motor of the filament merger unit"
       commands:
         - SwitchOn
         - SwitchOff
@@ -185,6 +228,7 @@ components:
       notifications:
         - StartMotorSucceeded
         - StartMotorFailed
+        - ErrorOccurred
       events:
         - SwitchOff
         - SwitchOn
@@ -247,84 +291,267 @@ components:
 
 
   - FilamentPreHeater:
-      description: "Pre-heater control of the feeder merger unit"
+      description: "Hardware service component to control the pre-heater of the filament merger unit"
       commands:
-        - Unknown
+        - SwitchOn
+        - SwitchOff
+        - GetTemperature
+      notifications:
+        - TargetTemperatureReached
+        - HeatingStopped
+        - ErrorOccurred
       events:
-        - Unknown
+        - SwitchOn
+        - SwitchOff
+        - SwitchOnFailed
+        - SwitchOnSucceeded
+        - TargetTemperatureReached
+        - HeatingUpFailed
       statemachine:
-        start: Start
+        start: 'Off'
         states:
-          - Start
+          - 'Off'
+          - Initialization
+          - HeatingUp
+          - Heating
+          - Error
         transitions:
-          - state: Start
-            next: Start
-            event: Unknown
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: Initialization
+            next: HeatingUp
+            event: SwitchOnSucceeded
+          - state: Initialization
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Initialization
+            next: Error
+            event: SwitchOnFailed
+            action: handleError
+          - state: HeatingUp
+            next: Heating
+            event: TargetTemperatureReached
+          - state: HeatingUp
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: HeatingUp
+            next: Error
+            event: HeatingUpFailed
+            action: handleError
+          - state: Heating
+            next: Heating
+            event: TargetTemperatureReached
+          - state: Heating
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Heating
+            next: Error
+            event: HeatingUpFailed
+            action: handleError
+          - state: Error
+            next: 'Off'
+            event: SwitchOff
+            handle: switchOff
 
 
   - FilamentMergerHeater:
-      description: "Merger heater control of the feeder merger unit"
-      commands:
-        - Unknown
-      events:
-        - Unknown
-      statemachine:
-        start: Start
-        states:
-          - Start
-        transitions:
-          - state: Start
-            next: Start
-            event: Unknown
+      description: "Hardware service component to control the merger heater of the filament merger unit"
+      using: FilamentPreHeater
 
 
   - FilamentCoilControl:
-      description: "Basic controller for the coil unit"
+      description: "Service component to control the filament coil unit"
       commands:
         - SwitchOn
         - SwitchOff
         - StartMotor
         - StopMotor
         - GetState
+        - FilamentTensionSensor.TensionTooLow
+        - FilamentTensionSensor.TensionTooHigh
+        - FilamentTensionSensor.ErrorOccurred
+        - FilamentCoilMotor.StartMotorSucceeded
+        - FilamentCoilMotor.StartMotorFailed
+        - FilamentCoilMotor.ErrorOccurred
+      notifications:
+        - CoilRunning
+        - CoilStopped
+        - ErrorOccurred
       events:
-        - Unknown
+        - SwitchOn
+        - SwitchOnSucceeded
+        - SwitchOnFailed
+        - SwitchOff
+        - StartMotor
+        - StartingMotorSucceeded
+        - StartingMotorFailed
+        - StopMotor
+        - StopMotorSucceeded
+        - StopMotorFailed
+        - RunningFailed
       statemachine:
-        start: Start
+        start: 'Off'
         states:
-          - Start
+          - 'Off'
+          - Initialization
+          - MotorStopped
+          - StartingMotor
+          - Running
+          - Error
         transitions:
-          - state: Start
-            next: Start
-            event: Unknown
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: Initialization
+            next: MotorStopped
+            event: SwitchOnSucceeded
+          - state: Initialization
+            next: Error
+            event: SwitchOnFailed
+            action: handleError
+          - state: Initialization
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: MotorStopped
+            next: StartingMotor
+            event: StartMotor
+            action: startMotor
+          - state: MotorStopped
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: StartingMotor
+            next: Running
+            event: StartingMotorSucceeded
+          - state: StartingMotor
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Running
+            next: MotorStopped
+            event: StopMotor
+            action: stopMotor
+          - state: Running
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Running
+            next: Error
+            event: RunningFailed
+            action: handleError
 
 
   - FilamentCoilMotor:
-      description: "Filament coil motor control of the coil control unit"
-      commands:
-        - Unknown
-      events:
-        - Unknown
-      statemachine:
-        start: Start
-        states:
-          - Start
-        transitions:
-          - state: Start
-            next: Start
-            event: Unknown
+      description: "Hardware service component controls the filament coil motor of the filament coil unit"
+      using: FilamentFeederMotor
 
-
-  - FilamentStrainSensor:
-      description: "Pre-heater control of the coil control unit"
+  - FilamentTensionSensor:
+      description: "Hardware service component to control the strain sensor of the filament coil unit"
       commands:
-        - Unknown
+        - SwitchOn
+        - SwitchOff
+      notifications:
+        - TensionTooLow
+        - TensionTooHigh
+        - ErrorOccurred
       events:
-        - Unknown
+        - SwitchOn
+        - SwitchOnSucceeded
+        - SwitchOnFailed
+        - SwitchOff
+        - RunningFailed
       statemachine:
-        start: Start
+        start: 'Off'
         states:
-          - Start
+          - 'Off'
+          - Initialization
+          - Running
+          - Error
         transitions:
-          - state: Start
-            next: Start
-            event: Unknown
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: Initialization
+            next: Running
+            event: SwitchOnSucceeded
+          - state: Initialization
+            next: Error
+            event: SwitchOnFailed
+            action: handleError
+          - state: Initialization
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Running
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Running
+            next: Error
+            event: RunningFailed
+            action: handleError
+          - state: Error
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+
+  - UserInterfaceControl:
+      description: "Hardware service component to control the user interface of the filament coil unit"
+      commands:
+        - MachineControl.Starting
+        - MachineControl.Running
+        - MachineControl.SwitchedOff
+      notifications:
+        - UserSwitchOn
+        - UserSwitchOff
+        - UserIncreaseMotorSpeed
+        - UserDecreaseMotorSpeed
+      events:
+        - SwitchOn
+        - SwitchOnSucceeded
+        - SwitchOnFailed
+        - SwitchOff
+        - RunningFailed
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - Running
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: Initialization
+            next: Running
+            event: SwitchOnSucceeded
+          - state: Initialization
+            next: Error
+            event: SwitchOnFailed
+            action: handleError
+          - state: Initialization
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Running
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Running
+            next: Error
+            event: RunningFailed
+            action: handleError
+          - state: Error
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff

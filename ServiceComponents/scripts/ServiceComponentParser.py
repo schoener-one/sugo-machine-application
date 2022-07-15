@@ -27,34 +27,42 @@ class Parser:
             component_name = list(component.keys())[0]
             config = component[component_name]
             logging.info(f"parsing component {component_name}")
-            self._parse_component(component_name, config)
+            if 'using' in config:
+                self._parse_component_using(component_name, config)
+            else:
+                self._parse_component(component_name, config)
         self._validate_commands()
         return self._components
             
-    def _parse_component(self, name, config):
-        self._current_component = name
-        self._components[name] = ServiceComponent(config['commands'],
+    def _parse_component_using(self, component_name, config):
+        used_component = config['using']
+        if used_component not in self._components:
+            raise ParseException(f"unknown component {used_component} used in component {component_name}")
+        self._components[component_name] = self._components[used_component]
+        
+    def _parse_component(self, component_name, config):
+        self._components[component_name] = ServiceComponent(config['commands'],
                                                   config['notifications'] if 'notifications' in config else list(),
                                                   config['events'], None)
-        self._parse_statemachine(config['statemachine'])
+        self._parse_statemachine(component_name, self._components[component_name], config['statemachine'])
 
-    def _parse_statemachine(self, config):
+    def _parse_statemachine(self, component_name, component, config):
         start_state = config['start']
         if not start_state in config['states']:
             raise ParseException(f"unknown start state: {start_state}")
-        self._components[self._current_component].statemachine = StateMachine(config['states'], start_state, list())
+        component.statemachine = StateMachine(config['states'], start_state, list())
         for transition in config['transitions']:
-            self._parse_transition(transition)
+            self._parse_transition(component_name, component, transition)
     
-    def _parse_transition(self, config):
-        if not config['state'] in self._components[self._current_component].statemachine.states:
-            raise ParseException(f"state {config['state']} not in statemachine of component {self._current_component}")
-        if not config['next'] in self._components[self._current_component].statemachine.states:
-            raise ParseException(f"next state {config['next']} not in statemachine of component {self._current_component}")
-        if not config['event'] in self._components[self._current_component].events:
-            raise ParseException(f"event {config['event']} not in events of component {self._current_component}")
+    def _parse_transition(self, component_name, component, config):
+        if not config['state'] in component.statemachine.states:
+            raise ParseException(f"state {config['state']} not in statemachine of component {component_name}")
+        if not config['next'] in component.statemachine.states:
+            raise ParseException(f"next state {config['next']} not in statemachine of component {component_name}")
+        if not config['event'] in component.events:
+            raise ParseException(f"event {config['event']} not in events of component {component_name}")
         transition = Transition(config['state'], config['next'], config['event'], config['action'] if 'action' in config else None)
-        self._components[self._current_component].statemachine.transitions.append(transition)
+        component.statemachine.transitions.append(transition)
        
     def _validate_commands(self):
         for component_name, component in self._components.items():
