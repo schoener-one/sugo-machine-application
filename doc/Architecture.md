@@ -73,8 +73,8 @@ A component is the smallest logical unit of the architecture which represents a 
 ```plantuml
 @startuml
 package "ServiceComponents" {
-  [MachineService] ..> IMessageBroker: communicate
-  [MachineService] - Network
+  [MachineServiceGateway] ..> IMessageBroker: communicate
+  [MachineServiceGateway] - Network
   [FilamentMerger] ..> IMessageBroker: communicate
   [FilamentCoilControl] ..> IMessageBroker: communicate
   [MachineController] ..> IMessageBroker: communicate

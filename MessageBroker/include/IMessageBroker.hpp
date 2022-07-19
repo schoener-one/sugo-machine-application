@@ -11,7 +11,7 @@
 #define IMESSAGEBROKER_HPP_
 
 #include <functional>
-#include <list>
+#include <vector>
 
 #include "IRunnable.hpp"
 
@@ -33,7 +33,7 @@ public:
     /// Handler definition which reacts to a request.
     using Handler = std::function<ResponseT(const MessageT&)>;
     /// Receiver list definition.
-    using ReceiverIdList = std::list<ReceiverIdT>;
+    using ReceiverIdList = std::vector<ReceiverIdT>;
 
     /**
      * Notifies all receiver instances.

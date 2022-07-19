@@ -7,8 +7,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef MACHINESERVICE_HPP_
-#define MACHINESERVICE_HPP_
+#pragma once
 
 #include <string>
 
@@ -16,7 +15,7 @@
 
 #include "ICommandMessageBroker.hpp"
 #include "IConfiguration.hpp"
-#include "IMachineService.hpp"
+#include "IMachineServiceGateway.hpp"
 #include "Server.hpp"
 #include "ServiceComponent.hpp"
 
@@ -25,7 +24,7 @@ namespace sugo
 /**
  * Class to offer the service interface on network.
  */
-class MachineService : public ServiceComponent, public Server::IMessageHandler
+class MachineServiceGateway : public ServiceComponent, public Server::IMessageHandler
 {
 public:
     static void setConfiguration(IConfiguration& configuration);
@@ -33,7 +32,7 @@ public:
     /**
      * Creates a new instance
      */
-    explicit MachineService(ICommandMessageBroker& messageBroker,
+    explicit MachineServiceGateway(ICommandMessageBroker& messageBroker,
                             const IConfiguration& configuration, IOContext& ioContext);
 
     // IRunnable {{
@@ -55,5 +54,3 @@ private:
     Server m_jsonRpcServer;
 };
 }  // namespace sugo
-
-#endif /* MACHINESERVICE_HPP_ */

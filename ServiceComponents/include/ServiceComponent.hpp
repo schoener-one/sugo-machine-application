@@ -1,12 +1,13 @@
-/*
- * CommandExcecutionComponent.hpp
+///////////////////////////////////////////////////////////////////////////////
+/** @file
+ * @license: Copyright 2019 by Schoener-One
  *
- *  Created on: 17.11.2019
- *      Author: denis
+ * @author: denis@schoener-one.de
+ * @date:   17.11.2019
  */
+///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SERVICECOMPONENT_HPP_
-#define SERVICECOMPONENT_HPP_
+#pragma once
 
 #include "ServiceComponent.hpp"
 
@@ -15,7 +16,7 @@
 #include "CommandId.hpp"
 #include "Globals.hpp"
 #include "ICommandMessageBroker.hpp"
-#include "IServiceComponent.hpp"
+#include "IRunnable.hpp"
 
 namespace sugo
 {
@@ -28,19 +29,30 @@ namespace sugo
  * @todo Needs to be transformed to a base class of all ServiceComponents in order
  *       to handle messages in a generic manner!
  */
-class ServiceComponent : public IServiceComponent
+class ServiceComponent : public IRunnable
 {
 public:
     // IRunnable {{
-    bool start() override { return m_messageBroker.start(); }
+    bool start() override
+    {
+        return m_messageBroker.start();
+    }
 
-    void stop() override { m_messageBroker.stop(); }
+    void stop() override
+    {
+        m_messageBroker.stop();
+    }
 
-    bool isRunning() const override { return m_messageBroker.isRunning(); }
+    bool isRunning() const override
+    {
+        return m_messageBroker.isRunning();
+    }
     // IRunnable }}
 
 protected:
-    explicit ServiceComponent(ICommandMessageBroker& messageBroker) : m_messageBroker(messageBroker)
+    explicit ServiceComponent(ICommandMessageBroker&                       messageBroker,
+                              const ICommandMessageBroker::ReceiverIdList& notifReceivers)
+        : m_messageBroker(messageBroker), m_notificationReceivers(notifReceivers)
     {
     }
 
@@ -87,7 +99,10 @@ protected:
         m_messageBroker.registerHandler(commandId.command, handler);
     }
 
-    message::CommandResponse send(const CommandId& commandId) { return send(commandId, ""); }
+    message::CommandResponse send(const CommandId& commandId)
+    {
+        return send(commandId, "");
+    }
 
     message::CommandResponse send(const CommandId& commandId, const std::string& parameters)
     {
@@ -103,7 +118,10 @@ protected:
         return commandResponse;
     }
 
-    bool notify(const CommandId& commandId) { return notify(commandId, ""); }
+    bool notify(const CommandId& commandId)
+    {
+        return notify(commandId, "");
+    }
 
     bool notify(const CommandId& commandId, const std::string& parameters)
     {
@@ -113,17 +131,17 @@ protected:
         {
             command.set_parameters(parameters);
         }
-        //FIXME
-        // return m_messageBroker.notify(command);
-        return true;
+        return m_messageBroker.notify(command, m_notificationReceivers);
     }
 
-    ICommandMessageBroker& getCommandMessageBroker() { return m_messageBroker; }
+    ICommandMessageBroker& getCommandMessageBroker()
+    {
+        return m_messageBroker;
+    }
 
 private:
-    ICommandMessageBroker& m_messageBroker;
+    ICommandMessageBroker&                       m_messageBroker;
+    const ICommandMessageBroker::ReceiverIdList& m_notificationReceivers;
 };
 
 }  // namespace sugo
-
-#endif  // SERVICECOMPONENT_HPP_

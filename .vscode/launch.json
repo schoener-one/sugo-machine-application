@@ -25,6 +25,16 @@
             "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "generated"]
         },
         {
+            "name": "ServiceComponentGenerator Templates",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponent.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/MachineApplication",
+            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "generated", "-t"]
+        },
+        {
             "name": "Debug HAL SmokeTest",
             "type": "cppdbg",
             "request": "launch",

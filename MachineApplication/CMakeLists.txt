@@ -6,8 +6,16 @@ generate_service_component(
     CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/MachineServiceComponents.yaml"
     )
 add_executable(${MODULE_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineController.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentCoilControl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentCoilMotor.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentFeederMotor.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentMergerControl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentMergerHeater.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentPreHeater.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentTensionSensor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineApplication.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineControl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UserInterfaceControl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     )
 target_include_directories (${MODULE_NAME}
@@ -18,8 +26,7 @@ target_link_libraries(${MODULE_NAME}
     Common
     Protocol
     MessageBroker
-    MachineService
-    MachineController
+    MachineServiceGateway
     ${MODULE_NAME}-GenLib
     HardwareAbstractionLayer
     )
@@ -36,8 +43,7 @@ if (NOT NO_UNITTEST)
         Protocol
         MessageBroker
         MessageBrokerMocks
-        MachineService
-        MachineController
+        MachineServiceGateway
         ${Protobuf_LIBRARIES}
         ${Boost_LIBRARIES}
         pthread

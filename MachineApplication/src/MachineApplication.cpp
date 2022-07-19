@@ -16,13 +16,23 @@
 #include "CommandLineParser.hpp"
 #include "CommandMessageBroker.hpp"
 #include "ConfigurationFileParser.hpp"
+#include "FilamentCoilControl.hpp"
+#include "FilamentCoilMotor.hpp"
+#include "FilamentFeederMotor.hpp"
+#include "FilamentMergerControl.hpp"
+#include "FilamentMergerHeater.hpp"
+#include "FilamentPreHeater.hpp"
+#include "FilamentTensionSensor.hpp"
 #include "Globals.hpp"
 #include "HardwareAbstractionLayer.hpp"
-#include "MachineController.hpp"
-#include "MachineService.hpp"
+#include "MachineApplication.hpp"
+#include "MachineControl.hpp"
+#include "MachineServiceGateway.hpp"
+#include "UserInterfaceControl.hpp"
 
 namespace po = boost::program_options;
 using namespace sugo;
+using namespace hal;
 
 MachineApplication::MachineApplication()
     : m_configCommandLine(
@@ -51,9 +61,9 @@ bool MachineApplication::start(int argc, char const** argv)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    // MachineService::setConfiguration(m_configuration);
+    // MachineServiceGateway::setConfiguration(m_configuration);
     // CupRotationTray::setConfiguration(m_configuration);
-    IHardwareAbstractionLayer::setConfiguration(m_configuration);
+    HardwareAbstractionLayer::setConfiguration(m_configuration);
 
     LOG(info) << "Starting SugoMachine application";
     if (!parseCommandLine(argc, argv))
@@ -78,19 +88,19 @@ bool MachineApplication::start(int argc, char const** argv)
     // locator.register(hal);
 
     // SugoMachine
-    CommandMessageBroker machineControllerMessageBroker(IMachineController::Command::ReceiverId,
-                                                        m_ioContexts[typeid(MachineController)]);
-    MachineController    machineController(machineControllerMessageBroker);
-    if (!machineController.start())
+    CommandMessageBroker machineControllerMessageBroker(IMachineControl::ReceiverId,
+                                                        m_ioContexts[typeid(MachineControl)]);
+    MachineControl       machineControl(machineControllerMessageBroker);
+    if (!machineControl.start())
     {
         return false;
     }
 
-    // MachineService
-    CommandMessageBroker machineServiceMessageBroker(IMachineService::Command::ReceiverId,
-                                                     m_ioContexts[typeid(MachineService)]);
-    MachineService       machineService(machineServiceMessageBroker, m_configuration,
-                                  m_ioContexts[typeid(MachineService)]);
+    // MachineServiceGateway
+    CommandMessageBroker  machineServiceMessageBroker(IMachineServiceGateway::ReceiverId,
+                                                     m_ioContexts[typeid(MachineServiceGateway)]);
+    MachineServiceGateway machineService(machineServiceMessageBroker, m_configuration,
+                                         m_ioContexts[typeid(MachineServiceGateway)]);
     if (!machineService.start())
     {
         LOG(error) << "Failed to start machine service";
@@ -108,6 +118,7 @@ bool MachineApplication::start(int argc, char const** argv)
 
 bool MachineApplication::run()
 {
+    // FIXME move the start to
     const bool useRealTimePolicy = m_configCommandLine["real-time"].get<bool>();
 
     bool success = true;

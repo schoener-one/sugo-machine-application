@@ -1,13 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 /** @file
- * @license: CLOSED
+ * @license: Copyright 2022 by Schoener-One
  *
- * @author: denis
- * @date:   13.10.2019
+ * @author: denis@schoener-one.de
+ * @date:   09.05.2020
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "MachineService.hpp"
+#include "MachineServiceGateway.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -31,16 +31,16 @@ constexpr unsigned MethodTokenMethodId   = 1u;
 
 using namespace sugo;
 
-void MachineService::setConfiguration(IConfiguration& configuration)
+void MachineServiceGateway::setConfiguration(IConfiguration& configuration)
 {
     configuration.add(Option("sugo-machine-service.address", std::string("*"),
                              "Network address of the service"));
     configuration.add(Option("sugo-machine-service.port", 1234u, "Network port of the service"));
 }
 
-MachineService::MachineService(ICommandMessageBroker& messageBroker,
+MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroker,
                                const IConfiguration& configuration, IOContext& ioContext)
-    : ServiceComponent(messageBroker),
+    : ServiceComponent(messageBroker, {}),
       m_jsonRpcServer(
           std::string("tcp://") +
               configuration.getOption("sugo-machine-service.address").get<std::string>() + ":" +
@@ -50,7 +50,7 @@ MachineService::MachineService(ICommandMessageBroker& messageBroker,
 {
 }
 
-bool MachineService::start()
+bool MachineServiceGateway::start()
 {
     bool success = ServiceComponent::start();
 
@@ -63,18 +63,18 @@ bool MachineService::start()
     return success;
 }
 
-void MachineService::stop()
+void MachineServiceGateway::stop()
 {
     ServiceComponent::stop();
     m_jsonRpcServer.stop();
 }
 
-bool MachineService::isRunning() const
+bool MachineServiceGateway::isRunning() const
 {
     return ServiceComponent::isRunning() || m_jsonRpcServer.isRunning();
 }
 
-bool MachineService::processReceived(StreamBuffer& inBuf, StreamBuffer& outBuf)
+bool MachineServiceGateway::processReceived(StreamBuffer& inBuf, StreamBuffer& outBuf)
 {
     std::string  requestMessage;
     std::istream in(&inBuf);
@@ -104,7 +104,7 @@ bool MachineService::processReceived(StreamBuffer& inBuf, StreamBuffer& outBuf)
     return success;
 }
 
-jsonrpcpp::Response MachineService::processCommand(jsonrpcpp::request_ptr request)
+jsonrpcpp::Response MachineServiceGateway::processCommand(jsonrpcpp::request_ptr request)
 {
     String::Tokens      tokens = String::split<'.'>(request->method());
     jsonrpcpp::Response response;

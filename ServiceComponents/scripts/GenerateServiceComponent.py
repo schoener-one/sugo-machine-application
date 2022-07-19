@@ -12,6 +12,7 @@ import logging
 from ServiceComponentGenerator import Generator
 from ServiceComponentParser import Parser, ParseException 
 from PlantumlStateGenerator import PlantumlStateGenerator
+from ServiceComponentTemplateGenerator import Generator as TemplateGenerator
 
 def parse_args():
     global default_address
@@ -23,6 +24,8 @@ def parse_args():
                         help='Generated output file')
     parser.add_argument('-l', '--list-only', nargs='?', default=False, const=True,
                         help='Lists the generated files only, but does not generate')
+    parser.add_argument('-t', '--create_templates', nargs='?', default=False, const=True,
+                        help='Indicates if template classes should also be created')    
     levels = {
         'error': logging.ERROR,
         'warning': logging.WARN,
@@ -46,6 +49,8 @@ if __name__ == '__main__':
             else:
                 Generator(args.output_dir).generate(parsed_config)
             PlantumlStateGenerator(args.output_dir).generate(parsed_config)
+            if args.create_templates:
+                TemplateGenerator(args.output_dir).generate(parsed_config)
     except ParseException as ex:
         logging.error(f"parse error:  {str(ex)}")
         sys.exit(2)

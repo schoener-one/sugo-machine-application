@@ -30,18 +30,11 @@ using CommandMessageBrokerT =
  */
 class CommandMessageBroker : public CommandMessageBrokerT, public Server::IMessageHandler
 {
-public:
-    static std::string createAddress(const std::string& receiverId)
-    {
-        std::string address("inproc://");
-        address.append(receiverId);
-        return address;
-    }
-
+public:   
     // cppcheck-suppress passedByValue
     CommandMessageBroker(const std::string& receiverId, IOContext& ioContext)
         : CommandMessageBrokerT(),
-          m_server(createAddress(receiverId), *this, ioContext),
+          m_server(createInProcessAddress(receiverId), *this, ioContext),
           m_client(ioContext),
           m_receiverId(receiverId)
     {
@@ -88,9 +81,16 @@ protected:
     // Server::IMessageHandler }}
 
 private:
-    Server               m_server;
-    Client               m_client;
-    const std::string    m_receiverId;
+    inline static std::string createInProcessAddress(const std::string& receiverId)
+    {
+        std::string address("inproc://");
+        address.append(receiverId);
+        return address;
+    }
+
+    Server            m_server;
+    Client            m_client;
+    const std::string m_receiverId;
 };
 
 }  // namespace sugo

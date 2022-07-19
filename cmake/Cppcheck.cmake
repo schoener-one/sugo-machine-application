@@ -7,7 +7,7 @@
 file(GLOB_RECURSE SRC_ALL 
     ${PROJECT_SOURCE_DIR}/MachineController/*.cpp
     ${PROJECT_SOURCE_DIR}/MachineApplication/*.cpp
-    ${PROJECT_SOURCE_DIR}/MachineService/*.cpp
+    ${PROJECT_SOURCE_DIR}/MachineServiceGateway/*.cpp
     ${PROJECT_SOURCE_DIR}/Common/*.cpp
     ${PROJECT_SOURCE_DIR}/ServiceComponents/*.cpp
     ${PROJECT_SOURCE_DIR}/CupRotationTray/*.cpp
@@ -18,7 +18,7 @@ file(GLOB_RECURSE SRC_ALL
 file(GLOB_RECURSE HDR_ALL 
     ${PROJECT_SOURCE_DIR}/MachineController/*.hpp
     ${PROJECT_SOURCE_DIR}/MachineApplication/*.hpp
-    ${PROJECT_SOURCE_DIR}/MachineService/*.hpp
+    ${PROJECT_SOURCE_DIR}/MachineServiceGateway/*.hpp
     ${PROJECT_SOURCE_DIR}/Common/*.hpp
     ${PROJECT_SOURCE_DIR}/ServiceComponents/*.hpp
     ${PROJECT_SOURCE_DIR}/CupRotationTray/*.hpp
@@ -40,7 +40,7 @@ if (CPPCHECK_EXEC)
         --suppress=missingIncludeSystem
         -I ${PROJECT_SOURCE_DIR}/MachineController/include
         -I ${PROJECT_SOURCE_DIR}/MachineApplication/include
-        -I ${PROJECT_SOURCE_DIR}/MachineService/include
+        -I ${PROJECT_SOURCE_DIR}/MachineServiceGateway/include
         -I ${PROJECT_SOURCE_DIR}/Common/include
         -I ${PROJECT_SOURCE_DIR}/ServiceComponents/include
         -I ${PROJECT_SOURCE_DIR}/CupRotationTray/include

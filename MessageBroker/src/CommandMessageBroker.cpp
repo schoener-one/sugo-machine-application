@@ -20,7 +20,7 @@ bool CommandMessageBroker::send(const message::Command& message, const std::stri
                                 message::CommandResponse& response)
 {
     LOG(debug) << "Sending message to " << receiverId;
-    const std::string address = createAddress(receiverId);
+    const std::string address = createInProcessAddress(receiverId);
     bool              success = m_client.connect(address);
     if (success)
     {

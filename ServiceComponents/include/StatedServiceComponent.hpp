@@ -31,9 +31,10 @@ template <class StateT, class EventT>
 class StatedServiceComponent : public ServiceComponent
 {
 protected:
-    explicit StatedServiceComponent(ICommandMessageBroker&         messageBroker,
-                                    IStateMachine<StateT, EventT>& stateMachine)
-        : ServiceComponent(messageBroker), m_stateMachine(stateMachine)
+    explicit StatedServiceComponent(ICommandMessageBroker&                       messageBroker,
+                                    const ICommandMessageBroker::ReceiverIdList& notifReceivers,
+                                    IStateMachine<StateT, EventT>&               stateMachine)
+        : ServiceComponent(messageBroker, notifReceivers), m_stateMachine(stateMachine)
     {
     }
 
@@ -61,13 +62,6 @@ protected:
         oss << "{\"state\":\"" << m_stateMachine.getCurrentState() << "\"}";
         response.set_response(oss.str());
         return response;
-    }
-
-    static message::CommandResponse handleInvalidState(const message::Command& command,
-                                                       const StateT&           state)
-    {
-        LOG(debug) << "Received command '" << command.name() << "' in invalid state " << state;
-        return handleError(command, "invalid state", message::CommandResponse_Result_INVALID_STATE);
     }
 
 private:

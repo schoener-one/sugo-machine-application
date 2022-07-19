@@ -64,7 +64,7 @@ protected:
 // TEST_F(MachineSmokeTest, SugoMachine_CommandResponse)
 // {
 //     CommandMessageBroker messageBroker(IMachineController::Command::ReceiverId, {}, m_ioContext);
-//     MachineController    machineController(messageBroker);
+//     MachineControl    machineController(messageBroker);
 //     EXPECT_TRUE(messageBroker.start());
 //     startIOContext();
 //     message::Command command;

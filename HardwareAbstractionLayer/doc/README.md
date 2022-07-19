@@ -32,28 +32,28 @@ The I2C, SPI and UART interfaces are provided over the GPIO pin header.
 
 ### GPIO pin header
 
-| Pin | Name      | Connection                       | \| | Connection                       |   Name | Pin |
-|:----|:----------|:---------------------------------|:--:|---------------------------------:|-------:|----:|
-| 01  | 3.3V DC   | motor-control-dc                 | \| | signal-board-dc                  | 5V DC   | 02 |
-| 03  | SDA1 (I2C)| motor-control-i2c-sda            | \| | relay-board-dc                   | 5V DC   | 04 |
-| 05  | SCL1 (I2C)| motor-control-i2c-scl            | \| | serial-com-gnd                   | GND     | 06 |
-| 07  | GPIO 04   | relay-switch-heater-merger (out) | \| | serial-com-txd                   | TXD     | 08 |
-| 09  | GND       | signal-board-gnd                 | \| | serial-com-rxd                   | RXD     | 10 |
-| 11  | GPIO 17   | relay-switch-light-run (out)     | \| | relay-switch-light-ready (out)   | GPIO 18 | 12 |
-| 13  | GPIO 27   | temperature-sensor-control-cs-feeder (out)  | \| | relay-board           | GND     | 14 |
-| 15  | GPIO 22   | temperature-sensor-control-cs-merger (out)  | \| |                       | GPIO 23 | 16 |
-| 17  | 3.3V DC   | temperature-sensor-control-dc    | \| | relay-switch-light-power (out)   | GPIO 24 | 18 |
-| 19  | MOSI (SPI)| temperature-sensor-control-spi-sdi  | \| |                               | GND     | 20 |
-| 21  | MISO (SPI)| temperature-sensor-control-spi-sdo  | \| | _reserved-for-enc28J60_ (in)  | GPIO 25 | 22 |
-| 23  | CLK (SPI) | temperature-sensor-control-spi-clk  | \| |                               | GPIO 08 | 24 |
-| 25  | GND       | temperature-sensor-control-gnd   | \| |                                  | GPIO 07 | 26 |
-| 27  | ID_SD     |                                  | \| |                                  | ID_SC   | 28 |
-| 29  | GPIO 05   | signal-button-start (in)         | \| |                                  | GND     | 30 |
-| 31  | GPIO 06   | signal-button-stop (in)          | \| | signal-filament-tension-low (in) | GPIO 12 | 32 |
-| 33  | GPIO 13   | motor-control-error (in)         | \| |                                  | GND     | 34 |
-| 35  | GPIO 19   | motor-control-reset (out)        | \| | signal-filament-tension-high (in)| GPIO 16 | 36 |
-| 37  | GPIO 26   | relay-switch-fan-feeder (out)    | \| | relay-switch-fan-merger (out)    | GPIO 20 | 38 |
-| 39  | GND       | motor-control-gnd                | \| | relay-switch-heater-feeder (out) | GPIO 21 | 40 |
+| Pin | Name      | Connection                          | \| | Connection                       |   Name | Pin |
+|:----|:----------|:------------------------------------|:--:|---------------------------------:|-------:|----:|
+| 01  | 3.3V DC   | motor-control-dc                    | \| | signal-board-dc                  | 5V DC   | 02 |
+| 03  | SDA1 (I2C)| motor-control-i2c-sda               | \| | relay-board-dc                   | 5V DC   | 04 |
+| 05  | SCL1 (I2C)| motor-control-i2c-scl               | \| | serial-com-gnd                   | GND     | 06 |
+| 07  | GPIO 04   | relay-switch-heater-merger (out)    | \| | serial-com-txd                   | TXD     | 08 |
+| 09  | GND       | signal-board-gnd                    | \| | serial-com-rxd                   | RXD     | 10 |
+| 11  | GPIO 17   | relay-switch-light-run (out)        | \| | relay-switch-light-ready (out)   | GPIO 18 | 12 |
+| 13  | GPIO 27   | temperature-sensor-control-cs-feeder (out) | \| | relay-switch-board-gnd    | GND     | 14 |
+| 15  | GPIO 22   | temperature-sensor-control-cs-merger (out) | \| |                           | GPIO 23 | 16 |
+| 17  | 3.3V DC   | temperature-sensor-control-dc       | \| | relay-switch-light-power (out)   | GPIO 24 | 18 |
+| 19  | MOSI (SPI)| temperature-sensor-control-spi-sdi  | \| |                                  | GND     | 20 |
+| 21  | MISO (SPI)| temperature-sensor-control-spi-sdo  | \| | _reserved-for-enc28J60_ (in)     | GPIO 25 | 22 |
+| 23  | CLK (SPI) | temperature-sensor-control-spi-clk  | \| |                                  | GPIO 08 | 24 |
+| 25  | GND       | temperature-sensor-control-gnd      | \| |                                  | GPIO 07 | 26 |
+| 27  | ID_SD     |                                     | \| |                                  | ID_SC   | 28 |
+| 29  | GPIO 05   | signal-button-start (in)            | \| |                                  | GND     | 30 |
+| 31  | GPIO 06   | signal-button-stop (in)             | \| | signal-filament-tension-low (in) | GPIO 12 | 32 |
+| 33  | GPIO 13   | motor-control-error (in)            | \| |                                  | GND     | 34 |
+| 35  | GPIO 19   | motor-control-reset (out)           | \| | signal-filament-tension-high (in)| GPIO 16 | 36 |
+| 37  | GPIO 26   | relay-switch-fan-feeder (out)       | \| | relay-switch-fan-merger (out)    | GPIO 20 | 38 |
+| 39  | GND       | motor-control-gnd                   | \| | relay-switch-heater-feeder (out) | GPIO 21 | 40 |
 |||||||
 
 ### UART console interface
@@ -98,18 +98,24 @@ of different devices like heater and signal lights.
 
 **Channel occupancy:**
 
+*Board 1 (12V)*
 | Channel | Device           | Device type     | Voltage (out) | Power (out) | Color  |
 |---------|------------------|-----------------|---------------|-------------|--------|
-| 0       | fan-feeder       | fan             | 12V           | ?W          | red    |
-| 1       | fan-merger       | fan             | 12V           | ?W          | orange |
-| 2       | heater-feeder    | filament heater | 12V           | 40W         | yellow |
-| 3       | heater-merger    | filament heater | 12V           | 40W         | green  |
-| 4       | light-power      | LED light       | 3.3V          | -           | blue   |
-| 5       | light-run        | LED light       | 3.3V          | -           | violet |
-| 6       | light-ready      | LED light       | 3.3V          | -           | gray   |
-| 7       | _unused_         |                 |               |             | white  |
-| GND     | ground           |                 |               |             | black  |
-| DC      | power-supply 5V  |                 |               |             | brown  |
+| GND     |                  |                 | GND           |             | black  |
+| 1       | fan-feeder       | fan             | 12V           | ?W          | white  |
+| 2       | fan-merger       | fan             | 12V           | ?W          | gray   |
+| 3       | heater-merger    | filament heater | 12V           | 40W         | violet |
+| 4       | heater-feeder    | filament heater | 12V           | 40W         | yellow |
+|||||||
+
+*Board 2 (5V)*
+| Channel | Device           | Device type     | Voltage (out) | Power (out) | Color  |
+|---------|------------------|-----------------|---------------|-------------|--------|
+| GND     |                  |                 | GND           |             | black (Board 1) |
+| 1       | light-power      | LED light       | 5V            | -           | green  |
+| 2       | light-run        | LED light       | 5V            | -           | yellow |
+| 3       | light-ready      | LED light       | 5V            | -           | orange |
+| 4       | _unused_         |                 |               |             | red    |
 |||||||
 
 ### Filament heater

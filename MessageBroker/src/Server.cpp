@@ -8,19 +8,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "Server.hpp"
+#include "Globals.hpp"
 
 #include <azmq/socket.hpp>
-
-#include "Globals.hpp"
 
 namespace sugo
 {
 class ServerSocket : public azmq::rep_socket
 {
 public:
-    explicit ServerSocket(IOContext& service) : azmq::rep_socket(service) {}
+    // FIXME socket could be used optimized for single threaded!
+    explicit ServerSocket(IOContext& service) : azmq::rep_socket(service)
+    {
+    }
 };
-
 }  // namespace sugo
 
 using namespace sugo;
@@ -34,7 +35,10 @@ Server::Server(const std::string& address, IMessageHandler& messageHandler, IOCo
 {
 }
 
-Server::~Server() { stop(); }
+Server::~Server()
+{
+    stop();
+}
 
 bool Server::start()
 {
