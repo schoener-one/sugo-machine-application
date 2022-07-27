@@ -8,27 +8,33 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "Client.hpp"
+#include "Globals.hpp"
 
 #include <azmq/socket.hpp>
 #include <chrono>
-
-#include "Globals.hpp"
 
 namespace sugo
 {
 class ClientSocket : public azmq::req_socket
 {
 public:
-    explicit ClientSocket(IOContext& ioContext) : azmq::req_socket(ioContext) {}
+    explicit ClientSocket(boost::asio::io_context& context) : azmq::req_socket(context)
+    {
+    }
 };
 }  // namespace sugo
 
 using namespace sugo;
 namespace asio = boost::asio;
 
-Client::Client(IOContext& ioContext) : m_socket(std::make_unique<ClientSocket>(ioContext)) {}
+Client::Client(AsioContext& ioContext)
+    : m_socket(std::make_unique<ClientSocket>(ioContext.getContext()))
+{
+}
 
-Client::~Client() {}
+Client::~Client()
+{
+}
 
 bool Client::connect(const std::string& address, const std::chrono::milliseconds& timeoutSend,
                      const std::chrono::milliseconds& timeoutReceive)

@@ -24,16 +24,18 @@ namespace sugo
 /**
  * Class to offer the service interface on network.
  */
-class MachineServiceGateway : public ServiceComponent, public Server::IMessageHandler
+class MachineServiceGateway : public IMachineServiceGateway,
+                              public ServiceComponent,
+                              public Server::IMessageHandler
 {
 public:
-    static void setConfiguration(IConfiguration& configuration);
+    static void addConfigurationOptions(IConfiguration& configuration);
 
     /**
      * Creates a new instance
      */
     explicit MachineServiceGateway(ICommandMessageBroker& messageBroker,
-                            const IConfiguration& configuration, IOContext& ioContext);
+                                   const IConfiguration& configuration, AsioContext& ioContext);
 
     // IRunnable {{
     bool start() override;

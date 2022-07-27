@@ -1,31 +1,34 @@
 ///////////////////////////////////////////////////////////////////////////////
-/** @file
- * @license: CLOSED
+/**
+ * @file
+ * @license: Copyright 2022, Schoener-One
  *
- * @author: denis
- * @date:   01.12.2019
+ * @author: denis@schoener-one
+ * @date:   2019-12-01
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef MACHINEAPPLICATION_HPP_
-#define MACHINEAPPLICATION_HPP_
+#pragma once
 
-#include <map>
-#include <memory>
-#include <typeindex>
+#include <string>
 
+#include "ComponentsExecutionGroup.hpp"
 #include "Configuration.hpp"
-#include "Server.hpp"
 
 namespace sugo
 {
 /**
- * SugoMachine application class.
+ * @brief Abstreact class representing the machine application.
  */
 class MachineApplication final
 {
 public:
-    MachineApplication();
+    /**
+     * @brief Construct a new Machine Application object
+     *
+     * @param appName Name of the application
+     */
+    MachineApplication(const std::string& appName);
 
     /**
      * Starts the application with command line arguments.
@@ -39,13 +42,11 @@ public:
 private:
     bool parseCommandLine(int argc, char const** argv);
     bool parseConfigurationFile();
-    bool run();
 
-    Configuration                        m_configCommandLine;
-    Configuration                        m_configuration;
-    std::map<std::type_index, IOContext> m_ioContexts;
+    const std::string        m_name;
+    Configuration            m_configCommandLine;
+    Configuration            m_configuration;
+    ComponentsExecutionGroup m_execGroup;
 };
 
 }  // namespace sugo
-
-#endif /* MACHINEAPPLICATION_HPP_ */

@@ -27,11 +27,15 @@ template <class MessageT, class ResponseT = void, class ReceiverIdT = unsigned i
 class IMessageBroker : public IRunnable
 {
 protected:
-    virtual ~IMessageBroker() {}
+    virtual ~IMessageBroker()
+    {
+    }
 
 public:
     /// Handler definition which reacts to a request.
     using Handler = std::function<ResponseT(const MessageT&)>;
+    /// Type for receiver identifiers
+    using ReceiverIdType = ReceiverIdT;
     /// Receiver list definition.
     using ReceiverIdList = std::vector<ReceiverIdT>;
 
@@ -79,6 +83,13 @@ public:
      * @return true if the handler could be registered.
      */
     virtual bool hasRegisteredHandler(const ReceiverIdT& messageId) const = 0;
+
+    /**
+     * @brief Returns the assigned receiver identifier.
+     *
+     * @return const ReceiverIdType&  Receiver identifier.
+     */
+    virtual const ReceiverIdType& getReceiverId() const = 0;
 };
 
 }  // namespace sugo

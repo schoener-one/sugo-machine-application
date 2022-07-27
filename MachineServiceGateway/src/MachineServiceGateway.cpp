@@ -31,7 +31,7 @@ constexpr unsigned MethodTokenMethodId   = 1u;
 
 using namespace sugo;
 
-void MachineServiceGateway::setConfiguration(IConfiguration& configuration)
+void MachineServiceGateway::addConfigurationOptions(IConfiguration& configuration)
 {
     configuration.add(Option("sugo-machine-service.address", std::string("*"),
                              "Network address of the service"));
@@ -39,7 +39,7 @@ void MachineServiceGateway::setConfiguration(IConfiguration& configuration)
 }
 
 MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroker,
-                               const IConfiguration& configuration, IOContext& ioContext)
+                               const IConfiguration& configuration, AsioContext& ioContext)
     : ServiceComponent(messageBroker, {}),
       m_jsonRpcServer(
           std::string("tcp://") +

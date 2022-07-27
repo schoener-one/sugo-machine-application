@@ -18,7 +18,7 @@ class ServerSocket : public azmq::rep_socket
 {
 public:
     // FIXME socket could be used optimized for single threaded!
-    explicit ServerSocket(IOContext& service) : azmq::rep_socket(service)
+    explicit ServerSocket(boost::asio::io_context& context) : azmq::rep_socket(context)
     {
     }
 };
@@ -27,10 +27,10 @@ public:
 using namespace sugo;
 namespace asio = boost::asio;
 
-Server::Server(const std::string& address, IMessageHandler& messageHandler, IOContext& ioContext)
+Server::Server(const std::string& address, IMessageHandler& messageHandler, AsioContext& ioContext)
     : m_address(address),
       m_messageHandler(messageHandler),
-      m_socket(std::make_unique<ServerSocket>(ioContext)),
+      m_socket(std::make_unique<ServerSocket>(ioContext.getContext())),
       m_isRunning(false)
 {
 }
@@ -66,7 +66,7 @@ void Server::receiveRequest()
                                     if (bytesReceived > 0)
                                     {
                                         m_receiveBuf.commit(bytesReceived);
-                                        m_isRunning = handleReceived();
+                                        (void)handleReceived();
                                     }
                                     else
                                     {
@@ -78,13 +78,9 @@ void Server::receiveRequest()
                                     LOG(error) << "Receive error occurred: " << ec;
                                 }
 
-                                if (m_isRunning)
+                                if (isRunning())
                                 {
                                     receiveRequest();
-                                }
-                                else
-                                {
-                                    LOG(debug) << "Receiving data stopped";
                                 }
                             });
 }
@@ -122,7 +118,7 @@ bool Server::sendResponse()
 
 void Server::stop()
 {
-    if (m_isRunning)
+    if (isRunning())
     {
         try
         {

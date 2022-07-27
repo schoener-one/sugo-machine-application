@@ -15,7 +15,7 @@
 #include <memory>
 #include <ostream>
 
-#include "IOContext.hpp"
+#include "AsioContext.hpp"
 #include "StreamBuffer.hpp"
 
 namespace sugo
@@ -28,7 +28,7 @@ class ClientSocket;
 class Client
 {
 public:
-    explicit Client(IOContext& ioContext);
+    explicit Client(AsioContext& ioContext);
     virtual ~Client();
 
     /**

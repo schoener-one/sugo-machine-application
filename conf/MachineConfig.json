@@ -2,11 +2,5 @@
     "sugo-machine-service": {
         "address": "*",
         "port": 1234
-    },
-    "cup-rotation-tray": {
-        "stepper-motor": {
-            "speed-rpm": 20,
-            "index": 0
-        }
     }
 }

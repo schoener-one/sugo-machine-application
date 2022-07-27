@@ -62,6 +62,16 @@
                 }
             ],
             //"preLaunchTask": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest"
-        }
+        },
+        {
+            "name": "Machine Application (x86)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${config:build.directory.x86}/MachineApplication/MachineApplication",
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            "args": ["--config-file", "${workspaceFolder}/conf/MachineConfig.json"]
+        },
     ]
 }

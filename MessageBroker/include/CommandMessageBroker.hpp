@@ -7,9 +7,9 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMANDMESSAGEBROKER_HPP_
-#define COMMANDMESSAGEBROKER_HPP_
+#pragma once
 
+#include <cassert>
 #include <list>
 #include <memory>
 
@@ -21,22 +21,22 @@
 
 namespace sugo
 {
-using CommandMessageBrokerT =
-    MessageBroker<message::Command, message::CommandResponse, std::string>;
-
 /**
  * Class which handles command messages.
  * @todo Remove receiver-id list from interface.
  */
-class CommandMessageBroker : public CommandMessageBrokerT, public Server::IMessageHandler
+class CommandMessageBroker
+    : public MessageBroker<message::Command, message::CommandResponse, std::string>,
+      public Server::IMessageHandler
 {
-public:   
+public:
     // cppcheck-suppress passedByValue
-    CommandMessageBroker(const std::string& receiverId, IOContext& ioContext)
-        : CommandMessageBrokerT(),
+    CommandMessageBroker(const std::string& receiverId, AsioContext& ioContext)
+        : MessageBroker<message::Command, message::CommandResponse, std::string>(),
           m_server(createInProcessAddress(receiverId), *this, ioContext),
           m_client(ioContext),
-          m_receiverId(receiverId)
+          m_receiverId(receiverId),
+          m_ioContext(ioContext)
     {
     }
 
@@ -44,36 +44,43 @@ public:
     {
     }
 
-    using typename CommandMessageBrokerT::Handler;
+    using typename MessageBroker<message::Command, message::CommandResponse, std::string>::Handler;
 
     // IMessageBroker {{
     bool send(const message::Command& message, const std::string& receiverId,
               message::CommandResponse& response) override;
 
     bool notify(const message::Command& message, const ReceiverIdList& receivers) override;
+
+    const ReceiverIdType& getReceiverId() const override
+    {
+        return m_receiverId;
+    }
     // IMessageBroker }}
 
     // IRunnable {{
     bool start() override
     {
+        assert(!m_ioContext.isRunning());
+        if (!m_ioContext.start())
+        {
+            LOG(error) << "Failed to start io context";
+            return false;
+        }
         return m_server.start();
     }
 
     void stop() override
     {
         m_server.stop();
+        m_ioContext.stop();
     }
 
     bool isRunning() const override
     {
-        return m_server.isRunning();
+        return m_server.isRunning() && m_ioContext.isRunning();
     }
     // IRunnable }}
-
-    const std::string& getReceiverId() const
-    {
-        return m_receiverId;
-    }
 
 protected:
     // Server::IMessageHandler {{
@@ -91,8 +98,7 @@ private:
     Server            m_server;
     Client            m_client;
     const std::string m_receiverId;
+    AsioContext&      m_ioContext;
 };
 
 }  // namespace sugo
-
-#endif  // COMMANDMESSAGEBROKER_HPP_

@@ -13,6 +13,7 @@ add_executable(${MODULE_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentMergerHeater.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentPreHeater.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentTensionSensor.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ComponentsExecutionGroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineApplication.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineControl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UserInterfaceControl.cpp

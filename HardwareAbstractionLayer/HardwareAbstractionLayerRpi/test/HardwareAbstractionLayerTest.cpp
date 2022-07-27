@@ -179,7 +179,7 @@ TEST_F(HardwareAbstractionLayerTest, IHardwareAbstractionLayer_SetConfiguration)
     std::istringstream      iss(s_halConfig);
     ConfigurationFileParser parser(iss);
     Configuration           config;
-    HardwareAbstractionLayer::setConfiguration(config);
+    HardwareAbstractionLayer::addConfigurationOptions(config);
     parser.add(config);
     EXPECT_TRUE(parser.parse());
     const std::vector<std::string>& pinEnabled =

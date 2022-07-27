@@ -82,7 +82,7 @@ bool HardwareAbstractionLayer::init(const IConfiguration& configuration)
     return success;
 }
 
-void HardwareAbstractionLayer::setConfiguration(sugo::IConfiguration& configuration)
+void HardwareAbstractionLayer::addConfigurationOptions(sugo::IConfiguration& configuration)
 {
     const static std::string gpioControl{"hardware-abstraction-layer.gpio-control"};
     configuration.add(

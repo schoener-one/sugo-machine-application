@@ -11,7 +11,10 @@
 
 #include <string>
 
-namespace sugo::IMachineServiceGateway
+namespace sugo
 {
-static const std::string ReceiverId{"MachineService"};
+    struct IMachineServiceGateway
+    {
+        inline static const std::string ReceiverId{"MachineService"};
+    };
 }  // namespace sugo::IMachineServiceGateway

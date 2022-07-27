@@ -24,7 +24,7 @@ bool Thread::start(Runnable function, Policy policy, int priority)
     m_runnable = function;
     m_policy   = policy;
 
-    m_thread = std::thread([=] {
+    m_thread = std::thread([&] {
         Logger::reinit();
         bool success = true;
         if (m_policy == PolicyRealTime)

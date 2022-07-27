@@ -58,7 +58,7 @@ public:
      *
      * @param configuration Configuration to be set.
      */
-    static void setConfiguration(sugo::IConfiguration& configuration);
+    static void addConfigurationOptions(sugo::IConfiguration& configuration);
 
 private:
     GpioControllerMap              m_gpioControllerMap;

@@ -83,8 +83,8 @@ bool CommandMessageBroker::processReceived(StreamBuffer& inBuf, StreamBuffer& ou
     {
         const std::string commandName = command.name();
         LOG(debug) << "Received command '" << commandName << "' (" << command.id() << ")";
-        CommandMessageBrokerT::Handler* handler = findHandler(commandName);
-        std::ostream                    out(&outBuf);
+        Handler*     handler = findHandler(commandName);
+        std::ostream out(&outBuf);
         if (handler != nullptr)
         {
             message::CommandResponse response = (*handler)(command);

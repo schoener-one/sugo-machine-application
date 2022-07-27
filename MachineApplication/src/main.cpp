@@ -16,6 +16,6 @@
 int main(int argc, char const **argv)
 {
     sugo::Logger::init();
-    sugo::MachineApplication application;
+    sugo::MachineApplication application("SugoMachine");
     return application.start(argc, argv) ? 0 : -1;
 }

@@ -5,7 +5,7 @@ add_library (MessageBroker STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandMessageBroker.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/IOContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/AsioContext.cpp
     )
 target_include_directories (MessageBroker PUBLIC include)
 target_link_libraries(MessageBroker

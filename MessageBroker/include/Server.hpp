@@ -14,7 +14,7 @@
 #include <istream>
 #include <memory>
 
-#include "IOContext.hpp"
+#include "AsioContext.hpp"
 #include "IRunnable.hpp"
 #include "StreamBuffer.hpp"
 
@@ -34,7 +34,9 @@ public:
     class IMessageHandler
     {
     public:
-        virtual ~IMessageHandler() {}
+        virtual ~IMessageHandler()
+        {
+        }
 
         /**
          * Called to process a new received message.
@@ -45,7 +47,9 @@ public:
         virtual bool processReceived(StreamBuffer& in, StreamBuffer& out) = 0;
 
     protected:
-        IMessageHandler() {}
+        IMessageHandler()
+        {
+        }
     };
 
     /**
@@ -54,7 +58,7 @@ public:
      * @param messageHandler Instance to handle received messages.
      * @param ioContext IO context.
      */
-    Server(const std::string& address, IMessageHandler& messageHandler, IOContext& ioContext);
+    Server(const std::string& address, IMessageHandler& messageHandler, AsioContext& ioContext);
 
     virtual ~Server();
 
@@ -62,7 +66,10 @@ public:
      * Returns the binded address.
      * @return Binded address
      */
-    const std::string& getAddress() { return m_address; }
+    const std::string& getAddress()
+    {
+        return m_address;
+    }
 
     // IRunnable {{
     bool start() override;
