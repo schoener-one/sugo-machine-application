@@ -49,12 +49,6 @@ inline std::ostream& operator<<(std::ostream& ostr, const std::vector<ValueT>& v
 
 using namespace sugo::hal;
 
-const sugo::IConfiguration& HardwareAbstractionLayer::getHardwareConfiguration(
-    const sugo::IConfiguration& configuration, sugo::IConfiguration& extractedConfiguration)
-{
-    return configuration.extract(getId() + ".", extractedConfiguration);
-}
-
 bool HardwareAbstractionLayer::init(const IConfiguration& configuration)
 {
     bool success = initSubComponents<IGpioControl, GpioControl>(

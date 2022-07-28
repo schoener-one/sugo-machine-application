@@ -18,8 +18,7 @@
 #include "CommandMessageBroker.hpp"
 #include "ConfigurationFileParser.hpp"
 #include "HardwareAbstractionLayer.hpp"
-#include "MachineServiceGateway.hpp"
-#include "UserInterfaceControl.hpp"
+#include "ServiceLocator.hpp"
 
 namespace po = boost::program_options;
 using namespace sugo;
@@ -74,18 +73,17 @@ bool MachineApplication::start(int argc, char const** argv)
         return false;
     }
 
-    // HardwareAbstractionLayer hal;
-    // Configuration            halConfiguration;
-    // hal.getHardwareConfiguration(m_configuration, halConfiguration);
-    // if (!hal.init(halConfiguration))
-    // {
-    //     return false;
-    // }
+    ServiceLocator serviceLocator;
+    serviceLocator.add<IConfiguration>(m_configuration);
 
-    // ServiceLocator locator;
-    // locator.register(hal);
+    HardwareAbstractionLayer hal;
+    serviceLocator.add<IHardwareAbstractionLayer>(hal);
+    if (!serviceLocator.get<IHardwareAbstractionLayer>().init(m_configuration))
+    {
+        return false;
+    }
 
-    const bool success = m_execGroup.start(m_configuration);
+    const bool success = m_execGroup.start(serviceLocator);
     LOG(info) << "Application " << m_name << " stopped";
     return success;
 }

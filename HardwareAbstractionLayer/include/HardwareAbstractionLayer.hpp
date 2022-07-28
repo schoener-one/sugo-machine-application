@@ -44,16 +44,6 @@ public:
     }
 
     /**
-     * @brief Extract the hardware configuration from existing configuration.
-     *
-     * @param[in] configuration Source configuration
-     * @param[out] extractedConfiguration Extracted hardware configuration.
-     * @return const sugo::IConfiguration& The extracted hardware configuration which was passed.
-     */
-    const sugo::IConfiguration& getHardwareConfiguration(
-        const sugo::IConfiguration& configuration, sugo::IConfiguration& extractedConfiguration);
-
-    /**
      * @brief Set the Configuration object.
      *
      * @param configuration Configuration to be set.

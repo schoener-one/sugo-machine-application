@@ -33,13 +33,15 @@ struct IComponentExecutionBundle
     virtual ServiceComponent& getServiceComponent() = 0;
 };
 
-template <class ComponentT>
+template <class ComponentT, typename... ComponentArgs>
 struct ComponentExecutionBundle : IComponentExecutionBundle
 {
-    ComponentExecutionBundle(const CommandMessageBroker::ReceiverIdType& receiverId)
-        : context(), broker(receiverId, context), component(broker)
+    ComponentExecutionBundle(const CommandMessageBroker::ReceiverIdType& receiverId,
+                             ComponentArgs&... componentArgs)
+        : context(), broker(receiverId, context), component(broker, componentArgs...)
     {
     }
+
     AsioContext          context;
     CommandMessageBroker broker;
     ComponentT           component;
@@ -57,7 +59,7 @@ struct ComponentExecutionBundle : IComponentExecutionBundle
 struct MachineServiceGatewayExecutionBundle : IComponentExecutionBundle
 {
     MachineServiceGatewayExecutionBundle(const CommandMessageBroker::ReceiverIdType& receiverId,
-                                         Configuration&                              configuration)
+                                         const IConfiguration&                       configuration)
         : context(), broker(receiverId, context), component(broker, configuration, context)
     {
     }
@@ -78,18 +80,20 @@ struct MachineServiceGatewayExecutionBundle : IComponentExecutionBundle
 
 using namespace sugo;
 
-void ComponentsExecutionGroup::addConfigurationOptions(Configuration& configuration)
+void ComponentsExecutionGroup::addConfigurationOptions(IConfiguration& configuration)
 {
     MachineServiceGateway::addConfigurationOptions(configuration);
 }
 
-bool ComponentsExecutionGroup::start(Configuration& configuration)
+bool ComponentsExecutionGroup::start(const ServiceLocator& serviceLocator)
 {
     ComponentExecutionBundle<MachineControl> machineControl(MachineControl::ReceiverId);
-    MachineServiceGatewayExecutionBundle MachineServiceGateway(MachineServiceGateway::ReceiverId,
-                                                               configuration);
 
-    std::array<IComponentExecutionBundle*, 1> bundles{&machineControl};
+    // Gateway
+    MachineServiceGatewayExecutionBundle machineServiceGateway(MachineServiceGateway::ReceiverId,
+                                                               serviceLocator.get<IConfiguration>());
+
+    std::array<IComponentExecutionBundle*, 2> bundles{&machineControl, &machineServiceGateway};
 
     for (auto const& bundle : bundles)
     {

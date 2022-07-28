@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include "Configuration.hpp"
+#include "IConfiguration.hpp"
+#include "ServiceLocator.hpp"
 
 namespace sugo
 {
@@ -26,17 +27,18 @@ public:
      *
      * @param configuration Configuration object to which all options are added.
      */
-    void addConfigurationOptions(Configuration& configuration);
+    void addConfigurationOptions(IConfiguration& configuration);
 
     /**
      * @brief Executes all components in a sufficient sequence.
      * This call does not return until stop() has been called or a an fatal
      * error has been occurred!
      *
+     * @param  serviceLocator Service locator object
      * @return true if all components could be executed successfully and have been stopped again.
      * @return false if at least one component failed to start.
      */
-    bool start(Configuration& configuration);
+    bool start(const ServiceLocator& serviceLocator);
 };
 
 }  // namespace sugo

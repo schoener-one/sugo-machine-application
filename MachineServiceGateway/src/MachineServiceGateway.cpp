@@ -52,7 +52,7 @@ MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroke
 
 bool MachineServiceGateway::start()
 {
-    bool success = ServiceComponent::start();
+    bool success = ServiceComponent::start(); // starts also io context!
 
     if (success)
     {
