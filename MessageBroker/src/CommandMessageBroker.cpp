@@ -64,11 +64,8 @@ bool CommandMessageBroker::notify(const message::Command& message, const Receive
     bool                     success = true;
     for (const auto& receiverId : receivers)
     {
-        if (receiverId != m_receiverId)
-        {
-            // Ignore the response!
-            success = send(message, receiverId, response) && success;
-        }
+        // Ignore the response!
+        success = send(message, receiverId, response) && success;
     }
     return success;
 }

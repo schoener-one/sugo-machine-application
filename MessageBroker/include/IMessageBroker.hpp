@@ -83,13 +83,6 @@ public:
      * @return true if the handler could be registered.
      */
     virtual bool hasRegisteredHandler(const ReceiverIdT& messageId) const = 0;
-
-    /**
-     * @brief Returns the assigned receiver identifier.
-     *
-     * @return const ReceiverIdType&  Receiver identifier.
-     */
-    virtual const ReceiverIdType& getReceiverId() const = 0;
 };
 
 }  // namespace sugo

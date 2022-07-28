@@ -49,16 +49,6 @@ public:
     }
     // IRunnable }}
 
-    /**
-     * @brief Returns the assigned identifier.
-     * 
-     * @return const std::string& Assigned identifier
-     */
-    const std::string& getId() const
-    {
-        return m_messageBroker.getReceiverId();
-    }
-
 protected:
     explicit ServiceComponent(ICommandMessageBroker&                       messageBroker,
                               const ICommandMessageBroker::ReceiverIdList& notifReceivers)

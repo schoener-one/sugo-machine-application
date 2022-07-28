@@ -35,7 +35,6 @@ public:
         : MessageBroker<message::Command, message::CommandResponse, std::string>(),
           m_server(createInProcessAddress(receiverId), *this, ioContext),
           m_client(ioContext),
-          m_receiverId(receiverId),
           m_ioContext(ioContext)
     {
     }
@@ -51,11 +50,6 @@ public:
               message::CommandResponse& response) override;
 
     bool notify(const message::Command& message, const ReceiverIdList& receivers) override;
-
-    const ReceiverIdType& getReceiverId() const override
-    {
-        return m_receiverId;
-    }
     // IMessageBroker }}
 
     // IRunnable {{
@@ -97,7 +91,6 @@ private:
 
     Server            m_server;
     Client            m_client;
-    const std::string m_receiverId;
     AsioContext&      m_ioContext;
 };
 
