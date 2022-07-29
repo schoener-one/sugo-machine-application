@@ -47,17 +47,31 @@ using namespace sugo;
 class MachineSmokeTest : public ::testing::Test, public IOContextHelper
 {
 protected:
-    MachineSmokeTest() {}
+    MachineSmokeTest()
+    {
+    }
 
-    ~MachineSmokeTest() override {}
+    ~MachineSmokeTest() override
+    {
+    }
 
-    static void SetUpTestCase() { Logger::init(); }
+    static void SetUpTestCase()
+    {
+        Logger::init();
+    }
 
-    void SetUp() override {}
+    void SetUp() override
+    {
+    }
 
-    void TearDown() override { stopIOContext(); }
+    void TearDown() override
+    {
+        stopIOContext();
+    }
 
-    void startIoService() {}
+    void startIoService()
+    {
+    }
 };
 
 // FIXME second send call keeps hanging

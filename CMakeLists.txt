@@ -9,7 +9,7 @@ message("Binary path: ${PROJECT_BINARY_DIR}")
 include(cmake/CompilerConfig.cmake)
 include(cmake/Coverage.cmake)
 include(cmake/Testing.cmake)
-include(cmake/GenerateServiceComponent.cmake)
+include(cmake/GenerateServiceComponents.cmake)
 
 ## **********************************
 ## Sub directories

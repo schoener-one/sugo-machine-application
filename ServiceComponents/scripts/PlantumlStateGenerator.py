@@ -11,7 +11,7 @@ import logging
 
 from ServiceComponentData import ServiceComponent
     
-class PlantumlStateGenerator:
+class Generator:
     """Class to generate the C++ files"""
     def __init__(self, out_dir) -> None:
         self._out_dir = Path(out_dir)
@@ -37,7 +37,7 @@ class PlantumlStateGenerator:
 state {component_name} {{
   [*] --> {component.statemachine.start}
 
-{PlantumlStateGenerator._generate_transitions(component.statemachine)}
+{Generator._generate_transitions(component.statemachine)}
 }}
 @enduml
 ''')

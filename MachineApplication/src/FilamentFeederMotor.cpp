@@ -5,7 +5,7 @@
  * @license: Copyright 2022, Schoener-One
  *
  * @author: denis@schoener-one
- * @date:   2022-07-19
+ * @date:   2022-07-29
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -52,32 +52,35 @@ message::CommandResponse FilamentFeederMotor::onCommandSetMotorSpeed(const messa
     return message::CommandResponse();
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void FilamentFeederMotor::startMotor(const IFilamentFeederMotor::Event&, const IFilamentFeederMotor::State&)
+void FilamentFeederMotor::startMotor(const IFilamentFeederMotor::Event&,
+                                     const IFilamentFeederMotor::State&)
 {
     LOG(debug) << "transition action startMotor in FilamentFeederMotor...";
 }
 
-void FilamentFeederMotor::switchOn(const IFilamentFeederMotor::Event&, const IFilamentFeederMotor::State&)
+void FilamentFeederMotor::switchOn(const IFilamentFeederMotor::Event&,
+                                   const IFilamentFeederMotor::State&)
 {
     LOG(debug) << "transition action switchOn in FilamentFeederMotor...";
 }
 
-void FilamentFeederMotor::handleError(const IFilamentFeederMotor::Event&, const IFilamentFeederMotor::State&)
+void FilamentFeederMotor::handleError(const IFilamentFeederMotor::Event&,
+                                      const IFilamentFeederMotor::State&)
 {
     LOG(debug) << "transition action handleError in FilamentFeederMotor...";
 }
 
-void FilamentFeederMotor::stopMotor(const IFilamentFeederMotor::Event&, const IFilamentFeederMotor::State&)
-{
-    LOG(debug) << "transition action stopMotor in FilamentFeederMotor...";
-}
-
-void FilamentFeederMotor::switchOff(const IFilamentFeederMotor::Event&, const IFilamentFeederMotor::State&)
+void FilamentFeederMotor::switchOff(const IFilamentFeederMotor::Event&,
+                                    const IFilamentFeederMotor::State&)
 {
     LOG(debug) << "transition action switchOff in FilamentFeederMotor...";
 }
 
+void FilamentFeederMotor::stopMotor(const IFilamentFeederMotor::Event&,
+                                    const IFilamentFeederMotor::State&)
+{
+    LOG(debug) << "transition action stopMotor in FilamentFeederMotor...";
+}

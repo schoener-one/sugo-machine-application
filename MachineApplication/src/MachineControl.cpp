@@ -37,7 +37,8 @@ message::CommandResponse MachineControl::onCommandIncreaseMotorSpeed(
     const message::Command& command)
 {
     // forwarding
-    const auto responseCoilControl = send(IFilamentCoilControl::CommandIncreaseMotorSpeed, command.parameters());
+    const auto responseCoilControl =
+        send(IFilamentCoilControl::CommandIncreaseMotorSpeed, command.parameters());
     if (responseCoilControl.result() != message::CommandResponse_Result_SUCCESS)
     {
         return responseCoilControl;
@@ -49,7 +50,8 @@ message::CommandResponse MachineControl::onCommandDecreaseMotorSpeed(
     const message::Command& command)
 {
     // forwarding
-    const auto responseCoilControl = send(IFilamentCoilControl::CommandDecreaseMotorSpeed, command.parameters());
+    const auto responseCoilControl =
+        send(IFilamentCoilControl::CommandDecreaseMotorSpeed, command.parameters());
     if (responseCoilControl.result() != message::CommandResponse_Result_SUCCESS)
     {
         return responseCoilControl;

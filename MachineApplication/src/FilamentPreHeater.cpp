@@ -5,7 +5,7 @@
  * @license: Copyright 2022, Schoener-One
  *
  * @author: denis@schoener-one
- * @date:   2022-07-19
+ * @date:   2022-07-29
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -34,18 +34,13 @@ message::CommandResponse FilamentPreHeater::onCommandGetTemperature(const messag
     return message::CommandResponse();
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void FilamentPreHeater::handleError(const IFilamentPreHeater::Event&, const IFilamentPreHeater::State&)
+void FilamentPreHeater::handleError(const IFilamentPreHeater::Event&,
+                                    const IFilamentPreHeater::State&)
 {
     LOG(debug) << "transition action handleError in FilamentPreHeater...";
-}
-
-void FilamentPreHeater::switchOff(const IFilamentPreHeater::Event&, const IFilamentPreHeater::State&)
-{
-    LOG(debug) << "transition action switchOff in FilamentPreHeater...";
 }
 
 void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilamentPreHeater::State&)
@@ -53,3 +48,8 @@ void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilame
     LOG(debug) << "transition action switchOn in FilamentPreHeater...";
 }
 
+void FilamentPreHeater::switchOff(const IFilamentPreHeater::Event&,
+                                  const IFilamentPreHeater::State&)
+{
+    LOG(debug) << "transition action switchOff in FilamentPreHeater...";
+}

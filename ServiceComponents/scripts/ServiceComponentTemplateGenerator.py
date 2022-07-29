@@ -69,6 +69,7 @@ class Generator:
 
 #pragma once
 
+#include "ServiceLocator.hpp"
 #include "I{context.name}.hpp"
 
 namespace sugo
@@ -80,7 +81,8 @@ class {context.name} : public I{context.name}
 {{
 public:    
     // Constructor / Destructor
-    explicit {context.name}(ICommandMessageBroker& messageBroker) :I{context.name}(messageBroker)
+    explicit {context.name}(ICommandMessageBroker& messageBroker, const ServiceLocator& serviceLocator) 
+        :I{context.name}(messageBroker), m_serviceLocator(serviceLocator)
     {{
     }}
     virtual ~{context.name}()
@@ -91,6 +93,8 @@ protected:
     
 {Generator._generate_command_handler_declarations(context.component.commands)}
 {Generator._generate_trans_actions_declarations(context.actions, context.name)}
+
+    const ServiceLocator& m_serviceLocator;
 }};
 
 }} // namespace sugo

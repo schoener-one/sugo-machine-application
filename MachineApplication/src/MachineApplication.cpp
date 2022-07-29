@@ -18,11 +18,40 @@
 #include "CommandMessageBroker.hpp"
 #include "ConfigurationFileParser.hpp"
 #include "HardwareAbstractionLayer.hpp"
+#include "MachineServiceGateway.hpp"
+#include "ServiceComponentExecutionBundle.hpp"
 #include "ServiceLocator.hpp"
 
 namespace po = boost::program_options;
 using namespace sugo;
 using namespace hal;
+
+namespace
+{
+template <class GatewayT>
+struct GatewayExecutionBundle
+{
+    GatewayExecutionBundle(const IConfiguration& configuration)
+        : context(),
+          broker(GatewayT::ReceiverId, context),
+          component(broker, configuration, context)
+    {
+    }
+
+    AsioContext           context;
+    CommandMessageBroker  broker;
+    MachineServiceGateway component;
+
+    AsioContext& getContext()
+    {
+        return context;
+    }
+    ServiceComponent& getServiceComponent()
+    {
+        return component;
+    }
+};
+}  // namespace
 
 MachineApplication::MachineApplication(const std::string& appName)
     : m_name(appName),
@@ -60,7 +89,7 @@ bool MachineApplication::start(int argc, char const** argv)
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     HardwareAbstractionLayer::addConfigurationOptions(m_configuration);
-    m_execGroup.addConfigurationOptions(m_configuration);
+    MachineServiceGateway::addConfigurationOptions(m_configuration);
 
     LOG(info) << "Starting application " << m_name;
     if (!parseCommandLine(argc, argv))
@@ -83,7 +112,16 @@ bool MachineApplication::start(int argc, char const** argv)
         return false;
     }
 
-    const bool success = m_execGroup.start(serviceLocator);
+    // Gateway
+    GatewayExecutionBundle<MachineServiceGateway> machineServiceGateway(m_configuration);
+    if (!machineServiceGateway.getServiceComponent().start())
+    {
+        LOG(error) << "Failed to start machine gateway";
+        return false;
+    }
+
+    // Service components
+    const bool success = m_components.start(serviceLocator);
     LOG(info) << "Application " << m_name << " stopped";
     return success;
 }

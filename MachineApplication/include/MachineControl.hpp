@@ -1,26 +1,38 @@
+
 ///////////////////////////////////////////////////////////////////////////////
-/** @file
- * @license: Copyright 2022 by Schoener-One
+/**
+ * @file
+ * @license: Copyright 2022, Schoener-One
  *
- * @author: denis@schoener-one.de
- * @date:   2022-07-07
+ * @author: denis@schoener-one
+ * @date:   2022-07-29
  */
 ///////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #include "IMachineControl.hpp"
+#include "ServiceLocator.hpp"
 
 namespace sugo
 {
-class MachineControl final : public IMachineControl
+/**
+ * @class MachineControl
+ */
+class MachineControl : public IMachineControl
 {
 public:
-    explicit MachineControl(ICommandMessageBroker& messageBroker) : IMachineControl(messageBroker)
+    // Constructor / Destructor
+    explicit MachineControl(ICommandMessageBroker& messageBroker,
+                            const ServiceLocator&  serviceLocator)
+        : IMachineControl(messageBroker), m_serviceLocator(serviceLocator)
+    {
+    }
+    virtual ~MachineControl()
     {
     }
 
-private:
+protected:
     // Command handlers
     message::CommandResponse onCommandSwitchOn(const message::Command& command) override;
     message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
@@ -41,21 +53,16 @@ private:
         const message::Command& command) override;
 
     // Transition actions
-    void waitForStarted(const IMachineControl::Event& event,
-                        const IMachineControl::State& state) override;
-    void handleError(const IMachineControl::Event& event,
-                     const IMachineControl::State& state) override;
-    void startMachine(const IMachineControl::Event& event,
-                      const IMachineControl::State& state) override;
-    void runSelfTest(const IMachineControl::Event& event,
-                     const IMachineControl::State& state) override;
-    void switchOn(const IMachineControl::Event& event,
-                  const IMachineControl::State& state) override;
-    void switchOff(const IMachineControl::Event& event,
-                   const IMachineControl::State& state) override;
+    void runSelfTest(const Event& event, const State& state) override;
+    void startMachine(const Event& event, const State& state) override;
+    void switchOff(const Event& event, const State& state) override;
+    void handleError(const Event& event, const State& state) override;
+    void switchOn(const Event& event, const State& state) override;
+    void waitForStarted(const Event& event, const State& state) override;
 
-    bool m_isFilamentMergerControlRunning = false;
-    bool m_isFilamentCoilControlRunning   = false;
+    const ServiceLocator& m_serviceLocator;
+    bool                  m_isFilamentMergerControlRunning = false;
+    bool                  m_isFilamentCoilControlRunning   = false;
 };
 
-} /* namespace sugo */
+}  // namespace sugo

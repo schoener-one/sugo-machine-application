@@ -1,7 +1,11 @@
 # CMake configuration file
 # Module: ${MODULE_NAME}
 set(MODULE_NAME "MachineApplication")
-generate_service_component(
+generate_service_components(
+    TARGET ${MODULE_NAME}
+    CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/MachineServiceComponents.yaml"
+    )
+generate_service_components_exec_group(
     TARGET ${MODULE_NAME}
     CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/MachineServiceComponents.yaml"
     )
@@ -13,7 +17,6 @@ add_executable(${MODULE_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentMergerHeater.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentPreHeater.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FilamentTensionSensor.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ComponentsExecutionGroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineApplication.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MachineControl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UserInterfaceControl.cpp
@@ -29,9 +32,10 @@ target_link_libraries(${MODULE_NAME}
     MessageBroker
     MachineServiceGateway
     ${MODULE_NAME}-GenLib
+    ${MODULE_NAME}-ExecGroup-GenLib
     HardwareAbstractionLayer
     )
-    
+        
  # Google Unittests
 if (NOT NO_UNITTEST)
     add_executable(MachineSmokeTest

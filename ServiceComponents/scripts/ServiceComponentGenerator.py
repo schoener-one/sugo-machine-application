@@ -47,10 +47,10 @@ class Generator:
             context = GeneratorContext(name, namespace, component, set([trans.action for trans in component.statemachine.transitions if trans.action]),
                                        set([receiver for receiver in components.keys() if receiver != name]))
             logging.info(f"generating component I{context.name} files")
-            self._generate_headers(context)
-            self._generate_source(context)
+            self._generate_header_files(context)
+            self._generate_source_files(context)
     
-    def _generate_headers(self, context):
+    def _generate_header_files(self, context):
         path = self._header_file_path(context.name)
         path.parent.mkdir(parents=True, exist_ok=True)
         newline = '\n'
@@ -164,7 +164,7 @@ protected:
             out_str += f'    virtual void {action}(const Event& event, const State& state);\n'
         return out_str
 
-    def _generate_source(self, context):
+    def _generate_source_files(self, context):
         path = self._source_file_path(context.name)
         path.parent.mkdir(parents=True, exist_ok=True)
         newline = '\n'
@@ -234,7 +234,7 @@ I{context.name}::I{context.name}(ICommandMessageBroker& messageBroker)
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 {Generator._generate_action_methods(context)}
-                        ''')
+''')
 
     @staticmethod
     def _generate_receiver_list(context):

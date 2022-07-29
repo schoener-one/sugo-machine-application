@@ -5,7 +5,7 @@
  * @license: Copyright 2022, Schoener-One
  *
  * @author: denis@schoener-one
- * @date:   2022-07-19
+ * @date:   2022-07-29
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -34,22 +34,23 @@ message::CommandResponse FilamentMergerHeater::onCommandGetTemperature(const mes
     return message::CommandResponse();
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void FilamentMergerHeater::handleError(const IFilamentMergerHeater::Event&, const IFilamentMergerHeater::State&)
+void FilamentMergerHeater::handleError(const IFilamentMergerHeater::Event&,
+                                       const IFilamentMergerHeater::State&)
 {
     LOG(debug) << "transition action handleError in FilamentMergerHeater...";
 }
 
-void FilamentMergerHeater::switchOff(const IFilamentMergerHeater::Event&, const IFilamentMergerHeater::State&)
-{
-    LOG(debug) << "transition action switchOff in FilamentMergerHeater...";
-}
-
-void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&, const IFilamentMergerHeater::State&)
+void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
+                                    const IFilamentMergerHeater::State&)
 {
     LOG(debug) << "transition action switchOn in FilamentMergerHeater...";
 }
 
+void FilamentMergerHeater::switchOff(const IFilamentMergerHeater::Event&,
+                                     const IFilamentMergerHeater::State&)
+{
+    LOG(debug) << "transition action switchOff in FilamentMergerHeater...";
+}

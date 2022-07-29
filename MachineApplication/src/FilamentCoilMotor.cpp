@@ -5,7 +5,7 @@
  * @license: Copyright 2022, Schoener-One
  *
  * @author: denis@schoener-one
- * @date:   2022-07-19
+ * @date:   2022-07-29
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -52,11 +52,11 @@ message::CommandResponse FilamentCoilMotor::onCommandSetMotorSpeed(const message
     return message::CommandResponse();
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void FilamentCoilMotor::startMotor(const IFilamentCoilMotor::Event&, const IFilamentCoilMotor::State&)
+void FilamentCoilMotor::startMotor(const IFilamentCoilMotor::Event&,
+                                   const IFilamentCoilMotor::State&)
 {
     LOG(debug) << "transition action startMotor in FilamentCoilMotor...";
 }
@@ -66,18 +66,20 @@ void FilamentCoilMotor::switchOn(const IFilamentCoilMotor::Event&, const IFilame
     LOG(debug) << "transition action switchOn in FilamentCoilMotor...";
 }
 
-void FilamentCoilMotor::handleError(const IFilamentCoilMotor::Event&, const IFilamentCoilMotor::State&)
+void FilamentCoilMotor::handleError(const IFilamentCoilMotor::Event&,
+                                    const IFilamentCoilMotor::State&)
 {
     LOG(debug) << "transition action handleError in FilamentCoilMotor...";
 }
 
-void FilamentCoilMotor::stopMotor(const IFilamentCoilMotor::Event&, const IFilamentCoilMotor::State&)
-{
-    LOG(debug) << "transition action stopMotor in FilamentCoilMotor...";
-}
-
-void FilamentCoilMotor::switchOff(const IFilamentCoilMotor::Event&, const IFilamentCoilMotor::State&)
+void FilamentCoilMotor::switchOff(const IFilamentCoilMotor::Event&,
+                                  const IFilamentCoilMotor::State&)
 {
     LOG(debug) << "transition action switchOff in FilamentCoilMotor...";
 }
 
+void FilamentCoilMotor::stopMotor(const IFilamentCoilMotor::Event&,
+                                  const IFilamentCoilMotor::State&)
+{
+    LOG(debug) << "transition action stopMotor in FilamentCoilMotor...";
+}

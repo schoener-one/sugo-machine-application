@@ -5,13 +5,14 @@
  * @license: Copyright 2022, Schoener-One
  *
  * @author: denis@schoener-one
- * @date:   2022-07-19
+ * @date:   2022-07-29
  */
 ///////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #include "IFilamentCoilControl.hpp"
+#include "ServiceLocator.hpp"
 
 namespace sugo
 {
@@ -20,17 +21,18 @@ namespace sugo
  */
 class FilamentCoilControl : public IFilamentCoilControl
 {
-public:    
+public:
     // Constructor / Destructor
-    explicit FilamentCoilControl(ICommandMessageBroker& messageBroker) :IFilamentCoilControl(messageBroker)
+    explicit FilamentCoilControl(ICommandMessageBroker& messageBroker,
+                                 const ServiceLocator&  serviceLocator)
+        : IFilamentCoilControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }
     virtual ~FilamentCoilControl()
     {
     }
-   
+
 protected:
-    
     // Command handlers
     message::CommandResponse onCommandSwitchOn(const message::Command& command) override;
     message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
@@ -39,20 +41,27 @@ protected:
     message::CommandResponse onCommandGetState(const message::Command& command) override;
     message::CommandResponse onCommandIncreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandDecreaseMotorSpeed(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentTensionSensorTensionTooLow(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentTensionSensorTensionTooHigh(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentTensionSensorErrorOccurred(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentCoilMotorStartMotorSucceeded(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentCoilMotorStartMotorFailed(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentCoilMotorErrorOccurred(const message::Command& command) override;
+    message::CommandResponse onCommandFilamentTensionSensorTensionTooLow(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentTensionSensorTensionTooHigh(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentTensionSensorErrorOccurred(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentCoilMotorStartMotorSucceeded(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentCoilMotorStartMotorFailed(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentCoilMotorErrorOccurred(
+        const message::Command& command) override;
 
     // Transition actions
-    void stopCoil(const Event& event, const State& state) override;
-    void switchOn(const Event& event, const State& state) override;
-    void handleError(const Event& event, const State& state) override;
     void switchOff(const Event& event, const State& state) override;
     void startCoil(const Event& event, const State& state) override;
+    void handleError(const Event& event, const State& state) override;
+    void stopCoil(const Event& event, const State& state) override;
+    void switchOn(const Event& event, const State& state) override;
 
+    const ServiceLocator& m_serviceLocator;
 };
 
-} // namespace sugo
+}  // namespace sugo

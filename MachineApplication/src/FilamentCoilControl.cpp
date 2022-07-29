@@ -5,7 +5,7 @@
  * @license: Copyright 2022, Schoener-One
  *
  * @author: denis@schoener-one
- * @date:   2022-07-19
+ * @date:   2022-07-29
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -58,68 +58,78 @@ message::CommandResponse FilamentCoilControl::onCommandDecreaseMotorSpeed(const 
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTensionTooLow(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTensionTooLow(
+    const message::Command&)
 {
     LOG(debug) << "command FilamentTensionSensor.TensionTooLow received in FilamentCoilControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTensionTooHigh(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTensionTooHigh(
+    const message::Command&)
 {
     LOG(debug) << "command FilamentTensionSensor.TensionTooHigh received in FilamentCoilControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorErrorOccurred(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorErrorOccurred(
+    const message::Command&)
 {
     LOG(debug) << "command FilamentTensionSensor.ErrorOccurred received in FilamentCoilControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorStartMotorSucceeded(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorStartMotorSucceeded(
+    const message::Command&)
 {
-    LOG(debug) << "command FilamentCoilMotor.StartMotorSucceeded received in FilamentCoilControl...";
+    LOG(debug)
+        << "command FilamentCoilMotor.StartMotorSucceeded received in FilamentCoilControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorStartMotorFailed(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorStartMotorFailed(
+    const message::Command&)
 {
     LOG(debug) << "command FilamentCoilMotor.StartMotorFailed received in FilamentCoilControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorErrorOccurred(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorErrorOccurred(
+    const message::Command&)
 {
     LOG(debug) << "command FilamentCoilMotor.ErrorOccurred received in FilamentCoilControl...";
     return message::CommandResponse();
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void FilamentCoilControl::stopCoil(const IFilamentCoilControl::Event&, const IFilamentCoilControl::State&)
-{
-    LOG(debug) << "transition action stopCoil in FilamentCoilControl...";
-}
-
-void FilamentCoilControl::switchOn(const IFilamentCoilControl::Event&, const IFilamentCoilControl::State&)
+void FilamentCoilControl::switchOn(const IFilamentCoilControl::Event&,
+                                   const IFilamentCoilControl::State&)
 {
     LOG(debug) << "transition action switchOn in FilamentCoilControl...";
 }
 
-void FilamentCoilControl::handleError(const IFilamentCoilControl::Event&, const IFilamentCoilControl::State&)
-{
-    LOG(debug) << "transition action handleError in FilamentCoilControl...";
-}
-
-void FilamentCoilControl::switchOff(const IFilamentCoilControl::Event&, const IFilamentCoilControl::State&)
+void FilamentCoilControl::switchOff(const IFilamentCoilControl::Event&,
+                                    const IFilamentCoilControl::State&)
 {
     LOG(debug) << "transition action switchOff in FilamentCoilControl...";
 }
 
-void FilamentCoilControl::startCoil(const IFilamentCoilControl::Event&, const IFilamentCoilControl::State&)
+void FilamentCoilControl::handleError(const IFilamentCoilControl::Event&,
+                                      const IFilamentCoilControl::State&)
+{
+    LOG(debug) << "transition action handleError in FilamentCoilControl...";
+}
+
+void FilamentCoilControl::stopCoil(const IFilamentCoilControl::Event&,
+                                   const IFilamentCoilControl::State&)
+{
+    LOG(debug) << "transition action stopCoil in FilamentCoilControl...";
+}
+
+void FilamentCoilControl::startCoil(const IFilamentCoilControl::Event&,
+                                    const IFilamentCoilControl::State&)
 {
     LOG(debug) << "transition action startCoil in FilamentCoilControl...";
 }
-

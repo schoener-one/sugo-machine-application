@@ -12,8 +12,8 @@
 
 #include <string>
 
-#include "ComponentsExecutionGroup.hpp"
 #include "Configuration.hpp"
+#include "ServiceComponentsExecutionGroup.hpp"
 
 namespace sugo
 {
@@ -43,10 +43,10 @@ private:
     bool parseCommandLine(int argc, char const** argv);
     bool parseConfigurationFile();
 
-    const std::string        m_name;
-    Configuration            m_configCommandLine;
-    Configuration            m_configuration;
-    ComponentsExecutionGroup m_execGroup;
+    const std::string               m_name;
+    Configuration                   m_configCommandLine;
+    Configuration                   m_configuration;
+    ServiceComponentsExecutionGroup m_components;
 };
 
 }  // namespace sugo

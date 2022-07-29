@@ -8,31 +8,31 @@
             "name": "ServiceComponentGenerator ListOnly",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponent.py",
+            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}/MachineApplication",
-            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "generated", "-l"]
+            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "gen", "--generate-exec-group"]
         },
         {
             "name": "ServiceComponentGenerator",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponent.py",
+            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}/MachineApplication",
-            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "generated"]
+            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "gen"]
         },
         {
             "name": "ServiceComponentGenerator Templates",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponent.py",
+            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}/MachineApplication",
-            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "generated", "-t"]
+            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "gen", "-t"]
         },
         {
             "name": "Debug HAL SmokeTest",

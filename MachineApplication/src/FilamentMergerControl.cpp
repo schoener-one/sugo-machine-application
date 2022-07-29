@@ -5,7 +5,7 @@
  * @license: Copyright 2022, Schoener-One
  *
  * @author: denis@schoener-one
- * @date:   2022-07-19
+ * @date:   2022-07-29
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -64,91 +64,110 @@ message::CommandResponse FilamentMergerControl::onCommandDecreaseMotorSpeed(cons
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterTargetTemperatureReached(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterTargetTemperatureReached(
+    const message::Command&)
 {
-    LOG(debug) << "command FilamentPreHeater.TargetTemperatureReached received in FilamentMergerControl...";
+    LOG(debug) << "command FilamentPreHeater.TargetTemperatureReached received in "
+                  "FilamentMergerControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterHeatingStopped(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterHeatingStopped(
+    const message::Command&)
 {
     LOG(debug) << "command FilamentPreHeater.HeatingStopped received in FilamentMergerControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterErrorOccurred(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterErrorOccurred(
+    const message::Command&)
 {
     LOG(debug) << "command FilamentPreHeater.ErrorOccurred received in FilamentMergerControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandFilamentMergerHeaterTargetTemperatureReached(const message::Command&)
+message::CommandResponse
+FilamentMergerControl::onCommandFilamentMergerHeaterTargetTemperatureReached(
+    const message::Command&)
 {
-    LOG(debug) << "command FilamentMergerHeater.TargetTemperatureReached received in FilamentMergerControl...";
+    LOG(debug) << "command FilamentMergerHeater.TargetTemperatureReached received in "
+                  "FilamentMergerControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandFilamentMergerHeaterHeatingStopped(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandFilamentMergerHeaterHeatingStopped(
+    const message::Command&)
 {
-    LOG(debug) << "command FilamentMergerHeater.HeatingStopped received in FilamentMergerControl...";
+    LOG(debug)
+        << "command FilamentMergerHeater.HeatingStopped received in FilamentMergerControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandFilamentMergerHeaterErrorOccurred(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandFilamentMergerHeaterErrorOccurred(
+    const message::Command&)
 {
     LOG(debug) << "command FilamentMergerHeater.ErrorOccurred received in FilamentMergerControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorStartMotorSucceeded(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorStartMotorSucceeded(
+    const message::Command&)
 {
-    LOG(debug) << "command FilamentFeederMotor.StartMotorSucceeded received in FilamentMergerControl...";
+    LOG(debug)
+        << "command FilamentFeederMotor.StartMotorSucceeded received in FilamentMergerControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorStartMotorFailed(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorStartMotorFailed(
+    const message::Command&)
 {
-    LOG(debug) << "command FilamentFeederMotor.StartMotorFailed received in FilamentMergerControl...";
+    LOG(debug)
+        << "command FilamentFeederMotor.StartMotorFailed received in FilamentMergerControl...";
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorErrorOccurred(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorErrorOccurred(
+    const message::Command&)
 {
     LOG(debug) << "command FilamentFeederMotor.ErrorOccurred received in FilamentMergerControl...";
     return message::CommandResponse();
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&, const IFilamentMergerControl::State&)
+void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&,
+                                       const IFilamentMergerControl::State&)
 {
     LOG(debug) << "transition action startMotor in FilamentMergerControl...";
 }
 
-void FilamentMergerControl::switchOn(const IFilamentMergerControl::Event&, const IFilamentMergerControl::State&)
+void FilamentMergerControl::switchOn(const IFilamentMergerControl::Event&,
+                                     const IFilamentMergerControl::State&)
 {
     LOG(debug) << "transition action switchOn in FilamentMergerControl...";
 }
 
-void FilamentMergerControl::heatingUp(const IFilamentMergerControl::Event&, const IFilamentMergerControl::State&)
-{
-    LOG(debug) << "transition action heatingUp in FilamentMergerControl...";
-}
-
-void FilamentMergerControl::handleError(const IFilamentMergerControl::Event&, const IFilamentMergerControl::State&)
-{
-    LOG(debug) << "transition action handleError in FilamentMergerControl...";
-}
-
-void FilamentMergerControl::stopMotor(const IFilamentMergerControl::Event&, const IFilamentMergerControl::State&)
-{
-    LOG(debug) << "transition action stopMotor in FilamentMergerControl...";
-}
-
-void FilamentMergerControl::switchOff(const IFilamentMergerControl::Event&, const IFilamentMergerControl::State&)
+void FilamentMergerControl::switchOff(const IFilamentMergerControl::Event&,
+                                      const IFilamentMergerControl::State&)
 {
     LOG(debug) << "transition action switchOff in FilamentMergerControl...";
 }
 
+void FilamentMergerControl::stopMotor(const IFilamentMergerControl::Event&,
+                                      const IFilamentMergerControl::State&)
+{
+    LOG(debug) << "transition action stopMotor in FilamentMergerControl...";
+}
+
+void FilamentMergerControl::handleError(const IFilamentMergerControl::Event&,
+                                        const IFilamentMergerControl::State&)
+{
+    LOG(debug) << "transition action handleError in FilamentMergerControl...";
+}
+
+void FilamentMergerControl::heatingUp(const IFilamentMergerControl::Event&,
+                                      const IFilamentMergerControl::State&)
+{
+    LOG(debug) << "transition action heatingUp in FilamentMergerControl...";
+}
