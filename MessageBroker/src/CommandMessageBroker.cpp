@@ -21,6 +21,7 @@ bool CommandMessageBroker::send(const message::Command& message, const std::stri
 {
     LOG(debug) << "Sending message to " << receiverId;
     const std::string address = createInProcessAddress(receiverId);
+    const std::lock_guard<std::mutex> lock(m_mutexClient);
     bool              success = m_client.connect(address);
     if (success)
     {

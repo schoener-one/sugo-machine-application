@@ -34,6 +34,7 @@ public:
     bool init(const IConfiguration& configuration) override;
     void finalize();
 
+    bool      reset() override;
     bool      rotateToPosition(Position position) override;
     bool      rotate(Direction direction) override;
     bool      stop(bool stopImmediately = false) override;
@@ -52,13 +53,15 @@ public:
 
 private:
     bool prepareForMotion();
-    bool waitAndShutdown(std::chrono::milliseconds remainingMotionTime, bool stopImmediately = false);
-    
+    bool waitAndShutdown(std::chrono::milliseconds remainingMotionTime,
+                         bool                      stopImmediately = false);
+
     I2cControl&    m_i2cControl;
     IGpioPin&      m_ioErr;
     IGpioPin&      m_ioRst;
-    TicController* m_controller = nullptr;
-    Speed          m_maxSpeed   = Speed(0, Unit::Rpm);
+    TicController* m_controller   = nullptr;
+    Speed          m_maxSpeed     = Speed(0, Unit::Rpm);
+    Speed          m_initMaxSpeed = Speed(0, Unit::Rpm);
 };
 
 }  // namespace sugo::hal

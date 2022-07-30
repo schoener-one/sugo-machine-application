@@ -63,6 +63,7 @@ bool StepperMotor::init(const sugo::IConfiguration& configuration)
         static_cast<I2cControl::Address>(configuration.getOption("i2c-address").get<unsigned>());
     m_maxSpeed =
         StepperMotor::Speed(configuration.getOption("max-speed-rpm").get<unsigned>(), Unit::Rpm);
+    m_initMaxSpeed = m_maxSpeed;
     LOG(debug) << getId() << ".i2c-address: " << address;
     LOG(debug) << getId() << ".max-speed-rpm: " << m_maxSpeed;
 
@@ -84,6 +85,16 @@ void StepperMotor::finalize()
         delete m_controller;
         m_controller = nullptr;
     }
+}
+
+bool StepperMotor::reset()
+{
+    if (getSpeed().getValue() != 0)
+    {
+        stop(true);
+    }
+    setMaxSpeed(m_initMaxSpeed);
+    return true;
 }
 
 StepperMotor::Position StepperMotor::getPosition() const

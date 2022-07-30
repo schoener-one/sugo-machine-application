@@ -12,6 +12,7 @@
 #include <cassert>
 #include <list>
 #include <memory>
+#include <mutex>
 
 #include <Command.pb.h>
 
@@ -89,9 +90,10 @@ private:
         return address;
     }
 
-    Server            m_server;
-    Client            m_client;
-    AsioContext&      m_ioContext;
+    Server       m_server;
+    Client       m_client;
+    AsioContext& m_ioContext;
+    std::mutex   m_mutexClient;
 };
 
 }  // namespace sugo

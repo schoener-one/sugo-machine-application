@@ -239,7 +239,6 @@ components:
         - StartMotorFailed
         - RunMotorFailed
         - StopMotor
-        - SetMotorSpeed
       statemachine:
         start: 'Off'
         states:
@@ -519,42 +518,29 @@ components:
         - UserDecreaseMotorSpeed
       events:
         - SwitchOn
-        - SwitchOnSucceeded
-        - SwitchOnFailed
         - SwitchOff
-        - RunningFailed
+        - StartingFinished
       statemachine:
         start: 'Off'
         states:
           - 'Off'
-          - Initialization
+          - Starting
           - Running
           - Error
         transitions:
           - state: 'Off'
-            next: Initialization
+            next: Starting
             event: SwitchOn
             action: switchOn
-          - state: Initialization
+          - state: Starting
             next: Running
-            event: SwitchOnSucceeded
-          - state: Initialization
-            next: Error
-            event: SwitchOnFailed
-            action: handleError
-          - state: Initialization
+            event: StartingFinished
+            action: switchRunning
+          - state: Starting
             next: 'Off'
             event: SwitchOff
             action: switchOff
           - state: Running
-            next: 'Off'
-            event: SwitchOff
-            action: switchOff
-          - state: Running
-            next: Error
-            event: RunningFailed
-            action: handleError
-          - state: Error
             next: 'Off'
             event: SwitchOff
             action: switchOff

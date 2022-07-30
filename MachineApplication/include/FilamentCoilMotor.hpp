@@ -49,6 +49,7 @@ protected:
     void startMotor(const Event& event, const State& state) override;
 
     const ServiceLocator& m_serviceLocator;
+    unsigned              m_currentMotorSpeed = 0;
 };
 
 }  // namespace sugo

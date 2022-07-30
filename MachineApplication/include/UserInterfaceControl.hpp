@@ -13,6 +13,9 @@
 
 #include "IUserInterfaceControl.hpp"
 #include "ServiceLocator.hpp"
+#include "Thread.hpp"
+
+#include "GpioPinEventObserver.hpp"
 
 namespace sugo
 {
@@ -42,11 +45,13 @@ protected:
         const message::Command& command) override;
 
     // Transition actions
-    void handleError(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
     void switchOff(const Event& event, const State& state) override;
+    void switchRunning(const Event& event, const State& state) override;
 
     const ServiceLocator& m_serviceLocator;
+    hal::GpioPinEventObserver m_signalButtonStartObserver;
+    hal::GpioPinEventObserver m_signalButtonStopObserver;
 };
 
 }  // namespace sugo

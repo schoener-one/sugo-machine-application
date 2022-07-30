@@ -87,5 +87,6 @@ function(generate_service_components_exec_group)
         MessageBroker
         ServiceComponents
         ${ARG_TARGET}-GenLib
+        HardwareAbstractionLayer # FIXME this dependency should not be add here!
         )
 endfunction()

@@ -35,6 +35,16 @@
             "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "gen", "-t"]
         },
         {
+            "name": "ServiceComponentGenerator State Diagrams",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/MachineApplication",
+            "args": ["-i", "${workspaceFolder}/MachineApplication/MachineServiceComponents.yaml", "-o", "gen", "--generate-state-diagrams"]
+        },
+        {
             "name": "Debug HAL SmokeTest",
             "type": "cppdbg",
             "request": "launch",

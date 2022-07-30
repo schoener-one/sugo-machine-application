@@ -46,6 +46,16 @@ public:
     }
 
     /**
+     * @brief Resets the device to the default state.
+     * If it was running before it will be stopped. All parameters like
+     * speed will also be set to default.
+     * 
+     * @return true  if the reset was successful.
+     * @return false if the reset failed.
+     */
+    virtual bool reset() = 0;
+
+    /**
      * @brief Rotates the stepper motor to passed position. The method blocks the caller
      *        until the end of rotation is reached.
      *
