@@ -7,8 +7,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef ICOMMANDMESSAGEBROKER_HPP_
-#define ICOMMANDMESSAGEBROKER_HPP_
+#pragma once
 
 #include <Command.pb.h>
 #include <string>
@@ -21,5 +20,3 @@ namespace sugo
 using ICommandMessageBroker =
     IMessageBroker<message::Command, message::CommandResponse, std::string>;
 }  // namespace sugo
-
-#endif  // ICOMMANDMESSAGEBROKER_HPP_

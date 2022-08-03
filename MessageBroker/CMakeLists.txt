@@ -12,6 +12,7 @@ target_link_libraries(MessageBroker
     PUBLIC
     Common
     Protocol
+    zmq
     )
 
 # FIXME dependency to external libraries!
@@ -21,8 +22,11 @@ endif()
 
 # Common Mocks library
 add_library (MessageBrokerMocks INTERFACE)
-target_include_directories (MessageBrokerMocks INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/test)
-target_link_libraries(MessageBrokerMocks INTERFACE MessageBroker gmock)
+target_include_directories (MessageBrokerMocks INTERFACE mocks)
+target_link_libraries(MessageBrokerMocks INTERFACE
+    MessageBroker
+    gmock
+    )
 
 # Google Unittests
 if (NOT NO_UNITTEST)    
@@ -38,7 +42,6 @@ if (NOT NO_UNITTEST)
         ${Protobuf_LIBRARIES}
         ${Boost_LIBRARIES}
         pthread
-        zmq
         GTest::GTest
         GTest::Main
         gmock)

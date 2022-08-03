@@ -1,10 +1,12 @@
 # CMake configuration file
 # Module: HardwareAbstractionLayer
 
+# HardwareAbstractionLayerInterface library
 add_library(HardwareAbstractionLayerInterface INTERFACE)
 target_include_directories (HardwareAbstractionLayerInterface INTERFACE include)
 target_link_libraries(HardwareAbstractionLayerInterface INTERFACE Common)
 
+# HardwareAbstractionLayer library
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Common/include)
 
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
@@ -21,3 +23,10 @@ target_sources(HardwareAbstractionLayer
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/src/HardwareAbstractionLayer.cpp
     )
 add_subdirectory(test)
+
+# HardwareAbstractionLayerInterfaceMock library
+add_library(HardwareAbstractionLayerInterfaceMocks INTERFACE)
+target_include_directories (HardwareAbstractionLayerInterfaceMocks INTERFACE mocks)
+target_link_libraries(HardwareAbstractionLayerInterfaceMocks INTERFACE
+    HardwareAbstractionLayerInterface
+    )

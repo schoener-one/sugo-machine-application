@@ -20,6 +20,36 @@
             "group": "build"
         },
         {
+            "label": "x86_build-MachineApplicationTest",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target MachineApplicationTest",
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
+            "label": "x86_build-MachineServiceComponents",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target MachineServiceComponents",
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
+            "label": "x86_build-MachineServiceComponentsTest",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target MachineServiceComponentsTest",
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
             "label": "x86_build-HardwareAbstractionLayer",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayer",

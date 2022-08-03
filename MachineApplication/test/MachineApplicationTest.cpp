@@ -44,14 +44,14 @@ public:
 
 using namespace sugo;
 
-class MachineSmokeTest : public ::testing::Test, public IOContextHelper
+class MachineApplicationSmokeTest : public ::testing::Test, public IOContextHelper
 {
 protected:
-    MachineSmokeTest()
+    MachineApplicationSmokeTest()
     {
     }
 
-    ~MachineSmokeTest() override
+    ~MachineApplicationSmokeTest() override
     {
     }
 
@@ -75,7 +75,7 @@ protected:
 };
 
 // FIXME second send call keeps hanging
-// TEST_F(MachineSmokeTest, SugoMachine_CommandResponse)
+// TEST_F(MachineApplicationSmokeTest, SugoMachine_CommandResponse)
 // {
 //     CommandMessageBroker messageBroker(IMachineController::Command::ReceiverId, {}, m_ioContext);
 //     MachineControl    machineController(messageBroker);
@@ -97,7 +97,7 @@ protected:
 //     EXPECT_EQ(message::CommandResponse::SUCCESS, response.result());
 // }
 
-TEST_F(MachineSmokeTest, CircularMotionController_ResetNoMotion)
+TEST_F(MachineApplicationSmokeTest, CircularMotionController_ResetNoMotion)
 {
     IStepperMotorMock                             stepperMotorMock;
     CircularMotionController::PositionSwitchArray positionSwitchArray = {
@@ -111,7 +111,7 @@ TEST_F(MachineSmokeTest, CircularMotionController_ResetNoMotion)
     EXPECT_TRUE(circularMotionController.reset());
 }
 
-TEST_F(MachineSmokeTest, CircularMotionController_ResetWithMotion)
+TEST_F(MachineApplicationSmokeTest, CircularMotionController_ResetWithMotion)
 {
     IStepperMotorMock                             stepperMotorMock;
     CircularMotionController::PositionSwitchArray positionSwitchArray = {
