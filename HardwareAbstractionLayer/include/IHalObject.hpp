@@ -29,7 +29,7 @@ public:
 
     /// Hal object map
     template <class HalObjectT>
-    using Map = std::map<Identifier, std::unique_ptr<HalObjectT>>;
+    using Map = std::map<Identifier, std::shared_ptr<HalObjectT>>;
 
     /**
      * @brief Construct a new IHalObject object

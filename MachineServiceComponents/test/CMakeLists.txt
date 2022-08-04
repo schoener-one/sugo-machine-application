@@ -13,4 +13,4 @@ target_link_libraries(${MODULE_NAME}Test
     GTest::GTest
     GTest::Main
     gmock)
-gtest_add_tests(${MODULE_NAME}Test "" AUTO TEST_LIST sugo)
+#gtest_add_tests(${MODULE_NAME}Test "" AUTO TEST_LIST sugo)

@@ -15,6 +15,7 @@
 #include "Thread.hpp"
 
 #include <functional>
+#include <memory>
 
 namespace sugo::hal
 {
@@ -34,12 +35,12 @@ public:
      * @return true  if the observer could be started.
      * @return false if the observer could no be started.
      */
-    bool start(const std::unique_ptr<IGpioPin>& pin, Handler handler)
+    bool start(const std::shared_ptr<IGpioPin> pin, Handler handler)
     {
-        m_pin    = pin.get();
+        m_pin    = pin;
         m_doWait = true;
         return m_thread.start([&] {
-            assert(m_pin != nullptr);
+            assert(m_pin);
             IGpioPin::Event event;
             do
             {
@@ -75,13 +76,13 @@ public:
         {
             m_doWait = false;
             m_thread.join();
-            m_pin = nullptr;
+            m_pin.reset();
         }
     }
 
 private:
-    IGpioPin* m_pin = nullptr;
-    Thread    m_thread;
-    bool      m_doWait = false;
+    std::shared_ptr<IGpioPin> m_pin;
+    Thread                    m_thread;
+    bool                      m_doWait = false;
 };
 }  // namespace sugo::hal

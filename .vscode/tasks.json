@@ -117,6 +117,16 @@
             "group": "build"
         },
         {
+            "label": "rpi_build-HardwareAbstractionLayer",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.rpi} --target HardwareAbstractionLayer",
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.rpi}" ]
+            },
+            "group": "build"
+        },
+        {
             "label": "rpi_build-HardwareAbstractionLayerSmokeTest",
             "type": "shell",
             "command": ". ${config:sdk.env}; cmake --build ${config:build.directory.rpi} --target HardwareAbstractionLayerSmokeTest",

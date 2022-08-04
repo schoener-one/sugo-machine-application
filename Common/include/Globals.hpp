@@ -1,12 +1,15 @@
-/*
- * Globals.hpp
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @file
+ * @license: Copyright 2019, Schoener-One
  *
- *  Created on: 01.09.2019
- *      Author: denis
+ * @author: denis@schoener-one
+ * @date:   2019-09-01
  */
+///////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_GLOBALS_HPP_
-#define INCLUDE_GLOBALS_HPP_
+#pragma once
+
 #include <boost/filesystem.hpp>
 #include <boost/log/trivial.hpp>
 #include <cassert>
@@ -22,5 +25,3 @@ namespace sugo
 {
 using Json = nlohmann::json;
 }
-
-#endif /* INCLUDE_GLOBALS_HPP_ */

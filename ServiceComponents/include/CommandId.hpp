@@ -27,6 +27,11 @@ public:
 
     const std::string receiver;
     const std::string command;
+
+    operator const std::string &() const
+    {
+        return command;
+    }
 };
 
 std::ostream& operator<<(std::ostream& ostr, CommandId const& commandId);

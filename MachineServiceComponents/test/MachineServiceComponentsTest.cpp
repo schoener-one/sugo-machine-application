@@ -20,16 +20,29 @@
 #include "Logger.hpp"
 #include "ServiceLocator.hpp"
 
+class MachineApplicationSmokeTest;
+
 using namespace sugo;
 using namespace hal;
 
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+class TestFilamentCoilMotor : public FilamentCoilMotor
+{
+    FRIEND_TEST(MachineApplicationSmokeTest, FilamentCoilMotor_Start);
+
+public:
+    using FilamentCoilMotor::FilamentCoilMotor;
+};
 
 class MachineApplicationSmokeTest : public ::testing::Test
 {
 protected:
     MachineApplicationSmokeTest()
+        : m_mockStepperMotorControl(new NiceMock<IStepperMotorControlMock>()),
+          m_mockStepperMotor(new IStepperMotorMock())
     {
     }
 
@@ -39,18 +52,22 @@ protected:
 
     void SetUp() override
     {
-        auto stepperMotorControl = std::make_unique<IStepperMotorControlMock>();
+        m_stepperMotorControllerMap.emplace(StepperMotorControlName, m_mockStepperMotorControl);
+        m_stepperMotorMap.emplace(StepperMotorName, m_mockStepperMotor);
+        m_serviceLocator.add<IHardwareAbstractionLayer>(m_mockHardwareAbstractionLayer);
         ON_CALL(m_mockHardwareAbstractionLayer, getStepperMotorControllerMap())
             .WillByDefault(ReturnRef(m_stepperMotorControllerMap));
-        ON_CALL(*stepperMotorControl, getStepperMotorMap())
+        ON_CALL(*m_mockStepperMotorControl, getStepperMotorMap())
             .WillByDefault(ReturnRef(m_stepperMotorMap));
-        m_stepperMotorControllerMap.emplace(StepperMotorControlName, stepperMotorControl);
-        m_stepperMotorMap.emplace(StepperMotorName, std::make_unique<IStepperMotorMock>());
-        m_serviceLocator.add<IHardwareAbstractionLayer>(m_mockHardwareAbstractionLayer);
     }
 
     void TearDown() override
     {
+    }
+
+    static void SetUpTestCase()
+    {
+        Logger::init();
     }
 
     inline static const std::string StepperMotorName{"coiler"};
@@ -59,12 +76,34 @@ protected:
     IHardwareAbstractionLayer::StepperMotorControllerMap m_stepperMotorControllerMap;
     IStepperMotorControl::StepperMotorMap                m_stepperMotorMap;
 
-    IHardwareAbstractionLayerMock m_mockHardwareAbstractionLayer;
-    ICommandMessageBrokerMock     m_mockCommandMessageBroker;
-    ServiceLocator                m_serviceLocator;
+    std::shared_ptr<IStepperMotorControlMock> m_mockStepperMotorControl;
+    std::shared_ptr<IStepperMotorMock>        m_mockStepperMotor;
+
+    NiceMock<IHardwareAbstractionLayerMock> m_mockHardwareAbstractionLayer;
+    NiceMock<ICommandMessageBrokerMock>     m_mockCommandMessageBroker;
+    ServiceLocator                          m_serviceLocator;
 };
 
 TEST_F(MachineApplicationSmokeTest, FilamentCoilMotor_Start)
 {
-    FilamentCoilMotor comp(m_mockCommandMessageBroker, m_serviceLocator);
+    TestFilamentCoilMotor comp(m_mockCommandMessageBroker, m_serviceLocator);
+
+    EXPECT_CALL(m_mockCommandMessageBroker, start()).WillOnce(Return(true));
+    EXPECT_TRUE(comp.start());
+
+    EXPECT_CALL(*m_mockStepperMotor, reset()).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockStepperMotor, getMaxSpeed())
+        .WillOnce(Return(IStepperMotor::Speed(100, Unit::Rpm)));
+    message::Command command;
+    command.set_id(4);
+    auto response = comp.onCommandSwitchOn(command);
+    EXPECT_EQ(response.result(), message::CommandResponse_Result_SUCCESS);
+    EXPECT_EQ(comp.getCurrentState(), FilamentCoilMotor::State::Stopped);
+
+    EXPECT_CALL(*m_mockStepperMotor, rotate(IStepperMotor::Direction::Forward))
+        .WillOnce(Return(true));
+    response = comp.onCommandStartMotor(command);
+    EXPECT_EQ(response.id(), 4);
+    EXPECT_EQ(response.result(), message::CommandResponse_Result_SUCCESS);
+    EXPECT_EQ(comp.getCurrentState(), FilamentCoilMotor::State::Running);
 }
