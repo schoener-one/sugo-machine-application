@@ -20,7 +20,7 @@
 #include "Logger.hpp"
 #include "ServiceLocator.hpp"
 
-class MachineApplicationSmokeTest;
+class MachineServiceComponentsTest;
 
 using namespace sugo;
 using namespace hal;
@@ -31,22 +31,22 @@ using ::testing::ReturnRef;
 
 class TestFilamentCoilMotor : public FilamentCoilMotor
 {
-    FRIEND_TEST(MachineApplicationSmokeTest, FilamentCoilMotor_Start);
+    FRIEND_TEST(MachineServiceComponentsTest, FilamentCoilMotor_Start);
 
 public:
     using FilamentCoilMotor::FilamentCoilMotor;
 };
 
-class MachineApplicationSmokeTest : public ::testing::Test
+class MachineServiceComponentsTest : public ::testing::Test
 {
 protected:
-    MachineApplicationSmokeTest()
+    MachineServiceComponentsTest()
         : m_mockStepperMotorControl(new NiceMock<IStepperMotorControlMock>()),
           m_mockStepperMotor(new IStepperMotorMock())
     {
     }
 
-    ~MachineApplicationSmokeTest() override
+    ~MachineServiceComponentsTest() override
     {
     }
 
@@ -84,7 +84,7 @@ protected:
     ServiceLocator                          m_serviceLocator;
 };
 
-TEST_F(MachineApplicationSmokeTest, FilamentCoilMotor_Start)
+TEST_F(MachineServiceComponentsTest, FilamentCoilMotor_Start)
 {
     TestFilamentCoilMotor comp(m_mockCommandMessageBroker, m_serviceLocator);
 

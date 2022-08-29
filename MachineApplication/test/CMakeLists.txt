@@ -1,20 +1,19 @@
 # Google Unittests
-add_executable(${MODULE_NAME}Test
-    ${MODULE_NAME}Test.cpp
+
+# Integration test
+add_executable(${MODULE_NAME}IntegrationTest
+    ${MODULE_NAME}IntegrationTest.cpp
     )
-target_compile_options(${MODULE_NAME}Test PUBLIC "-DUNIT_TEST")
-target_link_libraries(${MODULE_NAME}Test
+target_compile_options(${MODULE_NAME}IntegrationTest PUBLIC "-DUNIT_TEST")
+target_link_libraries(${MODULE_NAME}IntegrationTest
     Common
-    CommonMocks
-    Protocol
     MessageBroker
-    MessageBrokerMocks
-    MachineServiceGateway
+    MachineServiceComponents-ExecGroup-GenLib
+    MachineServiceComponents
+    HardwareAbstractionLayerInterfaceMocks
     ${Protobuf_LIBRARIES}
     ${Boost_LIBRARIES}
-    pthread
-    zmq
     GTest::GTest
     GTest::Main
     gmock)
-gtest_add_tests(${MODULE_NAME}Test "" AUTO TEST_LIST sugo)
+gtest_add_tests(${MODULE_NAME}IntegrationTest "" AUTO TEST_LIST sugo)
