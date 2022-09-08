@@ -11,18 +11,18 @@
 
 #pragma once
 
+#include "IRequestHandler.hpp"
 #include "IUserInterfaceControl.hpp"
 #include "ServiceLocator.hpp"
 #include "Thread.hpp"
-
-#include "GpioPinEventObserver.hpp"
+#include "Globals.hpp"
 
 namespace sugo
 {
 /**
  * @class UserInterfaceControl
  */
-class UserInterfaceControl : public IUserInterfaceControl
+class UserInterfaceControl : public IUserInterfaceControl, public remote_control::IRequestHandler
 {
 public:
     // Constructor / Destructor
@@ -33,6 +33,14 @@ public:
     }
     virtual ~UserInterfaceControl()
     {
+    }
+
+    bool receiveRequest(remote_control::IRequestHandler::ClientId clientId, const Json& request,
+                        Json& response) override;
+    void registerSendNotification(SendNotificationCallback callback)
+    {
+        m_cbSendNotification = callback;
+        updateMachineState();
     }
 
 protected:
@@ -49,9 +57,12 @@ protected:
     void switchOff(const Event& event, const State& state) override;
     void switchRunning(const Event& event, const State& state) override;
 
-    const ServiceLocator& m_serviceLocator;
-    hal::GpioPinEventObserver m_signalButtonStartObserver;
-    hal::GpioPinEventObserver m_signalButtonStopObserver;
+private:
+    void updateMachineState();
+    Json createStateMessage(const std::string& type);
+    
+    const ServiceLocator&    m_serviceLocator;
+    SendNotificationCallback m_cbSendNotification = nullptr;
 };
 
 }  // namespace sugo

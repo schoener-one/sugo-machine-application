@@ -31,6 +31,7 @@ target_link_libraries(${MODULE_NAME} PUBLIC
     MachineServiceGateway
     ${MODULE_NAME}-GenLib
     HardwareAbstractionLayer
+    MachineRemoteControl
     )
  
 if (NOT NO_UNITTEST)

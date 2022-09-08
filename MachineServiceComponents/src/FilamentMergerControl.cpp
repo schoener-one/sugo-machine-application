@@ -52,18 +52,6 @@ message::CommandResponse FilamentMergerControl::onCommandGetTemperatures(const m
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentMergerControl::onCommandIncreaseMotorSpeed(const message::Command&)
-{
-    LOG(debug) << "command IncreaseMotorSpeed received in FilamentMergerControl...";
-    return message::CommandResponse();
-}
-
-message::CommandResponse FilamentMergerControl::onCommandDecreaseMotorSpeed(const message::Command&)
-{
-    LOG(debug) << "command DecreaseMotorSpeed received in FilamentMergerControl...";
-    return message::CommandResponse();
-}
-
 message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterTargetTemperatureReached(
     const message::Command&)
 {
@@ -130,6 +118,12 @@ message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorErro
     const message::Command&)
 {
     LOG(debug) << "command FilamentFeederMotor.ErrorOccurred received in FilamentMergerControl...";
+    return message::CommandResponse();
+}
+
+message::CommandResponse FilamentMergerControl::onCommandSetMotorSpeed(const message::Command&)
+{
+    LOG(debug) << "command FilamentFeederMotor.SetMotorSpeed received in FilamentMergerControl...";
     return message::CommandResponse();
 }
 

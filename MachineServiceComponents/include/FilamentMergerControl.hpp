@@ -40,8 +40,6 @@ protected:
     message::CommandResponse onCommandStopFeeding(const message::Command& command) override;
     message::CommandResponse onCommandGetState(const message::Command& command) override;
     message::CommandResponse onCommandGetTemperatures(const message::Command& command) override;
-    message::CommandResponse onCommandIncreaseMotorSpeed(const message::Command& command) override;
-    message::CommandResponse onCommandDecreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandFilamentPreHeaterTargetTemperatureReached(
         const message::Command& command) override;
     message::CommandResponse onCommandFilamentPreHeaterHeatingStopped(
@@ -60,6 +58,7 @@ protected:
         const message::Command& command) override;
     message::CommandResponse onCommandFilamentFeederMotorErrorOccurred(
         const message::Command& command) override;
+    message::CommandResponse onCommandSetMotorSpeed(const message::Command& command) override;
 
     // Transition actions
     void switchOff(const Event& event, const State& state) override;

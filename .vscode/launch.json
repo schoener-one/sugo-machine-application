@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/MachineServiceComponents",
+            "cwd": "${workspaceFolder}/ServiceComponents",
             "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--generate-exec-group"]
         },
         {
@@ -21,8 +21,18 @@
             "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/MachineServiceComponents",
+            "cwd": "${workspaceFolder}/ServiceComponents",
             "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen"]
+        },
+        {
+            "name": "ServiceComponentGenerator NoStateMachine",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/ServiceComponents",
+            "args": ["-i", "${workspaceFolder}/ServiceComponents/test/Components_NoStateMachine.yaml", "-o", "gen"]
         },
         {
             "name": "ServiceComponentGenerator Templates",
@@ -31,7 +41,7 @@
             "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/MachineServiceComponents",
+            "cwd": "${workspaceFolder}/ServiceComponents",
             "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "-t"]
         },
         {
@@ -41,7 +51,7 @@
             "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/MachineServiceComponents",
+            "cwd": "${workspaceFolder}/ServiceComponents",
             "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--generate-state-diagrams"]
         },
         {
@@ -82,6 +92,16 @@
             "stopAtEntry": false,
             "MIMode": "gdb",
             "args": ["--config-file", "${workspaceFolder}/conf/MachineConfig.json"]
+        },
+        {
+            "name": "Machine Remote Control Server (x86)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${config:build.directory.x86}/MachineRemoteControl/MachineRemoteControlServer",
+            "cwd": "${workspaceFolder}/MachineRemoteControl",
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            "args": ["www"]
         },
     ]
 }

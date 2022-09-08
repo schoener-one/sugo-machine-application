@@ -39,8 +39,6 @@ protected:
     message::CommandResponse onCommandStartCoil(const message::Command& command) override;
     message::CommandResponse onCommandStopCoil(const message::Command& command) override;
     message::CommandResponse onCommandGetState(const message::Command& command) override;
-    message::CommandResponse onCommandIncreaseMotorSpeed(const message::Command& command) override;
-    message::CommandResponse onCommandDecreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandFilamentTensionSensorTensionTooLow(
         const message::Command& command) override;
     message::CommandResponse onCommandFilamentTensionSensorTensionTooHigh(
@@ -53,6 +51,7 @@ protected:
         const message::Command& command) override;
     message::CommandResponse onCommandFilamentCoilMotorErrorOccurred(
         const message::Command& command) override;
+    message::CommandResponse onCommandSetMotorSpeed(const message::Command& command) override;
 
     // Transition actions
     void switchOff(const Event& event, const State& state) override;

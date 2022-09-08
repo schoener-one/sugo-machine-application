@@ -17,7 +17,7 @@ target_link_libraries(MessageBroker
 
 # FIXME dependency to external libraries!
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-    add_dependencies(MessageBroker azmq)
+    add_dependencies(MessageBroker azmq_external)
 endif()
 
 # Common Mocks library

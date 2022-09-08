@@ -23,6 +23,7 @@ list(APPEND PROJECT_SUBDIRS
     ${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer
     ${PROJECT_SOURCE_DIR}/MachineServiceComponents
     ${PROJECT_SOURCE_DIR}/MachineApplication
+    ${PROJECT_SOURCE_DIR}/MachineRemoteControl
     )
 
 # FIXME remove globbing!
@@ -73,6 +74,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/MachineServiceGateway)
 add_subdirectory(${PROJECT_SOURCE_DIR}/HardwareAbstractionLayer)
 add_subdirectory(${PROJECT_SOURCE_DIR}/MachineServiceComponents)
 add_subdirectory(${PROJECT_SOURCE_DIR}/MachineApplication)
+add_subdirectory(${PROJECT_SOURCE_DIR}/MachineRemoteControl)
 
 include(cmake/Cppcheck.cmake)
 include(cmake/ClangFormatCheck.cmake)

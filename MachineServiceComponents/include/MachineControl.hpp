@@ -22,6 +22,14 @@ namespace sugo
 class MachineControl : public IMachineControl
 {
 public:
+    /// @brief Default motor speed
+    static constexpr unsigned MotorSpeedInc = 10;  // FIXME needs to be configurable
+    /// @brief Default motor speed
+    static constexpr unsigned DefaultMotorSpeed =
+        10 * MotorSpeedInc;  // FIXME needs to be configurable
+    /// @brief Max motor speed
+    static constexpr unsigned MaxMotorSpeed = 30 * MotorSpeedInc;  // FIXME needs to be configurable
+
     // Constructor / Destructor
     explicit MachineControl(ICommandMessageBroker& messageBroker,
                             const ServiceLocator&  serviceLocator)
@@ -39,6 +47,7 @@ protected:
     message::CommandResponse onCommandGetState(const message::Command& command) override;
     message::CommandResponse onCommandIncreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandDecreaseMotorSpeed(const message::Command& command) override;
+    message::CommandResponse onCommandGetMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandFilamentMergerControlFeedingRunning(
         const message::Command& command) override;
     message::CommandResponse onCommandFilamentMergerControlFeedingStopped(
@@ -60,9 +69,11 @@ protected:
     void switchOn(const Event& event, const State& state) override;
     void waitForStarted(const Event& event, const State& state) override;
 
+private:
     const ServiceLocator& m_serviceLocator;
     bool                  m_isFilamentMergerControlRunning = false;
     bool                  m_isFilamentCoilControlRunning   = false;
+    unsigned              m_currentMotorSpeed              = DefaultMotorSpeed;
 };
 
 }  // namespace sugo

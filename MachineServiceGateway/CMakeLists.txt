@@ -15,5 +15,5 @@ target_link_libraries(MachineServiceGateway
 
 # FIXME dependency to external libraries!
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-    add_dependencies(MachineServiceGateway jsonrpcpp)
+    add_dependencies(MachineServiceGateway jsonrpcpp_external)
 endif()

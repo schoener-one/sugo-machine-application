@@ -46,18 +46,6 @@ message::CommandResponse FilamentCoilControl::onCommandGetState(const message::C
     return message::CommandResponse();
 }
 
-message::CommandResponse FilamentCoilControl::onCommandIncreaseMotorSpeed(const message::Command&)
-{
-    LOG(debug) << "command IncreaseMotorSpeed received in FilamentCoilControl...";
-    return message::CommandResponse();
-}
-
-message::CommandResponse FilamentCoilControl::onCommandDecreaseMotorSpeed(const message::Command&)
-{
-    LOG(debug) << "command DecreaseMotorSpeed received in FilamentCoilControl...";
-    return message::CommandResponse();
-}
-
 message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTensionTooLow(
     const message::Command&)
 {
@@ -98,6 +86,12 @@ message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorErrorOcc
     const message::Command&)
 {
     LOG(debug) << "command FilamentCoilMotor.ErrorOccurred received in FilamentCoilControl...";
+    return message::CommandResponse();
+}
+
+message::CommandResponse FilamentCoilControl::onCommandSetMotorSpeed(const message::Command&)
+{
+    LOG(debug) << "command FilamentCoilMotor.SetMotorSpeed received in FilamentCoilControl...";
     return message::CommandResponse();
 }
 

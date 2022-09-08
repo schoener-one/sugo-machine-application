@@ -7,6 +7,7 @@ components:
         - GetState
         - IncreaseMotorSpeed
         - DecreaseMotorSpeed
+        - GetMotorSpeed
         - FilamentMergerControl.FeedingRunning
         - FilamentMergerControl.FeedingStopped
         - FilamentMergerControl.ErrorOccurred
@@ -17,6 +18,7 @@ components:
         - Starting
         - Running
         - SwitchedOff
+        - Error
       events:
         - SwitchOff
         - SwitchOn
@@ -116,8 +118,6 @@ components:
         - StopFeeding
         - GetState
         - GetTemperatures
-        - IncreaseMotorSpeed
-        - DecreaseMotorSpeed
         - FilamentPreHeater.TargetTemperatureReached
         - FilamentPreHeater.HeatingStopped
         - FilamentPreHeater.ErrorOccurred
@@ -127,6 +127,7 @@ components:
         - FilamentFeederMotor.StartMotorSucceeded
         - FilamentFeederMotor.StartMotorFailed
         - FilamentFeederMotor.ErrorOccurred
+        - SetMotorSpeed
       notifications:
         - FeedingRunning
         - FeedingStopped
@@ -371,14 +372,13 @@ components:
         - StartCoil
         - StopCoil
         - GetState
-        - IncreaseMotorSpeed
-        - DecreaseMotorSpeed
         - FilamentTensionSensor.TensionTooLow
         - FilamentTensionSensor.TensionTooHigh
         - FilamentTensionSensor.ErrorOccurred
         - FilamentCoilMotor.StartMotorSucceeded
         - FilamentCoilMotor.StartMotorFailed
         - FilamentCoilMotor.ErrorOccurred
+        - SetMotorSpeed
       notifications:
         - CoilRunning
         - CoilStopped
@@ -511,11 +511,7 @@ components:
         - MachineControl.Starting
         - MachineControl.Running
         - MachineControl.SwitchedOff
-      notifications:
-        - UserSwitchOn
-        - UserSwitchOff
-        - UserIncreaseMotorSpeed
-        - UserDecreaseMotorSpeed
+        - MachineControl.Error
       events:
         - SwitchOn
         - SwitchOff

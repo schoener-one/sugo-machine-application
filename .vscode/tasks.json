@@ -70,6 +70,16 @@
             "group": "build"
         },
         {
+            "label": "x86_build-MachineRemoteControlServer",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target MachineRemoteControlServer",
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
             "label": "x86_build-HardwareAbstractionLayerTest",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayerTest",

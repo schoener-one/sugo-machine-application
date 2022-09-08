@@ -34,31 +34,40 @@ message::CommandResponse MachineControl::onCommandGetState(const message::Comman
 }
 
 message::CommandResponse MachineControl::onCommandIncreaseMotorSpeed(
-    const message::Command& command)
+    const message::Command&)
 {
-    // forwarding
-    const auto responseCoilControl =
-        send(IFilamentCoilControl::CommandIncreaseMotorSpeed, command.parameters());
+    m_currentMotorSpeed = ((m_currentMotorSpeed + MotorSpeedInc) % MaxMotorSpeed);
+    LOG(debug) << "Increase motor speed to " << m_currentMotorSpeed;
+    const std::string parameters   = Json({"speed", m_currentMotorSpeed}).dump();
+    const auto responseCoilControl = send(IFilamentCoilControl::CommandSetMotorSpeed, parameters);
     if (responseCoilControl.result() != message::CommandResponse_Result_SUCCESS)
     {
         return responseCoilControl;
     }
-    return send(IFilamentMergerControl::CommandIncreaseMotorSpeed, command.parameters());
+    return send(IFilamentMergerControl::CommandSetMotorSpeed, parameters);
 }
 
 message::CommandResponse MachineControl::onCommandDecreaseMotorSpeed(
-    const message::Command& command)
+    const message::Command&)
 {
-    // forwarding
-    const auto responseCoilControl =
-        send(IFilamentCoilControl::CommandDecreaseMotorSpeed, command.parameters());
+    m_currentMotorSpeed = ((m_currentMotorSpeed - MotorSpeedInc) % MaxMotorSpeed);
+    LOG(debug) << "Decrease motor speed to " << m_currentMotorSpeed;
+    const std::string parameters   = Json({"speed", m_currentMotorSpeed}).dump();
+    const auto responseCoilControl = send(IFilamentCoilControl::CommandSetMotorSpeed, parameters);
     if (responseCoilControl.result() != message::CommandResponse_Result_SUCCESS)
     {
         return responseCoilControl;
     }
-    return send(IFilamentMergerControl::CommandDecreaseMotorSpeed, command.parameters());
+    return send(IFilamentMergerControl::CommandSetMotorSpeed, parameters);
 }
 
+message::CommandResponse MachineControl::onCommandGetMotorSpeed(const message::Command& command)
+{
+    message::CommandResponse response;
+    response.set_id(command.id());
+    response.set_result(message::CommandResponse_Result_SUCCESS);
+    return response;
+}
 message::CommandResponse MachineControl::onCommandFilamentMergerControlFeedingRunning(
     const message::Command& command)
 {

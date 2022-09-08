@@ -13,7 +13,7 @@ target_link_libraries(Common ${Boost_LIBRARIES})
 
 # FIXME dependency to external libraries!
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-    add_dependencies(Common jsonrpcpp)
+    add_dependencies(Common jsonrpcpp_external)
 endif()
 
 # Common Mocks library

@@ -88,5 +88,6 @@ function(generate_service_components_exec_group)
         ServiceComponents
         ${ARG_TARGET}-GenLib
         HardwareAbstractionLayer # FIXME this dependency should not be add here!
+        MachineRemoteControl     # FIXME this dependency should not be add here!
         )
 endfunction()
