@@ -15,7 +15,9 @@
 
 using namespace sugo;
 
-Thread::Thread() : m_isReady(false), m_policy(PolicyCurrent) {}
+Thread::Thread(const std::string& id) : m_id(id), m_isReady(false), m_policy(PolicyCurrent)
+{
+}
 
 bool Thread::start(Runnable function, Policy policy, int priority)
 {
@@ -25,7 +27,7 @@ bool Thread::start(Runnable function, Policy policy, int priority)
     m_policy   = policy;
 
     m_thread = std::thread([&] {
-        Logger::reinit();
+        Logger::reinit(getId());
         bool success = true;
         if (m_policy == PolicyRealTime)
         {
@@ -39,10 +41,15 @@ bool Thread::start(Runnable function, Policy policy, int priority)
             m_condVar.wait(lockThread, [&] { return m_isReady; });
             // now start...
             LOG(debug) << "Starting new " << ((m_policy == PolicyRealTime) ? "real-time " : "")
-                       << "thread: " << std::this_thread::get_id();
+                       << "thread: " << std::hex << std::setw(8) << std::setfill('0')
+                       << std::this_thread::get_id();
             try
             {
                 m_runnable();
+            }
+            catch (const std::exception& ex)
+            {
+                LOG(error) << "Exception catched: " << ex.what();
             }
             catch (...)
             {

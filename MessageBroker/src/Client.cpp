@@ -42,6 +42,7 @@ bool Client::connect(const std::string& address, const std::chrono::milliseconds
     bool success = false;
     try
     {
+        LOG(trace) << "Connect to address: " << address;
         m_socket->connect(address);
         m_socket->set_option(azmq::socket::snd_timeo(static_cast<int>(timeoutSend.count())));
         m_socket->set_option(azmq::socket::rcv_timeo(static_cast<int>(timeoutReceive.count())));
@@ -59,6 +60,7 @@ bool Client::disconnect(const std::string& address)
     bool success = false;
     try
     {
+        LOG(trace) << "Disconnect from address: " << address;
         m_socket->disconnect(address);
         success = true;
     }
@@ -71,36 +73,22 @@ bool Client::disconnect(const std::string& address)
 
 bool Client::send(const StreamBuffer& outMessage, StreamBuffer& inResponse)
 {
-    bool success = false;
     try
     {
         auto size = m_socket->send(outMessage.data());
-        if (size > 0)
+        LOG(trace) << "Sent " << size << " bytes";
+        if (size == 0)
         {
-            size = m_socket->receive(inResponse.prepare(StreamBuffer::MaxBufferSize));
-            inResponse.commit(size);
-            success = true;
+            LOG(warning) << "No data sent";
+            return false;
         }
+        size = m_socket->receive(inResponse.prepare(StreamBuffer::MaxBufferSize));
+        inResponse.commit(size);
     }
     catch (boost::system::system_error& error)
     {
         LOG(error) << error.what();
+        return false;
     }
-    return success;
-}
-
-bool Client::notify(const StreamBuffer& outMessage)
-{
-    bool success = false;
-    try
-    {
-        // TODO Use async_send here!
-        const auto size = m_socket->send(outMessage.data());
-        success         = (size > 0);
-    }
-    catch (boost::system::system_error& error)
-    {
-        LOG(error) << error.what();
-    }
-    return success;
+    return true;
 }

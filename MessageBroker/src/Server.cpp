@@ -46,6 +46,7 @@ bool Server::start()
     try
     {
         m_socket->bind(m_address);
+        LOG(debug) << "bind to address: " << m_address;
         receiveRequest();
         m_isRunning = true;
     }
@@ -60,9 +61,9 @@ void Server::receiveRequest()
 {
     m_socket->async_receive(m_receiveBuf.prepare(StreamBuffer::MaxBufferSize),
                             [&](boost::system::error_code ec, std::size_t bytesReceived) {
-                                LOG(debug) << "Received " << bytesReceived << " bytes";
                                 if (!ec)
                                 {
+                                    LOG(trace) << "Received " << bytesReceived << " bytes";
                                     if (bytesReceived > 0)
                                     {
                                         m_receiveBuf.commit(bytesReceived);
@@ -75,7 +76,7 @@ void Server::receiveRequest()
                                 }
                                 else
                                 {
-                                    LOG(error) << "Receive error occurred: " << ec;
+                                    LOG(error) << "Receive error occurred: " << ec.message();
                                 }
 
                                 if (isRunning())

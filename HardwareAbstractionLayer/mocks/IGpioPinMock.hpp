@@ -4,7 +4,7 @@
  * @license: Copyright 2022, Schoener-One
  *
  * @author: denis@schoener-one
- * @date:   2022-08-03
+ * @date:   2022-09-19
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -12,19 +12,21 @@
 
 #include <gmock/gmock.h>
 
-#include "IStepperMotorControl.hpp"
+#include "IGpioPin.hpp"
 
 namespace sugo::hal
 {
-class IStepperMotorControlMock : public IStepperMotorControl
+class IGpioPinMock : public IGpioPin
 {
 public:
-    IStepperMotorControlMock() : IStepperMotorControl("IStepperMotorControlMock")
+    IGpioPinMock() : IGpioPin("IGpioPinMock")
     {
     }
 
     MOCK_METHOD(bool, init, (const IConfiguration&));
-    MOCK_METHOD(void, reset, ());
-    MOCK_METHOD(const StepperMotorMap&, getStepperMotorMap, ());
+    MOCK_METHOD(State, getState, (), (const));
+    MOCK_METHOD(bool, setState, (State));
+    MOCK_METHOD(Direction, getDirection, (), (const));
+    MOCK_METHOD(Event, waitForEvent, (std::chrono::nanoseconds));
 };
 }  // namespace sugo::hal

@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "HeaterService.hpp"
 #include "IFilamentPreHeater.hpp"
 #include "ServiceLocator.hpp"
 
@@ -19,13 +20,13 @@ namespace sugo
 /**
  * @class FilamentPreHeater
  */
-class FilamentPreHeater : public IFilamentPreHeater
+class FilamentPreHeater : public IFilamentPreHeater, public HeaterService
 {
 public:
     // Constructor / Destructor
     explicit FilamentPreHeater(ICommandMessageBroker& messageBroker,
                                const ServiceLocator&  serviceLocator)
-        : IFilamentPreHeater(messageBroker), m_serviceLocator(serviceLocator)
+        : IFilamentPreHeater(messageBroker), HeaterService(serviceLocator)
     {
     }
     virtual ~FilamentPreHeater()
@@ -39,11 +40,15 @@ protected:
     message::CommandResponse onCommandGetTemperature(const message::Command& command) override;
 
     // Transition actions
-    void switchOff(const Event& event, const State& state) override;
+    void stopHeating(const Event& event, const State& state) override;
     void handleError(const Event& event, const State& state) override;
+    void startHeating(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
+    void switchOff(const Event& event, const State& state) override;
 
-    const ServiceLocator& m_serviceLocator;
+    // HeaterService events
+    void onMaxTemperatureReached() override;
+    void onMinTemperatureReached() override;
 };
 
 }  // namespace sugo

@@ -12,6 +12,7 @@
 #pragma once
 
 #include "IMachineControl.hpp"
+#include "MachineConfig.hpp"
 #include "ServiceLocator.hpp"
 
 namespace sugo
@@ -22,14 +23,6 @@ namespace sugo
 class MachineControl : public IMachineControl
 {
 public:
-    /// @brief Default motor speed
-    static constexpr unsigned MotorSpeedInc = 10;  // FIXME needs to be configurable
-    /// @brief Default motor speed
-    static constexpr unsigned DefaultMotorSpeed =
-        10 * MotorSpeedInc;  // FIXME needs to be configurable
-    /// @brief Max motor speed
-    static constexpr unsigned MaxMotorSpeed = 30 * MotorSpeedInc;  // FIXME needs to be configurable
-
     // Constructor / Destructor
     explicit MachineControl(ICommandMessageBroker& messageBroker,
                             const ServiceLocator&  serviceLocator)
@@ -44,13 +37,14 @@ protected:
     // Command handlers
     message::CommandResponse onCommandSwitchOn(const message::Command& command) override;
     message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
-    message::CommandResponse onCommandGetState(const message::Command& command) override;
     message::CommandResponse onCommandIncreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandDecreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandGetMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandFilamentMergerControlFeedingRunning(
         const message::Command& command) override;
     message::CommandResponse onCommandFilamentMergerControlFeedingStopped(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentMergerControlHeatedUp(
         const message::Command& command) override;
     message::CommandResponse onCommandFilamentMergerControlErrorOccurred(
         const message::Command& command) override;
@@ -73,7 +67,7 @@ private:
     const ServiceLocator& m_serviceLocator;
     bool                  m_isFilamentMergerControlRunning = false;
     bool                  m_isFilamentCoilControlRunning   = false;
-    unsigned              m_currentMotorSpeed              = DefaultMotorSpeed;
+    unsigned              m_motorSpeed                     = config::DefaultMotorSpeed;
 };
 
 }  // namespace sugo

@@ -4,12 +4,12 @@ components:
       commands:
         - SwitchOn
         - SwitchOff
-        - GetState
         - IncreaseMotorSpeed
         - DecreaseMotorSpeed
         - GetMotorSpeed
         - FilamentMergerControl.FeedingRunning
         - FilamentMergerControl.FeedingStopped
+        - FilamentMergerControl.HeatedUp
         - FilamentMergerControl.ErrorOccurred
         - FilamentCoilControl.CoilRunning
         - FilamentCoilControl.CoilStopped
@@ -26,9 +26,11 @@ components:
         - SwitchOnFailed
         - SelfTestSucceeded
         - SelfTestFailed
+        - MergerHeatedUp
         - StartingSucceeded
         - StartingFailed
-        - RunningFailed
+        - RunningStopped
+        - ErrorOccurred
         - WaitForStarted
       statemachine:
         start: 'Off'
@@ -36,6 +38,7 @@ components:
           - 'Off'
           - Initialization
           - SelfTest
+          - WaitingForHeatedUp
           - Starting
           - WaitingForStarted
           - Running
@@ -58,9 +61,16 @@ components:
             event: SwitchOff
             action: switchOff
           - state: SelfTest
-            next: Starting
+            next: WaitingForHeatedUp
             event: SelfTestSucceeded
+          - state: WaitingForHeatedUp
+            next: Starting
+            event: MergerHeatedUp
             action: startMachine
+          - state: WaitingForHeatedUp
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
           - state: Starting
             next: WaitingForStarted
             event: WaitForStarted
@@ -89,7 +99,7 @@ components:
             action: switchOff
           - state: Running
             next: Error
-            event: RunningFailed
+            event: ErrorOccurred
             action: handleError
           - state: Starting
             next: Error
@@ -116,13 +126,10 @@ components:
         - SwitchOff
         - StartFeeding
         - StopFeeding
-        - GetState
         - GetTemperatures
         - FilamentPreHeater.TargetTemperatureReached
-        - FilamentPreHeater.HeatingStopped
         - FilamentPreHeater.ErrorOccurred
         - FilamentMergerHeater.TargetTemperatureReached
-        - FilamentMergerHeater.HeatingStopped
         - FilamentMergerHeater.ErrorOccurred
         - FilamentFeederMotor.StartMotorSucceeded
         - FilamentFeederMotor.StartMotorFailed
@@ -131,6 +138,7 @@ components:
       notifications:
         - FeedingRunning
         - FeedingStopped
+        - HeatedUp
         - ErrorOccurred
       events:
         - SwitchOff
@@ -140,12 +148,12 @@ components:
         - HeatingUpSucceeded
         - HeatingUpFailed
         - StartMotor
-        - StartingMotorSucceeded
-        - StartingMotorFailed
+        - StartMotorSucceeded
+        - StartMotorFailed
         - StopMotor
         - StopMotorSucceeded
         - StopMotorFailed
-        - RunningFailed
+        - ErrorOccurred
       statemachine:
         start: 'Off'
         states:
@@ -168,6 +176,7 @@ components:
           - state: HeatingUp
             next: MotorStopped
             event: HeatingUpSucceeded
+            action: notifyHeatedUp
           - state: HeatingUp
             next: 'Off'
             event: SwitchOff
@@ -182,7 +191,7 @@ components:
             action: switchOff
           - state: StartingMotor
             next: Running
-            event: StartingMotorSucceeded
+            event: StartMotorSucceeded
           - state: StartingMotor
             next: 'Off'
             event: SwitchOff
@@ -201,11 +210,11 @@ components:
             action: handleError
           - state: StartingMotor
             next: Error
-            event: StartingMotorFailed
+            event: StartMotorFailed
             action: handleError
           - state: Running
             next: Error
-            event: RunningFailed
+            event: ErrorOccurred
             action: handleError
           - state: Initialization
             next: Error
@@ -222,10 +231,10 @@ components:
       commands:
         - SwitchOn
         - SwitchOff
-        - GetState
         - StartMotor
         - StopMotor
         - SetMotorSpeed
+        - SetMotorOffsetSpeed
       notifications:
         - StartMotorSucceeded
         - StartMotorFailed
@@ -298,22 +307,22 @@ components:
         - GetTemperature
       notifications:
         - TargetTemperatureReached
-        - HeatingStopped
         - ErrorOccurred
       events:
         - SwitchOn
         - SwitchOff
         - SwitchOnFailed
         - SwitchOnSucceeded
-        - TargetTemperatureReached
-        - HeatingUpFailed
+        - MaxTemperatureReached
+        - MinTemperatureReached
+        - ErrorOccurred
       statemachine:
         start: 'Off'
         states:
           - 'Off'
           - Initialization
-          - HeatingUp
-          - Heating
+          - HeatingOn
+          - HeatingOff
           - Error
         transitions:
           - state: 'Off'
@@ -321,37 +330,42 @@ components:
             event: SwitchOn
             action: switchOn
           - state: Initialization
-            next: HeatingUp
+            next: HeatingOn
             event: SwitchOnSucceeded
-          - state: Initialization
-            next: 'Off'
-            event: SwitchOff
-            action: switchOff
           - state: Initialization
             next: Error
             event: SwitchOnFailed
             action: handleError
-          - state: HeatingUp
-            next: Heating
-            event: TargetTemperatureReached
-          - state: HeatingUp
+          - state: Initialization
             next: 'Off'
             event: SwitchOff
             action: switchOff
-          - state: HeatingUp
+          - state: HeatingOn
+            next: HeatingOff
+            event: MaxTemperatureReached
+            action: stopHeating
+          - state: HeatingOn
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: HeatingOn
             next: Error
-            event: HeatingUpFailed
+            event: ErrorOccurred
             action: handleError
-          - state: Heating
-            next: Heating
-            event: TargetTemperatureReached
-          - state: Heating
+          - state: HeatingOff
+            next: HeatingOff
+            event: MaxTemperatureReached
+          - state: HeatingOff
+            next: HeatingOn
+            event: MinTemperatureReached
+            action: startHeating
+          - state: HeatingOff
             next: 'Off'
             event: SwitchOff
             action: switchOff
-          - state: Heating
+          - state: HeatingOff
             next: Error
-            event: HeatingUpFailed
+            event: ErrorOccurred
             action: handleError
           - state: Error
             next: 'Off'
@@ -371,7 +385,6 @@ components:
         - SwitchOff
         - StartCoil
         - StopCoil
-        - GetState
         - FilamentTensionSensor.TensionTooLow
         - FilamentTensionSensor.TensionTooHigh
         - FilamentTensionSensor.ErrorOccurred
@@ -388,20 +401,20 @@ components:
         - SwitchOnSucceeded
         - SwitchOnFailed
         - SwitchOff
-        - StartCoil
-        - StartingCoilSucceeded
-        - StartingCoilFailed
-        - StopCoil
-        - StopCoilSucceeded
-        - StopCoilFailed
-        - RunningFailed
+        - StartMotor
+        - StartMotorSucceeded
+        - StartMotorFailed
+        - StopMotor
+        - StopMotorSucceeded
+        - StopMotorFailed
+        - ErrorOccurred
       statemachine:
         start: 'Off'
         states:
           - 'Off'
           - Initialization
-          - CoilStopped
-          - StartingCoil
+          - MotorStopped
+          - StartingMotor
           - Running
           - Error
         transitions:
@@ -410,7 +423,7 @@ components:
             event: SwitchOn
             action: switchOn
           - state: Initialization
-            next: CoilStopped
+            next: MotorStopped
             event: SwitchOnSucceeded
           - state: Initialization
             next: Error
@@ -420,32 +433,32 @@ components:
             next: 'Off'
             event: SwitchOff
             action: switchOff
-          - state: CoilStopped
-            next: StartingCoil
-            event: StartCoil
-            action: startCoil
-          - state: CoilStopped
+          - state: MotorStopped
+            next: StartingMotor
+            event: StartMotor
+            action: startMotor
+          - state: MotorStopped
             next: 'Off'
             event: SwitchOff
             action: switchOff
-          - state: StartingCoil
+          - state: StartingMotor
             next: Running
-            event: StartingCoilSucceeded
-          - state: StartingCoil
+            event: StartMotorSucceeded
+          - state: StartingMotor
             next: 'Off'
             event: SwitchOff
             action: switchOff
           - state: Running
-            next: CoilStopped
-            event: StopCoil
-            action: stopCoil
+            next: MotorStopped
+            event: StopMotor
+            action: stopMotor
           - state: Running
             next: 'Off'
             event: SwitchOff
             action: switchOff
           - state: Running
             next: Error
-            event: RunningFailed
+            event: ErrorOccurred
             action: handleError
 
 
@@ -468,7 +481,7 @@ components:
         - SwitchOnSucceeded
         - SwitchOnFailed
         - SwitchOff
-        - RunningFailed
+        - ErrorOccurred
       statemachine:
         start: 'Off'
         states:
@@ -498,7 +511,7 @@ components:
             action: switchOff
           - state: Running
             next: Error
-            event: RunningFailed
+            event: ErrorOccurred
             action: handleError
           - state: Error
             next: 'Off'
@@ -513,30 +526,28 @@ components:
         - MachineControl.SwitchedOff
         - MachineControl.Error
       events:
-        - SwitchOn
-        - SwitchOff
-        - StartingFinished
+        - MachineStarting
+        - MachineRunning
+        - MachineSwitchedOff
+        - MachineError
       statemachine:
-        start: 'Off'
+        start: Active
         states:
-          - 'Off'
-          - Starting
-          - Running
-          - Error
+          - Active
         transitions:
-          - state: 'Off'
-            next: Starting
-            event: SwitchOn
-            action: switchOn
-          - state: Starting
-            next: Running
-            event: StartingFinished
-            action: switchRunning
-          - state: Starting
-            next: 'Off'
-            event: SwitchOff
-            action: switchOff
-          - state: Running
-            next: 'Off'
-            event: SwitchOff
-            action: switchOff
+          - state: Active
+            next: Active
+            event: MachineStarting
+            action: handleMachineStateChange
+          - state: Active
+            next: Active
+            event: MachineRunning
+            action: handleMachineStateChange
+          - state: Active
+            next: Active
+            event: MachineSwitchedOff
+            action: handleMachineStateChange
+          - state: Active
+            next: Active
+            event: MachineError
+            action: handleMachineStateChange

@@ -26,7 +26,8 @@ RemoteControlServer::RemoteControlServer(const std::string address, unsigned sho
       m_port(port),
       m_docRoot(docRoot),
       m_requestHandler(requestHandler),
-      m_serverStatus(std::make_unique<mg_mgr>())
+      m_serverStatus(std::make_unique<mg_mgr>()),
+      m_thread("RemoteControlServer")
 
 {
     mg_log_set(MG_LL_ERROR);
@@ -67,7 +68,7 @@ void RemoteControlServer::stop()
 void RemoteControlServer::sendNotification(const Json &notification)
 {
     std::lock_guard<std::mutex> lock(m_mutexStartStop);
-    for (auto& [key, connection] : m_connections)
+    for (auto &[key, connection] : m_connections)
     {
         if (connection.isOpenWebsocket())
         {

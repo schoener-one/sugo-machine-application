@@ -23,9 +23,9 @@ class ITemperatureSensor : public IHalObject
 {
 public:
     /// Raw value type
-    using RawValueType = int32_t;
+    using RawTemperature = int32_t;
     /// Translated value type
-    using ValueType = UnitValue<RawValueType>;
+    using Temperature = UnitValue<RawTemperature>;
 
     /**
      * @brief Destroy the ITemperatureSensor object.
@@ -38,9 +38,9 @@ public:
     /**
      * @brief Returns a unit translated value according to the used filter.
      *
-     * @return ValueType Unit translated value.
+     * @return Temperature Unit translated value.
      */
-    virtual ValueType getTemperature() const = 0;
+    virtual Temperature getTemperature() const = 0;
 
 protected:
     using IHalObject::IHalObject;

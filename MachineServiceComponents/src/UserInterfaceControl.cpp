@@ -10,82 +10,71 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "UserInterfaceControl.hpp"
+#include "HardwareAbstractionLayerHelper.hpp"
 #include "IHardwareAbstractionLayer.hpp"
 #include "IMachineControl.hpp"
+#include "MachineConfig.hpp"
+#include "MachineProtocol.hpp"
+#include "RemoteControlProtocol.hpp"
+#include "MessageProtocol.hpp"
 
 #include <cassert>
 #include <string>
 
 using namespace sugo;
-using namespace hal;
 using namespace remote_control;
 
-namespace
+std::string UserInterfaceControl::convertToString(UserInterfaceControl::EventId event)
 {
-const std::string GpioControl("gpio-control");
-const std::string GpioPinRelaySwitchLightRun("relay-switch-light-run");
-const std::string GpioPinRelaySwitchLightPower("relay-switch-light-power");
-const std::string GpioPinRelaySwitchLightReady("relay-switch-light-ready");
-
-inline auto& getGpioPin(const ServiceLocator& serviceLocator, const std::string& gpioPinName)
-{
-    auto& gpioController =
-        serviceLocator.get<IHardwareAbstractionLayer>().getGpioControllerMap().at(GpioControl);
-    assert(gpioController);
-    auto& gpioPin = gpioController->getGpioPinMap().at(gpioPinName);
-    assert(gpioPin);
-    return gpioPin;
-}
-
-constexpr const char* convertToString(UserInterfaceControl::State state)
-{
-    switch (state)
+    switch (event)
     {
-        case UserInterfaceControl::State::Off:
+        case EventId::MachineSwitchedOff:
             return "off";
-        case UserInterfaceControl::State::Starting:
+        case EventId::MachineStarting:
             return "starting";
-        case UserInterfaceControl::State::Running:
+        case EventId::MachineRunning:
             return "running";
-        case UserInterfaceControl::State::Error:
+        case EventId::MachineError:
             return "error";
     }
     return "";
 }
-}  // namespace
 
 Json UserInterfaceControl::createStateMessage(const std::string& type)
 {
+    namespace rp             = remote_control::protocol;
     auto     machineResponse = send(IMachineControl::CommandGetMotorSpeed);
     auto     response        = Json::parse(machineResponse.response());
-    auto     jsonSpeed       = response.at("speed");
+    auto     jsonSpeed       = response.at(protocol::IdSpeed);
     unsigned speed           = (jsonSpeed.empty()) ? 0 : jsonSpeed.get<unsigned>();
-    return Json({{"type", type},
-                 {"result", "ok"},
-                 {"state", convertToString(getCurrentState())},
-                 {"speed", speed}});
+    return Json({{rp::IdType, type},
+                 {rp::IdResult, rp::IdResultSuccess},
+                 {rp::IdState, convertToString(m_lastMachineEvent)},
+                 {rp::IdSpeed, speed}});
 }
 
 bool UserInterfaceControl::receiveRequest(remote_control::IRequestHandler::ClientId clientId,
                                           const Json& request, Json& response)
 {
-    const auto type = request.at("type");
+    namespace rp     = remote_control::protocol;
+    const auto& type = request.at(rp::IdType);
     if (type.empty())
     {
         LOG(warning) << clientId << ": Invalid request - missing request type";
-        response.push_back(
-            {{"type", "request-response"}, {"result", "nok"}, {"reason", "invalid-type"}});
+        response = {{rp::IdType, rp::IdTypeResponseRequest},
+                    {rp::IdResult, rp::IdResultError},
+                    {rp::IdErrorReason, rp::IdErrorTypeInvalid}};
         return true;
     }
 
     const auto typeValue = type.get<std::string>();
-    if (typeValue == "state-request")
+    if (typeValue == rp::IdTypeRequestState)
     {
-        response.push_back(createStateMessage("state-response"));
+        response = createStateMessage(rp::IdTypeResponseState);
     }
-    else if (typeValue == "command-request")
+    else if (typeValue == rp::IdTypeRequestCommand)
     {
-        if (!request.at("command").empty())
+        if (!request.at(rp::IdCommand).empty())
         {
             const auto command = request.at("command").get<std::string>();
             LOG(debug) << clientId << ": Received command request: " << command;
@@ -109,19 +98,23 @@ bool UserInterfaceControl::receiveRequest(remote_control::IRequestHandler::Clien
             }
 
             const std::string result =
-                machineResponse.result() == message::CommandResponse_Result_SUCCESS ? "nok" : "ok";
-            response.push_back({{"type", "command-response"}, {"result", result}});
+                machineResponse.result() == message::CommandResponse_Result_SUCCESS
+                    ? rp::IdResultError
+                    : rp::IdResultSuccess;
+            response = {{rp::IdType, rp::IdTypeResponseCommand}, {rp::IdResult, result}};
         }
         else
         {
-            response.push_back(
-                {{"type", "request-response"}, {"result", "nok"}, {"reason", "invalid-command"}});
+            response = {{rp::IdType, rp::IdTypeResponseRequest},
+                        {rp::IdResult, rp::IdResultError},
+                        {rp::IdErrorReason, rp::IdErrorCommandUnsupported}};
         }
     }
     else
     {
-        response.push_back(
-            {{"type", "request-response"}, {"result", "nok"}, {"reason", "invalid-request"}});
+        response = {{rp::IdType, rp::IdTypeResponseRequest},
+                    {rp::IdResult, rp::IdResultError},
+                    {rp::IdErrorReason, rp::IdErrorRequestUnsupported}};
     }
     return true;
 }
@@ -142,47 +135,57 @@ void UserInterfaceControl::updateMachineState()
 message::CommandResponse UserInterfaceControl::onCommandMachineControlStarting(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
+    return handleStateChangeCommand(command, Event(EventId::MachineStarting));
 }
 
 message::CommandResponse UserInterfaceControl::onCommandMachineControlRunning(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::StartingFinished));
+    return handleStateChangeCommand(command, Event(EventId::MachineRunning));
 }
 
 message::CommandResponse UserInterfaceControl::onCommandMachineControlSwitchedOff(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
+    return handleStateChangeCommand(command, Event(EventId::MachineSwitchedOff));
+}
+
+message::CommandResponse UserInterfaceControl::onCommandMachineControlError(
+    const message::Command& command)
+{
+    return handleStateChangeCommand(command, Event(EventId::MachineError));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void UserInterfaceControl::switchOff(const IUserInterfaceControl::Event&,
-                                     const IUserInterfaceControl::State&)
-{
-    (void)getGpioPin(m_serviceLocator, GpioPinRelaySwitchLightRun)->setState(IGpioPin::State::Low);
-    (void)getGpioPin(m_serviceLocator, GpioPinRelaySwitchLightReady)
-        ->setState(IGpioPin::State::Low);
-    updateMachineState();
-}
+void UserInterfaceControl::handleMachineStateChange(const Event& event, const State&)
 
-void UserInterfaceControl::switchOn(const IUserInterfaceControl::Event&,
-                                    const IUserInterfaceControl::State&)
 {
-    (void)getGpioPin(m_serviceLocator, GpioPinRelaySwitchLightRun)->setState(IGpioPin::State::High);
-    (void)getGpioPin(m_serviceLocator, GpioPinRelaySwitchLightReady)
-        ->setState(IGpioPin::State::Low);
-    updateMachineState();
-}
-
-void UserInterfaceControl::switchRunning(const IUserInterfaceControl::Event&,
-                                         const IUserInterfaceControl::State&)
-{
-    (void)getGpioPin(m_serviceLocator, GpioPinRelaySwitchLightRun)->setState(IGpioPin::State::High);
-    (void)getGpioPin(m_serviceLocator, GpioPinRelaySwitchLightReady)
-        ->setState(IGpioPin::State::High);
+    auto& hal          = m_serviceLocator.get<hal::IHardwareAbstractionLayer>();
+    m_lastMachineEvent = event.getId();
+    switch (event.getId())
+    {
+        case EventId::MachineError:
+        // TODO Make LED lights flashing on error!
+        case EventId::MachineSwitchedOff:
+            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightRunId)
+                ->setState(hal::IGpioPin::State::Low);
+            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightReadyId)
+                ->setState(hal::IGpioPin::State::Low);
+            break;
+        case EventId::MachineStarting:
+            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightRunId)
+                ->setState(hal::IGpioPin::State::High);
+            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightReadyId)
+                ->setState(hal::IGpioPin::State::Low);
+            break;
+        case EventId::MachineRunning:
+            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightRunId)
+                ->setState(hal::IGpioPin::State::High);
+            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightReadyId)
+                ->setState(hal::IGpioPin::State::High);
+            break;
+    }
     updateMachineState();
 }

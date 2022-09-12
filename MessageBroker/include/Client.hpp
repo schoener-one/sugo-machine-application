@@ -23,7 +23,9 @@ namespace sugo
 class ClientSocket;
 
 /**
- * Class for sending messages.
+ * @brief Class for sending messages.
+ * @todo This class should use the azmq::message approach for sending.
+ * 
  */
 class Client
 {
@@ -55,13 +57,6 @@ public:
      * @return                True if the message could be send and the response has been received.
      */
     bool send(const StreamBuffer& outMessage, StreamBuffer& inResponse);
-
-    /**
-     * Sends a notification message to the defined address.
-     * @param outMessage Message to be sent.
-     * @return           True if the message could be send.
-     */
-    bool notify(const StreamBuffer& outMessage);
 
 private:
     std::unique_ptr<ClientSocket> m_socket;

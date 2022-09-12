@@ -55,9 +55,9 @@ void TemperatureSensor::finalize()
     }
 }
 
-TemperatureSensor::ValueType TemperatureSensor::getTemperature() const
+TemperatureSensor::Temperature TemperatureSensor::getTemperature() const
 {
     assert(m_driver != nullptr);
 
-    return ValueType(m_driver->getTemperature(), Unit::Celcius);
+    return Temperature(m_driver->getTemperature(), Unit::Celcius);
 }

@@ -41,31 +41,25 @@ protected:
     message::CommandResponse handleStateChangeCommand(const message::Command& command,
                                                       const EventT&           event)
     {
-        LOG(debug) << "Received command '" << command.name() << "'";
-        message::CommandResponse response;
-        response.set_id(command.id());
-        response.set_result(message::CommandResponse_Result_SUCCESS);
+        LOG(debug) << "Received command '" << command.name() << "' in state "
+                   << m_stateMachine.getCurrentState();
+        message::CommandResponse_Result result = message::CommandResponse_Result_SUCCESS;
         m_stateMachine.push(event, [&](const EventT& event, const StateT& state) {
             LOG(warning) << "Invalid transition for '" << event << "' in state '" << state << "'";
-            response.set_result(message::CommandResponse_Result_INVALID_STATE);
+            result = message::CommandResponse_Result_INVALID_STATE;
         });
-        return response;
+        return createResponse(
+            command, Json({{protocol::IdErrorReason, protocol::IdErrorInvalidState}}), result);
     }
 
     message::CommandResponse handleCommandGetState(const message::Command& command)
     {
-        LOG(debug) << "Received command '" << command.name() << "'";
-        message::CommandResponse response;
-        response.set_id(command.id());
-        response.set_result(message::CommandResponse_Result_SUCCESS);
-        std::ostringstream oss;
-        oss << "{\"state\":\"" << m_stateMachine.getCurrentState() << "\"}";
-        response.set_response(oss.str());
-        return response;
+        return createResponse(command,
+                              Json({{protocol::IdState, m_stateMachine.getCurrentState()}}));
     }
 
 private:
-    sugo::IStateMachine<StateT, EventT>& m_stateMachine;
+    sugo::IStateMachine<StateT, EventT>& m_stateMachine;  ///< The component state machine
 };
 
 }  // namespace sugo

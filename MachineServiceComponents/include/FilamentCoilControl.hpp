@@ -38,7 +38,6 @@ protected:
     message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
     message::CommandResponse onCommandStartCoil(const message::Command& command) override;
     message::CommandResponse onCommandStopCoil(const message::Command& command) override;
-    message::CommandResponse onCommandGetState(const message::Command& command) override;
     message::CommandResponse onCommandFilamentTensionSensorTensionTooLow(
         const message::Command& command) override;
     message::CommandResponse onCommandFilamentTensionSensorTensionTooHigh(
@@ -55,12 +54,14 @@ protected:
 
     // Transition actions
     void switchOff(const Event& event, const State& state) override;
-    void startCoil(const Event& event, const State& state) override;
+    void startMotor(const Event& event, const State& state) override;
     void handleError(const Event& event, const State& state) override;
-    void stopCoil(const Event& event, const State& state) override;
+    void stopMotor(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
 
+private:
     const ServiceLocator& m_serviceLocator;
+    int                   m_motorOffsetSpeed = 0;
 };
 
 }  // namespace sugo

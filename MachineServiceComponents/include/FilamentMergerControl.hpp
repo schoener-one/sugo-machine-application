@@ -38,26 +38,14 @@ protected:
     message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
     message::CommandResponse onCommandStartFeeding(const message::Command& command) override;
     message::CommandResponse onCommandStopFeeding(const message::Command& command) override;
-    message::CommandResponse onCommandGetState(const message::Command& command) override;
     message::CommandResponse onCommandGetTemperatures(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentPreHeaterTargetTemperatureReached(
-        const message::Command& command) override;
-    message::CommandResponse onCommandFilamentPreHeaterHeatingStopped(
-        const message::Command& command) override;
-    message::CommandResponse onCommandFilamentPreHeaterErrorOccurred(
-        const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerHeaterTargetTemperatureReached(
-        const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerHeaterHeatingStopped(
-        const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerHeaterErrorOccurred(
-        const message::Command& command) override;
-    message::CommandResponse onCommandFilamentFeederMotorStartMotorSucceeded(
-        const message::Command& command) override;
-    message::CommandResponse onCommandFilamentFeederMotorStartMotorFailed(
-        const message::Command& command) override;
-    message::CommandResponse onCommandFilamentFeederMotorErrorOccurred(
-        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentPreHeaterTargetTemperatureReached(const message::Command& command) override;
+    message::CommandResponse onCommandFilamentPreHeaterErrorOccurred(const message::Command& command) override;
+    message::CommandResponse onCommandFilamentMergerHeaterTargetTemperatureReached(const message::Command& command) override;
+    message::CommandResponse onCommandFilamentMergerHeaterErrorOccurred(const message::Command& command) override;
+    message::CommandResponse onCommandFilamentFeederMotorStartMotorSucceeded(const message::Command& command) override;
+    message::CommandResponse onCommandFilamentFeederMotorStartMotorFailed(const message::Command& command) override;
+    message::CommandResponse onCommandFilamentFeederMotorErrorOccurred(const message::Command& command) override;
     message::CommandResponse onCommandSetMotorSpeed(const message::Command& command) override;
 
     // Transition actions
@@ -66,9 +54,13 @@ protected:
     void handleError(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
     void startMotor(const Event& event, const State& state) override;
+    void notifyHeatedUp(const Event& event, const State& state) override;
     void heatingUp(const Event& event, const State& state) override;
 
+private:
     const ServiceLocator& m_serviceLocator;
+    bool                  m_isPreHeaterTemperatureReached    = false;
+    bool                  m_isMergerHeaterTemperatureReached = false;
 };
 
 }  // namespace sugo

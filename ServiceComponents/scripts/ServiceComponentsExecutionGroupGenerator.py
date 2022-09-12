@@ -27,10 +27,10 @@ class Generator:
     def generate(self, components):
         logging.info(f"generating component execution group files")
         component_names = list([name for name, component in components.items()])
-        self._generate_header_file(self._header_file_path())
+        self._generate_header_file(self._header_file_path(), component_names)
         self._generate_source_file(self._source_file_path(), component_names)
     
-    def _generate_header_file(self, path):
+    def _generate_header_file(self, path, components):
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("w", encoding="utf-8") as file:
             file.write(f'''
@@ -45,8 +45,11 @@ class Generator:
 
 #pragma once
 
-#include "IConfiguration.hpp"
+#include "ServiceComponentExecutionBundle.hpp"
 #include "ServiceLocator.hpp"
+
+#include <array>
+#include <memory>
 
 namespace sugo
 {{
@@ -57,8 +60,6 @@ namespace sugo
 class ServiceComponentsExecutionGroup final
 {{
 public:
-    ~ServiceComponentsExecutionGroup() = default;
-
     /**
      * @brief Executes all components in a sufficient sequence.
      * This call does not return until stop() has been called or a an fatal
@@ -69,6 +70,25 @@ public:
      * @return false if at least one component failed to start.
      */
     bool start(const ServiceLocator& serviceLocator);
+    
+    /**
+     * @brief Waits blocked until all components have been stopped.
+     *
+     */
+    void waitUntilFinished();
+
+    /**
+     * @brief Stops the execution of all group components.
+     * The call blocks until the last component has stopped.
+     *
+     */
+    void stop();
+    
+private:
+    /// @brief Number all of components
+    static constexpr unsigned NumberOfComponents = {len(components)}u;
+
+    std::array<std::unique_ptr<IServiceComponentExecutionBundle>, NumberOfComponents> m_bundles;
 }};
 
 }}  // namespace sugo
@@ -98,12 +118,7 @@ using namespace sugo;
 bool ServiceComponentsExecutionGroup::start(const ServiceLocator& serviceLocator)
 {{
     {Generator._generate_component_exec_bundles(components)}
-    std::array<IServiceComponentExecutionBundle*, {len(components)}> bundles
-    {{{{
-        {Generator._generate_bundle_list(components)}
-    }}}};
-
-    for (auto const& bundle : bundles)
+    for (auto const& bundle : m_bundles)
     {{
         if (!bundle->getServiceComponent().start())
         {{
@@ -111,13 +126,24 @@ bool ServiceComponentsExecutionGroup::start(const ServiceLocator& serviceLocator
             return false;
         }}
     }}
+    return true;
+}}
 
-    // Now wait until all have finished
-    for (auto const& bundle : bundles)
+void ServiceComponentsExecutionGroup::waitUntilFinished()
+{{
+    for (auto const& bundle : m_bundles)
     {{
         bundle->getContext().waitUntilFinished();
     }}
-    return true;
+}}
+
+void ServiceComponentsExecutionGroup::stop()
+{{
+    for (auto const& bundle : m_bundles)
+    {{
+        bundle->getContext().stop();
+    }}
+    waitUntilFinished();
 }}
 ''')
 
@@ -132,9 +158,11 @@ bool ServiceComponentsExecutionGroup::start(const ServiceLocator& serviceLocator
     @staticmethod
     def _generate_component_exec_bundles(components):
         out_str = str()
+        i = 0
         for name in components:
-            out_str += f'''ServiceComponentExecutionBundle<{name}, const ServiceLocator> {name[0].lower() + name[1:]}(serviceLocator);
+            out_str += f'''m_bundles[{i}] = std::make_unique<ServiceComponentExecutionBundle<{name}, const ServiceLocator>>(serviceLocator);
     '''
+            i += 1
         return out_str
 
     @staticmethod

@@ -10,29 +10,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentCoilMotor.hpp"
+#include "HardwareAbstractionLayerHelper.hpp"
 #include "IHardwareAbstractionLayer.hpp"
-
-#include <cassert>
+#include "MachineConfig.hpp"
+#include "MachineProtocol.hpp"
+#include "MessageProtocol.hpp"
 
 using namespace sugo;
-using namespace hal;
-
-namespace
-{
-const std::string StepperMotorName("coiler");
-const std::string StepperMotorControlName("stepper-motor-control");
-
-inline auto& getStepperMotor(const ServiceLocator& serviceLocator)
-{
-    auto& stepperMotorControl =
-        serviceLocator.get<IHardwareAbstractionLayer>().getStepperMotorControllerMap().at(
-            StepperMotorControlName);
-    assert(stepperMotorControl);
-    auto& stepperMotor = stepperMotorControl->getStepperMotorMap().at(StepperMotorName);
-    assert(stepperMotor);
-    return stepperMotor;
-}
-}  // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
@@ -47,11 +31,6 @@ message::CommandResponse FilamentCoilMotor::onCommandSwitchOff(const message::Co
     return handleStateChangeCommand(command, Event(EventId::SwitchOff));
 }
 
-message::CommandResponse FilamentCoilMotor::onCommandGetState(const message::Command& command)
-{
-    return handleCommandGetState(command);
-}
-
 message::CommandResponse FilamentCoilMotor::onCommandStartMotor(const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::StartMotor));
@@ -64,23 +43,48 @@ message::CommandResponse FilamentCoilMotor::onCommandStopMotor(const message::Co
 
 message::CommandResponse FilamentCoilMotor::onCommandSetMotorSpeed(const message::Command& command)
 {
-    auto& stepperMotor = getStepperMotor(m_serviceLocator);
-    m_currentMotorSpeed += 50;
-    stepperMotor->setMaxSpeed(IStepperMotor::Speed(m_currentMotorSpeed, Unit::Rpm));
-    message::CommandResponse response;
-    response.set_id(command.id());
-    response.set_result(message::CommandResponse_Result_SUCCESS);
-    return response;
+    const auto& motorSpeed = Json::parse(command.parameters()).at(protocol::IdSpeed);
+    if (motorSpeed.empty())
+    {
+        return createErrorResponse(
+            command, Json({{protocol::IdErrorReason, protocol::IdErrorCommandParameterInvalid}}));
+    }
+    setMotorSpeed(motorSpeed.get<unsigned>());
+    return createResponse(command);
+}
+
+message::CommandResponse FilamentCoilMotor::onCommandSetMotorOffsetSpeed(
+    const message::Command& command)
+{
+    const auto& motorSpeed = Json::parse(command.parameters()).at(protocol::IdSpeed);
+    if (motorSpeed.empty())
+    {
+        return createErrorResponse(
+            command, Json({{protocol::IdErrorReason, protocol::IdErrorCommandParameterInvalid}}));
+    }
+    setMotorOffsetSpeed(motorSpeed.get<unsigned>());
+    return createResponse(command);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
+void FilamentCoilMotor::switchOn(const IFilamentCoilMotor::Event&, const IFilamentCoilMotor::State&)
+{
+    if (resetMotor())
+    {
+        push(Event(EventId::SwitchOnSucceeded));
+    }
+    else
+    {
+        push(Event(EventId::SwitchOnFailed));
+    }
+}
+
 void FilamentCoilMotor::startMotor(const IFilamentCoilMotor::Event&,
                                    const IFilamentCoilMotor::State&)
 {
-    auto& stepperMotor = getStepperMotor(m_serviceLocator);
-    if (stepperMotor->rotate(IStepperMotor::Direction::Forward))
+    if (startMotorRotation())
     {
         push(Event(EventId::StartMotorSucceeded));
         notify(NotificationStartMotorSucceeded);
@@ -92,25 +96,10 @@ void FilamentCoilMotor::startMotor(const IFilamentCoilMotor::Event&,
     }
 }
 
-void FilamentCoilMotor::switchOn(const IFilamentCoilMotor::Event&,
-                                 const IFilamentCoilMotor::State&)
+void FilamentCoilMotor::handleError(const IFilamentCoilMotor::Event&,
+                                    const IFilamentCoilMotor::State&)
 {
-    auto& stepperMotor = getStepperMotor(m_serviceLocator);
-    if (!stepperMotor->reset())
-    {
-        push(Event(EventId::SwitchOnFailed));
-    }
-    else
-    {
-        m_currentMotorSpeed = stepperMotor->getMaxSpeed().getValue();
-        push(Event(EventId::SwitchOnSucceeded));
-    }
-}
-
-void FilamentCoilMotor::handleError(const IFilamentCoilMotor::Event& event,
-                                    const IFilamentCoilMotor::State& state)
-{
-    stopMotor(event, state);
+    stopMotorRotation(true);
     notify(NotificationErrorOccurred);
 }
 
@@ -123,10 +112,5 @@ void FilamentCoilMotor::switchOff(const IFilamentCoilMotor::Event&,
 void FilamentCoilMotor::stopMotor(const IFilamentCoilMotor::Event&,
                                   const IFilamentCoilMotor::State&)
 {
-    auto& stepperMotor = getStepperMotor(m_serviceLocator);
-    if (stepperMotor->stop(false))
-    {
-        LOG(warning) << "Failed to stop motor - trying to stop immediately";
-        stepperMotor->stop(true);  // stop immediately!
-    }
+    stopMotorRotation(false);
 }

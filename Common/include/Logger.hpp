@@ -42,13 +42,18 @@ inline ValueT setThreadAttribute(const char* name, ValueT value)
 class Logger final
 {
 public:
+    /// @brief Severity type
     using Severity = boost::log::trivial::severity_level;
+    /// @brief Default severity
+    static constexpr Severity DefaultSeverity = Severity::debug;
 
-    static void reinit(Severity severity = Severity::debug);
-    static void init(Severity severity = Severity::debug);
+    static void reinit(const std::string& instanceName = std::string());
+    static void init(Severity severity = DefaultSeverity, const std::string& instanceName = std::string());
 
 private:
     Logger() {}
+
+    static Severity m_severity;
 };
 
 }  // namespace sugo

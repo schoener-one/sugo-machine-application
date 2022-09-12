@@ -23,7 +23,6 @@
 class MachineServiceComponentsTest;
 
 using namespace sugo;
-using namespace hal;
 
 using ::testing::NiceMock;
 using ::testing::Return;

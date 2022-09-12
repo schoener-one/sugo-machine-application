@@ -11,6 +11,7 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
+#include <string>
 #include <thread>
 
 namespace sugo
@@ -28,7 +29,13 @@ public:
         PolicyRealTime  ///< Change to real time thread policy.
     };
 
-    explicit Thread();
+    /**
+     * @brief Construct a new thread object.
+     *
+     * @param id Identifier of this thread
+     */
+    explicit Thread(const std::string& id);
+    ~Thread() = default;
 
     /// Runnable function
     using Runnable = std::function<void(void)>;
@@ -45,11 +52,29 @@ public:
      * Indicates if thread is still running.
      * @return true if thread is still running.
      */
-    bool isRunning() const { return m_thread.joinable(); }
+    bool isRunning() const
+    {
+        return m_thread.joinable();
+    }
 
-    void join() { m_thread.join(); }
+    /**
+     * @brief Waits for the thread to be finished.
+     * 
+     */
+    void join()
+    {
+        m_thread.join();
+    }
 
-    std::thread::id getId() { return m_thread.get_id(); }
+    /**
+     * @brief Get the identifier of this thread.
+     *
+     * @return Thread identifier.
+     */
+    const std::string& getId()
+    {
+        return m_id;
+    }
 
 private:
     /**
@@ -66,6 +91,7 @@ private:
      */
     bool setRealTimePolicy(int priority);
 
+    std::string             m_id;
     std::mutex              m_mutex;
     std::condition_variable m_condVar;
     bool                    m_isReady;

@@ -24,10 +24,17 @@ public:
     static constexpr Thread::Policy DefaultPolicy   = Thread::PolicyCurrent;
     static constexpr int            DefaultPriority = 0;
 
-    IOContext(Thread::Policy policy = DefaultPolicy, int priority = DefaultPriority)
-        : m_policy(policy), m_priority(priority)
+    IOContext(const std::string& instanceId, Thread::Policy policy = DefaultPolicy,
+              int priority = DefaultPriority)
+        : m_thread(instanceId), m_policy(policy), m_priority(priority)
     {
     }
+    virtual ~IOContext()
+    {
+    }
+
+    IOContext& operator=(const IOContext&) = delete;
+    IOContext& operator=(IOContext&&) = delete;
 
     /**
      * Sets a new policy. The policy will only be applied on next start.

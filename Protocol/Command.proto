@@ -6,6 +6,11 @@ message Command {
 	string name = 1;
 	uint32 id = 2;
 	string parameters = 3;
+	enum Type {
+		Request = 0;
+		Notification = 1;
+	}
+	Type type = 4;
 }
 
 message CommandResponse {

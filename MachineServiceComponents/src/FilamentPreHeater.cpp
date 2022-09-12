@@ -10,46 +10,85 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentPreHeater.hpp"
+#include "MachineProtocol.hpp"
+#include "MachineConfig.hpp"
 
 using namespace sugo;
+
+void FilamentPreHeater::onMaxTemperatureReached()
+{
+    notify(NotificationTargetTemperatureReached);
+    push(Event(EventId::MaxTemperatureReached));
+}
+
+void FilamentPreHeater::onMinTemperatureReached()
+{
+    push(Event(EventId::MinTemperatureReached));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentPreHeater::onCommandSwitchOn(const message::Command&)
+message::CommandResponse FilamentPreHeater::onCommandSwitchOn(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOn received in FilamentPreHeater...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
 }
 
-message::CommandResponse FilamentPreHeater::onCommandSwitchOff(const message::Command&)
+message::CommandResponse FilamentPreHeater::onCommandSwitchOff(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOff received in FilamentPreHeater...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
 }
 
-message::CommandResponse FilamentPreHeater::onCommandGetTemperature(const message::Command&)
+message::CommandResponse FilamentPreHeater::onCommandGetTemperature(const message::Command& command)
 {
-    LOG(debug) << "command GetTemperature received in FilamentPreHeater...";
-    return message::CommandResponse();
+    return createResponse(command, Json({{protocol::IdTemperature, getTemperature()}}));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void FilamentPreHeater::handleError(const IFilamentPreHeater::Event&,
-                                    const IFilamentPreHeater::State&)
-{
-    LOG(debug) << "transition action handleError in FilamentPreHeater...";
-}
-
 void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilamentPreHeater::State&)
 {
-    LOG(debug) << "transition action switchOn in FilamentPreHeater...";
+    updateHeaterTemperature();
+    if (!startTemperatureObservation())
+    {
+        push(Event(EventId::SwitchOnFailed));
+        return;
+    }
+    push(Event(EventId::SwitchOnSucceeded));
+}
+
+void FilamentPreHeater::startHeating(const IFilamentPreHeater::Event&,
+                                     const IFilamentPreHeater::State&)
+{
+    if (!switchHeater(config::GpioPinRelaySwitchFeederHeaterId, true))
+    {
+        push(Event(EventId::ErrorOccurred));
+    }
+}
+
+void FilamentPreHeater::stopHeating(const IFilamentPreHeater::Event&,
+                                    const IFilamentPreHeater::State&)
+{
+    if (!switchHeater(config::GpioPinRelaySwitchFeederHeaterId, false))
+    {
+        push(Event(EventId::ErrorOccurred));
+    }
 }
 
 void FilamentPreHeater::switchOff(const IFilamentPreHeater::Event&,
                                   const IFilamentPreHeater::State&)
 {
-    LOG(debug) << "transition action switchOff in FilamentPreHeater...";
+    stopTemperatureObservation();
+    if (!switchHeater(config::GpioPinRelaySwitchFeederHeaterId, false))
+    {
+        push(Event(EventId::ErrorOccurred));
+    }
+}
+
+void FilamentPreHeater::handleError(const IFilamentPreHeater::Event&,
+                                    const IFilamentPreHeater::State&)
+{
+    (void)switchHeater(config::GpioPinRelaySwitchFeederHeaterId, false);
+    notify(NotificationErrorOccurred);
 }

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 /** @file
- * @license: CLOSED
+ * @license: Copyright 2019 by Schoener-One
  *
  * @author: denis
  * @date:   17.04.2020
@@ -13,6 +13,8 @@
 #include <Command.pb.h>
 
 #include "CommandMessageBroker.hpp"
+#include "MessageHelper.hpp"
+#include "MessageProtocol.hpp"
 
 using namespace sugo;
 
@@ -20,54 +22,67 @@ bool CommandMessageBroker::send(const message::Command& message, const std::stri
                                 message::CommandResponse& response)
 {
     LOG(debug) << "Sending message to " << receiverId;
-    const std::string address = createInProcessAddress(receiverId);
+    const std::string                 address = createInProcessAddress(receiverId);
     const std::lock_guard<std::mutex> lock(m_mutexClient);
-    bool              success = m_client.connect(address);
-    if (success)
+
+    if (!m_client.connect(address))
     {
-        StreamBuffer outBuf;
-        std::ostream outStream(&outBuf);
-        success = message.SerializeToOstream(&outStream);
-
-        if (success)
-        {
-            StreamBuffer inBuf;
-            success = m_client.send(outBuf, inBuf);
-
-            if (success)
-            {
-                std::istream inStream(&inBuf);
-                success = response.ParseFromIstream(&inStream);
-
-                if (!success)
-                {
-                    LOG(error) << "Failed to parse command response";
-                }
-            }
-            else
-            {
-                LOG(error) << "Failed to send command";
-            }
-        }
-        else
-        {
-            LOG(error) << "Failed to serialize command";
-        }
-        success = m_client.disconnect(address) && success;
+        LOG(error) << "Failed to connect to " << address;
+        return false;
     }
 
-    return success;
+    StreamBuffer outBuf;
+    std::ostream outStream(&outBuf);
+    bool         success = message.SerializeToOstream(&outStream);
+
+    if (success)
+    {
+        success = send(outBuf, response, (message.type() == message::Command_Type_Notification));
+    }
+    else
+    {
+        LOG(error) << "Failed to serialize command";
+    }
+
+    return m_client.disconnect(address) && success;
+}
+
+bool CommandMessageBroker::send(const StreamBuffer& outBuf, message::CommandResponse& response,
+                                bool ignoreReceiveMessage)
+{
+    StreamBuffer inBuf;
+    if (!m_client.send(outBuf, inBuf))
+    {
+        LOG(error) << "Failed to send command";
+        return false;
+    }
+
+    if (!ignoreReceiveMessage)
+    {
+        std::istream inStream(&inBuf);
+        if (!response.ParseFromIstream(&inStream))
+        {
+            LOG(error) << "Failed to parse command response";
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool CommandMessageBroker::notify(const message::Command& message, const ReceiverIdList& receivers)
 {
     message::CommandResponse response;
     bool                     success = true;
+    message::Command         notification(message);
+    notification.set_type(message::Command_Type_Notification);
+
     for (const auto& receiverId : receivers)
     {
         // Ignore the response!
-        success = send(message, receiverId, response) && success;
+        success = send(notification, receiverId, response) && success;
     }
+
     return success;
 }
 
@@ -76,33 +91,38 @@ bool CommandMessageBroker::processReceived(StreamBuffer& inBuf, StreamBuffer& ou
     // TODO handle message IDs!
     message::Command command;
     std::istream     in(&inBuf);
-    bool             success = command.ParseFromIstream(&in);
-    if (success)
+
+    if (!command.ParseFromIstream(&in))
     {
-        const std::string commandName = command.name();
-        LOG(debug) << "Received command '" << commandName << "' (" << command.id() << ")";
-        Handler*     handler = findHandler(commandName);
-        std::ostream out(&outBuf);
-        if (handler != nullptr)
+        LOG(error) << "Failed to parse command";
+        return false;
+    }
+
+    const std::string& commandName = command.name();
+    // LOG(debug) << "Received command '" << commandName << "' (" << command.id() << ")";
+    Handler*                 handler = findHandler(commandName);
+    std::ostream             out(&outBuf);
+    message::CommandResponse response;
+
+    if (handler == nullptr)
+    {
+        if (command.type() == message::Command_Type_Notification)
         {
-            message::CommandResponse response = (*handler)(command);
-            response.set_id(command.id());
-            response.SerializeToOstream(&out);
+            // TODO notification can be ignored if no handler is available!
+            response = message::createResponse(command);  // but must be answered!
         }
         else
         {
             LOG(error) << "Received invalid command: " << commandName;
-            message::CommandResponse response;
-            response.set_id(command.id());
-            response.set_result(message::CommandResponse_Result_INVALID_COMMAND);
-            response.set_response("unknown command");
-            response.SerializeToOstream(&out);
-            success = false;
+            response = message::createUnsupportedCommandResponse(command);
         }
     }
     else
     {
-        LOG(error) << "Failed to parse command";
+        response = (*handler)(command);
+        response.set_id(command.id());
     }
-    return success;
+
+    response.SerializeToOstream(&out);
+    return true;
 }

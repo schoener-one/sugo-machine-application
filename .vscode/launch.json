@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}/ServiceComponents",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--generate-exec-group"]
+            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--list-only"]
         },
         {
             "name": "ServiceComponentGenerator",
@@ -22,17 +22,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}/ServiceComponents",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen"]
-        },
-        {
-            "name": "ServiceComponentGenerator NoStateMachine",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "cwd": "${workspaceFolder}/ServiceComponents",
-            "args": ["-i", "${workspaceFolder}/ServiceComponents/test/Components_NoStateMachine.yaml", "-o", "gen"]
+            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--generate-exec-group", "--generate-service-components"]
         },
         {
             "name": "ServiceComponentGenerator Templates",
@@ -92,6 +82,16 @@
             "stopAtEntry": false,
             "MIMode": "gdb",
             "args": ["--config-file", "${workspaceFolder}/conf/MachineConfig.json"]
+        },
+        {
+            "name": "Machine Application Integration Test (x86)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${config:build.directory.x86}/MachineApplication/test/MachineApplicationIntegrationTest",
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            "args": []
         },
         {
             "name": "Machine Remote Control Server (x86)",

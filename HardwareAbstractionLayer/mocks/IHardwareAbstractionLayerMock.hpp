@@ -22,8 +22,8 @@ public:
     IHardwareAbstractionLayerMock() : IHardwareAbstractionLayer("IHardwareAbstractionLayerMock")
     {
     }
-    MOCK_METHOD(bool, init, (const IConfiguration&));
 
+    MOCK_METHOD(bool, init, (const IConfiguration&));
     MOCK_METHOD(const GpioControllerMap&, getGpioControllerMap, (), (const));
     MOCK_METHOD(const StepperMotorControllerMap&, getStepperMotorControllerMap, (), (const));
     MOCK_METHOD(const TemperatureSensorControllerMap&, getTemperatureSensorControllerMap, (),

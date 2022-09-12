@@ -113,7 +113,10 @@ public:
 
     inline static const std::string ReceiverId{{"{context.name}"}};
     
+    // Commands
+    inline static const CommandId CommandGetState{{ReceiverId, "GetState"}};
 {Generator._generate_commands(context.component.commands) if len(context.component.commands) else ''}
+    // Notifications
 {Generator._generate_notifications(context.component.notifications) if len(context.component.notifications) else ''}    
     // Constructor / Destructor
     explicit I{context.name}(ICommandMessageBroker& messageBroker);
@@ -125,8 +128,11 @@ public:
     I{context.name}& operator=(I{context.name}&&) = default;
     
 protected:
-    
+
+    // Command handlers
+    message::CommandResponse onCommandGetState(const message::Command& command);
 {Generator._generate_command_handler_declarations(context.component.commands)}
+    // Transition actions
 {Generator._generate_trans_actions_declarations(context.actions, context.name)}
 }};
 
@@ -135,15 +141,15 @@ protected:
 
     @staticmethod
     def _generate_commands(commands):
-        out_str = '    // Commands\n'
+        out_str = ''
         for command in commands:
             command_name = command.replace('.', '')
-            out_str += f'    inline static const CommandId Command{command_name}{{ReceiverId, "{command_name}"}};\n'
+            out_str += f'    inline static const CommandId Command{command_name}{{ReceiverId, "{command}"}};\n'
         return out_str
 
     @staticmethod
     def _generate_notifications(notifications):
-        out_str = '    // Notifications\n'
+        out_str = ''
         for notification in notifications:
             notif_name = notification.replace('.', '')
             out_str += f'    inline static const CommandId Notification{notif_name}{{ReceiverId, "{notif_name}"}};\n'
@@ -151,17 +157,17 @@ protected:
 
     @staticmethod
     def _generate_command_handler_declarations(commands):
-        out_str = '    // Command handlers\n'
+        out_str = ''
         for command in commands:
             command_name = command.replace('.', '')
-            out_str += f'    virtual message::CommandResponse onCommand{command_name}(const message::Command& command);\n'
+            out_str += f'    virtual message::CommandResponse onCommand{command_name}(const message::Command& command) = 0;\n'
         return out_str
 
     @staticmethod
     def _generate_trans_actions_declarations(actions, component_name):
-        out_str = '    // Transition actions\n'
+        out_str = ''
         for action in actions:
-            out_str += f'    virtual void {action}(const Event& event, const State& state);\n'
+            out_str += f'    virtual void {action}(const Event& event, const State& state) = 0;\n'
         return out_str
 
     def _generate_source_files(self, context):
@@ -224,16 +230,14 @@ I{context.name}::I{context.name}(ICommandMessageBroker& messageBroker)
           }}),
       StatedServiceComponent<I{context.name}::State, I{context.name}::Event>(messageBroker, NotificationReceivers, *this)
 {{
+    registerCommandHandler(CommandGetState, std::bind(&I{context.name}::onCommandGetState, this, std::placeholders::_1));
 {Generator._generate_command_register_calls(context)}
 }}
 
-///////////////////////////////////////////////////////////////////////////////
-// Commands:
-{Generator._generate_command_methods(context)}
-
-///////////////////////////////////////////////////////////////////////////////
-// Transition actions:
-{Generator._generate_action_methods(context)}
+message::CommandResponse I{context.name}::onCommandGetState(const message::Command& command)
+{{
+    return handleCommandGetState(command);
+}}
 ''')
 
     @staticmethod
@@ -259,30 +263,4 @@ I{context.name}::I{context.name}(ICommandMessageBroker& messageBroker)
             command_name = command.replace('.', '')
             out_str += f'''    registerCommandHandler(Command{command_name}, std::bind(&I{context.name}::onCommand{command_name}, this, std::placeholders::_1));
 '''
-        return out_str
-    
-    @staticmethod
-    def _generate_command_methods(context):
-        out_str = ''
-        for command in context.component.commands:
-            command_name = command.replace('.', '')
-            out_str += f'''
-message::CommandResponse I{context.name}::onCommand{command_name}(const message::Command&)
-{{
-    LOG(debug) << "command {command} received in I{context.name}...";
-    return message::CommandResponse();
-}}
-'''
-        return out_str
-    
-    @staticmethod
-    def _generate_action_methods(context):
-        out_str = ''
-        for action in context.actions:
-            out_str += f'''
-void I{context.name}::{action}(const I{context.name}::Event&, const I{context.name}::State&)
-{{
-    LOG(debug) << "transition action {action} in I{context.name}...";
-}}
-            '''
         return out_str

@@ -45,7 +45,7 @@
         console.log("requesting current machine state...");
         ws.send(
           JSON.stringify({
-            type: "state-request",
+            type: "request-state",
           })
         );
       }
@@ -54,7 +54,7 @@
         console.log("sending machine command '" + commandName + "'");
         ws.send(
           JSON.stringify({
-            type: "command-request",
+            type: "request-command",
             command: commandName,
           })
         );
@@ -80,11 +80,11 @@
           var js = JSON.parse(event.data);
           if (js != null && "type" in js) {
             if (
-              js.type == "state-response" ||
-              js.type == "state-notification"
+              js.type == "response-state" ||
+              js.type == "notification-state"
             ) {
               receiveMachineState(js);
-            } else if (js.type == "command-response" && js.result == "nok") {
+            } else if (js.type == "response-command" && js.result == "error") {
               alert("Command failed");
               console.log("command response: " + js.result);
             }

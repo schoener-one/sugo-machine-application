@@ -22,8 +22,8 @@ public:
     IStepperMotorMock() : IStepperMotor("IStepperMotorMock")
     {
     }
-    MOCK_METHOD(bool, init, (const IConfiguration&));
 
+    MOCK_METHOD(bool, init, (const IConfiguration&));
     MOCK_METHOD(bool, reset, ());
     MOCK_METHOD(bool, rotateToPosition, (Position position));
     MOCK_METHOD(bool, rotate, (Direction direction));

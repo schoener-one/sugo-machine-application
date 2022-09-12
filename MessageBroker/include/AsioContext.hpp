@@ -22,11 +22,8 @@ namespace sugo
 class AsioContext : public IOContext
 {
 public:
-    AsioContext(Thread::Policy policy = IOContext::DefaultPolicy, int priority = IOContext::DefaultPriority)
-        : IOContext(policy, priority)
-    {
-    }
-
+    using IOContext::IOContext;
+    
     ~AsioContext() override
     {
         if (isRunning())

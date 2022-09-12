@@ -94,6 +94,7 @@ protected:
 {Generator._generate_command_handler_declarations(context.component.commands)}
 {Generator._generate_trans_actions_declarations(context.actions, context.name)}
 
+private:
     const ServiceLocator& m_serviceLocator;
 }};
 
@@ -150,10 +151,10 @@ using namespace sugo;
         for command in context.component.commands:
             command_name = command.replace('.', '')
             out_str += f'''
-message::CommandResponse {context.name}::onCommand{command_name}(const message::Command&)
+message::CommandResponse {context.name}::onCommand{command_name}(const message::Command& command)
 {{
-    LOG(debug) << "command {command} received in {context.name}...";
-    return message::CommandResponse();
+    LOG(debug) << "Command {command} received in {context.name}...";
+    return createUnsupportedCommandResponse(command);
 }}
 '''
         return out_str
@@ -165,7 +166,7 @@ message::CommandResponse {context.name}::onCommand{command_name}(const message::
             out_str += f'''
 void {context.name}::{action}(const I{context.name}::Event&, const I{context.name}::State&)
 {{
-    LOG(debug) << "transition action {action} in {context.name}...";
+    LOG(debug) << "Transition action {action} in {context.name}...";
 }}
 '''
         return out_str

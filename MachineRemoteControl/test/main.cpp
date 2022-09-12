@@ -15,6 +15,7 @@
 
 #include "IRequestHandler.hpp"
 #include "Logger.hpp"
+#include "RemoteControlProtocol.hpp"
 #include "RemoteControlServer.hpp"
 
 using namespace sugo;
@@ -39,21 +40,22 @@ public:
 
     bool receiveRequest(ClientId clientId, const Json& request, Json& response) override
     {
-        const auto type = request.at("type");
+        const auto type = request.at(protocol::IdType);
         if (type.empty())
         {
             LOG(warning) << clientId << ": Invalid request - missing request type";
-            response = {
-                {"type", "request-response"}, {"result", "nok"}, {"reason", "invalid-type"}};
+            response = {{protocol::IdType, protocol::IdTypeResponseRequest},
+                        {protocol::IdResult, protocol::IdResultError},
+                        {protocol::IdErrorReason, protocol::IdErrorTypeInvalid}};
             return true;
         }
 
         const auto typeValue = type.get<std::string>();
-        if (typeValue == "state-request")
+        if (typeValue == protocol::IdTypeRequestState)
         {
-            response = createStateMessage("state-response");
+            response = createStateMessage(protocol::IdTypeResponseState);
         }
-        else if (typeValue == "command-request")
+        else if (typeValue == protocol::IdTypeRequestCommand)
         {
             if (!request.at("command").empty())
             {
@@ -64,13 +66,14 @@ public:
                     if (m_currentState == State::Off)
                     {
                         m_currentState = State::Starting;
-                        response       = {{"type", "command-response"}, {"result", "ok"}};
+                        response       = {{protocol::IdType, protocol::IdTypeResponseCommand},
+                                    {protocol::IdResult, protocol::IdResultSuccess}};
                     }
                     else
                     {
-                        response = {{"type", "command-response"},
-                                    {"result", "nok"},
-                                    {"reason", "wrong-state"}};
+                        response = {{protocol::IdType, protocol::IdTypeResponseCommand},
+                                    {protocol::IdResult, protocol::IdResultError},
+                                    {protocol::IdErrorReason, "error-state-invalid"}};
                         return true;
                     }
                 }
@@ -79,13 +82,14 @@ public:
                     if ((m_currentState == State::Running) || (m_currentState == State::Error))
                     {
                         m_currentState = State::Off;
-                        response       = {{"type", "command-response"}, {"result", "ok"}};
+                        response       = {{protocol::IdType, protocol::IdTypeResponseCommand},
+                                    {protocol::IdResult, protocol::IdResultSuccess}};
                     }
                     else
                     {
-                        response = {{"type", "command-response"},
-                                    {"result", "nok"},
-                                    {"reason", "wrong-state"}};
+                        response = {{protocol::IdType, protocol::IdTypeResponseCommand},
+                                    {protocol::IdResult, protocol::IdResultError},
+                                    {protocol::IdErrorReason, "error-state-invalid"}};
                         return true;
                     }
                 }
@@ -101,14 +105,16 @@ public:
             }
             else
             {
-                response = {
-                    {"type", "request-response"}, {"result", "nok"}, {"reason", "invalid-command"}};
+                response = {{protocol::IdType, protocol::IdTypeResponseRequest},
+                            {protocol::IdResult, protocol::IdResultError},
+                            {protocol::IdErrorReason, "invalid-command"}};
             }
         }
         else
         {
-            response = 
-                {{"type", "request-response"}, {"result", "nok"}, {"reason", "invalid-request"}};
+            response = {{protocol::IdType, protocol::IdTypeResponseRequest},
+                        {protocol::IdResult, protocol::IdResultError},
+                        {protocol::IdErrorReason, "invalid-request"}};
         }
         return true;
     }
@@ -145,10 +151,10 @@ private:
 
     Json createStateMessage(const std::string& type)
     {
-        return Json({{"type", type},
-                          {"result", "ok"},
-                          {"state", convertToString(m_currentState)},
-                          {"speed", m_currentSpeed}});
+        return Json({{protocol::IdType, type},
+                     {protocol::IdResult, protocol::IdResultSuccess},
+                     {"state", convertToString(m_currentState)},
+                     {protocol::IdSpeed, m_currentSpeed}});
     }
 
     void updateMachineState()

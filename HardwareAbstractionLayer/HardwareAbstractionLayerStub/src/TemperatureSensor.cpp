@@ -30,7 +30,7 @@ void TemperatureSensor::finalize()
 
 }
 
-TemperatureSensor::ValueType TemperatureSensor::getTemperature() const
+TemperatureSensor::Temperature TemperatureSensor::getTemperature() const
 {
-    return ValueType(0, Unit::Celcius);
+    return Temperature(0, Unit::Celcius);
 }

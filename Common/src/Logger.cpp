@@ -22,16 +22,26 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/file.hpp>
+#include <sstream>
+#include <thread>
 
 using namespace sugo;
 namespace logging = boost::log;
 namespace expr    = logging::expressions;
 
-void Logger::reinit(Severity severity)
+Logger::Severity Logger::m_severity = Logger::DefaultSeverity;
+
+void Logger::reinit(const std::string& instanceName)
 {
+    std::ostringstream instanceId;
+    instanceId << instanceName << "@" << std::hex << std::setw(8) << std::setfill('0')
+               << std::this_thread::get_id();
+
     logging::add_common_attributes();
     logging::core::get()->add_global_attribute("Scope", logging::attributes::named_scope());
-    logging::core::get()->set_filter(logging::trivial::severity >= severity);
+    logging::core::get()->set_filter(logging::trivial::severity >= m_severity);
+    logging::core::get()->add_thread_attribute(
+        "InstanceID", logging::attributes::constant<std::string>(instanceId.str()));
     logging::core::get()->add_thread_attribute(
         "File", logging::attributes::mutable_constant<std::string>(""));
     logging::core::get()->add_thread_attribute("Line",
@@ -39,9 +49,11 @@ void Logger::reinit(Severity severity)
     logging::core::get()->add_thread_attribute(
         "Function", logging::attributes::mutable_constant<std::string>(""));
 }
-void Logger::init(Severity severity)
+
+void Logger::init(Severity severity, const std::string& instanceName)
 {
-    reinit(severity);
+    m_severity = severity;
+    reinit(instanceName);
 
     // console sink
     auto consoleSink = logging::add_console_log(std::clog);
@@ -53,9 +65,7 @@ void Logger::init(Severity severity)
                      << expr::attr<logging::trivial::severity_level>("Severity") << "] "
                      << expr::smessage << " [" << expr::attr<std::string>("File") << ":"
                      << expr::attr<int>("Line") << ":" << expr::attr<std::string>("Function")
-                     << "] [" << std::setw(8)
-                     << expr::attr<logging::attributes::current_thread_id::value_type>("ThreadID")
-                     << "]");
+                     << "] [" << expr::attr<std::string>("InstanceID") << "]");
     consoleSink->locked_backend()->auto_flush(true);
 
     // fs sink

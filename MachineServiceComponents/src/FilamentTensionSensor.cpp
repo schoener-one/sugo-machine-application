@@ -16,16 +16,14 @@ using namespace sugo;
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentTensionSensor::onCommandSwitchOn(const message::Command&)
+message::CommandResponse FilamentTensionSensor::onCommandSwitchOn(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOn received in FilamentTensionSensor...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
 }
 
-message::CommandResponse FilamentTensionSensor::onCommandSwitchOff(const message::Command&)
+message::CommandResponse FilamentTensionSensor::onCommandSwitchOff(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOff received in FilamentTensionSensor...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,17 +32,17 @@ message::CommandResponse FilamentTensionSensor::onCommandSwitchOff(const message
 void FilamentTensionSensor::switchOff(const IFilamentTensionSensor::Event&,
                                       const IFilamentTensionSensor::State&)
 {
-    LOG(debug) << "transition action switchOff in FilamentTensionSensor...";
+    // Nothing to do!
 }
 
 void FilamentTensionSensor::switchOn(const IFilamentTensionSensor::Event&,
                                      const IFilamentTensionSensor::State&)
 {
-    LOG(debug) << "transition action switchOn in FilamentTensionSensor...";
+    push(Event(EventId::SwitchOnSucceeded));
 }
 
 void FilamentTensionSensor::handleError(const IFilamentTensionSensor::Event&,
                                         const IFilamentTensionSensor::State&)
 {
-    LOG(debug) << "transition action handleError in FilamentTensionSensor...";
+    notify(NotificationErrorOccurred);
 }

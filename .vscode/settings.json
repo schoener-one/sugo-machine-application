@@ -106,6 +106,8 @@
         "valarray": "cpp",
         "variant": "cpp",
         "*.ipp": "cpp",
-        "netfwd": "cpp"
+        "netfwd": "cpp",
+        "climits": "cpp",
+        "cassert": "cpp"
     }
 }

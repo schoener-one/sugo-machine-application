@@ -11,6 +11,8 @@
 #include "AsioContext.hpp"
 #include "Logger.hpp"
 
+#include <boost/asio/executor_work_guard.hpp>
+
 using namespace sugo;
 
 bool AsioContext::start()
@@ -19,8 +21,8 @@ bool AsioContext::start()
         [&] {
             try
             {
-                // boost::asio::executor_work_guard<decltype(m_asioContext.get_executor())> work{
-                //     m_asioContext.get_executor()};
+                boost::asio::executor_work_guard<decltype(m_asioContext.get_executor())> work{
+                    m_asioContext.get_executor()};
 
                 LOG(debug) << "Starting IO context thread";
                 (void)m_asioContext.run();

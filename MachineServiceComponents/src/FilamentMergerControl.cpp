@@ -10,158 +10,182 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentMergerControl.hpp"
+#include "IFilamentFeederMotor.hpp"
+#include "IFilamentMergerHeater.hpp"
+#include "IFilamentPreHeater.hpp"
 
 using namespace sugo;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentMergerControl::onCommandSwitchOn(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandSwitchOn(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOn received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
 }
 
-message::CommandResponse FilamentMergerControl::onCommandSwitchOff(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandSwitchOff(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOff received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
 }
 
-message::CommandResponse FilamentMergerControl::onCommandStartFeeding(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandStartFeeding(
+    const message::Command& command)
 {
-    LOG(debug) << "command StartFeeding received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::StartMotor));
 }
 
-message::CommandResponse FilamentMergerControl::onCommandStopFeeding(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandStopFeeding(
+    const message::Command& command)
 {
-    LOG(debug) << "command StopFeeding received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::StopMotor));
 }
 
-message::CommandResponse FilamentMergerControl::onCommandGetState(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandGetTemperatures(
+    const message::Command& command)
 {
-    LOG(debug) << "command GetState received in FilamentMergerControl...";
-    return message::CommandResponse();
-}
-
-message::CommandResponse FilamentMergerControl::onCommandGetTemperatures(const message::Command&)
-{
-    LOG(debug) << "command GetTemperatures received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return forward(IFilamentMergerHeater::CommandGetTemperature, command);
 }
 
 message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterTargetTemperatureReached(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentPreHeater.TargetTemperatureReached received in "
-                  "FilamentMergerControl...";
-    return message::CommandResponse();
-}
-
-message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterHeatingStopped(
-    const message::Command&)
-{
-    LOG(debug) << "command FilamentPreHeater.HeatingStopped received in FilamentMergerControl...";
-    return message::CommandResponse();
+    m_isPreHeaterTemperatureReached = true;
+    // TODO add support for state change conditions!
+    if (m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
+    {
+        return handleStateChangeCommand(command, Event(EventId::HeatingUpSucceeded));
+    }
+    return createResponse(command);
 }
 
 message::CommandResponse FilamentMergerControl::onCommandFilamentPreHeaterErrorOccurred(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentPreHeater.ErrorOccurred received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));
 }
 
 message::CommandResponse
 FilamentMergerControl::onCommandFilamentMergerHeaterTargetTemperatureReached(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentMergerHeater.TargetTemperatureReached received in "
-                  "FilamentMergerControl...";
-    return message::CommandResponse();
-}
-
-message::CommandResponse FilamentMergerControl::onCommandFilamentMergerHeaterHeatingStopped(
-    const message::Command&)
-{
-    LOG(debug)
-        << "command FilamentMergerHeater.HeatingStopped received in FilamentMergerControl...";
-    return message::CommandResponse();
+    m_isMergerHeaterTemperatureReached = true;
+    // TODO add support for state change conditions!
+    if (m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
+    {
+        return handleStateChangeCommand(command, Event(EventId::HeatingUpSucceeded));
+    }
+    return createResponse(command);
 }
 
 message::CommandResponse FilamentMergerControl::onCommandFilamentMergerHeaterErrorOccurred(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentMergerHeater.ErrorOccurred received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));
 }
 
 message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorStartMotorSucceeded(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug)
-        << "command FilamentFeederMotor.StartMotorSucceeded received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::StartMotorSucceeded));
 }
 
 message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorStartMotorFailed(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug)
-        << "command FilamentFeederMotor.StartMotorFailed received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::StartMotorFailed));
 }
 
 message::CommandResponse FilamentMergerControl::onCommandFilamentFeederMotorErrorOccurred(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentFeederMotor.ErrorOccurred received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));
 }
 
-message::CommandResponse FilamentMergerControl::onCommandSetMotorSpeed(const message::Command&)
+message::CommandResponse FilamentMergerControl::onCommandSetMotorSpeed(
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentFeederMotor.SetMotorSpeed received in FilamentMergerControl...";
-    return message::CommandResponse();
+    return forward(IFilamentFeederMotor::CommandSetMotorSpeed, command);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&,
-                                       const IFilamentMergerControl::State&)
-{
-    LOG(debug) << "transition action startMotor in FilamentMergerControl...";
-}
-
 void FilamentMergerControl::switchOn(const IFilamentMergerControl::Event&,
                                      const IFilamentMergerControl::State&)
 {
-    LOG(debug) << "transition action switchOn in FilamentMergerControl...";
+    m_isMergerHeaterTemperatureReached = false;
+    m_isPreHeaterTemperatureReached    = false;
+    const auto responseFeederMotor     = send(IFilamentFeederMotor::CommandSwitchOn);
+    if (responseFeederMotor.result() != message::CommandResponse_Result_SUCCESS)
+    {
+        push(Event(EventId::SwitchOnFailed));
+        return;
+    }
+    push(Event(EventId::SwitchOnSucceeded));
 }
 
 void FilamentMergerControl::switchOff(const IFilamentMergerControl::Event&,
                                       const IFilamentMergerControl::State&)
 {
-    LOG(debug) << "transition action switchOff in FilamentMergerControl...";
+    (void)send(IFilamentFeederMotor::CommandSwitchOff);
+    (void)send(IFilamentMergerHeater::CommandSwitchOff);
+    (void)send(IFilamentPreHeater::CommandSwitchOff);
 }
 
+void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&,
+                                       const IFilamentMergerControl::State&)
+{
+    const auto response = send(IFilamentFeederMotor::CommandStartMotor);
+    if (response.result() == message::CommandResponse_Result_SUCCESS)
+    {
+        push(Event(EventId::StartMotorSucceeded));
+    }
+    else
+    {
+        push(Event(EventId::StartMotorFailed));
+    }
+}
 void FilamentMergerControl::stopMotor(const IFilamentMergerControl::Event&,
                                       const IFilamentMergerControl::State&)
 {
-    LOG(debug) << "transition action stopMotor in FilamentMergerControl...";
+    const auto response = send(IFilamentFeederMotor::CommandStopMotor);
+    if (response.result() == message::CommandResponse_Result_SUCCESS)
+    {
+        push(Event(EventId::StopMotorSucceeded));
+    }
+    else
+    {
+        push(Event(EventId::StopMotorFailed));
+    }
 }
 
-void FilamentMergerControl::handleError(const IFilamentMergerControl::Event&,
-                                        const IFilamentMergerControl::State&)
+void FilamentMergerControl::handleError(const IFilamentMergerControl::Event& event,
+                                        const IFilamentMergerControl::State& state)
 {
-    LOG(debug) << "transition action handleError in FilamentMergerControl...";
+    switchOff(event, state);
+    notify(NotificationErrorOccurred);
+}
+
+void FilamentMergerControl::notifyHeatedUp(const Event&, const State&)
+{
+    LOG(info) << "!!! heating up !!!";
+    notify(NotificationHeatedUp);
+    LOG(info) << "!!! heating up !!!";
 }
 
 void FilamentMergerControl::heatingUp(const IFilamentMergerControl::Event&,
                                       const IFilamentMergerControl::State&)
 {
-    LOG(debug) << "transition action heatingUp in FilamentMergerControl...";
+    const auto responsePreHeater = send(IFilamentPreHeater::CommandSwitchOn);
+    if (responsePreHeater.result() != message::CommandResponse_Result_SUCCESS)
+    {
+        push(Event(EventId::HeatingUpFailed));
+    }
+    const auto responseMergerHeater = send(IFilamentMergerHeater::CommandSwitchOn);
+    if (responseMergerHeater.result() != message::CommandResponse_Result_SUCCESS)
+    {
+        push(Event(EventId::HeatingUpFailed));
+        return;
+    }
 }

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 /** @file
- * @license: CLOSED
+ * @license: Copyright 2019 by Schoener-One
  *
  * @author: denis
  * @date:   17.04.2020
@@ -89,6 +89,7 @@ private:
         address.append(receiverId);
         return address;
     }
+    bool send(const StreamBuffer& outBuf, message::CommandResponse& response, bool ignoreReceiveMessage = false);
 
     Server       m_server;
     Client       m_client;

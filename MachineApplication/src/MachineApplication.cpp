@@ -112,7 +112,7 @@ bool MachineApplication::start(int argc, char const** argv)
         return false;
     }
 
-    // Gateway
+    // Start gateway
     GatewayExecutionBundle<MachineServiceGateway> machineServiceGateway(m_configuration);
     if (!machineServiceGateway.getServiceComponent().start())
     {
@@ -120,8 +120,14 @@ bool MachineApplication::start(int argc, char const** argv)
         return false;
     }
 
-    // Service components
-    const bool success = m_components.start(serviceLocator);
+    // Start service components
+    if (!m_components.start(serviceLocator))
+    {
+        LOG(error) << "Failed to start application components";
+        return false;
+    }
+
+    m_components.waitUntilFinished();
     LOG(info) << "Application " << m_name << " stopped";
-    return success;
+    return true;
 }

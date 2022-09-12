@@ -11,11 +11,11 @@
 
 #pragma once
 
+#include "Globals.hpp"
 #include "IRequestHandler.hpp"
 #include "IUserInterfaceControl.hpp"
 #include "ServiceLocator.hpp"
 #include "Thread.hpp"
-#include "Globals.hpp"
 
 namespace sugo
 {
@@ -51,18 +51,19 @@ protected:
         const message::Command& command) override;
     message::CommandResponse onCommandMachineControlSwitchedOff(
         const message::Command& command) override;
+    message::CommandResponse onCommandMachineControlError(const message::Command& command) override;
 
     // Transition actions
-    void switchOn(const Event& event, const State& state) override;
-    void switchOff(const Event& event, const State& state) override;
-    void switchRunning(const Event& event, const State& state) override;
+    void handleMachineStateChange(const Event& event, const State& state) override;
 
 private:
     void updateMachineState();
     Json createStateMessage(const std::string& type);
-    
+    static std::string convertToString(UserInterfaceControl::EventId event);
+
     const ServiceLocator&    m_serviceLocator;
     SendNotificationCallback m_cbSendNotification = nullptr;
+    EventId                  m_lastMachineEvent   = EventId::MachineSwitchedOff;
 };
 
 }  // namespace sugo

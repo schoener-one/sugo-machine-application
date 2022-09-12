@@ -37,7 +37,7 @@ public:
     void finalize();
     bool init(const IConfiguration& configuration) override;
 
-    ValueType getTemperature() const override;
+    Temperature getTemperature() const override;
 
 private:
     SpiControl&                     m_spiControl;

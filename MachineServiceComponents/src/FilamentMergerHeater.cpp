@@ -10,47 +10,87 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentMergerHeater.hpp"
+#include "MachineProtocol.hpp"
+#include "MachineConfig.hpp"
 
 using namespace sugo;
+
+void FilamentMergerHeater::onMaxTemperatureReached()
+{
+    notify(NotificationTargetTemperatureReached);
+    push(Event(EventId::MaxTemperatureReached));
+}
+
+void FilamentMergerHeater::onMinTemperatureReached()
+{
+    push(Event(EventId::MinTemperatureReached));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentMergerHeater::onCommandSwitchOn(const message::Command&)
+message::CommandResponse FilamentMergerHeater::onCommandSwitchOn(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOn received in FilamentMergerHeater...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
 }
 
-message::CommandResponse FilamentMergerHeater::onCommandSwitchOff(const message::Command&)
+message::CommandResponse FilamentMergerHeater::onCommandSwitchOff(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOff received in FilamentMergerHeater...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
 }
 
-message::CommandResponse FilamentMergerHeater::onCommandGetTemperature(const message::Command&)
+message::CommandResponse FilamentMergerHeater::onCommandGetTemperature(
+    const message::Command& command)
 {
-    LOG(debug) << "command GetTemperature received in FilamentMergerHeater...";
-    return message::CommandResponse();
+    return createResponse(command, Json({{protocol::IdTemperature, getTemperature()}}));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
 
-void FilamentMergerHeater::handleError(const IFilamentMergerHeater::Event&,
-                                       const IFilamentMergerHeater::State&)
-{
-    LOG(debug) << "transition action handleError in FilamentMergerHeater...";
-}
-
 void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
                                     const IFilamentMergerHeater::State&)
 {
-    LOG(debug) << "transition action switchOn in FilamentMergerHeater...";
+    updateHeaterTemperature();
+    if (!startTemperatureObservation())
+    {
+        push(Event(EventId::SwitchOnFailed));
+        return;
+    }
+    push(Event(EventId::SwitchOnSucceeded));
+}
+
+void FilamentMergerHeater::startHeating(const IFilamentMergerHeater::Event&,
+                                        const IFilamentMergerHeater::State&)
+{
+    if (!switchHeater(config::GpioPinRelaySwitchMergerHeaterId, true))
+    {
+        push(Event(EventId::ErrorOccurred));
+    }
+}
+
+void FilamentMergerHeater::stopHeating(const IFilamentMergerHeater::Event&,
+                                       const IFilamentMergerHeater::State&)
+{
+    if (!switchHeater(config::GpioPinRelaySwitchMergerHeaterId, false))
+    {
+        push(Event(EventId::ErrorOccurred));
+    }
 }
 
 void FilamentMergerHeater::switchOff(const IFilamentMergerHeater::Event&,
                                      const IFilamentMergerHeater::State&)
 {
-    LOG(debug) << "transition action switchOff in FilamentMergerHeater...";
+    stopTemperatureObservation();
+    if (!switchHeater(config::GpioPinRelaySwitchMergerHeaterId, false))
+    {
+        push(Event(EventId::ErrorOccurred));
+    }
+}
+
+void FilamentMergerHeater::handleError(const IFilamentMergerHeater::Event&,
+                                       const IFilamentMergerHeater::State&)
+{
+    (void)switchHeater(config::GpioPinRelaySwitchMergerHeaterId, false);
+    notify(NotificationErrorOccurred);
 }

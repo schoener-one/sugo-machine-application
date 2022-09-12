@@ -10,89 +10,80 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentCoilControl.hpp"
+#include "IFilamentCoilMotor.hpp"
+#include "IFilamentTensionSensor.hpp"
+#include "MachineConfig.hpp"
+#include "MachineProtocol.hpp"
 
 using namespace sugo;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentCoilControl::onCommandSwitchOn(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandSwitchOn(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOn received in FilamentCoilControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
 }
 
-message::CommandResponse FilamentCoilControl::onCommandSwitchOff(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandSwitchOff(const message::Command& command)
 {
-    LOG(debug) << "command SwitchOff received in FilamentCoilControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
 }
 
-message::CommandResponse FilamentCoilControl::onCommandStartCoil(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandStartCoil(const message::Command& command)
 {
-    LOG(debug) << "command StartCoil received in FilamentCoilControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::StartMotor));
 }
 
-message::CommandResponse FilamentCoilControl::onCommandStopCoil(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandStopCoil(const message::Command& command)
 {
-    LOG(debug) << "command StopCoil received in FilamentCoilControl...";
-    return message::CommandResponse();
-}
-
-message::CommandResponse FilamentCoilControl::onCommandGetState(const message::Command&)
-{
-    LOG(debug) << "command GetState received in FilamentCoilControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::StopMotor));
 }
 
 message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTensionTooLow(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentTensionSensor.TensionTooLow received in FilamentCoilControl...";
-    return message::CommandResponse();
+    m_motorOffsetSpeed = ((m_motorOffsetSpeed - config::MotorSpeedInc) % config::MaxMotorSpeed);
+    send(IFilamentCoilMotor::CommandSetMotorOffsetSpeed, Json({{protocol::IdSpeed, m_motorOffsetSpeed}}));
+    return createResponse(command);
 }
 
 message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTensionTooHigh(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentTensionSensor.TensionTooHigh received in FilamentCoilControl...";
-    return message::CommandResponse();
+    m_motorOffsetSpeed = ((m_motorOffsetSpeed + config::MotorSpeedInc) % config::MaxMotorSpeed);
+    send(IFilamentCoilMotor::CommandSetMotorOffsetSpeed, Json({{protocol::IdSpeed, m_motorOffsetSpeed}}));
+    return createResponse(command);
 }
 
 message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorErrorOccurred(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentTensionSensor.ErrorOccurred received in FilamentCoilControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));
 }
 
 message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorStartMotorSucceeded(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug)
-        << "command FilamentCoilMotor.StartMotorSucceeded received in FilamentCoilControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::StartMotorSucceeded));
 }
 
 message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorStartMotorFailed(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentCoilMotor.StartMotorFailed received in FilamentCoilControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::StartMotorFailed));
 }
 
 message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorErrorOccurred(
-    const message::Command&)
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentCoilMotor.ErrorOccurred received in FilamentCoilControl...";
-    return message::CommandResponse();
+    return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));
 }
 
-message::CommandResponse FilamentCoilControl::onCommandSetMotorSpeed(const message::Command&)
+message::CommandResponse FilamentCoilControl::onCommandSetMotorSpeed(
+    const message::Command& command)
 {
-    LOG(debug) << "command FilamentCoilMotor.SetMotorSpeed received in FilamentCoilControl...";
-    return message::CommandResponse();
+    return forward(IFilamentCoilMotor::CommandSetMotorSpeed, command);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,29 +92,57 @@ message::CommandResponse FilamentCoilControl::onCommandSetMotorSpeed(const messa
 void FilamentCoilControl::switchOn(const IFilamentCoilControl::Event&,
                                    const IFilamentCoilControl::State&)
 {
-    LOG(debug) << "transition action switchOn in FilamentCoilControl...";
+    m_motorOffsetSpeed = 0;
+    const auto response =
+        send(IFilamentCoilMotor::CommandSetMotorOffsetSpeed, Json({{protocol::IdSpeed, m_motorOffsetSpeed}}));
+    if (response.result() == message::CommandResponse_Result_SUCCESS)
+    {
+        push(Event(EventId::SwitchOnSucceeded));
+    }
+    else
+    {
+        push(Event(EventId::SwitchOnFailed));
+    }
 }
 
 void FilamentCoilControl::switchOff(const IFilamentCoilControl::Event&,
                                     const IFilamentCoilControl::State&)
 {
-    LOG(debug) << "transition action switchOff in FilamentCoilControl...";
+    (void)send(IFilamentCoilMotor::CommandSwitchOff);
+    (void)send(IFilamentTensionSensor::CommandSwitchOff);
 }
 
-void FilamentCoilControl::handleError(const IFilamentCoilControl::Event&,
-                                      const IFilamentCoilControl::State&)
+void FilamentCoilControl::handleError(const IFilamentCoilControl::Event& event,
+                                      const IFilamentCoilControl::State& state)
 {
-    LOG(debug) << "transition action handleError in FilamentCoilControl...";
+    switchOff(event, state);
+    notify(IFilamentCoilControl::NotificationErrorOccurred);
 }
 
-void FilamentCoilControl::stopCoil(const IFilamentCoilControl::Event&,
+void FilamentCoilControl::stopMotor(const IFilamentCoilControl::Event&,
                                    const IFilamentCoilControl::State&)
 {
-    LOG(debug) << "transition action stopCoil in FilamentCoilControl...";
+    const auto response = send(IFilamentCoilMotor::CommandStopMotor);
+    if (response.result() == message::CommandResponse_Result_SUCCESS)
+    {
+        push(Event(EventId::StopMotorSucceeded));
+    }
+    else
+    {
+        push(Event(EventId::StopMotorFailed));
+    }
 }
 
-void FilamentCoilControl::startCoil(const IFilamentCoilControl::Event&,
+void FilamentCoilControl::startMotor(const IFilamentCoilControl::Event&,
                                     const IFilamentCoilControl::State&)
 {
-    LOG(debug) << "transition action startCoil in FilamentCoilControl...";
+    const auto response = send(IFilamentCoilMotor::CommandStartMotor);
+    if (response.result() == message::CommandResponse_Result_SUCCESS)
+    {
+        push(Event(EventId::StartMotorSucceeded));
+    }
+    else
+    {
+        push(Event(EventId::StartMotorFailed));
+    }
 }

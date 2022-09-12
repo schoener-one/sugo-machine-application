@@ -4,7 +4,7 @@
  * @license: Copyright 2022, Schoener-One
  *
  * @author: denis@schoener-one
- * @date:   2022-08-03
+ * @date:   2022-09-19
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -12,19 +12,18 @@
 
 #include <gmock/gmock.h>
 
-#include "IStepperMotorControl.hpp"
+#include "ITemperatureSensor.hpp"
 
 namespace sugo::hal
 {
-class IStepperMotorControlMock : public IStepperMotorControl
+class ITemperatureSensorMock : public ITemperatureSensor
 {
 public:
-    IStepperMotorControlMock() : IStepperMotorControl("IStepperMotorControlMock")
+    ITemperatureSensorMock() : ITemperatureSensor("ITemperatureSensorMock")
     {
     }
 
     MOCK_METHOD(bool, init, (const IConfiguration&));
-    MOCK_METHOD(void, reset, ());
-    MOCK_METHOD(const StepperMotorMap&, getStepperMotorMap, ());
+    MOCK_METHOD(Temperature, getTemperature, (), (const));
 };
 }  // namespace sugo::hal

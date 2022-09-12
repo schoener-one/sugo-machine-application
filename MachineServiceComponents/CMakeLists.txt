@@ -19,6 +19,8 @@ add_library(${MODULE_NAME}
     src/FilamentTensionSensor.cpp
     src/MachineControl.cpp
     src/UserInterfaceControl.cpp
+    src/HeaterService.cpp
+    src/MotorService.cpp
     )
 target_include_directories (${MODULE_NAME}
     PUBLIC

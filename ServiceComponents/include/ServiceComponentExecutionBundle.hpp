@@ -36,7 +36,7 @@ struct ServiceComponentExecutionBundle : IServiceComponentExecutionBundle
 {
     ServiceComponentExecutionBundle(ComponentArgs&... componentArgs)
         : IServiceComponentExecutionBundle(ComponentT::ReceiverId),
-          context(),
+          context(id),
           broker(ComponentT::ReceiverId, context),
           component(broker, componentArgs...)
     {

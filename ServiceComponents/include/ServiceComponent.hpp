@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "ServiceComponent.hpp"
-
-#include <sstream>
-
 #include "CommandId.hpp"
 #include "Globals.hpp"
 #include "ICommandMessageBroker.hpp"
 #include "IRunnable.hpp"
+#include "ServiceComponent.hpp"
+#include "MessageProtocol.hpp"
+#include "MessageHelper.hpp"
+
+#include <sstream>
 
 namespace sugo
 {
@@ -56,41 +57,26 @@ protected:
     {
     }
 
-    static message::CommandResponse handleRequestCommand(const message::Command& command,
-                                                         const std::string&      responseData)
-    {
-        LOG(debug) << "Received request command '" << command.name() << "'";
-        message::CommandResponse response;
-        response.set_id(command.id());
-        response.set_result(message::CommandResponse_Result_SUCCESS);
-        response.set_response(responseData);
-        return response;
-    }
-
-    static message::CommandResponse handleInvalidCommand(const message::Command& command)
+    static message::CommandResponse createUnsupportedCommandResponse(
+        const message::Command& command)
     {
         LOG(debug) << "Received invalid command '" << command.name() << "'";
-        return handleError(command, "invalid command",
-                           message::CommandResponse_Result_INVALID_COMMAND);
+        return message::createUnsupportedCommandResponse(command);
     }
 
-    static message::CommandResponse handleInvalidParameter(
-        const message::Command& command, const std::string& hint = "invalid parameter")
+    static message::CommandResponse createResponse(
+        const message::Command& command, const Json& response = Json(),
+        const message::CommandResponse_Result result = message::CommandResponse_Result_SUCCESS)
     {
-        LOG(debug) << "Received command '" << command.name() << "' with invalid parameters '"
-                   << command.parameters() << "'";
-        return handleError(command, hint, message::CommandResponse_Result_INVALID_PARAMETER);
+        return message::createResponse(command, response, result);
     }
 
-    static message::CommandResponse handleError(
-        const message::Command& command, const std::string& errorMessage = "procedure failed",
+    static message::CommandResponse createErrorResponse(
+        const message::Command& command,
+        const Json& errorMessage = Json({{protocol::IdErrorReason, protocol::IdErrorUnspecified}}),
         message::CommandResponse_Result errorCode = message::CommandResponse_Result_ERROR)
     {
-        message::CommandResponse response;
-        response.set_id(command.id());
-        response.set_result(errorCode);
-        response.set_response(errorMessage);
-        return response;
+        return message::createErrorResponse(command, errorMessage, errorCode);
     }
 
     void registerCommandHandler(const CommandId&                 commandId,
@@ -101,19 +87,30 @@ protected:
 
     message::CommandResponse send(const CommandId& commandId)
     {
-        return send(commandId, "");
+        return send(commandId, Json());
     }
 
-    message::CommandResponse send(const CommandId& commandId, const std::string& parameters)
+    message::CommandResponse send(const CommandId& commandId, const Json& parameters)
     {
         message::Command command;
         command.set_name(commandId.command);
         if (!parameters.empty())
         {
-            command.set_parameters(parameters);
+            command.set_parameters(parameters.dump());
         }
         message::CommandResponse commandResponse;
         const bool success = m_messageBroker.send(command, commandId.receiver, commandResponse);
+        assert(success);
+        return commandResponse;
+    }
+
+    message::CommandResponse forward(const CommandId& commandId, const message::Command& command)
+    {
+        message::Command forwardCommand = command;
+        forwardCommand.set_name(commandId.command);
+        message::CommandResponse commandResponse;
+        const bool               success =
+            m_messageBroker.send(forwardCommand, commandId.receiver, commandResponse);
         assert(success);
         return commandResponse;
     }
@@ -123,13 +120,13 @@ protected:
         return notify(commandId, "");
     }
 
-    bool notify(const CommandId& commandId, const std::string& parameters)
+    bool notify(const CommandId& commandId, const Json& parameters)
     {
         message::Command command;
-        command.set_name(commandId.command);
+        command.set_name(commandId.receiver + "." + commandId.command);
         if (!parameters.empty())
         {
-            command.set_parameters(parameters);
+            command.set_parameters(parameters.dump());
         }
         return m_messageBroker.notify(command, m_notificationReceivers);
     }
