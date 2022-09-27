@@ -15,17 +15,57 @@
 #include "CommandMessageBroker.hpp"
 #include "MessageHelper.hpp"
 #include "MessageProtocol.hpp"
+#include "Timer.hpp"
 
 using namespace sugo;
+
+CommandMessageBroker::CommandMessageBroker(const std::string& receiverId, IOContext& ioContext)
+    : MessageBroker<message::Command, message::CommandResponse, std::string>(),
+      m_server(createInProcessAddress(receiverId), *this, ioContext),
+      m_client(ioContext),
+      m_ioContext(ioContext)
+{
+}
+
+CommandMessageBroker::~CommandMessageBroker()
+{
+    if (isRunning())
+    {
+        LOG(warning) << "Still running";
+    }
+}
+
+bool CommandMessageBroker::start()
+{
+    assert(!m_ioContext.isRunning());
+    if (!m_ioContext.start())
+    {
+        LOG(error) << "Failed to start io context";
+        return false;
+    }
+    return m_server.start();
+}
+
+void CommandMessageBroker::stop()
+{
+    m_server.stop();
+    m_ioContext.stop();
+}
 
 bool CommandMessageBroker::send(const message::Command& message, const std::string& receiverId,
                                 message::CommandResponse& response)
 {
-    LOG(debug) << "Sending message to " << receiverId;
+    if (m_isProcessingReceiveMessage.load())
+    {
+        LOG(fatal) << "Failed to send message: processing received message (deadlock)";
+        ASSERT_NOT_REACHABLE;
+    }
+
+    LOG(debug) << "Sending message " << message.name() << " to " << receiverId;
     const std::string                 address = createInProcessAddress(receiverId);
     const std::lock_guard<std::mutex> lock(m_mutexClient);
 
-    if (!m_client.connect(address))
+    if (!m_client.connect(address, MaxMessageTransmissionTime, MaxMessageTransmissionTime))
     {
         LOG(error) << "Failed to connect to " << address;
         return false;
@@ -35,16 +75,42 @@ bool CommandMessageBroker::send(const message::Command& message, const std::stri
     std::ostream outStream(&outBuf);
     bool         success = message.SerializeToOstream(&outStream);
 
-    if (success)
-    {
-        success = send(outBuf, response, (message.type() == message::Command_Type_Notification));
-    }
-    else
+    if (!success)
     {
         LOG(error) << "Failed to serialize command";
     }
 
-    return m_client.disconnect(address) && success;
+    if (success)
+    {
+        success = false;
+        for (unsigned i = MaxMessageTransmissionRetries; !success && (i > 0); i--)
+        {
+            success =
+                send(outBuf, response, (message.type() == message::Command_Type_Notification));
+            if (!success)
+            {
+                LOG(error) << "Failed to send message (" << (MaxMessageTransmissionRetries - i + 1)
+                           << "/" << MaxMessageTransmissionRetries << ")";
+                std::this_thread::sleep_for(
+                    MaxMessageTransmissionTime);  // just wait a short time to retry!
+            }
+        }
+        if (!success)
+        {
+            LOG(error) << "Failed to send message completely";
+        }
+    }
+
+    if (m_client.isConnected())
+    {
+        success = m_client.disconnect();
+        if (!success)
+        {
+            LOG(error) << "Failed to disconnect";
+        }
+    }
+
+    return success;
 }
 
 bool CommandMessageBroker::send(const StreamBuffer& outBuf, message::CommandResponse& response,
@@ -94,9 +160,11 @@ bool CommandMessageBroker::processReceived(StreamBuffer& inBuf, StreamBuffer& ou
 
     if (!command.ParseFromIstream(&in))
     {
+        // FIXME shouldn't return without reponse!
         LOG(error) << "Failed to parse command";
         return false;
     }
+    m_isProcessingReceiveMessage = true;
 
     const std::string& commandName = command.name();
     // LOG(debug) << "Received command '" << commandName << "' (" << command.id() << ")";
@@ -123,6 +191,15 @@ bool CommandMessageBroker::processReceived(StreamBuffer& inBuf, StreamBuffer& ou
         response.set_id(command.id());
     }
 
-    response.SerializeToOstream(&out);
-    return true;
+    return response.SerializeToOstream(&out);
+}
+
+void CommandMessageBroker::processPost()
+{
+    m_isProcessingReceiveMessage = false;
+    if (m_postProcess)
+    {
+        LOG(trace) << "Start post processing";
+        m_postProcess();
+    }
 }

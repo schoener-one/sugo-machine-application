@@ -17,13 +17,14 @@ using namespace sugo;
 
 void FilamentPreHeater::onMaxTemperatureReached()
 {
-    notify(NotificationTargetTemperatureReached);
     push(Event(EventId::MaxTemperatureReached));
+    processAllEvents();
 }
 
 void FilamentPreHeater::onMinTemperatureReached()
 {
     push(Event(EventId::MinTemperatureReached));
+    processAllEvents();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +50,7 @@ message::CommandResponse FilamentPreHeater::onCommandGetTemperature(const messag
 
 void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilamentPreHeater::State&)
 {
+    m_hasNotifiedTargetTemperatureReached = false;
     updateHeaterTemperature();
     if (!startTemperatureObservation())
     {
@@ -70,6 +72,11 @@ void FilamentPreHeater::startHeating(const IFilamentPreHeater::Event&,
 void FilamentPreHeater::stopHeating(const IFilamentPreHeater::Event&,
                                     const IFilamentPreHeater::State&)
 {
+    if (!m_hasNotifiedTargetTemperatureReached)
+    {
+        notify(NotificationTargetTemperatureReached);
+        m_hasNotifiedTargetTemperatureReached = true;
+    }
     if (!switchHeater(config::GpioPinRelaySwitchFeederHeaterId, false))
     {
         push(Event(EventId::ErrorOccurred));

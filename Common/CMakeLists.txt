@@ -18,7 +18,7 @@ endif()
 
 # Common Mocks library
 add_library (CommonMocks INTERFACE)
-target_include_directories (CommonMocks INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/test)
+target_include_directories (CommonMocks INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/mocks)
 target_link_libraries(CommonMocks INTERFACE Common gmock)
 
 # Google Unittests

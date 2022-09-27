@@ -1,23 +1,22 @@
 ///////////////////////////////////////////////////////////////////////////////
 /** @file
- * @license: CLOSED
+ * @license: Copyright 2019 by Schoener-One
  *
- * @author: denis
- * @date:   02.05.2020
+ * @author: denis@schoener-one.de
+ * @date:   2020-05-02
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef STATEMACHINE_HPP_
-#define STATEMACHINE_HPP_
+#pragma once
+
+#include "EventQueue.hpp"
+#include "Globals.hpp"
+#include "IStateMachine.hpp"
 
 #include <algorithm>
 #include <cassert>
-#include <mutex>
-#include <queue>
 #include <vector>
-
-#include "Globals.hpp"
-#include "IStateMachine.hpp"
+#include <mutex>
 
 namespace sugo
 {
@@ -84,7 +83,6 @@ public:
         return std::bind(_func, _instance);
     }
 
-protected:
     /**
      * Constructor of the class.
      *
@@ -94,44 +92,44 @@ protected:
      *                           existing transitions.
      */
     StateMachine(StateT initState, const TransitionTable transitions)
-        : m_state{initState}, m_transitions{transitions}
+        : m_state{initState}, m_transitions{transitions}, m_eventQueue{}
     {
     }
 
-public:
-    virtual ~StateMachine() {}
-
-    // IStateMachine {{
-    StateT getCurrentState() const override { return m_state; }
-
-    void push(const EventT& event, Action transitionNotFound = nullptr)
+    virtual ~StateMachine() override
     {
-        m_queueEvents.push(event);
-        std::unique_lock<std::mutex> lock(m_mutex, std::try_to_lock);
-        if (lock.owns_lock())  // Only if holding the lock, otherwise don't block!
+    }
+
+    StateT getCurrentState() const override
+    {
+        return m_state;
+    }
+
+    bool push(const EventT& event) override
+    {
+        return m_eventQueue.push(event);
+    }
+
+    bool processNextEvent() override
+    {
+        std::lock_guard<std::mutex> lock(m_mutexEventProcessing);
+        if (m_eventQueue.empty())
         {
-            bool success = true;
-            while (success && (!m_queueEvents.empty()))
-            {
-                success = processEvent(m_queueEvents.front());
-                m_queueEvents.pop();
-                if (!success)
-                {
-                    LOG(error) << "Transition for event '" << event << "' not found in state '"
-                               << m_state << "'";
-                    if (transitionNotFound != nullptr)
-                    {
-                        transitionNotFound(event, m_state);
-                    }
-                    else
-                    {
-                        ASSERT_NOT_REACHABLE;
-                    }
-                }
-            }
+            return false;
         }
+        EventT event = m_eventQueue.pull();
+        if (!processEvent(event))
+        {
+            LOG(fatal) << "Transition for event " << event << " not found in state " << m_state;
+            ASSERT_NOT_REACHABLE;
+        }
+        return true;
     }
-    // IStateMachine }}
+
+    EventQueue<EventT>& getEventQueue() override
+    {
+        return m_eventQueue;
+    }
 
 private:
     /**
@@ -151,8 +149,8 @@ private:
         bool success = false;
         if (ti != m_transitions.end())
         {
-            LOG(debug) << "Transition for event '" << event << "' from state '" << m_state
-                       << "' to state '" << ti->next << "'";
+            LOG(debug) << "Transition for event " << event << " from state " << m_state
+                       << " to state " << ti->next;
             m_state = ti->next;
             if (ti->action != nullptr)
             {
@@ -164,12 +162,9 @@ private:
     }
 
     StateT                m_state;        ///< Current state.
-    std::mutex            m_mutex;        ///< Mutex to protect against race conditions.
     const TransitionTable m_transitions;  ///< Transition table.
-    // FIXME use a fixed size queue here!
-    std::queue<EventT> m_queueEvents;  ///< Pending events.
+    EventQueue<EventT>    m_eventQueue;   ///< Event queue for pending events.
+    std::mutex            m_mutexEventProcessing;   ///< Mutex to protect the state
 };
 
 }  // namespace sugo
-
-#endif  // STATEMACHINE_HPP_

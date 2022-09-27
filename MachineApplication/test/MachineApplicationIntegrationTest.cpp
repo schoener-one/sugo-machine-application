@@ -14,7 +14,6 @@
 #include <memory>
 #include <mutex>
 
-#include "AsioContext.hpp"
 #include "CommandId.hpp"
 #include "CommandMessageBroker.hpp"
 #include "Globals.hpp"
@@ -22,6 +21,7 @@
 #include "IGpioPinMock.hpp"
 #include "IHardwareAbstractionLayerMock.hpp"
 #include "IMachineControl.hpp"
+#include "IOContext.hpp"
 #include "IStepperMotorControlMock.hpp"
 #include "IStepperMotorMock.hpp"
 #include "ITemperatureSensorControlMock.hpp"
@@ -37,6 +37,7 @@ class MachineApplicationIntegrationTest;
 using namespace sugo;
 using namespace hal;
 
+using ::testing::_;
 using ::testing::MockFunction;
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -60,19 +61,31 @@ protected:
 
     void SetUp() override
     {
-        m_ioContext.start();
         m_lastCommandId.clear();
+        ASSERT_TRUE(m_broker.start());
         m_broker.registerHandler(ReceiverId,
                                  [&](const message::Command& command) -> message::CommandResponse {
                                      m_lastCommandId = command.name();
                                      m_condVar.notify_one();
                                      return message::createResponse(command);
                                  });
+        prepareForStartComponents();
+        ASSERT_TRUE(m_components.start(m_serviceLocator));
+
+        // Add us to the receiver lists!
+        for (auto& bundle : m_components.getBundles())
+        {
+            auto& component      = bundle->getServiceComponent();
+            auto  receiverIdList = component.getReceiverList();
+            receiverIdList.push_back(ReceiverId);
+            component.setReceiverList(receiverIdList);
+        }
     }
 
     void TearDown() override
     {
-        m_ioContext.stop();
+        m_components.stop();
+        m_broker.stop();
     }
 
     static void SetUpTestCase()
@@ -108,7 +121,7 @@ protected:
 
     template <typename CompT>
     void waitForNotification(const CommandId& commandId, const std::chrono::milliseconds& maxTime =
-                                                             std::chrono::milliseconds(1000))
+                                                             std::chrono::milliseconds(60000))
     {
         std::unique_lock<std::mutex> lockThread(m_mutex);
         m_lastCommandId.clear();
@@ -144,7 +157,7 @@ protected:
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinRelaySwitchLightReady;
 
     NiceMock<IHardwareAbstractionLayerMock> m_mockHardwareAbstractionLayer;
-    AsioContext                             m_ioContext;
+    IOContext                               m_ioContext;
     CommandMessageBroker                    m_broker;
     ServiceLocator                          m_serviceLocator;
     ServiceComponentsExecutionGroup         m_components;
@@ -234,9 +247,6 @@ void MachineApplicationIntegrationTest::prepareForSwitchOn()
 
 TEST_F(MachineApplicationIntegrationTest, StartExecutionGroup)
 {
-    prepareForStartComponents();
-    EXPECT_TRUE(m_components.start(m_serviceLocator));
-
     prepareForSwitchOn();
     send(IMachineControl::CommandSwitchOn);
     EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
@@ -251,7 +261,9 @@ TEST_F(MachineApplicationIntegrationTest, StartExecutionGroup)
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::Low))
         .WillOnce(Return(true));
-    EXPECT_NOTIFICATION(IMachineControl, NotificationStarting);
+    EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).Times(2).WillRepeatedly(Return(true));
+    EXPECT_NOTIFICATION(IMachineControl, NotificationRunning);
 
     m_components.waitUntilFinished();
 }

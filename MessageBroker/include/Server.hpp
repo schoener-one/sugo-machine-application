@@ -14,7 +14,7 @@
 #include <istream>
 #include <memory>
 
-#include "AsioContext.hpp"
+#include "IOContext.hpp"
 #include "IRunnable.hpp"
 #include "StreamBuffer.hpp"
 
@@ -39,17 +39,19 @@ public:
         }
 
         /**
-         * Called to process a new received message.
+         * @brief Called to process a new received message.
+         *
          * @param in  Input stream buffer as received message.
          * @param out Output stream buffer to write the response to.
          * @return true if the message could be processed.
          */
         virtual bool processReceived(StreamBuffer& in, StreamBuffer& out) = 0;
 
-    protected:
-        IMessageHandler()
-        {
-        }
+        /**
+         * @brief Called after the message response has been sent.
+         * This function could be used to do a second step processing.
+         */
+        virtual void processPost() = 0;
     };
 
     /**
@@ -58,7 +60,7 @@ public:
      * @param messageHandler Instance to handle received messages.
      * @param ioContext IO context.
      */
-    Server(const std::string& address, IMessageHandler& messageHandler, AsioContext& ioContext);
+    Server(const std::string& address, IMessageHandler& messageHandler, IOContext& ioContext);
 
     virtual ~Server();
 
@@ -76,7 +78,10 @@ public:
 
     void stop() override;
 
-    bool isRunning() const override { return m_isRunning; }
+    bool isRunning() const override
+    {
+        return m_isRunning;
+    }
     // IRunnable }}
 
 private:

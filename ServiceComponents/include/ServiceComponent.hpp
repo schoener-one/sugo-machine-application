@@ -12,12 +12,9 @@
 #include "CommandId.hpp"
 #include "Globals.hpp"
 #include "ICommandMessageBroker.hpp"
-#include "IRunnable.hpp"
-#include "ServiceComponent.hpp"
-#include "MessageProtocol.hpp"
 #include "MessageHelper.hpp"
-
-#include <sstream>
+#include "MessageProtocol.hpp"
+#include "IServiceComponent.hpp"
 
 namespace sugo
 {
@@ -30,10 +27,21 @@ namespace sugo
  * @todo Needs to be transformed to a base class of all ServiceComponents in order
  *       to handle messages in a generic manner!
  */
-class ServiceComponent : public IRunnable
+class ServiceComponent : public IServiceComponent
 {
 public:
-    // IRunnable {{
+    /**
+     * @brief Construct a new service component object
+     *
+     * @param messageBroker  The message broker to be used for sending and receiving.
+     * @param notifReceivers The list for notification receivers.
+     */
+    explicit ServiceComponent(ICommandMessageBroker&                       messageBroker,
+                              const ICommandMessageBroker::ReceiverIdList& notifReceivers)
+        : m_messageBroker(messageBroker), m_notificationReceivers(notifReceivers)
+    {
+    }
+
     bool start() override
     {
         return m_messageBroker.start();
@@ -48,15 +56,18 @@ public:
     {
         return m_messageBroker.isRunning();
     }
-    // IRunnable }}
 
-protected:
-    explicit ServiceComponent(ICommandMessageBroker&                       messageBroker,
-                              const ICommandMessageBroker::ReceiverIdList& notifReceivers)
-        : m_messageBroker(messageBroker), m_notificationReceivers(notifReceivers)
+    const ICommandMessageBroker::ReceiverIdList& getReceiverList() const override
     {
+        return m_notificationReceivers;
+    }
+    
+    void setReceiverList(const ICommandMessageBroker::ReceiverIdList& receiverIdList) override
+    {
+        m_notificationReceivers = receiverIdList;
     }
 
+protected:
     static message::CommandResponse createUnsupportedCommandResponse(
         const message::Command& command)
     {
@@ -137,8 +148,8 @@ protected:
     }
 
 private:
-    ICommandMessageBroker&                       m_messageBroker;
-    const ICommandMessageBroker::ReceiverIdList& m_notificationReceivers;
+    ICommandMessageBroker&                m_messageBroker;
+    ICommandMessageBroker::ReceiverIdList m_notificationReceivers;
 };
 
 }  // namespace sugo

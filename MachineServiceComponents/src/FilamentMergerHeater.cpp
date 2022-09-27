@@ -10,20 +10,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentMergerHeater.hpp"
-#include "MachineProtocol.hpp"
 #include "MachineConfig.hpp"
+#include "MachineProtocol.hpp"
 
 using namespace sugo;
 
 void FilamentMergerHeater::onMaxTemperatureReached()
 {
-    notify(NotificationTargetTemperatureReached);
     push(Event(EventId::MaxTemperatureReached));
+    processAllEvents();
 }
 
 void FilamentMergerHeater::onMinTemperatureReached()
 {
     push(Event(EventId::MinTemperatureReached));
+    processAllEvents();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +52,7 @@ message::CommandResponse FilamentMergerHeater::onCommandGetTemperature(
 void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
                                     const IFilamentMergerHeater::State&)
 {
+    m_hasNotifiedTargetTemperatureReached = false;
     updateHeaterTemperature();
     if (!startTemperatureObservation())
     {
@@ -72,6 +74,11 @@ void FilamentMergerHeater::startHeating(const IFilamentMergerHeater::Event&,
 void FilamentMergerHeater::stopHeating(const IFilamentMergerHeater::Event&,
                                        const IFilamentMergerHeater::State&)
 {
+    if (!m_hasNotifiedTargetTemperatureReached)
+    {
+        notify(NotificationTargetTemperatureReached);
+        m_hasNotifiedTargetTemperatureReached = true;
+    }
     if (!switchHeater(config::GpioPinRelaySwitchMergerHeaterId, false))
     {
         push(Event(EventId::ErrorOccurred));

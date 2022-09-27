@@ -12,10 +12,8 @@
 
 #include <map>
 
-#include "Client.hpp"
 #include "Globals.hpp"
 #include "IMessageBroker.hpp"
-#include "Server.hpp"
 
 namespace sugo
 {
@@ -25,7 +23,6 @@ class MessageBroker : public IMessageBroker<MessageT, ResponseT, ReceiverIdT>
 public:
     using typename IMessageBroker<MessageT, ResponseT, ReceiverIdT>::Handler;
 
-    // IMessageBroker {{
     void registerHandler(const ReceiverIdT& receiverId, Handler& handler) override
     {
         m_handlers[receiverId] = handler;
@@ -50,8 +47,7 @@ public:
         auto iter = m_handlers.find(receiverId);
         return (iter != m_handlers.end());
     }
-    // IMessageBroker }}
-
+    
 protected:
     Handler* findHandler(const ReceiverIdT& receiverId)
     {

@@ -7,8 +7,9 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef ISTATEMACHINE_HPP_
-#define ISTATEMACHINE_HPP_
+#pragma once
+
+#include "EventQueue.hpp"
 
 #include <functional>
 
@@ -18,12 +19,15 @@ namespace sugo
  * Interface class for finite state machines.
  * @tparam StateT State type
  * @tparam EventT Event type
+ * @todo Remove IQueue regarding interface (i.e. push, wakeUpAll)
  */
 template <class StateT = int, class EventT = int>
 class IStateMachine
 {
 public:
-    virtual ~IStateMachine() {}
+    virtual ~IStateMachine()
+    {
+    }
 
     /**
      * Transition action function type.
@@ -37,17 +41,29 @@ public:
     virtual StateT getCurrentState() const = 0;
 
     /**
-     * Processes a new event according to the current state and the transition
-     * table.
+     * @brief Processes a new event according to the current state and the transition table.
+     * This call could be blocked by another calling thread!
      *
-     * @param event              Event to be processed.
-     * @param transitionNotFound Action to be called if a transition could not be found.
+     * @param event  Event to be processed.
+     * @return true  If the event could be pushed.
+     * @return false If the event could not be pushed (i.e. queue full).
      */
-    virtual void push(const EventT &event, Action transitionNotFound) = 0;
+    virtual bool push(const EventT &event) = 0;
 
-protected:
-    IStateMachine() {}
+    /**
+     * @brief Process the next event pushed to the queue.
+     * This call could be blocked by another calling thread or if the queue is empty! 
+     * 
+     * @return true  If the next event could be processed.
+     * @return false If the next event could not be processed because of a transition not found error.
+     */
+    virtual bool processNextEvent() = 0;
+
+    /**
+     * @brief Returns the event queue.
+     * 
+     * @return EventQueue Event queue instance.
+     */
+    virtual EventQueue<EventT>& getEventQueue() = 0;
 };
 }  // namespace sugo
-
-#endif  // ISTATEMACHINE_HPP_

@@ -36,7 +36,14 @@ public:
     Timer(TimeoutHandler timeoutHandler) : m_thread("Timer"), m_timeoutHandler(timeoutHandler)
     {
     }
-    ~Timer() = default;
+    /**
+     * @brief Stops the timer and destroys the object
+     *
+     */
+    ~Timer()
+    {
+        stop();
+    }
 
     /**
      * @brief Starts the timer.
@@ -53,7 +60,10 @@ public:
             for (; m_isRunning;)
             {
                 std::this_thread::sleep_for(period);
-                m_timeoutHandler();
+                if (m_isRunning)
+                {
+                    m_timeoutHandler();
+                }
             }
         });
     }

@@ -29,6 +29,11 @@ public:
         PolicyRealTime  ///< Change to real time thread policy.
     };
 
+    /// @brief The default thread policy
+    static constexpr Thread::Policy DefaultPolicy = Thread::PolicyCurrent;
+    /// @brief The default thread priority
+    static constexpr int DefaultPriority = 0;
+
     /**
      * @brief Construct a new thread object.
      *
@@ -37,8 +42,8 @@ public:
     explicit Thread(const std::string& id);
     ~Thread() = default;
 
-    /// Runnable function
-    using Runnable = std::function<void(void)>;
+    /// @brief Runnable function instance.
+    using Runnable = std::function<void()>;
 
     /**
      * Starts a new thread with the runnable function.
@@ -46,7 +51,7 @@ public:
      * @param function Function to be executed within the thread context.
      * @return true if the function could be started.
      */
-    bool start(Runnable function, Policy policy = PolicyCurrent, int priority = 0);
+    bool start(Runnable function, Policy policy = DefaultPolicy, int priority = DefaultPriority);
 
     /**
      * Indicates if thread is still running.
@@ -96,7 +101,7 @@ private:
     std::condition_variable m_condVar;
     bool                    m_isReady;
     std::thread             m_thread;
-    Runnable                m_runnable;
+    Runnable                m_runnable = nullptr;
     Policy                  m_policy;
 };
 }  // namespace sugo

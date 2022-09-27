@@ -7,8 +7,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef IRUNNABLE_HPP_
-#define IRUNNABLE_HPP_
+#pragma once
 
 namespace sugo
 {
@@ -36,10 +35,5 @@ public:
      * @return true if the instance is still running.
      */
     virtual bool isRunning() const = 0;
-
-protected:
-    IRunnable() {}
 };
 }  // namespace sugo
-
-#endif  // IRUNNABLE_HPP_

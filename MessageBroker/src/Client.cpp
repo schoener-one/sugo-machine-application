@@ -27,8 +27,9 @@ public:
 using namespace sugo;
 namespace asio = boost::asio;
 
-Client::Client(AsioContext& ioContext)
-    : m_socket(std::make_unique<ClientSocket>(ioContext.getContext()))
+Client::Client(IOContext& ioContext)
+    : m_socket(std::make_unique<ClientSocket>(
+          ioContext.getContext()))  // TODO remove dynamic allocation!
 {
 }
 
@@ -46,7 +47,8 @@ bool Client::connect(const std::string& address, const std::chrono::milliseconds
         m_socket->connect(address);
         m_socket->set_option(azmq::socket::snd_timeo(static_cast<int>(timeoutSend.count())));
         m_socket->set_option(azmq::socket::rcv_timeo(static_cast<int>(timeoutReceive.count())));
-        success = true;
+        m_address = address;
+        success   = true;
     }
     catch (boost::system::system_error& error)
     {
@@ -55,14 +57,18 @@ bool Client::connect(const std::string& address, const std::chrono::milliseconds
     return success;
 }
 
-bool Client::disconnect(const std::string& address)
+bool Client::disconnect()
 {
     bool success = false;
     try
     {
-        LOG(trace) << "Disconnect from address: " << address;
-        m_socket->disconnect(address);
-        success = true;
+        if (isConnected())
+        {
+            LOG(trace) << "Disconnect from address: " << m_address;
+            m_socket->disconnect(m_address);
+            m_address.clear();
+            success = true;
+        }
     }
     catch (boost::system::system_error& error)
     {

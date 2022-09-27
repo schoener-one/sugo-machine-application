@@ -58,6 +58,7 @@ protected:
     void handleError(const Event& event, const State& state) override;
     void stopMotor(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
+    void notifyRunning(const Event& event, const State& state) override;
 
 private:
     const ServiceLocator& m_serviceLocator;

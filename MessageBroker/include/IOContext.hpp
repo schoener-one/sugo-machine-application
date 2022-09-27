@@ -10,70 +10,40 @@
 
 #pragma once
 
-#include "IRunnable.hpp"
-#include "Thread.hpp"
+#include "ProcessContext.hpp"
+
+#include <boost/asio/io_context.hpp>
 
 namespace sugo
 {
 /**
- * Class representing IO context.
+ * Class representing the io context.
  */
-class IOContext : public IRunnable
+class IOContext : public ProcessContext
 {
 public:
-    static constexpr Thread::Policy DefaultPolicy   = Thread::PolicyCurrent;
-    static constexpr int            DefaultPriority = 0;
-
-    IOContext(const std::string& instanceId, Thread::Policy policy = DefaultPolicy,
-              int priority = DefaultPriority)
-        : m_thread(instanceId), m_policy(policy), m_priority(priority)
-    {
-    }
-    virtual ~IOContext()
-    {
-    }
-
-    IOContext& operator=(const IOContext&) = delete;
-    IOContext& operator=(IOContext&&) = delete;
+    /**
+     * @brief Construct a new io context object.
+     *
+     * @param instanceId Instance identifier of this context.
+     * @param policy     Thread policy.
+     * @param priority   Thread priority.
+     */
+    IOContext(const std::string& instanceId, Thread::Policy policy = Thread::DefaultPolicy,
+              int priority = Thread::DefaultPriority);
 
     /**
-     * Sets a new policy. The policy will only be applied on next start.
-     * @param policy   New thread policy.
-     * @param priority New thread priority.
+     * @brief Get the asio io_context.
+     *
+     * @return The reference to the asio io_context.
      */
-    void setPolicy(Thread::Policy policy, int priority)
+    boost::asio::io_context& getContext()
     {
-        m_policy   = policy;
-        m_priority = priority;
+        return m_asioContext;
     }
 
-    // IRunnable {{
-    bool isRunning() const override
-    {
-        return m_thread.isRunning();
-    }
-    // IRunnable }}
-
-    /**
-     * Waits until IO context thread has finished.
-     */
-    void waitUntilFinished()
-    {
-        if (m_thread.isRunning())
-        {
-            m_thread.join();
-        }
-    }
-
-    Thread& getThread()
-    {
-        return m_thread;
-    }
-
-protected:
-    Thread         m_thread;
-    Thread::Policy m_policy;
-    int            m_priority;
+private:
+    boost::asio::io_context m_asioContext;
 };
 
 }  // namespace sugo

@@ -45,7 +45,7 @@ class Generator:
 
 #pragma once
 
-#include "ServiceComponentExecutionBundle.hpp"
+#include "IServiceComponentExecutionBundle.hpp"
 #include "ServiceLocator.hpp"
 
 #include <array>
@@ -60,6 +60,11 @@ namespace sugo
 class ServiceComponentsExecutionGroup final
 {{
 public:
+    /// @brief Number all of components
+    static constexpr unsigned NumberOfComponents = {len(components)}u;
+    /// @brief Execution bundles for service components.
+    using ServiceComponentExecutionBundles = std::array<std::unique_ptr<IServiceComponentExecutionBundle>, NumberOfComponents>;
+
     /**
      * @brief Executes all components in a sufficient sequence.
      * This call does not return until stop() has been called or a an fatal
@@ -84,11 +89,19 @@ public:
      */
     void stop();
     
-private:
-    /// @brief Number all of components
-    static constexpr unsigned NumberOfComponents = {len(components)}u;
+    /**
+     * @brief Returns the reference to the execution bundles.
+     * 
+     * @return Reference to the execution bundles.
+     */
+    ServiceComponentExecutionBundles& getBundles()
+    {{
+        return m_bundles;
+    }}
 
-    std::array<std::unique_ptr<IServiceComponentExecutionBundle>, NumberOfComponents> m_bundles;
+private:
+
+    ServiceComponentExecutionBundles m_bundles; ///< The service component execution bundles.
 }};
 
 }}  // namespace sugo
@@ -120,7 +133,7 @@ bool ServiceComponentsExecutionGroup::start(const ServiceLocator& serviceLocator
     {Generator._generate_component_exec_bundles(components)}
     for (auto const& bundle : m_bundles)
     {{
-        if (!bundle->getServiceComponent().start())
+        if (!bundle->start())
         {{
             LOG(error) << "Failed to start component " << bundle->getId();
             return false;
@@ -133,7 +146,7 @@ void ServiceComponentsExecutionGroup::waitUntilFinished()
 {{
     for (auto const& bundle : m_bundles)
     {{
-        bundle->getContext().waitUntilFinished();
+        bundle->waitUntilFinished();
     }}
 }}
 
@@ -141,9 +154,8 @@ void ServiceComponentsExecutionGroup::stop()
 {{
     for (auto const& bundle : m_bundles)
     {{
-        bundle->getContext().stop();
+        bundle->stop();
     }}
-    waitUntilFinished();
 }}
 ''')
 

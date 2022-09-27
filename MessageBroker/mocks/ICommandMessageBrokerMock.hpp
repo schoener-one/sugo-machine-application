@@ -29,6 +29,7 @@ public:
     MOCK_METHOD(bool, start, ());
     MOCK_METHOD(void, stop, ());
     MOCK_METHOD(bool, isRunning, (), (const));
+    MOCK_METHOD(void, registerPostProcessHandler, (Thread::Runnable));
 };
 
 }  // namespace sugo

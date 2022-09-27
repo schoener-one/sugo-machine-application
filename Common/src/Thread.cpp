@@ -13,6 +13,11 @@
 
 #include "Globals.hpp"
 
+namespace
+{
+constexpr std::size_t MaxThreadNameSize = 15;  // + \0 = 16!
+}
+
 using namespace sugo;
 
 Thread::Thread(const std::string& id) : m_id(id), m_isReady(false), m_policy(PolicyCurrent)
@@ -28,6 +33,7 @@ bool Thread::start(Runnable function, Policy policy, int priority)
 
     m_thread = std::thread([&] {
         Logger::reinit(getId());
+
         bool success = true;
         if (m_policy == PolicyRealTime)
         {
@@ -63,6 +69,10 @@ bool Thread::start(Runnable function, Policy policy, int priority)
         m_isReady = false;
     });
     assert(m_thread.joinable() == true);
+    // Set thread visible name
+    const std::string shortName(
+        m_id.substr(0, (m_id.size() > MaxThreadNameSize) ? MaxThreadNameSize : m_id.size()));
+    assert(pthread_setname_np(m_thread.native_handle(), shortName.c_str()) == 0);
 
     if (policy == PolicyRealTime)
     {

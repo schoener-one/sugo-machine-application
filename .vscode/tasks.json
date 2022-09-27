@@ -30,6 +30,46 @@
             "group": "build"
         },
         {
+            "label": "x86_build-MachineApplicationIntegrationTest",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target MachineApplicationIntegrationTest",
+            "problemMatcher": {
+                "base": "$gcc",
+                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
+            "label": "x86_build-ServiceComponents",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target ServiceComponents",
+            "problemMatcher": {
+                "base": "$gcc",
+                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
+            "label": "x86_build-ServiceComponentsTest",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target ServiceComponentsTest",
+            "problemMatcher": {
+                "base": "$gcc",
+                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
+            "label": "x86_build-MessageBrokerTest",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target MessageBrokerTest",
+            "problemMatcher": {
+                "base": "$gcc",
+                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
             "label": "x86_build-MachineServiceComponents",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target MachineServiceComponents",
@@ -50,29 +90,9 @@
             "group": "build"
         },
         {
-            "label": "x86_build-MachineApplicationIntegrationTest",
-            "type": "shell",
-            "command": "cmake --build ${config:build.directory.x86} --target MachineApplicationIntegrationTest",
-            "problemMatcher": {
-                "base": "$gcc",
-                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
-            },
-            "group": "build"
-        },
-        {
             "label": "x86_build-HardwareAbstractionLayer",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayer",
-            "problemMatcher": {
-                "base": "$gcc",
-                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
-            },
-            "group": "build"
-        },
-        {
-            "label": "x86_build-MachineRemoteControlServer",
-            "type": "shell",
-            "command": "cmake --build ${config:build.directory.x86} --target MachineRemoteControlServer",
             "problemMatcher": {
                 "base": "$gcc",
                 // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
@@ -93,6 +113,16 @@
             "label": "x86_build-HardwareAbstractionLayerSmokeTest",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target HardwareAbstractionLayerSmokeTest",
+            "problemMatcher": {
+                "base": "$gcc",
+                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
+            "label": "x86_build-MachineRemoteControlServer",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target MachineRemoteControlServer",
             "problemMatcher": {
                 "base": "$gcc",
                 // "fileLocation": [ "relative", "${config:build.directory.x86}" ]

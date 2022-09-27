@@ -27,7 +27,7 @@ public:
 using namespace sugo;
 namespace asio = boost::asio;
 
-Server::Server(const std::string& address, IMessageHandler& messageHandler, AsioContext& ioContext)
+Server::Server(const std::string& address, IMessageHandler& messageHandler, IOContext& ioContext)
     : m_address(address),
       m_messageHandler(messageHandler),
       m_socket(std::make_unique<ServerSocket>(ioContext.getContext())),
@@ -37,7 +37,6 @@ Server::Server(const std::string& address, IMessageHandler& messageHandler, Asio
 
 Server::~Server()
 {
-    stop();
 }
 
 bool Server::start()
@@ -89,13 +88,20 @@ void Server::receiveRequest()
 bool Server::handleReceived()
 {
     bool success = m_messageHandler.processReceived(m_receiveBuf, m_sendBuf);
-
-    if (success && (m_sendBuf.size() > 0))
+    if ((m_sendBuf.size() > 0) && success)
     {
         // Just send if we have something to send!
         success = sendResponse();
     }
+    else
+    {
+        LOG(error) << "Failed to process received message"
+                   << (((m_sendBuf.size() == 0) ? ": response message is empty" : ""));
+        success = false;
+    }
 
+    // Do a post process here to decouple message response from internal processing!
+    m_messageHandler.processPost();
     return success;
 }
 
@@ -111,7 +117,7 @@ bool Server::sendResponse()
     }
     catch (boost::system::system_error& error)
     {
-        LOG(error) << "Failed to send: " << error.what();
+        LOG(error) << "Failed to send message: " << error.what();
     }
 
     return success;

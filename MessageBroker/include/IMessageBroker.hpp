@@ -10,10 +10,12 @@
 #ifndef IMESSAGEBROKER_HPP_
 #define IMESSAGEBROKER_HPP_
 
+#include <chrono>
 #include <functional>
 #include <vector>
 
 #include "IRunnable.hpp"
+#include "Thread.hpp"
 
 namespace sugo
 {
@@ -27,11 +29,16 @@ template <class MessageT, class ResponseT = void, class ReceiverIdT = unsigned i
 class IMessageBroker : public IRunnable
 {
 protected:
-    virtual ~IMessageBroker()
-    {
-    }
+    virtual ~IMessageBroker() = default;
 
 public:
+    /// @brief Maximum time to transmit a message (inclusive response).
+    inline static constexpr std::chrono::milliseconds MaxMessageTransmissionTime{10};
+    /// @brief Address prefix
+    inline static const std::string AddressPrefix{"inproc://"};
+    /// @brief Maximum of retries for a failed transmission.
+    static constexpr unsigned MaxMessageTransmissionRetries = 3;
+
     /// Handler definition which reacts to a request.
     using Handler = std::function<ResponseT(const MessageT&)>;
     /// Type for receiver identifiers
@@ -83,6 +90,14 @@ public:
      * @return true if the handler could be registered.
      */
     virtual bool hasRegisteredHandler(const ReceiverIdT& messageId) const = 0;
+
+    /**
+     * @brief Registers a post process handler which will be called if a received message
+     * has been handled.
+     *
+     * @param postProcess Callback function to be called for post processing.
+     */
+    virtual void registerPostProcessHandler(Thread::Runnable postProcess) = 0;
 };
 
 }  // namespace sugo

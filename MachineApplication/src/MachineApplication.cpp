@@ -28,29 +28,8 @@ using namespace hal;
 
 namespace
 {
-template <class GatewayT>
-struct GatewayExecutionBundle
-{
-    GatewayExecutionBundle(const IConfiguration& configuration)
-        : context(),
-          broker(GatewayT::ReceiverId, context),
-          component(broker, configuration, context)
-    {
-    }
-
-    AsioContext           context;
-    CommandMessageBroker  broker;
-    MachineServiceGateway component;
-
-    AsioContext& getContext()
-    {
-        return context;
-    }
-    ServiceComponent& getServiceComponent()
-    {
-        return component;
-    }
-};
+using MachineServiceGatewayExecutionBundle =
+    ServiceComponentExecutionBundle<MachineServiceGateway, IOContext, const IConfiguration>;
 }  // namespace
 
 MachineApplication::MachineApplication(const std::string& appName)
@@ -113,8 +92,9 @@ bool MachineApplication::start(int argc, char const** argv)
     }
 
     // Start gateway
-    GatewayExecutionBundle<MachineServiceGateway> machineServiceGateway(m_configuration);
-    if (!machineServiceGateway.getServiceComponent().start())
+    IOContext                            contextRpcServer("MachineServiceGatewayRpcServer");
+    MachineServiceGatewayExecutionBundle machineServiceGateway(contextRpcServer, m_configuration);
+    if (!machineServiceGateway.start())
     {
         LOG(error) << "Failed to start machine gateway";
         return false;
@@ -128,6 +108,7 @@ bool MachineApplication::start(int argc, char const** argv)
     }
 
     m_components.waitUntilFinished();
+    machineServiceGateway.stop();
     LOG(info) << "Application " << m_name << " stopped";
     return true;
 }

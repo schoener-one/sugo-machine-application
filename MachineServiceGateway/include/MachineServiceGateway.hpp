@@ -16,6 +16,7 @@
 #include "ICommandMessageBroker.hpp"
 #include "IConfiguration.hpp"
 #include "IMachineServiceGateway.hpp"
+#include "IOContext.hpp"
 #include "Server.hpp"
 #include "ServiceComponent.hpp"
 
@@ -34,21 +35,16 @@ public:
     /**
      * Creates a new instance
      */
-    explicit MachineServiceGateway(ICommandMessageBroker& messageBroker,
-                                   const IConfiguration& configuration, AsioContext& ioContext);
+    explicit MachineServiceGateway(ICommandMessageBroker& messageBroker, IOContext& ioContext,
+                                   const IConfiguration& configuration);
 
-    // IRunnable {{
     bool start() override;
-
     void stop() override;
-
     bool isRunning() const override;
-    // IRunnable }}
 
 protected:
-    // Server::IMessageHandler {{
     bool processReceived(StreamBuffer& in, StreamBuffer& out) override;
-    // Server::IMessageHandler }}
+    void processPost() override{};
 
 private:
     jsonrpcpp::Response processCommand(jsonrpcpp::request_ptr request);

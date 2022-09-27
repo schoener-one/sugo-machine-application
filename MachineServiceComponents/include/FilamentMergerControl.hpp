@@ -39,13 +39,20 @@ protected:
     message::CommandResponse onCommandStartFeeding(const message::Command& command) override;
     message::CommandResponse onCommandStopFeeding(const message::Command& command) override;
     message::CommandResponse onCommandGetTemperatures(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentPreHeaterTargetTemperatureReached(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentPreHeaterErrorOccurred(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerHeaterTargetTemperatureReached(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerHeaterErrorOccurred(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentFeederMotorStartMotorSucceeded(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentFeederMotorStartMotorFailed(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentFeederMotorErrorOccurred(const message::Command& command) override;
+    message::CommandResponse onCommandFilamentPreHeaterTargetTemperatureReached(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentPreHeaterErrorOccurred(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentMergerHeaterTargetTemperatureReached(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentMergerHeaterErrorOccurred(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentFeederMotorStartMotorSucceeded(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentFeederMotorStartMotorFailed(
+        const message::Command& command) override;
+    message::CommandResponse onCommandFilamentFeederMotorErrorOccurred(
+        const message::Command& command) override;
     message::CommandResponse onCommandSetMotorSpeed(const message::Command& command) override;
 
     // Transition actions
@@ -56,6 +63,7 @@ protected:
     void startMotor(const Event& event, const State& state) override;
     void notifyHeatedUp(const Event& event, const State& state) override;
     void heatingUp(const Event& event, const State& state) override;
+    void notifyRunning(const Event& event, const State& state) override;
 
 private:
     const ServiceLocator& m_serviceLocator;

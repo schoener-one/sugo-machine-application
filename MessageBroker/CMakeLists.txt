@@ -5,7 +5,8 @@ add_library (MessageBroker STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandMessageBroker.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/AsioContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/IOContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ProcessContext.cpp
     )
 target_include_directories (MessageBroker PUBLIC include)
 target_link_libraries(MessageBroker
@@ -31,8 +32,8 @@ target_link_libraries(MessageBrokerMocks INTERFACE
 # Google Unittests
 if (NOT NO_UNITTEST)    
     add_executable(MessageBrokerTest
-        test/CommandMessageBrokerTest.cpp
-        test/ClientServerTest.cpp
+        test/CommandMessageBrokerIntegrationTest.cpp
+        test/ClientServerIntegrationTest.cpp
         )
     target_compile_options(MessageBrokerTest PUBLIC "-DUNIT_TEST")
     target_link_libraries(MessageBrokerTest

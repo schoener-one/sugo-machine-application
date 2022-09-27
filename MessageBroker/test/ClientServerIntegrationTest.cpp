@@ -17,7 +17,6 @@
 #include <boost/container/vector.hpp>
 
 #include "Client.hpp"
-#include "IOContextHelper.hpp"
 #include "Logger.hpp"
 #include "Server.hpp"
 
@@ -25,7 +24,7 @@ namespace bc = boost::container;
 
 namespace sugo
 {
-class TestEchoServer : public Server::IMessageHandler
+class EchoMessageHandler : public Server::IMessageHandler
 {
 public:
     bool processReceived(StreamBuffer& inBuf, StreamBuffer& outBuf) override
@@ -39,100 +38,117 @@ public:
         return true;
     }
 
+    void processPost()
+    {
+    }
+
     bc::vector<std::string> m_receivedMessages;
 };
-
-const std::string address = "inproc://server";
 }  // namespace sugo
 
 using namespace sugo;
 
-class ClientServerTest : public ::testing::Test, public IOContextHelper
+class ClientServerIntegrationTest : public ::testing::Test
 {
 protected:
-    ClientServerTest()
-        : IOContextHelper(), m_server(address, m_messageHandler, m_ioContext), m_client(m_ioContext)
+    const std::string addressServer = "inproc://server";
+    
+    ClientServerIntegrationTest()
+        : m_serverContext("server"),
+          m_clientContext("client"),
+          m_server(addressServer, m_messageHandler, m_serverContext),
+          m_client(m_clientContext)
     {
     }
 
-    ~ClientServerTest() override {}
-
-    static void SetUpTestCase() { Logger::init(Logger::Severity::error); }
-
-    void SetUp() override {}
-
-    void TearDown() override { stopIOContext(); }
-
-    static std::string sendMessage(const std::string& message, Client& client,
-                                   bool isNotification = false)
+    ~ClientServerIntegrationTest() override
     {
-        StreamBuffer outBuf;
-        std::ostream os(&outBuf);
-        os << message;
-        StreamBuffer inBuf;
-        std::istream is(&inBuf);
-        std::string  response;
-        if (isNotification)
-        {
-            EXPECT_TRUE(client.notify(outBuf));
-        }
-        else
-        {
-            EXPECT_TRUE(client.send(outBuf, inBuf));
-            std::getline(is, response);
-        }
-        return response;
     }
 
-    void testReceiveQueue(bool testNotificationQueue);
+    static void SetUpTestCase()
+    {
+        Logger::init(Logger::Severity::trace);
+    }
 
-    TestEchoServer m_messageHandler;
+    void SetUp() override
+    {
+        ASSERT_TRUE(m_server.start());
+        ASSERT_TRUE(m_serverContext.start());
+        ASSERT_TRUE(m_clientContext.start());
+    }
+
+    void TearDown() override
+    {
+        if (m_clientContext.isRunning())
+        {
+            m_clientContext.stop();
+        }
+        if (m_serverContext.isRunning())
+        {
+            m_serverContext.stop();
+        }
+        if (m_server.isRunning())
+        {
+            m_server.stop();
+        }
+    }
+
+    static std::string sendMessage(const std::string& message, Client& client);
+
+    EchoMessageHandler m_messageHandler;
+    IOContext      m_serverContext, m_clientContext;
     Server         m_server;
     Client         m_client;
     StreamBuffer   m_outBuf;
 };
 
-TEST_F(ClientServerTest, Server_StartStop)
+std::string ClientServerIntegrationTest::sendMessage(const std::string& message, Client& client)
 {
-    EXPECT_TRUE(m_server.start());
+    StreamBuffer outBuf;
+    std::ostream os(&outBuf);
+    os << message;
+    StreamBuffer inBuf;
+    std::istream is(&inBuf);
+    std::string  response;
+    EXPECT_TRUE(client.send(outBuf, inBuf));
+    std::getline(is, response);
+    return response;
+}
+
+TEST_F(ClientServerIntegrationTest, Server_StartStop)
+{
     EXPECT_TRUE(m_server.isRunning());
     m_server.stop();
     EXPECT_FALSE(m_server.isRunning());
 }
 
-TEST_F(ClientServerTest, Server_ReplyRequest)
+TEST_F(ClientServerIntegrationTest, Server_ReplyRequest)
 {
-    EXPECT_TRUE(m_server.start());
-    startIOContext();
-    EXPECT_TRUE(m_client.connect(address));
+    EXPECT_TRUE(m_client.connect(addressServer));
     static const std::string message  = "How are you?";
     const std::string        response = sendMessage(message, m_client);
-    EXPECT_TRUE(m_client.disconnect(address));
+    EXPECT_TRUE(m_client.disconnect(addressServer));
     EXPECT_EQ(response, message);
 }
 
-void ClientServerTest::testReceiveQueue(bool testNotificationQueue)
+TEST_F(ClientServerIntegrationTest, Server_RequestQueueing)
 {
-    // Prepare server
-    EXPECT_TRUE(m_server.start());
-    m_ioContextMutex.lock();
-    startIOContext();
-
     // Prepare clients
     std::function<void(int)> sender([=](int index) {
-        IOContext clientIoContext;
+        Logger::reinit();
+        IOContext clientIoContext("client");
         Client    client(clientIoContext);
         clientIoContext.start();
-        EXPECT_TRUE(client.connect(address));
+        EXPECT_TRUE(client.connect(addressServer));
         const std::string message = std::to_string(index);
-        (void)sendMessage(message, client, testNotificationQueue);
+        (void)sendMessage(message, client);
+        clientIoContext.stop();
     });
 
     // Run test
     std::thread clientThread1(sender, 1);
     std::thread clientThread2(sender, 2);
     std::thread clientThread3(sender, 3);
-    m_ioContextMutex.unlock();  // Starting server processing
     clientThread1.join();
     clientThread2.join();
     clientThread3.join();
@@ -144,7 +160,3 @@ void ClientServerTest::testReceiveQueue(bool testNotificationQueue)
     EXPECT_EQ(m_messageHandler.m_receivedMessages.at(1), "2");
     EXPECT_EQ(m_messageHandler.m_receivedMessages.at(2), "3");
 }
-
-TEST_F(ClientServerTest, Server_RequestQueueing) { testReceiveQueue(false); }
-
-TEST_F(ClientServerTest, Server_NotificationQueueing) { testReceiveQueue(true); }

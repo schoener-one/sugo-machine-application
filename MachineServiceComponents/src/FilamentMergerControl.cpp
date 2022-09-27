@@ -120,9 +120,11 @@ void FilamentMergerControl::switchOn(const IFilamentMergerControl::Event&,
     if (responseFeederMotor.result() != message::CommandResponse_Result_SUCCESS)
     {
         push(Event(EventId::SwitchOnFailed));
-        return;
     }
-    push(Event(EventId::SwitchOnSucceeded));
+    else
+    {
+        push(Event(EventId::SwitchOnSucceeded));
+    }
 }
 
 void FilamentMergerControl::switchOff(const IFilamentMergerControl::Event&,
@@ -137,15 +139,12 @@ void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&,
                                        const IFilamentMergerControl::State&)
 {
     const auto response = send(IFilamentFeederMotor::CommandStartMotor);
-    if (response.result() == message::CommandResponse_Result_SUCCESS)
-    {
-        push(Event(EventId::StartMotorSucceeded));
-    }
-    else
+    if (response.result() != message::CommandResponse_Result_SUCCESS)
     {
         push(Event(EventId::StartMotorFailed));
     }
 }
+
 void FilamentMergerControl::stopMotor(const IFilamentMergerControl::Event&,
                                       const IFilamentMergerControl::State&)
 {
@@ -158,6 +157,7 @@ void FilamentMergerControl::stopMotor(const IFilamentMergerControl::Event&,
     {
         push(Event(EventId::StopMotorFailed));
     }
+    notify(NotificationFeedingStopped);
 }
 
 void FilamentMergerControl::handleError(const IFilamentMergerControl::Event& event,
@@ -169,9 +169,7 @@ void FilamentMergerControl::handleError(const IFilamentMergerControl::Event& eve
 
 void FilamentMergerControl::notifyHeatedUp(const Event&, const State&)
 {
-    LOG(info) << "!!! heating up !!!";
     notify(NotificationHeatedUp);
-    LOG(info) << "!!! heating up !!!";
 }
 
 void FilamentMergerControl::heatingUp(const IFilamentMergerControl::Event&,
@@ -188,4 +186,10 @@ void FilamentMergerControl::heatingUp(const IFilamentMergerControl::Event&,
         push(Event(EventId::HeatingUpFailed));
         return;
     }
+}
+
+void FilamentMergerControl::notifyRunning(const IFilamentMergerControl::Event&,
+                                        const IFilamentMergerControl::State&)
+{
+    notify(NotificationFeedingRunning);
 }

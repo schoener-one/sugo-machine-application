@@ -1,25 +1,25 @@
-/*
- * CommandExcecutionComponent.hpp
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @file
+ * @license: Copyright 2019, Schoener-One
  *
- *  Created on: 17.11.2019
- *      Author: denis
+ * @author: denis@schoener-one
+ * @date:   2019-11-17
  */
+///////////////////////////////////////////////////////////////////////////////
 
-#ifndef STATEDSERVICECOMPONENT_HPP_
-#define STATEDSERVICECOMPONENT_HPP_
-
-#include "ServiceComponent.hpp"
-
-#include <sstream>
+#pragma once
 
 #include "Globals.hpp"
 #include "IStateMachine.hpp"
 #include "ServiceComponent.hpp"
 
+#include <mutex>
+
 namespace sugo
 {
 /**
- * Class to receive handle state machine events from commands.
+ * Class to receive messages and drives a finite state machine by events.
  *
  * @tparam StateT State type
  * @tparam EventT Event type
@@ -30,12 +30,33 @@ namespace sugo
 template <class StateT, class EventT>
 class StatedServiceComponent : public ServiceComponent
 {
-protected:
+public:
+    /**
+     * @brief Construct a new stated service component object.
+     *
+     * @param messageBroker        The message broker to be used for sending and receiving.
+     * @param notifReceivers       The list for notification receivers.
+     * @param stateMachine         The state machine of this component.
+     */
     explicit StatedServiceComponent(ICommandMessageBroker&                       messageBroker,
                                     const ICommandMessageBroker::ReceiverIdList& notifReceivers,
                                     IStateMachine<StateT, EventT>&               stateMachine)
         : ServiceComponent(messageBroker, notifReceivers), m_stateMachine(stateMachine)
     {
+        messageBroker.registerPostProcessHandler(
+            std::bind(&StatedServiceComponent::processAllEvents, this));
+    }
+
+protected:
+    /**
+     * @brief Processes all events queued for the state machine.
+     */
+    void processAllEvents()
+    {
+        while (!m_stateMachine.getEventQueue().empty())
+        {
+            (void)m_stateMachine.processNextEvent();
+        }
     }
 
     message::CommandResponse handleStateChangeCommand(const message::Command& command,
@@ -43,13 +64,17 @@ protected:
     {
         LOG(debug) << "Received command '" << command.name() << "' in state "
                    << m_stateMachine.getCurrentState();
-        message::CommandResponse_Result result = message::CommandResponse_Result_SUCCESS;
-        m_stateMachine.push(event, [&](const EventT& event, const StateT& state) {
-            LOG(warning) << "Invalid transition for '" << event << "' in state '" << state << "'";
-            result = message::CommandResponse_Result_INVALID_STATE;
-        });
-        return createResponse(
-            command, Json({{protocol::IdErrorReason, protocol::IdErrorInvalidState}}), result);
+        // FIXME do a state pre check here if a push would succeeded in current state!
+        if (m_stateMachine.push(event))
+        {
+            return createResponse(command);
+        }
+        else
+        {
+            return createErrorResponse(
+                command,
+                Json({{protocol::IdErrorReason, protocol::IdErrorRequestTooMuchRequests}}));
+        };
     }
 
     message::CommandResponse handleCommandGetState(const message::Command& command)
@@ -59,9 +84,7 @@ protected:
     }
 
 private:
-    sugo::IStateMachine<StateT, EventT>& m_stateMachine;  ///< The component state machine
+    IStateMachine<StateT, EventT>& m_stateMachine;  ///< The component state machine.
 };
 
 }  // namespace sugo
-
-#endif  // STATEDSERVICECOMPONENT_HPP_

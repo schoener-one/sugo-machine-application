@@ -13,9 +13,8 @@
 #include <chrono>
 #include <istream>
 #include <memory>
-#include <ostream>
 
-#include "AsioContext.hpp"
+#include "IOContext.hpp"
 #include "StreamBuffer.hpp"
 
 namespace sugo
@@ -25,12 +24,12 @@ class ClientSocket;
 /**
  * @brief Class for sending messages.
  * @todo This class should use the azmq::message approach for sending.
- * 
+ *
  */
 class Client
 {
 public:
-    explicit Client(AsioContext& ioContext);
+    explicit Client(IOContext& ioContext);
     virtual ~Client();
 
     /**
@@ -48,7 +47,7 @@ public:
      * @param address The address to disconnect from.
      * @return true if a connection was established and could be disconnected.
      */
-    bool disconnect(const std::string& address);
+    bool disconnect();
 
     /**
      * Sends a request message to the defined address and waits for the response.
@@ -58,8 +57,20 @@ public:
      */
     bool send(const StreamBuffer& outMessage, StreamBuffer& inResponse);
 
+    /**
+     * @brief Indicates if a connection is established.
+     * 
+     * @return true  If connection is established.
+     * @return false If connection is not established.
+     */
+    bool isConnected() const
+    {
+        return !m_address.empty();
+    }
+
 private:
     std::unique_ptr<ClientSocket> m_socket;
+    std::string                   m_address;  // Address to peer
 };
 
 }  // namespace sugo

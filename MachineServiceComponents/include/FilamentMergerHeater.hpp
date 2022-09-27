@@ -49,6 +49,9 @@ protected:
     // HeaterService events
     void onMaxTemperatureReached() override;
     void onMinTemperatureReached() override;
+
+private:
+    bool m_hasNotifiedTargetTemperatureReached = false;
 };
 
 }  // namespace sugo

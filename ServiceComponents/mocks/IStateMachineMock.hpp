@@ -7,8 +7,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMON_TEST_ISTATEMACHINEMOCK_HPP_
-#define COMMON_TEST_ISTATEMACHINEMOCK_HPP_
+#pragma once
 
 #include <gmock/gmock.h>
 
@@ -37,10 +36,10 @@ class IStateMachineMock : public IStateMachine<test::State, test::Event>
 public:
     using typename IStateMachine<test::State, test::Event>::Action;
 
-    MOCK_CONST_METHOD0(getCurrentState, test::State());
-    MOCK_METHOD2(push, void(const test::Event &, Action));
+    MOCK_METHOD(test::State, getCurrentState, (), (const));
+    MOCK_METHOD(bool, push, (const test::Event&));
+    MOCK_METHOD(bool, processNextEvent, ());
+    MOCK_METHOD(EventQueue<test::Event>&, getEventQueue, ());
 };
 
 }  // namespace sugo
-
-#endif  // COMMON_TEST_ISTATEMACHINEMOCK_HPP_

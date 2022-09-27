@@ -33,26 +33,26 @@ using namespace sugo;
 
 void MachineServiceGateway::addConfigurationOptions(IConfiguration& configuration)
 {
-    configuration.add(Option("sugo-machine-service.address", std::string("*"),
-                             "Network address of the service"));
+    configuration.add(
+        Option("sugo-machine-service.address", std::string("*"), "Network address of the service"));
     configuration.add(Option("sugo-machine-service.port", 1234u, "Network port of the service"));
 }
 
 MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroker,
-                               const IConfiguration& configuration, AsioContext& ioContext)
+                                             IOContext&             ioContext,
+                                             const IConfiguration&  configuration)
     : ServiceComponent(messageBroker, {}),
       m_jsonRpcServer(
           std::string("tcp://") +
               configuration.getOption("sugo-machine-service.address").get<std::string>() + ":" +
-              std::to_string(
-                  configuration.getOption("sugo-machine-service.port").get<unsigned>()),
+              std::to_string(configuration.getOption("sugo-machine-service.port").get<unsigned>()),
           *this, ioContext)
 {
 }
 
 bool MachineServiceGateway::start()
 {
-    bool success = ServiceComponent::start(); // starts also io context!
+    bool success = ServiceComponent::start();  // starts also io context!
 
     if (success)
     {

@@ -11,49 +11,67 @@
 #pragma once
 
 #include "CommandMessageBroker.hpp"
-#include "IConfiguration.hpp"
+#include "IOContext.hpp"
+#include "IRunnable.hpp"
+#include "IServiceComponentExecutionBundle.hpp"
 #include "ServiceComponent.hpp"
 
 namespace sugo
 {
-struct IServiceComponentExecutionBundle
+/**
+ * @brief Class to bundle all needed objects for executing the component.
+ *
+ * @tparam ComponentT    Component class to be bundled.
+ * @tparam ComponentArgs Additional component arguments to be pass.
+ */
+template <class ComponentT, class... ComponentArgs>
+class ServiceComponentExecutionBundle : public IServiceComponentExecutionBundle
 {
-    IServiceComponentExecutionBundle(const CommandMessageBroker::ReceiverIdType& id) : id(id)
-    {
-    }
-    virtual AsioContext&      getContext()          = 0;
-    virtual ServiceComponent& getServiceComponent() = 0;
-    const std::string&        getId() const
-    {
-        return id;
-    }
-
-    const CommandMessageBroker::ReceiverIdType id;
-};
-
-template <class ComponentT, typename... ComponentArgs>
-struct ServiceComponentExecutionBundle : IServiceComponentExecutionBundle
-{
+public:
     ServiceComponentExecutionBundle(ComponentArgs&... componentArgs)
-        : IServiceComponentExecutionBundle(ComponentT::ReceiverId),
-          context(id),
-          broker(ComponentT::ReceiverId, context),
-          component(broker, componentArgs...)
+        : m_id(ComponentT::ReceiverId),
+          m_ioContext(m_id),
+          m_broker(m_id, m_ioContext),
+          m_component(m_broker, componentArgs...)
     {
+    }
+    ~ServiceComponentExecutionBundle() = default;
+
+    bool start() override
+    {
+        return m_component.start();
     }
 
-    AsioContext          context;
-    CommandMessageBroker broker;
-    ComponentT           component;
+    void stop() override
+    {
+        m_component.stop();
+    }
 
-    AsioContext& getContext() override
+    bool isRunning() const override
     {
-        return context;
+        return m_component.isRunning();
     }
-    ServiceComponent& getServiceComponent()
+
+    const std::string& getId() const override
     {
-        return component;
+        return m_id;
     }
+
+    void waitUntilFinished() override
+    {
+        m_ioContext.waitUntilFinished();
+    }
+
+    ServiceComponent& getServiceComponent() override
+    {
+        return m_component;
+    }
+
+private:
+    const decltype(ComponentT::ReceiverId) m_id;
+    IOContext                              m_ioContext;
+    CommandMessageBroker                   m_broker;
+    ComponentT                             m_component;
 };
 
 }  // namespace sugo

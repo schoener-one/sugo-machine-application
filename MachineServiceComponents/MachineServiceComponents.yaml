@@ -192,6 +192,7 @@ components:
           - state: StartingMotor
             next: Running
             event: StartMotorSucceeded
+            action: notifyRunning
           - state: StartingMotor
             next: 'Off'
             event: SwitchOff
@@ -444,6 +445,7 @@ components:
           - state: StartingMotor
             next: Running
             event: StartMotorSucceeded
+            action: notifyRunning
           - state: StartingMotor
             next: 'Off'
             event: SwitchOff
