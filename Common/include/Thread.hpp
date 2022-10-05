@@ -42,7 +42,7 @@ public:
     explicit Thread(const std::string& id);
     ~Thread() = default;
 
-    /// @brief Runnable function instance.
+    /// @brief Runnable function type.
     using Runnable = std::function<void()>;
 
     /**

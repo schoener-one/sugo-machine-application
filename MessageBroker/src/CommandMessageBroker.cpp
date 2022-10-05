@@ -20,8 +20,7 @@
 using namespace sugo;
 
 CommandMessageBroker::CommandMessageBroker(const std::string& receiverId, IOContext& ioContext)
-    : MessageBroker<message::Command, message::CommandResponse, std::string>(),
-      m_server(createInProcessAddress(receiverId), *this, ioContext),
+    : m_server(createInProcessAddress(receiverId), *this, ioContext),
       m_client(ioContext),
       m_ioContext(ioContext)
 {
@@ -52,8 +51,9 @@ void CommandMessageBroker::stop()
     m_ioContext.stop();
 }
 
-bool CommandMessageBroker::send(const message::Command& message, const std::string& receiverId,
-                                message::CommandResponse& response)
+bool CommandMessageBroker::send(const message::Command&                  message,
+                                const ICommandMessageBroker::ReceiverId& receiverId,
+                                message::CommandResponse&                response)
 {
     if (m_isProcessingReceiveMessage.load())
     {
@@ -89,10 +89,11 @@ bool CommandMessageBroker::send(const message::Command& message, const std::stri
                 send(outBuf, response, (message.type() == message::Command_Type_Notification));
             if (!success)
             {
-                LOG(error) << "Failed to send message (" << (MaxMessageTransmissionRetries - i + 1)
-                           << "/" << MaxMessageTransmissionRetries << ")";
+                const unsigned tryCount = MaxMessageTransmissionRetries - i + 1;
+                LOG(error) << "Failed to send message (" << tryCount << "/"
+                           << MaxMessageTransmissionRetries << ")";
                 std::this_thread::sleep_for(
-                    MaxMessageTransmissionTime);  // just wait a short time to retry!
+                    MaxMessageTransmissionTime * tryCount);  // just wait a short time to retry!
             }
         }
         if (!success)
@@ -136,18 +137,24 @@ bool CommandMessageBroker::send(const StreamBuffer& outBuf, message::CommandResp
     return true;
 }
 
-bool CommandMessageBroker::notify(const message::Command& message, const ReceiverIdList& receivers)
+bool CommandMessageBroker::notify(const message::Command&                      message,
+                                  const ICommandMessageBroker::ReceiverIdList& receivers)
 {
-    message::CommandResponse response;
+    message::CommandResponse dummyResponse;  // Response will be ignored for notifications!
     bool                     success = true;
     message::Command         notification(message);
     notification.set_type(message::Command_Type_Notification);
 
     for (const auto& receiverId : receivers)
     {
-        // Ignore the response!
-        success = send(notification, receiverId, response) && success;
+        success = send(notification, receiverId, dummyResponse) && success;
     }
+#ifndef NO_TEST_INTERFACE
+    if (!m_notificationReceiver.empty())
+    {
+        (void)send(notification, m_notificationReceiver, dummyResponse);
+    }
+#endif  // NO_TEST_INTERFACE
 
     return success;
 }
@@ -176,21 +183,21 @@ bool CommandMessageBroker::processReceived(StreamBuffer& inBuf, StreamBuffer& ou
     {
         if (command.type() == message::Command_Type_Notification)
         {
-            // TODO notification can be ignored if no handler is available!
+            LOG(warning) << "Received unhandled notification: " << commandName;
             response = message::createResponse(command);  // but must be answered!
         }
         else
         {
-            LOG(error) << "Received invalid command: " << commandName;
+            LOG(error) << "Received unhandled command: " << commandName;
             response = message::createUnsupportedCommandResponse(command);
         }
     }
     else
     {
         response = (*handler)(command);
-        response.set_id(command.id());
     }
 
+    response.set_id(command.id());
     return response.SerializeToOstream(&out);
 }
 
@@ -202,4 +209,44 @@ void CommandMessageBroker::processPost()
         LOG(trace) << "Start post processing";
         m_postProcess();
     }
+}
+
+void CommandMessageBroker::registerHandler(const ICommandMessageBroker::MessageId& messageId,
+                                           Handler&                                handler)
+{
+    m_handlers[messageId] = handler;
+}
+
+void CommandMessageBroker::registerHandler(const ICommandMessageBroker::MessageId& messageId,
+                                           Handler&&                               handler)
+{
+    m_handlers[messageId] = handler;
+}
+
+void CommandMessageBroker::unregisterHandler(const ICommandMessageBroker::MessageId& messageId)
+{
+    auto iter = m_handlers.find(messageId);
+    if (iter != m_handlers.end())
+    {
+        m_handlers.erase(iter);
+    }
+}
+
+bool CommandMessageBroker::hasRegisteredHandler(
+    const ICommandMessageBroker::MessageId& messageId) const
+{
+    auto iter = m_handlers.find(messageId);
+    return (iter != m_handlers.end());
+}
+
+CommandMessageBroker::Handler* CommandMessageBroker::findHandler(
+    const ICommandMessageBroker::ReceiverId& receiverId)
+{
+    Handler* handler = nullptr;
+    auto     iter    = m_handlers.find(receiverId);
+    if (iter != m_handlers.end())
+    {
+        handler = &(iter->second);
+    }
+    return handler;
 }

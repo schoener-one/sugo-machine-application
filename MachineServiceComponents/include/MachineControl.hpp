@@ -40,19 +40,19 @@ protected:
     message::CommandResponse onCommandIncreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandDecreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandGetMotorSpeed(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerControlFeedingRunning(
+    message::CommandResponse onNotificationFilamentMergerControlFeedingRunning(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerControlFeedingStopped(
+    message::CommandResponse onNotificationFilamentMergerControlFeedingStopped(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerControlHeatedUp(
+    message::CommandResponse onNotificationFilamentMergerControlHeatedUp(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerControlErrorOccurred(
+    message::CommandResponse onNotificationFilamentMergerControlErrorOccurred(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentCoilControlCoilRunning(
+    message::CommandResponse onNotificationFilamentCoilControlCoilRunning(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentCoilControlCoilStopped(
+    message::CommandResponse onNotificationFilamentCoilControlCoilStopped(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentCoilControlErrorOccurred(
+    message::CommandResponse onNotificationFilamentCoilControlErrorOccurred(
         const message::Command& command) override;
 
     // Transition actions

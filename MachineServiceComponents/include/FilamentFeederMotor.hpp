@@ -26,12 +26,11 @@ public:
     // Constructor / Destructor
     explicit FilamentFeederMotor(ICommandMessageBroker& messageBroker,
                                  const ServiceLocator&  serviceLocator)
-        : IFilamentFeederMotor(messageBroker), MotorService(serviceLocator)
+        : IFilamentFeederMotor(messageBroker),
+          MotorService(config::StepperMotorFeederId, serviceLocator)
     {
     }
-    virtual ~FilamentFeederMotor()
-    {
-    }
+    virtual ~FilamentFeederMotor() = default;
 
 protected:
     // Command handlers

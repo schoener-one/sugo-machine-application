@@ -26,7 +26,8 @@ public:
     // Constructor / Destructor
     explicit FilamentCoilMotor(ICommandMessageBroker& messageBroker,
                                const ServiceLocator&  serviceLocator)
-        : IFilamentCoilMotor(messageBroker), MotorService(serviceLocator)
+        : IFilamentCoilMotor(messageBroker),
+          MotorService(config::StepperMotorCoilerId, serviceLocator)
     {
     }
     virtual ~FilamentCoilMotor()

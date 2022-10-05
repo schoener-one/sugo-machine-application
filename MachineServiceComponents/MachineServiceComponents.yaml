@@ -1,24 +1,27 @@
 components:
   - MachineControl:
       description: "Service component to controls the whole machine"
-      commands:
-        - SwitchOn
-        - SwitchOff
-        - IncreaseMotorSpeed
-        - DecreaseMotorSpeed
-        - GetMotorSpeed
-        - FilamentMergerControl.FeedingRunning
-        - FilamentMergerControl.FeedingStopped
-        - FilamentMergerControl.HeatedUp
-        - FilamentMergerControl.ErrorOccurred
-        - FilamentCoilControl.CoilRunning
-        - FilamentCoilControl.CoilStopped
-        - FilamentCoilControl.ErrorOccurred
-      notifications:
-        - Starting
-        - Running
-        - SwitchedOff
-        - Error
+      inbound:
+        commands:
+          - SwitchOn
+          - SwitchOff
+          - IncreaseMotorSpeed
+          - DecreaseMotorSpeed
+          - GetMotorSpeed
+        notifications:
+          - FilamentMergerControl.FeedingRunning
+          - FilamentMergerControl.FeedingStopped
+          - FilamentMergerControl.HeatedUp
+          - FilamentMergerControl.ErrorOccurred
+          - FilamentCoilControl.CoilRunning
+          - FilamentCoilControl.CoilStopped
+          - FilamentCoilControl.ErrorOccurred
+      outbound:
+        notifications:
+          - Starting
+          - Running
+          - SwitchedOff
+          - Error
       events:
         - SwitchOff
         - SwitchOn
@@ -121,25 +124,28 @@ components:
 
   - FilamentMergerControl:
       description: "Hardware service component to control the filament merger unit"
-      commands:
-        - SwitchOn
-        - SwitchOff
-        - StartFeeding
-        - StopFeeding
-        - GetTemperatures
-        - FilamentPreHeater.TargetTemperatureReached
-        - FilamentPreHeater.ErrorOccurred
-        - FilamentMergerHeater.TargetTemperatureReached
-        - FilamentMergerHeater.ErrorOccurred
-        - FilamentFeederMotor.StartMotorSucceeded
-        - FilamentFeederMotor.StartMotorFailed
-        - FilamentFeederMotor.ErrorOccurred
-        - SetMotorSpeed
-      notifications:
-        - FeedingRunning
-        - FeedingStopped
-        - HeatedUp
-        - ErrorOccurred
+      inbound:
+        commands:
+          - SwitchOn
+          - SwitchOff
+          - StartFeeding
+          - StopFeeding
+          - GetTemperatures
+          - SetMotorSpeed
+        notifications:
+          - FilamentPreHeater.TargetTemperatureReached
+          - FilamentPreHeater.ErrorOccurred
+          - FilamentMergerHeater.TargetTemperatureReached
+          - FilamentMergerHeater.ErrorOccurred
+          - FilamentFeederMotor.StartMotorSucceeded
+          - FilamentFeederMotor.StartMotorFailed
+          - FilamentFeederMotor.ErrorOccurred
+      outbound:
+        notifications:
+          - FeedingRunning
+          - FeedingStopped
+          - HeatedUp
+          - ErrorOccurred
       events:
         - SwitchOff
         - SwitchOn
@@ -226,20 +232,21 @@ components:
             event: SwitchOff
             action: switchOff
 
-
-  - FilamentFeederMotor:
-      description: "Hardware service component to control the feeder motor of the filament merger unit"
-      commands:
-        - SwitchOn
-        - SwitchOff
-        - StartMotor
-        - StopMotor
-        - SetMotorSpeed
-        - SetMotorOffsetSpeed
-      notifications:
-        - StartMotorSucceeded
-        - StartMotorFailed
-        - ErrorOccurred
+  - _BaseMotor: &BaseMotor
+      description: "Hardware service component to control a motor"
+      inbound:
+        commands:
+          - SwitchOn
+          - SwitchOff
+          - StartMotor
+          - StopMotor
+          - SetMotorSpeed
+          - SetMotorOffsetSpeed
+      outbound:
+        notifications:
+          - StartMotorSucceeded
+          - StartMotorFailed
+          - ErrorOccurred
       events:
         - SwitchOff
         - SwitchOn
@@ -300,15 +307,22 @@ components:
             action: switchOff
 
 
-  - FilamentPreHeater:
-      description: "Hardware service component to control the pre-heater of the filament merger unit"
-      commands:
-        - SwitchOn
-        - SwitchOff
-        - GetTemperature
-      notifications:
-        - TargetTemperatureReached
-        - ErrorOccurred
+  - FilamentFeederMotor:
+      <<: *BaseMotor
+      description: "Hardware service component to control the feeder motor of the filament merger unit"
+
+
+  - _BaseHeater: &BaseHeater
+      description: "Hardware service component to control a heater"
+      inbound:
+        commands:
+          - SwitchOn
+          - SwitchOff
+          - GetTemperature
+      outbound:
+        notifications:
+          - TargetTemperatureReached
+          - ErrorOccurred
       events:
         - SwitchOn
         - SwitchOff
@@ -373,30 +387,36 @@ components:
             event: SwitchOff
             handle: switchOff
 
+  - FilamentPreHeater:
+      <<: *BaseHeater
+      description: "Hardware service component to control the pre-heater of the filament merger unit"
 
   - FilamentMergerHeater:
+      <<: *BaseHeater
       description: "Hardware service component to control the merger heater of the filament merger unit"
-      using: FilamentPreHeater
 
 
   - FilamentCoilControl:
       description: "Service component to control the filament coil unit"
-      commands:
-        - SwitchOn
-        - SwitchOff
-        - StartCoil
-        - StopCoil
-        - FilamentTensionSensor.TensionTooLow
-        - FilamentTensionSensor.TensionTooHigh
-        - FilamentTensionSensor.ErrorOccurred
-        - FilamentCoilMotor.StartMotorSucceeded
-        - FilamentCoilMotor.StartMotorFailed
-        - FilamentCoilMotor.ErrorOccurred
-        - SetMotorSpeed
-      notifications:
-        - CoilRunning
-        - CoilStopped
-        - ErrorOccurred
+      inbound:
+        commands:
+          - SwitchOn
+          - SwitchOff
+          - StartCoil
+          - StopCoil
+          - SetMotorSpeed
+        notifications:
+          - FilamentTensionSensor.TensionTooLow
+          - FilamentTensionSensor.TensionTooHigh
+          - FilamentTensionSensor.ErrorOccurred
+          - FilamentCoilMotor.StartMotorSucceeded
+          - FilamentCoilMotor.StartMotorFailed
+          - FilamentCoilMotor.ErrorOccurred
+      outbound:
+        notifications:
+          - CoilRunning
+          - CoilStopped
+          - ErrorOccurred
       events:
         - SwitchOn
         - SwitchOnSucceeded
@@ -465,19 +485,21 @@ components:
 
 
   - FilamentCoilMotor:
+      <<: *BaseMotor
       description: "Hardware service component controls the filament coil motor of the filament coil unit"
-      using: FilamentFeederMotor
 
 
   - FilamentTensionSensor:
       description: "Hardware service component to control the strain sensor of the filament coil unit"
-      commands:
-        - SwitchOn
-        - SwitchOff
-      notifications:
-        - TensionTooLow
-        - TensionTooHigh
-        - ErrorOccurred
+      inbound:
+        commands:
+          - SwitchOn
+          - SwitchOff
+      outbound:
+        notifications:
+          - TensionTooLow
+          - TensionTooHigh
+          - ErrorOccurred
       events:
         - SwitchOn
         - SwitchOnSucceeded
@@ -522,11 +544,12 @@ components:
 
   - UserInterfaceControl:
       description: "Hardware service component to control the user interface of the filament coil unit"
-      commands:
-        - MachineControl.Starting
-        - MachineControl.Running
-        - MachineControl.SwitchedOff
-        - MachineControl.Error
+      inbound:
+        notifications:
+          - MachineControl.Starting
+          - MachineControl.Running
+          - MachineControl.SwitchedOff
+          - MachineControl.Error
       events:
         - MachineStarting
         - MachineRunning

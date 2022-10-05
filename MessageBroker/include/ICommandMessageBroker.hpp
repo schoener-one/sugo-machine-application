@@ -12,11 +12,11 @@
 #include <Command.pb.h>
 #include <string>
 
-#include "IMessageBroker.hpp"
+#include "IGenericMessageBroker.hpp"
 
 namespace sugo
 {
 /// Interface definition of the CommandMessageBroker.
 using ICommandMessageBroker =
-    IMessageBroker<message::Command, message::CommandResponse, std::string>;
+    IGenericMessageBroker<message::Command, std::string, message::CommandResponse, std::string>;
 }  // namespace sugo

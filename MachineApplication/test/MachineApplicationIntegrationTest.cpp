@@ -10,11 +10,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <condition_variable>
-#include <memory>
-#include <mutex>
 
-#include "CommandId.hpp"
 #include "CommandMessageBroker.hpp"
 #include "Globals.hpp"
 #include "IGpioControlMock.hpp"
@@ -31,8 +27,7 @@
 #include "ServiceComponentsExecutionGroup.hpp"
 #include "ServiceLocator.hpp"
 #include "Thread.hpp"
-
-class MachineApplicationIntegrationTest;
+#include "IntegrationTest.hpp"
 
 using namespace sugo;
 using namespace hal;
@@ -43,49 +38,36 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-/// Expect a defined state of that component
-#define EXPECT_STATE(_COMP, _STATE) expectState<_COMP>(_COMP::State::_STATE)
-#define EXPECT_NOTIFICATION(_COMP, _NOTIF) waitForNotification<_COMP>(_COMP::_NOTIF)
-class MachineApplicationIntegrationTest : public ::testing::Test
+class MachineApplicationIntegrationTest : public sugo::IntegrationTest
 {
 protected:
-    inline static const std::string ReceiverId{"MachineApplicationIntegrationTest"};
+    inline static const ICommandMessageBroker::ReceiverId ReceiverId{
+        "MachineApplicationIntegrationTest"};
 
-    MachineApplicationIntegrationTest() : m_ioContext(ReceiverId), m_broker(ReceiverId, m_ioContext)
-    {
-    }
-
-    ~MachineApplicationIntegrationTest() override
+    MachineApplicationIntegrationTest() :IntegrationTest(ReceiverId)
     {
     }
 
     void SetUp() override
     {
-        m_lastCommandId.clear();
-        ASSERT_TRUE(m_broker.start());
-        m_broker.registerHandler(ReceiverId,
-                                 [&](const message::Command& command) -> message::CommandResponse {
-                                     m_lastCommandId = command.name();
-                                     m_condVar.notify_one();
-                                     return message::createResponse(command);
-                                 });
+        sugo::IntegrationTest::SetUp();
+
         prepareForStartComponents();
         ASSERT_TRUE(m_components.start(m_serviceLocator));
 
         // Add us to the receiver lists!
         for (auto& bundle : m_components.getBundles())
         {
-            auto& component      = bundle->getServiceComponent();
-            auto  receiverIdList = component.getReceiverList();
-            receiverIdList.push_back(ReceiverId);
-            component.setReceiverList(receiverIdList);
+            CommandMessageBroker* broker = dynamic_cast<CommandMessageBroker*>(
+                &bundle->getServiceComponent().getCommandMessageBroker());
+            broker->setNotificationReceiver(ReceiverId);
         }
     }
 
     void TearDown() override
     {
         m_components.stop();
-        m_broker.stop();
+        sugo::IntegrationTest::TearDown();
     }
 
     static void SetUpTestCase()
@@ -96,43 +78,6 @@ protected:
     void prepareHardwareAbstractionLayer();
     void prepareForStartComponents();
     void prepareForSwitchOn();
-
-    message::CommandResponse send(const CommandId& commandId)
-    {
-        message::Command command;
-        command.set_id(m_idCount);
-        command.set_name(commandId.command);
-        message::CommandResponse response;
-        EXPECT_TRUE(m_broker.send(command, commandId.receiver, response));
-        EXPECT_EQ(response.result(), message::CommandResponse_Result_SUCCESS);
-        EXPECT_EQ(response.id(), m_idCount);
-        m_idCount++;
-        return response;
-    }
-
-    template <typename CompT>
-    void expectState(const typename CompT::State state)
-    {
-        auto        response  = send(CompT::CommandGetState);
-        const Json& jsonState = Json::parse(response.response()).at("state");
-        EXPECT_FALSE(jsonState.empty());
-        EXPECT_EQ(static_cast<unsigned>(state), jsonState.get<unsigned>());
-    }
-
-    template <typename CompT>
-    void waitForNotification(const CommandId& commandId, const std::chrono::milliseconds& maxTime =
-                                                             std::chrono::milliseconds(60000))
-    {
-        std::unique_lock<std::mutex> lockThread(m_mutex);
-        m_lastCommandId.clear();
-        std::cv_status status = std::cv_status::timeout;
-        do
-        {
-            status = m_condVar.wait_for(lockThread, maxTime);
-        } while ((status == std::cv_status::no_timeout) && (m_lastCommandId != commandId.command));
-        EXPECT_NE(std::cv_status::timeout, status);
-        EXPECT_EQ(m_lastCommandId, commandId.command);
-    }
 
     IHardwareAbstractionLayer::StepperMotorControllerMap      m_stepperMotorControllerMap;
     IHardwareAbstractionLayer::TemperatureSensorControllerMap m_temperatureSensorControllerMap;
@@ -157,15 +102,8 @@ protected:
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinRelaySwitchLightReady;
 
     NiceMock<IHardwareAbstractionLayerMock> m_mockHardwareAbstractionLayer;
-    IOContext                               m_ioContext;
-    CommandMessageBroker                    m_broker;
     ServiceLocator                          m_serviceLocator;
     ServiceComponentsExecutionGroup         m_components;
-    unsigned                                m_idCount = 0;
-
-    std::string             m_lastCommandId;
-    std::mutex              m_mutex;
-    std::condition_variable m_condVar;
 
     static constexpr unsigned DefaultMotorSpeed  = 100;
     static constexpr int32_t  DefaultTemperature = 25;
@@ -191,7 +129,7 @@ void MachineApplicationIntegrationTest::prepareHardwareAbstractionLayer()
         config::TemperatureSensorMergerId,
         m_mockTemperatureSensorMerger = std::make_shared<NiceMock<ITemperatureSensorMock>>());
     m_temperatureSensorMap.emplace(
-        config::TemperatureSensorMergerId,
+        config::TemperatureSensorFeederId,
         m_mockTemperatureSensorFeeder = std::make_shared<NiceMock<ITemperatureSensorMock>>());
 
     m_gpioControllerMap.emplace(config::GpioControlId,
@@ -262,8 +200,8 @@ TEST_F(MachineApplicationIntegrationTest, StartExecutionGroup)
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::Low))
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
-    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).Times(2).WillRepeatedly(Return(true));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(true));
     EXPECT_NOTIFICATION(IMachineControl, NotificationRunning);
 
-    m_components.waitUntilFinished();
+    m_components.stop();
 }

@@ -21,12 +21,29 @@ class StateMachine:
     states: list
     start: str
     transitions: list
-        
+
+@dataclass
+class Notification:
+    """Keeps information about notification"""
+    name: str
+    receivers: list
+
+@dataclass
+class Inbound:
+    """Keeps information about inbound messages"""
+    commands: list
+    notifications: list
+
+@dataclass
+class Outbound:
+    """Keeps information about outbound messages"""
+    notifications: list
+
 @dataclass
 class ServiceComponent:
     """Keeps the content of a service component"""
-    commands: list
-    notifications: list
+    inbound: Inbound
+    outbound: Outbound
     events: list
     statemachine: StateMachine
     

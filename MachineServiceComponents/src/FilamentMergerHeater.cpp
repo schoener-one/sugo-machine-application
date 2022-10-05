@@ -15,6 +15,14 @@
 
 using namespace sugo;
 
+FilamentMergerHeater::FilamentMergerHeater(ICommandMessageBroker& messageBroker,
+                                           const ServiceLocator&  serviceLocator)
+    : IFilamentMergerHeater(messageBroker),
+      HeaterService(config::GpioPinRelaySwitchMergerHeaterId, config::TemperatureSensorMergerId,
+                    serviceLocator)
+{
+}
+
 void FilamentMergerHeater::onMaxTemperatureReached()
 {
     push(Event(EventId::MaxTemperatureReached));
@@ -65,7 +73,7 @@ void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
 void FilamentMergerHeater::startHeating(const IFilamentMergerHeater::Event&,
                                         const IFilamentMergerHeater::State&)
 {
-    if (!switchHeater(config::GpioPinRelaySwitchMergerHeaterId, true))
+    if (!switchHeater(true))
     {
         push(Event(EventId::ErrorOccurred));
     }
@@ -79,7 +87,7 @@ void FilamentMergerHeater::stopHeating(const IFilamentMergerHeater::Event&,
         notify(NotificationTargetTemperatureReached);
         m_hasNotifiedTargetTemperatureReached = true;
     }
-    if (!switchHeater(config::GpioPinRelaySwitchMergerHeaterId, false))
+    if (!switchHeater(false))
     {
         push(Event(EventId::ErrorOccurred));
     }
@@ -89,7 +97,7 @@ void FilamentMergerHeater::switchOff(const IFilamentMergerHeater::Event&,
                                      const IFilamentMergerHeater::State&)
 {
     stopTemperatureObservation();
-    if (!switchHeater(config::GpioPinRelaySwitchMergerHeaterId, false))
+    if (!switchHeater(false))
     {
         push(Event(EventId::ErrorOccurred));
     }
@@ -98,6 +106,6 @@ void FilamentMergerHeater::switchOff(const IFilamentMergerHeater::Event&,
 void FilamentMergerHeater::handleError(const IFilamentMergerHeater::Event&,
                                        const IFilamentMergerHeater::State&)
 {
-    (void)switchHeater(config::GpioPinRelaySwitchMergerHeaterId, false);
+    (void)switchHeater(false);
     notify(NotificationErrorOccurred);
 }

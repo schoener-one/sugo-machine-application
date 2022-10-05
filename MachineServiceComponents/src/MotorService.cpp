@@ -12,10 +12,16 @@
 #include "HardwareAbstractionLayerHelper.hpp"
 #include "IHardwareAbstractionLayer.hpp"
 #include "IStepperMotor.hpp"
-#include "MachineConfig.hpp"
 #include "Logger.hpp"
+#include "MachineConfig.hpp"
 
 using namespace sugo;
+
+MotorService::MotorService(const std::string&    motorId,
+                                    const ServiceLocator& serviceLocator)
+    : m_motorId(motorId), m_serviceLocator(serviceLocator)
+{
+}
 
 void MotorService::setMotorSpeed(unsigned motorSpeed)
 {
@@ -25,8 +31,8 @@ void MotorService::setMotorSpeed(unsigned motorSpeed)
 
 void MotorService::setMotorSpeed()
 {
-    auto& stepperMotor    = getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(),
-                                         config::StepperMotorCoilerId);
+    auto& stepperMotor =
+        getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
     const auto motorSpeed = m_motorSpeed + m_motorOffsetSpeed;
     LOG(debug) << "Setting motor speed: " << motorSpeed;
     stepperMotor->setMaxSpeed(hal::IStepperMotor::Speed(motorSpeed, hal::Unit::Rpm));
@@ -40,15 +46,15 @@ void MotorService::setMotorOffsetSpeed(unsigned motorOffsetSpeed)
 
 bool MotorService::startMotorRotation()
 {
-    auto& stepperMotor = getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(),
-                                         config::StepperMotorCoilerId);
+    auto& stepperMotor =
+        getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
     return stepperMotor->rotate(hal::IStepperMotor::Direction::Forward);
 }
 
 bool MotorService::resetMotor()
 {
-    auto& stepperMotor = getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(),
-                                         config::StepperMotorCoilerId);
+    auto& stepperMotor =
+        getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
     if (!stepperMotor->reset())
     {
         return false;
@@ -58,7 +64,7 @@ bool MotorService::resetMotor()
 
 void MotorService::stopMotorRotation(bool immediately)
 {
-    auto& stepperMotor = getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(),
-                                         config::StepperMotorCoilerId);
+    auto& stepperMotor =
+        getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
     (void)stepperMotor->stop(immediately);
 }

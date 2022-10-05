@@ -25,13 +25,8 @@ class FilamentMergerHeater : public IFilamentMergerHeater, public HeaterService
 public:
     // Constructor / Destructor
     explicit FilamentMergerHeater(ICommandMessageBroker& messageBroker,
-                                  const ServiceLocator&  serviceLocator)
-        : IFilamentMergerHeater(messageBroker), HeaterService(serviceLocator)
-    {
-    }
-    virtual ~FilamentMergerHeater()
-    {
-    }
+                                  const ServiceLocator&  serviceLocator);
+    virtual ~FilamentMergerHeater() = default;
 
 protected:
     // Command handlers

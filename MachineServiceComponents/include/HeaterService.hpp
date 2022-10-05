@@ -15,6 +15,7 @@
 #include "Timer.hpp"
 
 #include <atomic>
+#include <string>
 
 namespace sugo
 {
@@ -24,19 +25,39 @@ namespace sugo
 class HeaterService
 {
 public:
-    // Constructor / Destructor
-    explicit HeaterService(const ServiceLocator& serviceLocator)
-        : m_serviceLocator(serviceLocator),
-          m_temperatureObserver([this]() { this->updateHeaterTemperature(); })
-    {
-    }
-    virtual ~HeaterService()
-    {
-    }
+    /// @brief Temperature value type
+    using Temperature = int32_t;
+    /// @brief Temperature range handler
+    using TemperatureRangeHandler = std::function<void()>;
+
+    /**
+     * @brief Constructs a new heater service object.
+     *
+     * @param heaterId            Heater id to be used.
+     * @param temperatureSensorId Temperature sensor id to be used.
+     * @param serviceLocator      Service locator to retrieve the HAL.
+     */
+    explicit HeaterService(const std::string& heaterId, const std::string& temperatureSensorId,
+                           const ServiceLocator& serviceLocator);
+    virtual ~HeaterService() = default;
 
 protected:
-    bool         switchHeater(const std::string& heaterSwitchId, bool switchOn);
-    void         updateHeaterTemperature();
+    /**
+     * @brief
+     *
+     * @param switchOn Indicates if the heater should be switched on or off.
+     * @return true    If the heater could be switched successfully.
+     * @return false   If the heater could not be switched successfully.
+     */
+    bool switchHeater(bool switchOn);
+    /**
+     * @brief Updates the current temperature and calls the appropriate handler.
+     *
+     * @param minTemperatureReached Min temperature reached handler to be called or nullptr.
+     * @param maxTemperatureReached Max temperature reached handler to be called or nullptr.
+     */
+    void         updateHeaterTemperature(TemperatureRangeHandler minTemperatureReached = nullptr,
+                                         TemperatureRangeHandler maxTemperatureReached = nullptr);
     virtual void onMaxTemperatureReached() = 0;
     virtual void onMinTemperatureReached() = 0;
     int32_t      getTemperature() const
@@ -47,9 +68,11 @@ protected:
     void stopTemperatureObservation();
 
 private:
-    const ServiceLocator& m_serviceLocator;
-    Timer                 m_temperatureObserver;
-    std::atomic_int32_t   m_lastTemperature = 0;
+    const std::string        m_heaterId;
+    const std::string        m_temperatureSensorId;
+    const ServiceLocator&    m_serviceLocator;
+    Timer                    m_temperatureObserver;
+    std::atomic<Temperature> m_lastTemperature = 0;
 };
 
 }  // namespace sugo

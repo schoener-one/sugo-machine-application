@@ -7,44 +7,42 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef IMESSAGEBROKER_HPP_
-#define IMESSAGEBROKER_HPP_
+#pragma once
 
 #include <chrono>
 #include <functional>
 #include <vector>
 
 #include "IRunnable.hpp"
-#include "Thread.hpp"
 
 namespace sugo
 {
 /**
- * Interface class to handle messaging between components.
- * @tparam MessageT Message type.
- * @tparam ResponseT Message response type.
+ * Generic interface class to send and receive messages.
+ * 
+ * @tparam MessageT    Message type.
+ * @tparam MessageIdT  Message id type.
+ * @tparam ResponseT   Message response type.
  * @tparam ReceiverIdT Receiver identifier type.
  */
-template <class MessageT, class ResponseT = void, class ReceiverIdT = unsigned int>
-class IMessageBroker : public IRunnable
+template <typename MessageT, typename MessageIdT, typename ResponseT = void,
+          typename ReceiverIdT = unsigned int>
+class IGenericMessageBroker : public IRunnable
 {
 protected:
-    virtual ~IMessageBroker() = default;
+    virtual ~IGenericMessageBroker() = default;
 
 public:
-    /// @brief Maximum time to transmit a message (inclusive response).
-    inline static constexpr std::chrono::milliseconds MaxMessageTransmissionTime{10};
-    /// @brief Address prefix
-    inline static const std::string AddressPrefix{"inproc://"};
-    /// @brief Maximum of retries for a failed transmission.
-    static constexpr unsigned MaxMessageTransmissionRetries = 3;
-
-    /// Handler definition which reacts to a request.
+    /// @brief Handler definition which reacts to a request.
     using Handler = std::function<ResponseT(const MessageT&)>;
-    /// Type for receiver identifiers
-    using ReceiverIdType = ReceiverIdT;
-    /// Receiver list definition.
+    /// @brief Type definition for message id.
+    using MessageId = MessageIdT;
+    /// @brief Type definition for receiver id.
+    using ReceiverId = ReceiverIdT;
+    /// @brief Type definition for receiver list.
     using ReceiverIdList = std::vector<ReceiverIdT>;
+    /// @brief Runnable function type.
+    using Runnable = std::function<void()>;
 
     /**
      * Notifies all receiver instances.
@@ -66,30 +64,30 @@ public:
 
     /**
      * Registers a new message handler.
-     * @param receiverId Message identifier.
+     * @param messageId Message identifier.
      * @param handler Handler to be invoked on message receive.
      */
-    virtual void registerHandler(const ReceiverIdT& messageId, Handler& handler) = 0;
+    virtual void registerHandler(const MessageIdT& messageId, Handler& handler) = 0;
 
     /**
      * Registers a new message handler.
-     * @param receiverId Message identifier.
+     * @param messageId Message identifier.
      * @param handler Handler to be invoked on message receive.
      */
-    virtual void registerHandler(const ReceiverIdT& messageId, Handler&& handler) = 0;
+    virtual void registerHandler(const MessageIdT& messageId, Handler&& handler) = 0;
 
     /**
      * Unregisters an existing message handler.
      * @param messageId Message identifier.
      */
-    virtual void unregisterHandler(const ReceiverIdT& messageId) = 0;
+    virtual void unregisterHandler(const MessageIdT& messageId) = 0;
 
     /**
      * Indicates if a handler has been registered for a message id.
      * @param messageId Message identifier.
      * @return true if the handler could be registered.
      */
-    virtual bool hasRegisteredHandler(const ReceiverIdT& messageId) const = 0;
+    virtual bool hasRegisteredHandler(const MessageIdT& messageId) const = 0;
 
     /**
      * @brief Registers a post process handler which will be called if a received message
@@ -97,9 +95,7 @@ public:
      *
      * @param postProcess Callback function to be called for post processing.
      */
-    virtual void registerPostProcessHandler(Thread::Runnable postProcess) = 0;
+    virtual void registerPostProcessHandler(Runnable postProcess) = 0;
 };
 
 }  // namespace sugo
-
-#endif /* IMESSAGEBROKER_HPP_ */

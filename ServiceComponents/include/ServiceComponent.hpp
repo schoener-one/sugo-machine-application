@@ -9,12 +9,13 @@
 
 #pragma once
 
-#include "CommandId.hpp"
 #include "Globals.hpp"
 #include "ICommandMessageBroker.hpp"
+#include "IRunnable.hpp"
 #include "MessageHelper.hpp"
-#include "MessageProtocol.hpp"
-#include "IServiceComponent.hpp"
+#include "MessageId.hpp"
+
+#include <string>
 
 namespace sugo
 {
@@ -27,20 +28,25 @@ namespace sugo
  * @todo Needs to be transformed to a base class of all ServiceComponents in order
  *       to handle messages in a generic manner!
  */
-class ServiceComponent : public IServiceComponent
+class ServiceComponent : public IRunnable
 {
 public:
+    /// @brief Type definition of message id.
+    using MessageId = std::string;
+    /// @brief Type definition of command id.
+    using CommandId = GenericCommandId<MessageId, ICommandMessageBroker::ReceiverId>;
+    /// @brief Type definition of notification id.
+    using NotificationId = GenericNotificationId<MessageId, ICommandMessageBroker::ReceiverIdList>;
+
     /**
      * @brief Construct a new service component object
      *
      * @param messageBroker  The message broker to be used for sending and receiving.
-     * @param notifReceivers The list for notification receivers.
      */
-    explicit ServiceComponent(ICommandMessageBroker&                       messageBroker,
-                              const ICommandMessageBroker::ReceiverIdList& notifReceivers)
-        : m_messageBroker(messageBroker), m_notificationReceivers(notifReceivers)
+    explicit ServiceComponent(ICommandMessageBroker& messageBroker) : m_messageBroker(messageBroker)
     {
     }
+    virtual ~ServiceComponent() = default;
 
     bool start() override
     {
@@ -57,23 +63,19 @@ public:
         return m_messageBroker.isRunning();
     }
 
-    const ICommandMessageBroker::ReceiverIdList& getReceiverList() const override
+    /**
+     * @brief Returns the command message broker.
+     *
+     * @return The command message broker.
+     */
+    ICommandMessageBroker& getCommandMessageBroker()
     {
-        return m_notificationReceivers;
-    }
-    
-    void setReceiverList(const ICommandMessageBroker::ReceiverIdList& receiverIdList) override
-    {
-        m_notificationReceivers = receiverIdList;
+        return m_messageBroker;
     }
 
 protected:
     static message::CommandResponse createUnsupportedCommandResponse(
-        const message::Command& command)
-    {
-        LOG(debug) << "Received invalid command '" << command.name() << "'";
-        return message::createUnsupportedCommandResponse(command);
-    }
+        const message::Command& command);
 
     static message::CommandResponse createResponse(
         const message::Command& command, const Json& response = Json(),
@@ -90,10 +92,15 @@ protected:
         return message::createErrorResponse(command, errorMessage, errorCode);
     }
 
-    void registerCommandHandler(const CommandId&                 commandId,
+    void registerMessageHandler(const CommandId& command, ICommandMessageBroker::Handler&& handler)
+    {
+        m_messageBroker.registerHandler(command.getId(), handler);
+    }
+
+    void registerMessageHandler(const NotificationId&            notification,
                                 ICommandMessageBroker::Handler&& handler)
     {
-        m_messageBroker.registerHandler(commandId.command, handler);
+        m_messageBroker.registerHandler(notification.getId(), handler);
     }
 
     message::CommandResponse send(const CommandId& commandId)
@@ -101,55 +108,21 @@ protected:
         return send(commandId, Json());
     }
 
-    message::CommandResponse send(const CommandId& commandId, const Json& parameters)
+    message::CommandResponse send(const CommandId& commandId, const Json& parameters);
+    message::CommandResponse forward(const CommandId& commandId, const message::Command& command);
+
+    bool notify(const NotificationId& notificationId)
     {
-        message::Command command;
-        command.set_name(commandId.command);
-        if (!parameters.empty())
-        {
-            command.set_parameters(parameters.dump());
-        }
-        message::CommandResponse commandResponse;
-        const bool success = m_messageBroker.send(command, commandId.receiver, commandResponse);
-        assert(success);
-        return commandResponse;
+        return notify(notificationId, "");
     }
 
-    message::CommandResponse forward(const CommandId& commandId, const message::Command& command)
-    {
-        message::Command forwardCommand = command;
-        forwardCommand.set_name(commandId.command);
-        message::CommandResponse commandResponse;
-        const bool               success =
-            m_messageBroker.send(forwardCommand, commandId.receiver, commandResponse);
-        assert(success);
-        return commandResponse;
-    }
-
-    bool notify(const CommandId& commandId)
-    {
-        return notify(commandId, "");
-    }
-
-    bool notify(const CommandId& commandId, const Json& parameters)
-    {
-        message::Command command;
-        command.set_name(commandId.receiver + "." + commandId.command);
-        if (!parameters.empty())
-        {
-            command.set_parameters(parameters.dump());
-        }
-        return m_messageBroker.notify(command, m_notificationReceivers);
-    }
-
-    ICommandMessageBroker& getCommandMessageBroker()
-    {
-        return m_messageBroker;
-    }
+    bool notify(const NotificationId& notificationId, const Json& parameters);
 
 private:
-    ICommandMessageBroker&                m_messageBroker;
-    ICommandMessageBroker::ReceiverIdList m_notificationReceivers;
+    ICommandMessageBroker& m_messageBroker;
 };
 
+std::ostream& operator<<(std::ostream& ostr, const ServiceComponent::CommandId& commandId);
+std::ostream& operator<<(std::ostream&                           ostr,
+                         const ServiceComponent::NotificationId& notificationId);
 }  // namespace sugo

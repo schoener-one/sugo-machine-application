@@ -22,7 +22,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}/ServiceComponents",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--generate-exec-group", "--generate-service-components"]
+            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--generate-exec-group", "--generate-service-components", "-L", "debug"]
         },
         {
             "name": "ServiceComponentGenerator Templates",

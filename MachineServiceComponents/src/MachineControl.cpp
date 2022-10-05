@@ -61,47 +61,47 @@ message::CommandResponse MachineControl::onCommandGetMotorSpeed(const message::C
     return createResponse(command, Json{{protocol::IdSpeed, m_motorSpeed}});
 }
 
-message::CommandResponse MachineControl::onCommandFilamentMergerControlFeedingRunning(
+message::CommandResponse MachineControl::onNotificationFilamentMergerControlFeedingRunning(
     const message::Command& command)
 {
     m_isFilamentMergerControlRunning = true;
     return handleStateChangeCommand(command, Event(EventId::WaitForStarted));
 }
 
-message::CommandResponse MachineControl::onCommandFilamentMergerControlFeedingStopped(
+message::CommandResponse MachineControl::onNotificationFilamentMergerControlFeedingStopped(
     const message::Command& command)
 {
     m_isFilamentMergerControlRunning = false;
     return handleStateChangeCommand(command, Event(EventId::RunningStopped));
 }
 
-message::CommandResponse MachineControl::onCommandFilamentMergerControlHeatedUp(
+message::CommandResponse MachineControl::onNotificationFilamentMergerControlHeatedUp(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::MergerHeatedUp));
 }
 
-message::CommandResponse MachineControl::onCommandFilamentMergerControlErrorOccurred(
+message::CommandResponse MachineControl::onNotificationFilamentMergerControlErrorOccurred(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));
 }
 
-message::CommandResponse MachineControl::onCommandFilamentCoilControlCoilRunning(
+message::CommandResponse MachineControl::onNotificationFilamentCoilControlCoilRunning(
     const message::Command& command)
 {
     m_isFilamentCoilControlRunning = true;
     return handleStateChangeCommand(command, Event(EventId::WaitForStarted));
 }
 
-message::CommandResponse MachineControl::onCommandFilamentCoilControlCoilStopped(
+message::CommandResponse MachineControl::onNotificationFilamentCoilControlCoilStopped(
     const message::Command& command)
 {
     m_isFilamentCoilControlRunning = false;
     return handleStateChangeCommand(command, Event(EventId::RunningStopped));
 }
 
-message::CommandResponse MachineControl::onCommandFilamentCoilControlErrorOccurred(
+message::CommandResponse MachineControl::onNotificationFilamentCoilControlErrorOccurred(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));

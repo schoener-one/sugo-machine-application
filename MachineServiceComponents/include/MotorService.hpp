@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include "ServiceLocator.hpp"
-#include "Timer.hpp"
 #include "MachineConfig.hpp"
+#include "ServiceLocator.hpp"
 
 #include <atomic>
+#include <string>
 
 namespace sugo
 {
@@ -25,14 +25,14 @@ namespace sugo
 class MotorService
 {
 public:
-    // Constructor / Destructor
-    explicit MotorService(const ServiceLocator& serviceLocator)
-        : m_serviceLocator(serviceLocator)
-    {
-    }
-    virtual ~MotorService()
-    {
-    }
+    /**
+     * @brief Construct a new motor service object.
+     *
+     * @param motorId        Motor id of the motor to be used.
+     * @param serviceLocator Service locator which contains the HAL interface.
+     */
+    explicit MotorService(const std::string& motorId, const ServiceLocator& serviceLocator);
+    virtual ~MotorService() = default;
 
 protected:
     void setMotorSpeed(unsigned motorSpeed);
@@ -40,12 +40,14 @@ protected:
     bool startMotorRotation();
     bool resetMotor();
     void stopMotorRotation(bool immediately = false);
-    
+
 private:
     void setMotorSpeed();
+
+    const std::string     m_motorId;
     const ServiceLocator& m_serviceLocator;
-    unsigned m_motorSpeed = 0;
-    unsigned m_motorOffsetSpeed = 0;
+    unsigned              m_motorSpeed       = 0;
+    unsigned              m_motorOffsetSpeed = 0;
 };
 
 }  // namespace sugo

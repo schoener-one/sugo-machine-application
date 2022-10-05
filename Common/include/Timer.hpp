@@ -15,6 +15,7 @@
 
 #include <chrono>
 #include <functional>
+#include <string>
 
 namespace sugo
 {
@@ -29,11 +30,13 @@ public:
     using TimeoutHandler = std::function<void()>;
 
     /**
-     * @brief Construct a new Timer object
+     * @brief Construct a new timer instance
      *
-     * @param timeoutHandler
+     * @param timeoutHandler Handler to be called in case of a timeout.
+     * @param name           Name of this timer.
      */
-    Timer(TimeoutHandler timeoutHandler) : m_thread("Timer"), m_timeoutHandler(timeoutHandler)
+    Timer(TimeoutHandler timeoutHandler, const std::string& name = "Timer")
+        : m_thread(name), m_timeoutHandler(timeoutHandler)
     {
     }
     /**

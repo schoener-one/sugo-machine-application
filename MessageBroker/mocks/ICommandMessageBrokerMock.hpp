@@ -18,7 +18,7 @@ namespace sugo
 class ICommandMessageBrokerMock : public ICommandMessageBroker
 {
 public:
-    using typename IMessageBroker<message::Command, message::CommandResponse, std::string>::Handler;
+    using typename IGenericMessageBroker<message::Command, message::CommandResponse, std::string>::Handler;
 
     MOCK_METHOD(bool, notify, (const message::Command&, const std::vector<std::string>&));
     MOCK_METHOD(bool, send, (const message::Command&, const std::string&, message::CommandResponse&));

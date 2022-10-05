@@ -114,10 +114,10 @@ public:
     inline static const std::string ReceiverId{{"{context.name}"}};
     
     // Commands
-    inline static const CommandId CommandGetState{{ReceiverId, "GetState"}};
-{Generator._generate_commands(context.component.commands) if len(context.component.commands) else ''}
+    inline static const CommandId CommandGetState{{"GetState", ReceiverId}};
+{Generator._generate_commands(context.component.inbound.commands) if len(context.component.inbound.commands) else ''}
     // Notifications
-{Generator._generate_notifications(context.component.notifications) if len(context.component.notifications) else ''}    
+{Generator._generate_notifications(context.name, context.component.outbound.notifications) if len(context.component.outbound.notifications) else ''}    
     // Constructor / Destructor
     explicit I{context.name}(ICommandMessageBroker& messageBroker);
     virtual ~I{context.name}(){{}}
@@ -129,9 +129,10 @@ public:
     
 protected:
 
-    // Command handlers
+    // Message handlers
     message::CommandResponse onCommandGetState(const message::Command& command);
-{Generator._generate_command_handler_declarations(context.component.commands)}
+{Generator._generate_message_handler_declarations('Command', context.component.inbound.commands)}
+{Generator._generate_message_handler_declarations('Notification', context.component.inbound.notifications)}
     // Transition actions
 {Generator._generate_trans_actions_declarations(context.actions, context.name)}
 }};
@@ -144,23 +145,23 @@ protected:
         out_str = ''
         for command in commands:
             command_name = command.replace('.', '')
-            out_str += f'    inline static const CommandId Command{command_name}{{ReceiverId, "{command}"}};\n'
+            out_str += f'    inline static const CommandId Command{command_name}{{"{command}", ReceiverId}};\n'
         return out_str
 
     @staticmethod
-    def _generate_notifications(notifications):
+    def _generate_notifications(component_name, notifications):
         out_str = ''
         for notification in notifications:
-            notif_name = notification.replace('.', '')
-            out_str += f'    inline static const CommandId Notification{notif_name}{{ReceiverId, "{notif_name}"}};\n'
+            receiver_list = '"' + '","'.join(notification.receivers) + '"' if notification.receivers else ""
+            out_str += f'    inline static const NotificationId Notification{notification.name}{{"{component_name}.{notification.name}", {{{receiver_list}}}}};\n'
         return out_str
 
     @staticmethod
-    def _generate_command_handler_declarations(commands):
+    def _generate_message_handler_declarations(prefix, messages):
         out_str = ''
-        for command in commands:
-            command_name = command.replace('.', '')
-            out_str += f'    virtual message::CommandResponse onCommand{command_name}(const message::Command& command) = 0;\n'
+        for message in messages:
+            message_name = message.replace('.', '')
+            out_str += f'    virtual message::CommandResponse on{prefix}{message_name}(const message::Command& command) = 0;\n'
         return out_str
 
     @staticmethod
@@ -186,6 +187,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "I{context.name}.hpp"
+{Generator._generate_includes(context.component.inbound.notifications)}
 
 using namespace sugo;
 using Transition = I{context.name}::StateMachine::Transition;
@@ -213,14 +215,6 @@ std::ostream& sugo::operator<<(std::ostream& ostr, {context.namespace}::EventId 
     return ostr;
 }}
 
-namespace
-{{
-const ICommandMessageBroker::ReceiverIdList NotificationReceivers
-{{
-{Generator._generate_receiver_list(context)}
-}};    
-}} // namespace
-
 I{context.name}::I{context.name}(ICommandMessageBroker& messageBroker)
     : StateMachine(State::{context.component.statemachine.start},
           {{
@@ -228,10 +222,11 @@ I{context.name}::I{context.name}(ICommandMessageBroker& messageBroker)
             {Generator._generate_transitions(context)}
               // clang-format on
           }}),
-      StatedServiceComponent<I{context.name}::State, I{context.name}::Event>(messageBroker, NotificationReceivers, *this)
+      StatedServiceComponent<I{context.name}::State, I{context.name}::Event>(messageBroker, *this)
 {{
-    registerCommandHandler(CommandGetState, std::bind(&I{context.name}::onCommandGetState, this, std::placeholders::_1));
-{Generator._generate_command_register_calls(context)}
+    registerMessageHandler(CommandGetState, std::bind(&I{context.name}::onCommandGetState, this, std::placeholders::_1));
+{Generator._generate_command_handler_registrations(context.name, context.component.inbound.commands)}
+{Generator._generate_notification_handler_registrations(context.name, context.component.inbound.notifications)}
 }}
 
 message::CommandResponse I{context.name}::onCommandGetState(const message::Command& command)
@@ -241,12 +236,16 @@ message::CommandResponse I{context.name}::onCommandGetState(const message::Comma
 ''')
 
     @staticmethod
-    def _generate_receiver_list(context):
-        out_str = str()
-        for receiver in context.receivers:
-            out_str += f'    "{receiver}",\n'
+    def _generate_includes(notifications):
+        senders = set()
+        for notification in notifications:
+            senders.add(notification.split('.')[0])
+        out_str = ''
+        for sender in senders:
+            out_str += f'''#include "I{sender}.hpp"
+'''
         return out_str
-        
+
     @staticmethod
     def _generate_transitions(context):
         out_str = ''
@@ -257,10 +256,19 @@ message::CommandResponse I{context.name}::onCommandGetState(const message::Comma
         return out_str
     
     @staticmethod
-    def _generate_command_register_calls(context):
+    def _generate_command_handler_registrations(context_name, commands):
         out_str = ''
-        for command in context.component.commands:
+        for command in commands:
             command_name = command.replace('.', '')
-            out_str += f'''    registerCommandHandler(Command{command_name}, std::bind(&I{context.name}::onCommand{command_name}, this, std::placeholders::_1));
+            out_str += f'''    registerMessageHandler(Command{command_name}, std::bind(&I{context_name}::onCommand{command_name}, this, std::placeholders::_1));
+'''
+        return out_str
+
+    @staticmethod
+    def _generate_notification_handler_registrations(context_name, notifications):
+        out_str = ''
+        for notification in notifications:
+            component_name, notification_name = notification.split('.')
+            out_str += f'''    registerMessageHandler(I{component_name}::Notification{notification_name}, std::bind(&I{context_name}::onNotification{component_name}{notification_name}, this, std::placeholders::_1));
 '''
         return out_str

@@ -30,5 +30,6 @@
 
 namespace sugo
 {
+/// @brief JSON data representation
 using Json = nlohmann::json;
 }

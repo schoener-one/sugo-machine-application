@@ -45,13 +45,13 @@ public:
 
 protected:
     // Command handlers
-    message::CommandResponse onCommandMachineControlStarting(
+    message::CommandResponse onNotificationMachineControlStarting(
         const message::Command& command) override;
-    message::CommandResponse onCommandMachineControlRunning(
+    message::CommandResponse onNotificationMachineControlRunning(
         const message::Command& command) override;
-    message::CommandResponse onCommandMachineControlSwitchedOff(
+    message::CommandResponse onNotificationMachineControlSwitchedOff(
         const message::Command& command) override;
-    message::CommandResponse onCommandMachineControlError(const message::Command& command) override;
+    message::CommandResponse onNotificationMachineControlError(const message::Command& command) override;
 
     // Transition actions
     void handleMachineStateChange(const Event& event, const State& state) override;

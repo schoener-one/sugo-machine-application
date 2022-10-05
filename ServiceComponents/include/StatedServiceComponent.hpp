@@ -35,13 +35,11 @@ public:
      * @brief Construct a new stated service component object.
      *
      * @param messageBroker        The message broker to be used for sending and receiving.
-     * @param notifReceivers       The list for notification receivers.
      * @param stateMachine         The state machine of this component.
      */
-    explicit StatedServiceComponent(ICommandMessageBroker&                       messageBroker,
-                                    const ICommandMessageBroker::ReceiverIdList& notifReceivers,
-                                    IStateMachine<StateT, EventT>&               stateMachine)
-        : ServiceComponent(messageBroker, notifReceivers), m_stateMachine(stateMachine)
+    explicit StatedServiceComponent(ICommandMessageBroker&         messageBroker,
+                                    IStateMachine<StateT, EventT>& stateMachine)
+        : ServiceComponent(messageBroker), m_stateMachine(stateMachine)
     {
         messageBroker.registerPostProcessHandler(
             std::bind(&StatedServiceComponent::processAllEvents, this));

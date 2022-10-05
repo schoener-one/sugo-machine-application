@@ -2,7 +2,7 @@
 
 set(MODULE_NAME "ServiceComponents")
 add_library (${MODULE_NAME} STATIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandId.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ServiceComponent.cpp
     )
 target_include_directories(${MODULE_NAME} PUBLIC include)
 target_link_libraries(${MODULE_NAME}

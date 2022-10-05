@@ -40,7 +40,7 @@ message::CommandResponse FilamentCoilControl::onCommandStopCoil(const message::C
     return handleStateChangeCommand(command, Event(EventId::StopMotor));
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTensionTooLow(
+message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorTensionTooLow(
     const message::Command& command)
 {
     m_motorOffsetSpeed = ((m_motorOffsetSpeed - config::MotorSpeedInc) % config::MaxMotorSpeed);
@@ -49,7 +49,7 @@ message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTens
     return createResponse(command);
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTensionTooHigh(
+message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorTensionTooHigh(
     const message::Command& command)
 {
     m_motorOffsetSpeed = ((m_motorOffsetSpeed + config::MotorSpeedInc) % config::MaxMotorSpeed);
@@ -58,25 +58,25 @@ message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorTens
     return createResponse(command);
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentTensionSensorErrorOccurred(
+message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorErrorOccurred(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorStartMotorSucceeded(
+message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorStartMotorSucceeded(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::StartMotorSucceeded));
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorStartMotorFailed(
+message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorStartMotorFailed(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::StartMotorFailed));
 }
 
-message::CommandResponse FilamentCoilControl::onCommandFilamentCoilMotorErrorOccurred(
+message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorErrorOccurred(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));

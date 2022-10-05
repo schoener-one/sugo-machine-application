@@ -39,19 +39,19 @@ protected:
     message::CommandResponse onCommandStartFeeding(const message::Command& command) override;
     message::CommandResponse onCommandStopFeeding(const message::Command& command) override;
     message::CommandResponse onCommandGetTemperatures(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentPreHeaterTargetTemperatureReached(
+    message::CommandResponse onNotificationFilamentPreHeaterTargetTemperatureReached(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentPreHeaterErrorOccurred(
+    message::CommandResponse onNotificationFilamentPreHeaterErrorOccurred(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerHeaterTargetTemperatureReached(
+    message::CommandResponse onNotificationFilamentMergerHeaterTargetTemperatureReached(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentMergerHeaterErrorOccurred(
+    message::CommandResponse onNotificationFilamentMergerHeaterErrorOccurred(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentFeederMotorStartMotorSucceeded(
+    message::CommandResponse onNotificationFilamentFeederMotorStartMotorSucceeded(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentFeederMotorStartMotorFailed(
+    message::CommandResponse onNotificationFilamentFeederMotorStartMotorFailed(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentFeederMotorErrorOccurred(
+    message::CommandResponse onNotificationFilamentFeederMotorErrorOccurred(
         const message::Command& command) override;
     message::CommandResponse onCommandSetMotorSpeed(const message::Command& command) override;
 

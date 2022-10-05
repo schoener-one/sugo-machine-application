@@ -38,17 +38,17 @@ protected:
     message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
     message::CommandResponse onCommandStartCoil(const message::Command& command) override;
     message::CommandResponse onCommandStopCoil(const message::Command& command) override;
-    message::CommandResponse onCommandFilamentTensionSensorTensionTooLow(
+    message::CommandResponse onNotificationFilamentTensionSensorTensionTooLow(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentTensionSensorTensionTooHigh(
+    message::CommandResponse onNotificationFilamentTensionSensorTensionTooHigh(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentTensionSensorErrorOccurred(
+    message::CommandResponse onNotificationFilamentTensionSensorErrorOccurred(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentCoilMotorStartMotorSucceeded(
+    message::CommandResponse onNotificationFilamentCoilMotorStartMotorSucceeded(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentCoilMotorStartMotorFailed(
+    message::CommandResponse onNotificationFilamentCoilMotorStartMotorFailed(
         const message::Command& command) override;
-    message::CommandResponse onCommandFilamentCoilMotorErrorOccurred(
+    message::CommandResponse onNotificationFilamentCoilMotorErrorOccurred(
         const message::Command& command) override;
     message::CommandResponse onCommandSetMotorSpeed(const message::Command& command) override;
 

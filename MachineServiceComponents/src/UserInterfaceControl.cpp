@@ -132,25 +132,25 @@ void UserInterfaceControl::updateMachineState()
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse UserInterfaceControl::onCommandMachineControlStarting(
+message::CommandResponse UserInterfaceControl::onNotificationMachineControlStarting(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::MachineStarting));
 }
 
-message::CommandResponse UserInterfaceControl::onCommandMachineControlRunning(
+message::CommandResponse UserInterfaceControl::onNotificationMachineControlRunning(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::MachineRunning));
 }
 
-message::CommandResponse UserInterfaceControl::onCommandMachineControlSwitchedOff(
+message::CommandResponse UserInterfaceControl::onNotificationMachineControlSwitchedOff(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::MachineSwitchedOff));
 }
 
-message::CommandResponse UserInterfaceControl::onCommandMachineControlError(
+message::CommandResponse UserInterfaceControl::onNotificationMachineControlError(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::MachineError));

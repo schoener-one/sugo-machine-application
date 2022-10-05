@@ -10,10 +10,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentPreHeater.hpp"
-#include "MachineProtocol.hpp"
 #include "MachineConfig.hpp"
+#include "MachineProtocol.hpp"
 
 using namespace sugo;
+
+FilamentPreHeater::FilamentPreHeater(ICommandMessageBroker& messageBroker,
+                                     const ServiceLocator&  serviceLocator)
+    : IFilamentPreHeater(messageBroker),
+      HeaterService(config::GpioPinRelaySwitchFeederHeaterId, config::TemperatureSensorFeederId,
+                    serviceLocator)
+{
+}
 
 void FilamentPreHeater::onMaxTemperatureReached()
 {
@@ -63,7 +71,7 @@ void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilame
 void FilamentPreHeater::startHeating(const IFilamentPreHeater::Event&,
                                      const IFilamentPreHeater::State&)
 {
-    if (!switchHeater(config::GpioPinRelaySwitchFeederHeaterId, true))
+    if (!switchHeater(true))
     {
         push(Event(EventId::ErrorOccurred));
     }
@@ -77,7 +85,7 @@ void FilamentPreHeater::stopHeating(const IFilamentPreHeater::Event&,
         notify(NotificationTargetTemperatureReached);
         m_hasNotifiedTargetTemperatureReached = true;
     }
-    if (!switchHeater(config::GpioPinRelaySwitchFeederHeaterId, false))
+    if (!switchHeater(false))
     {
         push(Event(EventId::ErrorOccurred));
     }
@@ -87,7 +95,7 @@ void FilamentPreHeater::switchOff(const IFilamentPreHeater::Event&,
                                   const IFilamentPreHeater::State&)
 {
     stopTemperatureObservation();
-    if (!switchHeater(config::GpioPinRelaySwitchFeederHeaterId, false))
+    if (!switchHeater(false))
     {
         push(Event(EventId::ErrorOccurred));
     }
@@ -96,6 +104,6 @@ void FilamentPreHeater::switchOff(const IFilamentPreHeater::Event&,
 void FilamentPreHeater::handleError(const IFilamentPreHeater::Event&,
                                     const IFilamentPreHeater::State&)
 {
-    (void)switchHeater(config::GpioPinRelaySwitchFeederHeaterId, false);
+    (void)switchHeater(false);
     notify(NotificationErrorOccurred);
 }

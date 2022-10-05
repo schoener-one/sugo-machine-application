@@ -55,11 +55,11 @@ bool Thread::start(Runnable function, Policy policy, int priority)
             }
             catch (const std::exception& ex)
             {
-                LOG(error) << "Exception catched: " << ex.what();
+                LOG(fatal) << "Exception catched: " << ex.what();
             }
             catch (...)
             {
-                LOG(error) << "Exception catched";
+                LOG(fatal) << "Exception catched";
             }
         }
         else

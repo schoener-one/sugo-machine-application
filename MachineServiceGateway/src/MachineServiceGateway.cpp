@@ -41,7 +41,7 @@ void MachineServiceGateway::addConfigurationOptions(IConfiguration& configuratio
 MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroker,
                                              IOContext&             ioContext,
                                              const IConfiguration&  configuration)
-    : ServiceComponent(messageBroker, {}),
+    : ServiceComponent(messageBroker),
       m_jsonRpcServer(
           std::string("tcp://") +
               configuration.getOption("sugo-machine-service.address").get<std::string>() + ":" +
