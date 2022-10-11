@@ -60,7 +60,6 @@ message::CommandResponse FilamentMergerHeater::onCommandGetTemperature(
 void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
                                     const IFilamentMergerHeater::State&)
 {
-    m_hasNotifiedTargetTemperatureReached = false;
     updateHeaterTemperature();
     if (!startTemperatureObservation())
     {
@@ -70,22 +69,25 @@ void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
     push(Event(EventId::SwitchOnSucceeded));
 }
 
-void FilamentMergerHeater::startHeating(const IFilamentMergerHeater::Event&,
+void FilamentMergerHeater::startHeating(const IFilamentMergerHeater::Event& event,
                                         const IFilamentMergerHeater::State&)
 {
+    if (event.getId() == EventId::MinTemperatureReached)
+    {
+        notify(NotificationTargetTemperatureRangeLeft);
+    }
     if (!switchHeater(true))
     {
         push(Event(EventId::ErrorOccurred));
     }
 }
 
-void FilamentMergerHeater::stopHeating(const IFilamentMergerHeater::Event&,
+void FilamentMergerHeater::stopHeating(const IFilamentMergerHeater::Event& event,
                                        const IFilamentMergerHeater::State&)
 {
-    if (!m_hasNotifiedTargetTemperatureReached)
+    if (event.getId() == EventId::MaxTemperatureReached)
     {
-        notify(NotificationTargetTemperatureReached);
-        m_hasNotifiedTargetTemperatureReached = true;
+        notify(NotificationTargetTemperatureRangeReached);
     }
     if (!switchHeater(false))
     {

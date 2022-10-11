@@ -158,23 +158,20 @@ void MachineControl::waitForStarted(const IMachineControl::Event&, const IMachin
     }
 }
 
-void MachineControl::handleError(const IMachineControl::Event& event,
-                                 const IMachineControl::State& state)
+void MachineControl::switchOff()
 {
-    LOG(error) << "Error occurred...";
-    switchOff(event, state);
-    notify(NotificationError);
+    (void)send(IFilamentMergerControl::CommandSwitchOff);
+    (void)send(IFilamentCoilControl::CommandSwitchOff);
+}
+
+void MachineControl::handleError(const IMachineControl::Event&, const IMachineControl::State&)
+{
+    switchOff();
+    notify(NotificationErrorOccurred);
 }
 
 void MachineControl::switchOff(const IMachineControl::Event&, const IMachineControl::State&)
 {
-    (void)send(IFilamentMergerControl::CommandSwitchOff);
-    (void)send(IFilamentCoilControl::CommandSwitchOff);
+    switchOff();
     notify(NotificationSwitchedOff);
-}
-
-void MachineControl::runSelfTest(const IMachineControl::Event&, const IMachineControl::State&)
-{
-    // TODO not implemented yet!
-    push(Event(EventId::SelfTestSucceeded));
 }

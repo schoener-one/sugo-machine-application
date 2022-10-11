@@ -45,7 +45,6 @@ protected:
     void handleError(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
     void stopMotor(const Event& event, const State& state) override;
-    void switchOff(const Event& event, const State& state) override;
     void startMotor(const Event& event, const State& state) override;
 };
 

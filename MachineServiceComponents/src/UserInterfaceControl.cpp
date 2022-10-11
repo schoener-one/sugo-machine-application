@@ -150,7 +150,7 @@ message::CommandResponse UserInterfaceControl::onNotificationMachineControlSwitc
     return handleStateChangeCommand(command, Event(EventId::MachineSwitchedOff));
 }
 
-message::CommandResponse UserInterfaceControl::onNotificationMachineControlError(
+message::CommandResponse UserInterfaceControl::onNotificationMachineControlErrorOccurred(
     const message::Command& command)
 {
     return handleStateChangeCommand(command, Event(EventId::MachineError));

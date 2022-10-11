@@ -51,14 +51,15 @@ protected:
         const message::Command& command) override;
     message::CommandResponse onNotificationMachineControlSwitchedOff(
         const message::Command& command) override;
-    message::CommandResponse onNotificationMachineControlError(const message::Command& command) override;
+    message::CommandResponse onNotificationMachineControlErrorOccurred(
+        const message::Command& command) override;
 
     // Transition actions
     void handleMachineStateChange(const Event& event, const State& state) override;
 
 private:
-    void updateMachineState();
-    Json createStateMessage(const std::string& type);
+    void               updateMachineState();
+    Json               createStateMessage(const std::string& type);
     static std::string convertToString(UserInterfaceControl::EventId event);
 
     const ServiceLocator&    m_serviceLocator;

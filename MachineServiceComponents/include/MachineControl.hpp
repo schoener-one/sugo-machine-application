@@ -56,7 +56,6 @@ protected:
         const message::Command& command) override;
 
     // Transition actions
-    void runSelfTest(const Event& event, const State& state) override;
     void startMachine(const Event& event, const State& state) override;
     void switchOff(const Event& event, const State& state) override;
     void handleError(const Event& event, const State& state) override;
@@ -64,6 +63,8 @@ protected:
     void waitForStarted(const Event& event, const State& state) override;
 
 private:
+    void switchOff();
+
     const ServiceLocator& m_serviceLocator;
     bool                  m_isFilamentMergerControlRunning = false;
     bool                  m_isFilamentCoilControlRunning   = false;

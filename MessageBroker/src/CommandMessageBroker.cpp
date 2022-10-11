@@ -90,7 +90,7 @@ bool CommandMessageBroker::send(const message::Command&                  message
             if (!success)
             {
                 const unsigned tryCount = MaxMessageTransmissionRetries - i + 1;
-                LOG(error) << "Failed to send message (" << tryCount << "/"
+                LOG(error) << "Failed to send message " << message.name() << " to " << receiverId << " (" << tryCount << "/"
                            << MaxMessageTransmissionRetries << ")";
                 std::this_thread::sleep_for(
                     MaxMessageTransmissionTime * tryCount);  // just wait a short time to retry!
@@ -98,7 +98,7 @@ bool CommandMessageBroker::send(const message::Command&                  message
         }
         if (!success)
         {
-            LOG(error) << "Failed to send message completely";
+            LOG(error) << "Failed to send message " << message.name() << " to " << receiverId << " completely";
         }
     }
 

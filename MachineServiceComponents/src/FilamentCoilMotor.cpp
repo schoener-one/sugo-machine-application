@@ -103,12 +103,6 @@ void FilamentCoilMotor::handleError(const IFilamentCoilMotor::Event&,
     notify(NotificationErrorOccurred);
 }
 
-void FilamentCoilMotor::switchOff(const IFilamentCoilMotor::Event&,
-                                  const IFilamentCoilMotor::State&)
-{
-    // Nothing to do!
-}
-
 void FilamentCoilMotor::stopMotor(const IFilamentCoilMotor::Event&,
                                   const IFilamentCoilMotor::State&)
 {

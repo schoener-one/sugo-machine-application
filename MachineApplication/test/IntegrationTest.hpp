@@ -62,6 +62,7 @@ protected:
     void expectState(const typename CompT::State state)
     {
         LOG(debug) << "Expect state: " << state;
+        std::unique_lock<std::mutex> lock(m_mutex);
         auto        response  = send(CompT::CommandGetState);
         const Json& jsonState = Json::parse(response.response()).at("state");
         EXPECT_FALSE(jsonState.empty());
@@ -71,27 +72,31 @@ protected:
     template <typename CompT>
     void waitForNotification(
         const ServiceComponent::NotificationId& notificationId,
-        const std::chrono::milliseconds&        maxTime = std::chrono::milliseconds(50000))
+        const std::chrono::milliseconds&        maxTime = std::chrono::milliseconds(30000))
     {
         m_broker.registerHandler(notificationId.getId(),
                                  [&](const message::Command& command) -> message::CommandResponse {
+                                     std::unique_lock<std::mutex> lock(m_mutex);
                                      m_lastCommandId = command.name();
+                                     lock.unlock();
                                      m_condVar.notify_one();
+                                     lock.lock();
                                      return message::createResponse(command);
                                  });
 
         LOG(debug) << "Expect notification: " << notificationId.getId();
-        std::unique_lock<std::mutex> lockThread(m_mutex);
+        std::unique_lock<std::mutex> lock(m_mutex);
         m_lastCommandId.clear();
         std::cv_status status = std::cv_status::timeout;
         do
         {
-            status = m_condVar.wait_for(lockThread, maxTime);
+            status = m_condVar.wait_for(lock, maxTime);
         } while ((status == std::cv_status::no_timeout) &&
                  (m_lastCommandId != notificationId.getId()));
         EXPECT_NE(std::cv_status::timeout, status);
         EXPECT_EQ(m_lastCommandId, notificationId.getId());
         m_broker.unregisterHandler(notificationId.getId());
+        LOG(debug) << "Expected notification received: " << notificationId.getId();
     }
 
     ICommandMessageBroker::ReceiverId m_receiverId;

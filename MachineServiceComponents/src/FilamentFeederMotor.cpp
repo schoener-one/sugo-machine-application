@@ -98,12 +98,6 @@ void FilamentFeederMotor::handleError(const IFilamentFeederMotor::Event&,
     notify(NotificationErrorOccurred);
 }
 
-void FilamentFeederMotor::switchOff(const IFilamentFeederMotor::Event&,
-                                    const IFilamentFeederMotor::State&)
-{
-    // Nothing to do!
-}
-
 void FilamentFeederMotor::stopMotor(const IFilamentFeederMotor::Event&,
                                     const IFilamentFeederMotor::State&)
 {

@@ -13,6 +13,10 @@
 
 #include "CommandMessageBroker.hpp"
 #include "Globals.hpp"
+#include "IFilamentCoilControl.hpp"
+#include "IFilamentCoilMotor.hpp"
+#include "IFilamentMergerHeater.hpp"
+#include "IFilamentPreHeater.hpp"
 #include "IGpioControlMock.hpp"
 #include "IGpioPinMock.hpp"
 #include "IHardwareAbstractionLayerMock.hpp"
@@ -22,12 +26,12 @@
 #include "IStepperMotorMock.hpp"
 #include "ITemperatureSensorControlMock.hpp"
 #include "ITemperatureSensorMock.hpp"
+#include "IntegrationTest.hpp"
 #include "Logger.hpp"
 #include "MachineConfig.hpp"
 #include "ServiceComponentsExecutionGroup.hpp"
 #include "ServiceLocator.hpp"
 #include "Thread.hpp"
-#include "IntegrationTest.hpp"
 
 using namespace sugo;
 using namespace hal;
@@ -38,19 +42,21 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-class MachineApplicationIntegrationTest : public sugo::IntegrationTest
+namespace sugo
+{
+class MachineApplicationIntegrationTest : public IntegrationTest
 {
 protected:
     inline static const ICommandMessageBroker::ReceiverId ReceiverId{
         "MachineApplicationIntegrationTest"};
 
-    MachineApplicationIntegrationTest() :IntegrationTest(ReceiverId)
+    MachineApplicationIntegrationTest() : IntegrationTest(ReceiverId)
     {
     }
 
     void SetUp() override
     {
-        sugo::IntegrationTest::SetUp();
+        IntegrationTest::SetUp();
 
         prepareForStartComponents();
         ASSERT_TRUE(m_components.start(m_serviceLocator));
@@ -67,7 +73,7 @@ protected:
     void TearDown() override
     {
         m_components.stop();
-        sugo::IntegrationTest::TearDown();
+        IntegrationTest::TearDown();
     }
 
     static void SetUpTestCase()
@@ -77,7 +83,11 @@ protected:
 
     void prepareHardwareAbstractionLayer();
     void prepareForStartComponents();
-    void prepareForSwitchOn();
+    void prepareSwitchOn();
+    void heatUp();
+    void coolDown();
+    void switchOnMachine();
+    void switchOffMachine();
 
     IHardwareAbstractionLayer::StepperMotorControllerMap      m_stepperMotorControllerMap;
     IHardwareAbstractionLayer::TemperatureSensorControllerMap m_temperatureSensorControllerMap;
@@ -179,29 +189,109 @@ void MachineApplicationIntegrationTest::prepareForStartComponents()
         .WillByDefault(Return(ITemperatureSensor::Temperature{DefaultTemperature, Unit::Celcius}));
 }
 
-void MachineApplicationIntegrationTest::prepareForSwitchOn()
+void MachineApplicationIntegrationTest::prepareSwitchOn()
 {
+    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::High))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::High))
+        .WillOnce(Return(true));
 }
 
-TEST_F(MachineApplicationIntegrationTest, StartExecutionGroup)
+void MachineApplicationIntegrationTest::heatUp()
 {
-    prepareForSwitchOn();
-    send(IMachineControl::CommandSwitchOn);
-    EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
-
+    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::Low))
+        .WillOnce(Return(true));
     ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
+    EXPECT_NOTIFICATION(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
+
+    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::Low))
+        .WillOnce(Return(true));
     ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
+    EXPECT_NOTIFICATION(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
+}
+
+void MachineApplicationIntegrationTest::coolDown()
+{
+    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::High))
+        .WillOnce(Return(true));
+    ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
+        .WillByDefault(
+            Return(ITemperatureSensor::Temperature{config::MinHeaterTemperature, Unit::Celcius}));
+    EXPECT_NOTIFICATION(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
+
+    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::High))
+        .WillOnce(Return(true));
+    ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
+        .WillByDefault(
+            Return(ITemperatureSensor::Temperature{config::MinHeaterTemperature, Unit::Celcius}));
+    EXPECT_NOTIFICATION(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
+}
+
+void MachineApplicationIntegrationTest::switchOnMachine()
+{
+    prepareSwitchOn();
+    send(IMachineControl::CommandSwitchOn);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationStarting);
+    EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
+
+    // Heating up
+    heatUp();
+    EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(true));
+    EXPECT_NOTIFICATION(IMachineControl, NotificationRunning);
+}
+
+void MachineApplicationIntegrationTest::switchOffMachine()
+{
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::Low))
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::Low))
         .WillOnce(Return(true));
-    EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
-    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(true));
-    EXPECT_NOTIFICATION(IMachineControl, NotificationRunning);
+    EXPECT_CALL(*m_mockStepperMotorFeeder, stop(false)).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, stop(false)).WillOnce(Return(true));
+    send(IMachineControl::CommandSwitchOff);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationSwitchedOff);
+}
+}  // namespace sugo
 
-    m_components.stop();
+TEST_F(MachineApplicationIntegrationTest, StartExecutionGroup)
+{
+    switchOnMachine();
+}
+
+TEST_F(MachineApplicationIntegrationTest, StopExecutionGroup)
+{
+    switchOnMachine();
+    switchOffMachine();
+}
+
+TEST_F(MachineApplicationIntegrationTest, HeaterCoolDown)
+{
+    switchOnMachine();
+
+    // Starting cool down and heat up again
+    coolDown();
+    heatUp();
+}
+
+TEST_F(MachineApplicationIntegrationTest, MotorErrorOccurred)
+{
+    prepareSwitchOn();
+    send(IMachineControl::CommandSwitchOn);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationStarting);
+    EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
+
+    heatUp();
+    EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
+    // Error occurres
+    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(false));
+    EXPECT_NOTIFICATION(IFilamentCoilMotor, NotificationStartMotorFailed);
+    EXPECT_NOTIFICATION(IFilamentCoilControl, NotificationErrorOccurred);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationErrorOccurred);
+    EXPECT_STATE(IMachineControl, Error);
+    send(IMachineControl::CommandSwitchOff);
 }

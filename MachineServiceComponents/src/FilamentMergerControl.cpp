@@ -47,12 +47,13 @@ message::CommandResponse FilamentMergerControl::onCommandGetTemperatures(
     return forward(IFilamentMergerHeater::CommandGetTemperature, command);
 }
 
-message::CommandResponse FilamentMergerControl::onNotificationFilamentPreHeaterTargetTemperatureReached(
+message::CommandResponse FilamentMergerControl::onNotificationFilamentPreHeaterTargetTemperatureRangeReached(
     const message::Command& command)
 {
+    const bool stateChange = !m_isPreHeaterTemperatureReached;
     m_isPreHeaterTemperatureReached = true;
     // TODO add support for state change conditions!
-    if (m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
+    if (stateChange && m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
     {
         return handleStateChangeCommand(command, Event(EventId::HeatingUpSucceeded));
     }
@@ -66,12 +67,13 @@ message::CommandResponse FilamentMergerControl::onNotificationFilamentPreHeaterE
 }
 
 message::CommandResponse
-FilamentMergerControl::onNotificationFilamentMergerHeaterTargetTemperatureReached(
+FilamentMergerControl::onNotificationFilamentMergerHeaterTargetTemperatureRangeReached(
     const message::Command& command)
 {
+    const bool stateChange = !m_isMergerHeaterTemperatureReached;
     m_isMergerHeaterTemperatureReached = true;
     // TODO add support for state change conditions!
-    if (m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
+    if (stateChange && m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
     {
         return handleStateChangeCommand(command, Event(EventId::HeatingUpSucceeded));
     }

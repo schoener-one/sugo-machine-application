@@ -21,14 +21,12 @@ components:
           - Starting
           - Running
           - SwitchedOff
-          - Error
+          - ErrorOccurred
       events:
         - SwitchOff
         - SwitchOn
         - SwitchOnSucceeded
         - SwitchOnFailed
-        - SelfTestSucceeded
-        - SelfTestFailed
         - MergerHeatedUp
         - StartingSucceeded
         - StartingFailed
@@ -40,7 +38,6 @@ components:
         states:
           - 'Off'
           - Initialization
-          - SelfTest
           - WaitingForHeatedUp
           - Starting
           - WaitingForStarted
@@ -52,20 +49,12 @@ components:
             event: SwitchOn
             action: switchOn
           - state: Initialization
-            next: SelfTest
+            next: WaitingForHeatedUp
             event: SwitchOnSucceeded
-            action: runSelfTest
           - state: Initialization
             next: 'Off'
             event: SwitchOff
             action: switchOff
-          - state: SelfTest
-            next: 'Off'
-            event: SwitchOff
-            action: switchOff
-          - state: SelfTest
-            next: WaitingForHeatedUp
-            event: SelfTestSucceeded
           - state: WaitingForHeatedUp
             next: Starting
             event: MergerHeatedUp
@@ -112,10 +101,6 @@ components:
             next: Error
             event: SwitchOnFailed
             action: handleError
-          - state: SelfTest
-            next: Error
-            event: SelfTestFailed
-            action: handleError
           - state: Error
             next: 'Off'
             event: SwitchOff
@@ -133,9 +118,9 @@ components:
           - GetTemperatures
           - SetMotorSpeed
         notifications:
-          - FilamentPreHeater.TargetTemperatureReached
+          - FilamentPreHeater.TargetTemperatureRangeReached
           - FilamentPreHeater.ErrorOccurred
-          - FilamentMergerHeater.TargetTemperatureReached
+          - FilamentMergerHeater.TargetTemperatureRangeReached
           - FilamentMergerHeater.ErrorOccurred
           - FilamentFeederMotor.StartMotorSucceeded
           - FilamentFeederMotor.StartMotorFailed
@@ -277,7 +262,6 @@ components:
           - state: Stopped
             next: 'Off'
             event: SwitchOff
-            action: switchOff
           - state: Stopped
             next: Starting
             event: StartMotor
@@ -288,10 +272,14 @@ components:
           - state: Starting
             next: Error
             event: StartMotorFailed
-            action: startMotor
+            action: handleError
           - state: Running
             next: Stopped
             event: StopMotor
+            action: stopMotor
+          - state: Running
+            next: 'Off'
+            event: SwitchOff
             action: stopMotor
           - state: Initialization
             next: Error
@@ -304,7 +292,6 @@ components:
           - state: Error
             next: 'Off'
             event: SwitchOff
-            action: switchOff
 
 
   - FilamentFeederMotor:
@@ -321,7 +308,8 @@ components:
           - GetTemperature
       outbound:
         notifications:
-          - TargetTemperatureReached
+          - TargetTemperatureRangeReached
+          - TargetTemperatureRangeLeft
           - ErrorOccurred
       events:
         - SwitchOn
@@ -347,6 +335,7 @@ components:
           - state: Initialization
             next: HeatingOn
             event: SwitchOnSucceeded
+            action: startHeating
           - state: Initialization
             next: Error
             event: SwitchOnFailed
@@ -467,6 +456,10 @@ components:
             event: StartMotorSucceeded
             action: notifyRunning
           - state: StartingMotor
+            next: Error
+            event: StartMotorFailed
+            action: handleError
+          - state: StartingMotor
             next: 'Off'
             event: SwitchOff
             action: switchOff
@@ -549,7 +542,7 @@ components:
           - MachineControl.Starting
           - MachineControl.Running
           - MachineControl.SwitchedOff
-          - MachineControl.Error
+          - MachineControl.ErrorOccurred
       events:
         - MachineStarting
         - MachineRunning

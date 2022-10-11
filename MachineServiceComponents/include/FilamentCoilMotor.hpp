@@ -44,7 +44,6 @@ protected:
     message::CommandResponse onCommandSetMotorOffsetSpeed(const message::Command& command) override;
 
     // Transition actions
-    void switchOff(const Event& event, const State& state) override;
     void stopMotor(const Event& event, const State& state) override;
     void handleError(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;

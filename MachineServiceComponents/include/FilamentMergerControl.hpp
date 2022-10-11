@@ -39,11 +39,11 @@ protected:
     message::CommandResponse onCommandStartFeeding(const message::Command& command) override;
     message::CommandResponse onCommandStopFeeding(const message::Command& command) override;
     message::CommandResponse onCommandGetTemperatures(const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentPreHeaterTargetTemperatureReached(
+    message::CommandResponse onNotificationFilamentPreHeaterTargetTemperatureRangeReached(
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentPreHeaterErrorOccurred(
         const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentMergerHeaterTargetTemperatureReached(
+    message::CommandResponse onNotificationFilamentMergerHeaterTargetTemperatureRangeReached(
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentMergerHeaterErrorOccurred(
         const message::Command& command) override;

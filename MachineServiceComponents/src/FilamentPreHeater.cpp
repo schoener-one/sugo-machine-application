@@ -58,7 +58,6 @@ message::CommandResponse FilamentPreHeater::onCommandGetTemperature(const messag
 
 void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilamentPreHeater::State&)
 {
-    m_hasNotifiedTargetTemperatureReached = false;
     updateHeaterTemperature();
     if (!startTemperatureObservation())
     {
@@ -68,22 +67,25 @@ void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilame
     push(Event(EventId::SwitchOnSucceeded));
 }
 
-void FilamentPreHeater::startHeating(const IFilamentPreHeater::Event&,
+void FilamentPreHeater::startHeating(const IFilamentPreHeater::Event& event,
                                      const IFilamentPreHeater::State&)
 {
+    if (event.getId() == EventId::MinTemperatureReached)
+    {
+        notify(NotificationTargetTemperatureRangeLeft);
+    }
     if (!switchHeater(true))
     {
         push(Event(EventId::ErrorOccurred));
     }
 }
 
-void FilamentPreHeater::stopHeating(const IFilamentPreHeater::Event&,
+void FilamentPreHeater::stopHeating(const IFilamentPreHeater::Event& event,
                                     const IFilamentPreHeater::State&)
 {
-    if (!m_hasNotifiedTargetTemperatureReached)
+    if (event.getId() == EventId::MaxTemperatureReached)
     {
-        notify(NotificationTargetTemperatureReached);
-        m_hasNotifiedTargetTemperatureReached = true;
+        notify(NotificationTargetTemperatureRangeReached);
     }
     if (!switchHeater(false))
     {
