@@ -16,28 +16,29 @@
 #include "MachineProtocol.hpp"
 
 using namespace sugo;
+using namespace sugo::message;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
 message::CommandResponse FilamentCoilControl::onCommandSwitchOn(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
+    return handleStateChangeMessage(command, Event(EventId::SwitchOn));
 }
 
 message::CommandResponse FilamentCoilControl::onCommandSwitchOff(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
+    return handleStateChangeMessage(command, Event(EventId::SwitchOff));
 }
 
 message::CommandResponse FilamentCoilControl::onCommandStartCoil(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::StartMotor));
+    return handleStateChangeMessage(command, Event(EventId::StartMotor));
 }
 
 message::CommandResponse FilamentCoilControl::onCommandStopCoil(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::StopMotor));
+    return handleStateChangeMessage(command, Event(EventId::StopMotor));
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorTensionTooLow(
@@ -46,7 +47,7 @@ message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSenso
     m_motorOffsetSpeed = ((m_motorOffsetSpeed - config::MotorSpeedInc) % config::MaxMotorSpeed);
     send(IFilamentCoilMotor::CommandSetMotorOffsetSpeed,
          Json({{protocol::IdSpeed, m_motorOffsetSpeed}}));
-    return createResponse(command);
+    return createCommandResponse(command);
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorTensionTooHigh(
@@ -55,31 +56,31 @@ message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSenso
     m_motorOffsetSpeed = ((m_motorOffsetSpeed + config::MotorSpeedInc) % config::MaxMotorSpeed);
     send(IFilamentCoilMotor::CommandSetMotorOffsetSpeed,
          Json({{protocol::IdSpeed, m_motorOffsetSpeed}}));
-    return createResponse(command);
+    return createCommandResponse(command);
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorErrorOccurred(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));
+    return handleStateChangeMessage(command, Event(EventId::ErrorOccurred));
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorStartMotorSucceeded(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::StartMotorSucceeded));
+    return handleStateChangeMessage(command, Event(EventId::StartMotorSucceeded));
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorStartMotorFailed(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::StartMotorFailed));
+    return handleStateChangeMessage(command, Event(EventId::StartMotorFailed));
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorErrorOccurred(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::ErrorOccurred));
+    return handleStateChangeMessage(command, Event(EventId::ErrorOccurred));
 }
 
 message::CommandResponse FilamentCoilControl::onCommandSetMotorSpeed(
@@ -124,14 +125,19 @@ void FilamentCoilControl::switchOn(const IFilamentCoilControl::Event&,
 void FilamentCoilControl::switchOff(const IFilamentCoilControl::Event&,
                                     const IFilamentCoilControl::State&)
 {
-    (void)send(IFilamentCoilMotor::CommandSwitchOff);
-    (void)send(IFilamentTensionSensor::CommandSwitchOff);
+    switchOff();
 }
 
-void FilamentCoilControl::handleError(const IFilamentCoilControl::Event& event,
-                                      const IFilamentCoilControl::State& state)
+void FilamentCoilControl::switchOff()
 {
-    switchOff(event, state);
+    switchOffServiceComponent<IFilamentCoilMotor>();
+    switchOffServiceComponent<IFilamentTensionSensor>();
+}
+
+void FilamentCoilControl::handleError(const IFilamentCoilControl::Event&,
+                                      const IFilamentCoilControl::State&)
+{
+    switchOff();
     notify(NotificationErrorOccurred);
 }
 

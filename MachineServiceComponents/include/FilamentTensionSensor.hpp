@@ -23,7 +23,7 @@ class FilamentTensionSensor : public IFilamentTensionSensor
 {
 public:
     // Constructor / Destructor
-    explicit FilamentTensionSensor(ICommandMessageBroker& messageBroker,
+    explicit FilamentTensionSensor(message::ICommandMessageBroker& messageBroker,
                                    const ServiceLocator&  serviceLocator)
         : IFilamentTensionSensor(messageBroker), m_serviceLocator(serviceLocator)
     {

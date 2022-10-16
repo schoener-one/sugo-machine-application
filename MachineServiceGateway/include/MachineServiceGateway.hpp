@@ -13,10 +13,11 @@
 
 #include <jsonrpcpp/jsonrpcpp.hpp>
 
-#include "ICommandMessageBroker.hpp"
 #include "IConfiguration.hpp"
 #include "IMachineServiceGateway.hpp"
+#include "IMessageHandler.hpp"
 #include "IOContext.hpp"
+#include "Message.hpp"
 #include "Server.hpp"
 #include "ServiceComponent.hpp"
 
@@ -27,7 +28,7 @@ namespace sugo
  */
 class MachineServiceGateway : public IMachineServiceGateway,
                               public ServiceComponent,
-                              public Server::IMessageHandler
+                              public message::IMessageHandler
 {
 public:
     static void addConfigurationOptions(IConfiguration& configuration);
@@ -35,20 +36,21 @@ public:
     /**
      * Creates a new instance
      */
-    explicit MachineServiceGateway(ICommandMessageBroker& messageBroker, IOContext& ioContext,
-                                   const IConfiguration& configuration);
+    explicit MachineServiceGateway(message::ICommandMessageBroker& messageBroker,
+                                   message::IOContext&             ioContext,
+                                   const IConfiguration&           configuration);
 
     bool start() override;
     void stop() override;
     bool isRunning() const override;
 
 protected:
-    bool processReceived(StreamBuffer& in, StreamBuffer& out) override;
+    bool processReceived(message::StreamBuffer& in, message::StreamBuffer& out) override;
     void processPost() override{};
 
 private:
     jsonrpcpp::Response processCommand(jsonrpcpp::request_ptr request);
 
-    Server m_jsonRpcServer;
+    message::Server m_jsonRpcServer;
 };
 }  // namespace sugo

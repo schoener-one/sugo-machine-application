@@ -111,15 +111,15 @@ public:
     using Event        = {context.namespace}::Event;
     using EventId      = {context.namespace}::EventId;
 
-    inline static const std::string ReceiverId{{"{context.name}"}};
+    inline static const message::Address ReceiverId{{"{context.name}"}};
     
     // Commands
-    inline static const CommandId CommandGetState{{"GetState", ReceiverId}};
+    inline static const message::CommandId CommandGetState{{"GetState", ReceiverId}};
 {Generator._generate_commands(context.component.inbound.commands) if len(context.component.inbound.commands) else ''}
     // Notifications
 {Generator._generate_notifications(context.name, context.component.outbound.notifications) if len(context.component.outbound.notifications) else ''}    
     // Constructor / Destructor
-    explicit I{context.name}(ICommandMessageBroker& messageBroker);
+    explicit I{context.name}(message::ICommandMessageBroker& messageBroker);
     virtual ~I{context.name}(){{}}
 
     I{context.name}(const I{context.name}&) = default;
@@ -128,7 +128,6 @@ public:
     I{context.name}& operator=(I{context.name}&&) = default;
     
 protected:
-
     // Message handlers
     message::CommandResponse onCommandGetState(const message::Command& command);
 {Generator._generate_message_handler_declarations('Command', context.component.inbound.commands)}
@@ -145,7 +144,7 @@ protected:
         out_str = ''
         for command in commands:
             command_name = command.replace('.', '')
-            out_str += f'    inline static const CommandId Command{command_name}{{"{command}", ReceiverId}};\n'
+            out_str += f'    inline static const message::CommandId Command{command_name}{{"{command}", ReceiverId}};\n'
         return out_str
 
     @staticmethod
@@ -153,7 +152,7 @@ protected:
         out_str = ''
         for notification in notifications:
             receiver_list = '"' + '","'.join(notification.receivers) + '"' if notification.receivers else ""
-            out_str += f'    inline static const NotificationId Notification{notification.name}{{"{component_name}.{notification.name}", {{{receiver_list}}}}};\n'
+            out_str += f'    inline static const message::NotificationId Notification{notification.name}{{"{component_name}.{notification.name}", ReceiverId}};\n'
         return out_str
 
     @staticmethod
@@ -188,6 +187,11 @@ protected:
 
 #include "I{context.name}.hpp"
 {Generator._generate_includes(context.component.inbound.notifications)}
+namespace {{
+    const sugo::IServiceComponent::NotificationIdList SubscriptionIds{{
+{Generator._generate_subscription_id_list(context.name, context.component.inbound.notifications)}
+    }};
+}} // namespace
 
 using namespace sugo;
 using Transition = I{context.name}::StateMachine::Transition;
@@ -197,7 +201,7 @@ std::ostream& sugo::operator<<(std::ostream& ostr, {context.namespace}::State co
 {{
     switch (value)
     {{
-{newline.join(f'        case {context.namespace}::State::{state}:{newline}        ostr << "{state}";{newline}        break;' for state in context.component.statemachine.states)}
+{newline.join(f'        case {context.namespace}::State::{state}:{newline}            ostr << "{state}";{newline}            break;' for state in context.component.statemachine.states)}
         default:
             ASSERT_NOT_REACHABLE;
     }}
@@ -208,21 +212,21 @@ std::ostream& sugo::operator<<(std::ostream& ostr, {context.namespace}::EventId 
 {{
     switch (value)
     {{
-{newline.join(f'        case {context.namespace}::EventId::{event}:{newline}        ostr << "{event}";{newline}        break;' for event in context.component.events)}
+{newline.join(f'        case {context.namespace}::EventId::{event}:{newline}            ostr << "{event}";{newline}            break;' for event in context.component.events)}
         default:
             ASSERT_NOT_REACHABLE;
     }}
     return ostr;
 }}
 
-I{context.name}::I{context.name}(ICommandMessageBroker& messageBroker)
+I{context.name}::I{context.name}(message::ICommandMessageBroker& messageBroker)
     : StateMachine(State::{context.component.statemachine.start},
           {{
               // clang-format off
             {Generator._generate_transitions(context)}
               // clang-format on
           }}),
-      StatedServiceComponent<I{context.name}::State, I{context.name}::Event>(messageBroker, *this)
+      StatedServiceComponent<I{context.name}::State, I{context.name}::Event>(messageBroker, SubscriptionIds, *this)
 {{
     registerMessageHandler(CommandGetState, std::bind(&I{context.name}::onCommandGetState, this, std::placeholders::_1));
 {Generator._generate_command_handler_registrations(context.name, context.component.inbound.commands)}
@@ -270,5 +274,14 @@ message::CommandResponse I{context.name}::onCommandGetState(const message::Comma
         for notification in notifications:
             component_name, notification_name = notification.split('.')
             out_str += f'''    registerMessageHandler(I{component_name}::Notification{notification_name}, std::bind(&I{context_name}::onNotification{component_name}{notification_name}, this, std::placeholders::_1));
+'''
+        return out_str
+
+    @staticmethod
+    def _generate_subscription_id_list(context_name, notifications):
+        out_str = ''
+        for notification in notifications:
+            component_name, notification_name = notification.split('.')
+            out_str += f'''        sugo::I{component_name}::Notification{notification_name},
 '''
         return out_str

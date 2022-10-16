@@ -10,7 +10,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "CommandId.hpp"
 #include "ICommandMessageBrokerMock.hpp"
 #include "IStateMachineMock.hpp"
 #include "Logger.hpp"
@@ -24,7 +23,7 @@ namespace sugo
 class StatedServiceComponentTestable : public StatedServiceComponent<test::State, test::Event>
 {
 public:
-    StatedServiceComponentTestable(ICommandMessageBroker&                   messageBroker,
+    StatedServiceComponentTestable(message::ICommandMessageBroker&                   messageBroker,
                                    IStateMachine<test::State, test::Event>& stateMachine)
         : StatedServiceComponent<test::State, test::Event>(messageBroker, {}, stateMachine)
     {
@@ -39,6 +38,7 @@ public:
 using ::testing::_;
 
 using namespace sugo;
+using namespace sugo::message;
 
 class StatedServiceComponentTest : public ::testing::Test
 {
@@ -69,21 +69,19 @@ protected:
     StatedServiceComponentTestable m_component;
 };
 
-TEST_F(StatedServiceComponentTest, StatedServiceComponent_Send)
+TEST_F(StatedServiceComponentTest, Send)
 {
     const CommandId   commandId("test", "send-this");
-    const std::string parameters("test-parameters");
-    EXPECT_CALL(m_mockCommandMessageBroker, send(_, commandId.receiver, _))
+    EXPECT_CALL(m_mockCommandMessageBroker, send(_, commandId.getReceiverAddress(), _))
         .WillOnce(::testing::Return(true));
-    const message::CommandResponse response = m_component.send(commandId, parameters);
+    const message::CommandResponse response = m_component.send(commandId, "test-parameters");
     EXPECT_EQ(response.result(), message::CommandResponse_Result_SUCCESS);
 }
 
-TEST_F(StatedServiceComponentTest, StatedServiceComponent_Notify)
+TEST_F(StatedServiceComponentTest, Notify)
 {
-    const CommandId   commandId("", "send-this");
-    const std::string parameters("test-parameters");
+    const NotificationId   notificationId("", "send-this");
     EXPECT_CALL(m_mockCommandMessageBroker, notify(_, _)).WillOnce(::testing::Return(true));
-    const bool success = m_component.notify(commandId, parameters);
+    const bool success = m_component.notify(notificationId, "test-parameters");
     EXPECT_TRUE(success);
 }

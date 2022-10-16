@@ -14,18 +14,19 @@
 #include "IMachineControl.hpp"
 #include "MachineConfig.hpp"
 #include "ServiceLocator.hpp"
+#include "ControlService.hpp"
 
 namespace sugo
 {
 /**
  * @class MachineControl
  */
-class MachineControl : public IMachineControl
+class MachineControl : public IMachineControl, public ControlService<MachineControl>
 {
 public:
     // Constructor / Destructor
-    explicit MachineControl(ICommandMessageBroker& messageBroker,
-                            const ServiceLocator&  serviceLocator)
+    explicit MachineControl(message::ICommandMessageBroker& messageBroker,
+                            const ServiceLocator&           serviceLocator)
         : IMachineControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }
@@ -64,11 +65,13 @@ protected:
 
 private:
     void switchOff();
-
+    
     const ServiceLocator& m_serviceLocator;
     bool                  m_isFilamentMergerControlRunning = false;
     bool                  m_isFilamentCoilControlRunning   = false;
     unsigned              m_motorSpeed                     = config::DefaultMotorSpeed;
+
+    friend class ControlService<MachineControl>;
 };
 
 }  // namespace sugo

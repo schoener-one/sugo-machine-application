@@ -13,10 +13,11 @@
 #include <string>
 
 #include "IGenericMessageBroker.hpp"
+#include "Message.hpp"
 
-namespace sugo
+namespace sugo::message
 {
 /// Interface definition of the CommandMessageBroker.
 using ICommandMessageBroker =
-    IGenericMessageBroker<message::Command, std::string, message::CommandResponse, std::string>;
-}  // namespace sugo
+    IGenericMessageBroker<message::Command, MessageId, message::CommandResponse, Address>;
+}  // namespace sugo::message

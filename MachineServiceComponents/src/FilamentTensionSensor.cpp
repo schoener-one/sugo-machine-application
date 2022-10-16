@@ -12,18 +12,19 @@
 #include "FilamentTensionSensor.hpp"
 
 using namespace sugo;
+using namespace sugo::message;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
 message::CommandResponse FilamentTensionSensor::onCommandSwitchOn(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
+    return handleStateChangeMessage(command, Event(EventId::SwitchOn));
 }
 
 message::CommandResponse FilamentTensionSensor::onCommandSwitchOff(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
+    return handleStateChangeMessage(command, Event(EventId::SwitchOff));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

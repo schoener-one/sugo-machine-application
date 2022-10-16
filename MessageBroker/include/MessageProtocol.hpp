@@ -12,7 +12,7 @@
 
 #include <string>
 
-namespace sugo::protocol
+namespace sugo::message::protocol
 {
 inline static const std::string IdState{"state"};
 inline static const std::string IdErrorReason{"reason"};

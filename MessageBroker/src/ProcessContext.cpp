@@ -11,7 +11,7 @@
 #include "ProcessContext.hpp"
 #include "Logger.hpp"
 
-using namespace sugo;
+using namespace sugo::message;
 
 ProcessContext::ProcessContext(const std::string& instanceId, Thread::Policy policy, int priority)
     : m_thread(instanceId), m_policy(policy), m_priority(priority)

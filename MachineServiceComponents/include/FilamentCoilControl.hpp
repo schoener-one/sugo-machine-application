@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "ControlService.hpp"
 #include "IFilamentCoilControl.hpp"
 #include "ServiceLocator.hpp"
 
@@ -19,12 +20,12 @@ namespace sugo
 /**
  * @class FilamentCoilControl
  */
-class FilamentCoilControl : public IFilamentCoilControl
+class FilamentCoilControl : public IFilamentCoilControl, public ControlService<FilamentCoilControl>
 {
 public:
     // Constructor / Destructor
-    explicit FilamentCoilControl(ICommandMessageBroker& messageBroker,
-                                 const ServiceLocator&  serviceLocator)
+    explicit FilamentCoilControl(message::ICommandMessageBroker& messageBroker,
+                                 const ServiceLocator&           serviceLocator)
         : IFilamentCoilControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }
@@ -61,8 +62,12 @@ protected:
     void notifyRunning(const Event& event, const State& state) override;
 
 private:
+    void switchOff();
+
     const ServiceLocator& m_serviceLocator;
     int                   m_motorOffsetSpeed = 0;
+
+    friend class ControlService<FilamentCoilControl>;
 };
 
 }  // namespace sugo

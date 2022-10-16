@@ -13,7 +13,7 @@
 
 #include <boost/asio/executor_work_guard.hpp>
 
-using namespace sugo;
+using namespace sugo::message;
 
 IOContext::IOContext(const std::string& instanceId, Thread::Policy policy, int priority)
     : ProcessContext(instanceId, policy, priority)

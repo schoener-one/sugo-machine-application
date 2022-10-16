@@ -14,7 +14,7 @@
 
 #include <boost/asio/io_context.hpp>
 
-namespace sugo
+namespace sugo::message
 {
 /**
  * Class representing the io context.

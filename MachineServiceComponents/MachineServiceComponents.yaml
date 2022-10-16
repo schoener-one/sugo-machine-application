@@ -81,6 +81,10 @@ components:
             next: Error
             event: StartingFailed
             action: handleError
+          - state: WaitingForStarted
+            next: Error
+            event: ErrorOccurred
+            action: handleError
           - state: Starting
             next: 'Off'
             event: SwitchOff
@@ -105,7 +109,12 @@ components:
             next: 'Off'
             event: SwitchOff
             action: switchOff
-
+          - state: Error
+            next: Error
+            event: ErrorOccurred
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
 
   - FilamentMergerControl:
       description: "Hardware service component to control the filament merger unit"
@@ -216,6 +225,13 @@ components:
             next: 'Off'
             event: SwitchOff
             action: switchOff
+          - state: Error
+            next: Error
+            event: ErrorOccurred
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
+
 
   - _BaseMotor: &BaseMotor
       description: "Hardware service component to control a motor"
@@ -292,6 +308,12 @@ components:
           - state: Error
             next: 'Off'
             event: SwitchOff
+          - state: Error
+            next: Error
+            event: RunMotorFailed
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
 
 
   - FilamentFeederMotor:
@@ -349,6 +371,9 @@ components:
             event: MaxTemperatureReached
             action: stopHeating
           - state: HeatingOn
+            next: HeatingOn
+            event: MinTemperatureReached
+          - state: HeatingOn
             next: 'Off'
             event: SwitchOff
             action: switchOff
@@ -375,6 +400,13 @@ components:
             next: 'Off'
             event: SwitchOff
             handle: switchOff
+          - state: Error
+            next: Error
+            event: ErrorOccurred
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
+
 
   - FilamentPreHeater:
       <<: *BaseHeater
@@ -475,6 +507,16 @@ components:
             next: Error
             event: ErrorOccurred
             action: handleError
+          - state: Error
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Error
+            next: Error
+            event: ErrorOccurred
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
 
 
   - FilamentCoilMotor:
@@ -534,6 +576,12 @@ components:
             next: 'Off'
             event: SwitchOff
             action: switchOff
+          - state: Error
+            next: Error
+            event: ErrorOccurred
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
 
   - UserInterfaceControl:
       description: "Hardware service component to control the user interface of the filament coil unit"

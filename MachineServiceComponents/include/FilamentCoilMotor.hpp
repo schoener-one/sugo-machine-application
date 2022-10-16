@@ -24,7 +24,7 @@ class FilamentCoilMotor : public IFilamentCoilMotor, public MotorService
 {
 public:
     // Constructor / Destructor
-    explicit FilamentCoilMotor(ICommandMessageBroker& messageBroker,
+    explicit FilamentCoilMotor(message::ICommandMessageBroker& messageBroker,
                                const ServiceLocator&  serviceLocator)
         : IFilamentCoilMotor(messageBroker),
           MotorService(config::StepperMotorCoilerId, serviceLocator)

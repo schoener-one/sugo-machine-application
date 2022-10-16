@@ -23,6 +23,7 @@
 
 using namespace sugo;
 using namespace remote_control;
+using namespace sugo::message;
 
 std::string UserInterfaceControl::convertToString(UserInterfaceControl::EventId event)
 {
@@ -135,25 +136,25 @@ void UserInterfaceControl::updateMachineState()
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlStarting(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::MachineStarting));
+    return handleStateChangeMessage(command, Event(EventId::MachineStarting));
 }
 
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlRunning(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::MachineRunning));
+    return handleStateChangeMessage(command, Event(EventId::MachineRunning));
 }
 
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlSwitchedOff(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::MachineSwitchedOff));
+    return handleStateChangeMessage(command, Event(EventId::MachineSwitchedOff));
 }
 
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlErrorOccurred(
     const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::MachineError));
+    return handleStateChangeMessage(command, Event(EventId::MachineError));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

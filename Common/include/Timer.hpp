@@ -46,6 +46,7 @@ public:
     ~Timer()
     {
         stop();
+        m_thread.join();
     }
 
     /**
@@ -58,12 +59,12 @@ public:
     template <typename RepT, typename PeriodT>
     bool start(const std::chrono::duration<RepT, PeriodT>& period)
     {
-        m_isRunning = true;
+        m_doRun = true;
         return m_thread.start([&] {
-            for (; m_isRunning;)
+            for (; m_doRun;)
             {
                 std::this_thread::sleep_for(period);
-                if (m_isRunning)
+                if (m_doRun)
                 {
                     m_timeoutHandler();
                 }
@@ -89,16 +90,18 @@ public:
      */
     void stop()
     {
-        if (m_isRunning)
-        {
-            m_isRunning = false;
-            m_thread.join();
-        }
+        m_doRun = false;
+        // FIXME timer has to stop immediately!
+        // if (m_doRun)
+        // {
+        //     m_doRun = false;
+        //     m_thread.join();
+        // }
     }
 
 private:
     Thread         m_thread;
-    bool           m_isRunning = false;
+    bool           m_doRun = false;
     TimeoutHandler m_timeoutHandler;
 };
 }  // namespace sugo

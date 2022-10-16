@@ -15,8 +15,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <vector>
 #include <mutex>
+#include <vector>
 
 namespace sugo
 {
@@ -110,19 +110,30 @@ public:
         return m_eventQueue.push(event);
     }
 
+    bool checkNextEvent(const EventT& event) const override
+    {
+        std::lock_guard<std::mutex> lock(m_mutexEventProcessing);
+        const auto ti = findTransition(event);
+        return (ti != m_transitions.end());
+    }
+
     bool processNextEvent() override
     {
         std::lock_guard<std::mutex> lock(m_mutexEventProcessing);
+
         if (m_eventQueue.empty())
         {
             return false;
         }
+        
         EventT event = m_eventQueue.pull();
+        
         if (!processEvent(event))
         {
             LOG(fatal) << "Transition for event " << event << " not found in state " << m_state;
             ASSERT_NOT_REACHABLE;
         }
+        
         return true;
     }
 
@@ -140,31 +151,38 @@ private:
      */
     bool processEvent(const EventT& event)
     {
-        typename TransitionTable::const_iterator ti = m_transitions.end();
-        ti           = std::find_if(m_transitions.begin(), m_transitions.end(),
-                          [&](const Transition& arg) -> bool {
-                              return m_state == arg.state && event == arg.event &&
-                                     (arg.guard == nullptr || arg.guard());
-                          });
-        bool success = false;
-        if (ti != m_transitions.end())
+        auto ti = findTransition(event);
+
+        if (ti == m_transitions.end())
         {
-            LOG(debug) << "Transition for event " << event << " from state " << m_state
-                       << " to state " << ti->next;
-            m_state = ti->next;
-            if (ti->action != nullptr)
-            {
-                ti->action(event, m_state);
-            }
-            success = true;
+            return false;
         }
-        return success;
+
+        LOG(debug) << "Transition for event " << event << " from state " << m_state << " to state "
+                   << ti->next;
+        m_state = ti->next;
+
+        if (ti->action != nullptr)
+        {
+            ti->action(event, m_state);
+        }
+
+        return true;
     }
 
-    StateT                m_state;        ///< Current state.
-    const TransitionTable m_transitions;  ///< Transition table.
-    EventQueue<EventT>    m_eventQueue;   ///< Event queue for pending events.
-    std::mutex            m_mutexEventProcessing;   ///< Mutex to protect the state
+    typename TransitionTable::const_iterator findTransition(const EventT& event) const
+    {
+        return std::find_if(
+            m_transitions.begin(), m_transitions.end(), [&](const Transition& arg) -> bool {
+                return m_state == arg.state && event == arg.event &&
+                       (arg.guard == nullptr || arg.guard());
+            });
+    }
+
+    StateT                m_state;                 ///< Current state.
+    const TransitionTable m_transitions;           ///< Transition table.
+    EventQueue<EventT>    m_eventQueue;            ///< Event queue for pending events.
+    mutable std::mutex    m_mutexEventProcessing;  ///< Mutex to protect the state
 };
 
 }  // namespace sugo

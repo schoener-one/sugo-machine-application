@@ -13,17 +13,18 @@
 
 #include "IFilamentMergerControl.hpp"
 #include "ServiceLocator.hpp"
+#include "ControlService.hpp"
 
 namespace sugo
 {
 /**
  * @class FilamentMergerControl
  */
-class FilamentMergerControl : public IFilamentMergerControl
+class FilamentMergerControl : public IFilamentMergerControl, public ControlService<FilamentMergerControl>
 {
 public:
     // Constructor / Destructor
-    explicit FilamentMergerControl(ICommandMessageBroker& messageBroker,
+    explicit FilamentMergerControl(message::ICommandMessageBroker& messageBroker,
                                    const ServiceLocator&  serviceLocator)
         : IFilamentMergerControl(messageBroker), m_serviceLocator(serviceLocator)
     {
@@ -66,9 +67,13 @@ protected:
     void notifyRunning(const Event& event, const State& state) override;
 
 private:
+    void switchOff();
+    
     const ServiceLocator& m_serviceLocator;
     bool                  m_isPreHeaterTemperatureReached    = false;
     bool                  m_isMergerHeaterTemperatureReached = false;
+
+    friend class ControlService<FilamentMergerControl>;
 };
 
 }  // namespace sugo

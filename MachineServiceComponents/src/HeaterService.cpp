@@ -15,6 +15,7 @@
 #include "MachineConfig.hpp"
 
 #include <cassert>
+#include <limits>
 
 using namespace sugo;
 
@@ -23,13 +24,8 @@ HeaterService::HeaterService(const std::string& heaterId, const std::string& tem
     : m_heaterId(heaterId),
       m_temperatureSensorId(temperatureSensorId),
       m_serviceLocator(serviceLocator),
-      m_temperatureObserver(
-          [this]() {
-              this->updateHeaterTemperature(
-                  std::bind(&HeaterService::onMinTemperatureReached, this),
-                  std::bind(&HeaterService::onMaxTemperatureReached, this));
-          },
-          heaterId + "Timer")
+      m_temperatureObserver([&]() { updateHeaterTemperatureAndCheck(); }, heaterId + "Timer"),
+      m_lastCheckedTemperature(std::numeric_limits<Temperature>::min())
 {
 }
 
@@ -37,40 +33,41 @@ bool HeaterService::switchHeater(bool switchOn)
 {
     auto pinHeaterMerger =
         getGpioPin(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_heaterId);
+    LOG(debug) << "Switch heater " << m_heaterId << " " << (switchOn ? "on" : "off");
     return pinHeaterMerger->setState(switchOn ? hal::IGpioPin::State::High
                                               : hal::IGpioPin::State::Low);
 }
 
-void HeaterService::updateHeaterTemperature(TemperatureRangeHandler minTemperatureReached,
-                                            TemperatureRangeHandler maxTemperatureReached)
+void HeaterService::updateHeaterTemperature()
 {
     auto& temperatureSensor = getTemperatureSensor(
         m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_temperatureSensorId);
     auto value = temperatureSensor->getTemperature();
     assert(value.getUnit() == hal::Unit::Celcius);
+    m_currentTemperature = value.getValue();
+}
 
-    const Temperature lastTemperature = m_lastTemperature;
-    m_lastTemperature                 = value.getValue();
+void HeaterService::updateHeaterTemperatureAndCheck()
+{
+    updateHeaterTemperature();
 
-    // Implement hysteresis
-    if ((lastTemperature < value.getValue()) && (value.getValue() >= config::MaxHeaterTemperature))
+    if (m_lastCheckedTemperature != m_currentTemperature)
     {
-        // Is heating up
-        LOG(debug) << "Max temperature reached: " << lastTemperature << "/" << value.getValue();
-        if (maxTemperatureReached)
+        // Implement hysteresis
+        if (m_currentTemperature >= config::MaxHeaterTemperature)
         {
-            maxTemperatureReached();
+            LOG(debug) << "Max temperature reached: " << m_lastCheckedTemperature << "/"
+                       << m_currentTemperature;
+            onMaxTemperatureReached();
         }
-    }
-    else if ((lastTemperature > value.getValue()) &&
-             (value.getValue() <= config::MinHeaterTemperature))
-    {
-        // Is heating down
-        LOG(debug) << "Min temperature reached: " << lastTemperature << "/" << value.getValue();
-        if (minTemperatureReached)
+        else if (m_currentTemperature <= config::MinHeaterTemperature)
         {
-            minTemperatureReached();
+            LOG(debug) << "Min temperature reached: " << m_lastCheckedTemperature << "/"
+                       << m_currentTemperature;
+            onMinTemperatureReached();
         }
+
+        m_lastCheckedTemperature = m_currentTemperature;
     }
 }
 

@@ -13,7 +13,7 @@
 #include "IRunnable.hpp"
 #include "Thread.hpp"
 
-namespace sugo
+namespace sugo::message
 {
 /**
  * Interface class representing the process context.

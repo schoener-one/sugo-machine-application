@@ -46,7 +46,7 @@ bool Thread::start(Runnable function, Policy policy, int priority)
             std::unique_lock<std::mutex> lockThread(m_mutex);
             m_condVar.wait(lockThread, [&] { return m_isReady; });
             // now start...
-            LOG(debug) << "Starting new " << ((m_policy == PolicyRealTime) ? "real-time " : "")
+            LOG(trace) << "Starting new " << ((m_policy == PolicyRealTime) ? "real-time " : "")
                        << "thread: " << std::hex << std::setw(8) << std::setfill('0')
                        << std::this_thread::get_id();
             try

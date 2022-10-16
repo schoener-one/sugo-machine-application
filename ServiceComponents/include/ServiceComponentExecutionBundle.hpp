@@ -14,7 +14,7 @@
 #include "IOContext.hpp"
 #include "IRunnable.hpp"
 #include "IServiceComponentExecutionBundle.hpp"
-#include "ServiceComponent.hpp"
+#include "IServiceComponent.hpp"
 
 namespace sugo
 {
@@ -62,15 +62,15 @@ public:
         m_ioContext.waitUntilFinished();
     }
 
-    ServiceComponent& getServiceComponent() override
+    IServiceComponent& getServiceComponent() override
     {
         return m_component;
     }
 
 private:
     const decltype(ComponentT::ReceiverId) m_id;
-    IOContext                              m_ioContext;
-    CommandMessageBroker                   m_broker;
+    message::IOContext                     m_ioContext;
+    message::CommandMessageBroker          m_broker;
     ComponentT                             m_component;
 };
 

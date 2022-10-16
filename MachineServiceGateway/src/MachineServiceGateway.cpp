@@ -30,22 +30,23 @@ constexpr unsigned MethodTokenMethodId   = 1u;
 }  // namespace
 
 using namespace sugo;
+using namespace message;
 
 void MachineServiceGateway::addConfigurationOptions(IConfiguration& configuration)
 {
     configuration.add(
-        Option("sugo-machine-service.address", std::string("*"), "Network address of the service"));
-    configuration.add(Option("sugo-machine-service.port", 1234u, "Network port of the service"));
+        Option("machine-service-gateway.address", std::string("*"), "Network address of the service"));
+    configuration.add(Option("machine-service-gateway.port", 1234u, "Network port of the service"));
 }
 
 MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroker,
                                              IOContext&             ioContext,
                                              const IConfiguration&  configuration)
-    : ServiceComponent(messageBroker),
+    : ServiceComponent(messageBroker, {}),
       m_jsonRpcServer(
           std::string("tcp://") +
-              configuration.getOption("sugo-machine-service.address").get<std::string>() + ":" +
-              std::to_string(configuration.getOption("sugo-machine-service.port").get<unsigned>()),
+              configuration.getOption("machine-service-gateway.address").get<std::string>() + ":" +
+              std::to_string(configuration.getOption("machine-service-gateway.port").get<unsigned>()),
           *this, ioContext)
 {
 }

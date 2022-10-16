@@ -7,6 +7,9 @@ add_library (MessageBroker STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandMessageBroker.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/IOContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ProcessContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Publisher.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Subscriber.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Message.cpp
     )
 target_include_directories (MessageBroker PUBLIC include)
 target_link_libraries(MessageBroker
@@ -29,22 +32,6 @@ target_link_libraries(MessageBrokerMocks INTERFACE
     gmock
     )
 
-# Google Unittests
-if (NOT NO_UNITTEST)    
-    add_executable(MessageBrokerTest
-        test/CommandMessageBrokerIntegrationTest.cpp
-        test/ClientServerIntegrationTest.cpp
-        )
-    target_compile_options(MessageBrokerTest PUBLIC "-DUNIT_TEST")
-    target_link_libraries(MessageBrokerTest
-        Common
-        Protocol
-        MessageBroker
-        ${Protobuf_LIBRARIES}
-        ${Boost_LIBRARIES}
-        pthread
-        GTest::GTest
-        GTest::Main
-        gmock)
-    gtest_add_tests(MessageBrokerTest "" AUTO)
+if (NOT NO_UNITTEST)
+    add_subdirectory(test)
 endif()

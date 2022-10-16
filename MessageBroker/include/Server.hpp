@@ -1,14 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 /** @file
- * @license: CLOSED
+ * @license: Copyright 2020, Schoener-One
  *
  * @author: denis
  * @date:   25.01.2020
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SERVER_HPP_
-#define SERVER_HPP_
+#pragma once
 
 #include <array>
 #include <istream>
@@ -17,8 +16,10 @@
 #include "IOContext.hpp"
 #include "IRunnable.hpp"
 #include "StreamBuffer.hpp"
+#include "IMessageHandler.hpp"
+#include "Message.hpp"
 
-namespace sugo
+namespace sugo::message
 {
 class ServerSocket;
 
@@ -29,38 +30,12 @@ class Server : public IRunnable
 {
 public:
     /**
-     * Interface for handle received messages.
-     */
-    class IMessageHandler
-    {
-    public:
-        virtual ~IMessageHandler()
-        {
-        }
-
-        /**
-         * @brief Called to process a new received message.
-         *
-         * @param in  Input stream buffer as received message.
-         * @param out Output stream buffer to write the response to.
-         * @return true if the message could be processed.
-         */
-        virtual bool processReceived(StreamBuffer& in, StreamBuffer& out) = 0;
-
-        /**
-         * @brief Called after the message response has been sent.
-         * This function could be used to do a second step processing.
-         */
-        virtual void processPost() = 0;
-    };
-
-    /**
      * Constructor
      * @param address Address to bind to as listener.
      * @param messageHandler Instance to handle received messages.
      * @param ioContext IO context.
      */
-    Server(const std::string& address, IMessageHandler& messageHandler, IOContext& ioContext);
+    Server(const Address& address, IMessageHandler& messageHandler, IOContext& ioContext);
 
     virtual ~Server();
 
@@ -68,35 +43,28 @@ public:
      * Returns the binded address.
      * @return Binded address
      */
-    const std::string& getAddress()
+    const Address& getAddress()
     {
         return m_address;
     }
 
-    // IRunnable {{
     bool start() override;
-
     void stop() override;
-
     bool isRunning() const override
     {
         return m_isRunning;
     }
-    // IRunnable }}
 
 private:
-    bool sendResponse();
+    bool sendResponse(const StreamBuffer& sendBuffer);
     void receiveRequest();
-    bool handleReceived();
+    bool handleReceived(StreamBuffer& receiveBuf);
 
     const std::string             m_address;
     IMessageHandler&              m_messageHandler;
     std::unique_ptr<ServerSocket> m_socket;
-    bool                          m_isRunning;
-    StreamBuffer                  m_receiveBuf;
-    StreamBuffer                  m_sendBuf;
+    bool                          m_isRunning = false;
+    StreamBuffer                  m_receiveBuffer;
 };
 
 }  // namespace sugo
-
-#endif  // SERVER_HPP_

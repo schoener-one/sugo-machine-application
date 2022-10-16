@@ -12,7 +12,7 @@
 
 #include <azmq/socket.hpp>
 
-namespace sugo
+namespace sugo::message
 {
 class ServerSocket : public azmq::rep_socket
 {
@@ -22,16 +22,15 @@ public:
     {
     }
 };
-}  // namespace sugo
+}  // namespace sugo::message
 
-using namespace sugo;
+using namespace sugo::message;
 namespace asio = boost::asio;
 
 Server::Server(const std::string& address, IMessageHandler& messageHandler, IOContext& ioContext)
     : m_address(address),
       m_messageHandler(messageHandler),
-      m_socket(std::make_unique<ServerSocket>(ioContext.getContext())),
-      m_isRunning(false)
+      m_socket(std::make_unique<ServerSocket>(ioContext.getContext()))
 {
 }
 
@@ -42,31 +41,33 @@ Server::~Server()
 bool Server::start()
 {
     assert(!m_isRunning);
-    try
+    boost::system::error_code ec;
+    m_socket->bind(m_address, ec);
+
+    if (ec)
     {
-        m_socket->bind(m_address);
-        LOG(debug) << "bind to address: " << m_address;
-        receiveRequest();
-        m_isRunning = true;
+        LOG(error) << "Failed to bind address: " << ec.message();
+        return false;
     }
-    catch (boost::system::system_error& error)
-    {
-        LOG(error) << "Failed to start receiving: " << error.what();
-    }
+
+    LOG(debug) << "Bind to address: " << m_address;
+    m_isRunning = true;
+    receiveRequest();
     return m_isRunning;
 }
 
 void Server::receiveRequest()
 {
-    m_socket->async_receive(m_receiveBuf.prepare(StreamBuffer::MaxBufferSize),
+    m_socket->async_receive(m_receiveBuffer.prepare(StreamBuffer::MaxBufferSize),
                             [&](boost::system::error_code ec, std::size_t bytesReceived) {
+                                LOG(trace) << "Received " << bytesReceived << " bytes";
+
                                 if (!ec)
                                 {
-                                    LOG(trace) << "Received " << bytesReceived << " bytes";
                                     if (bytesReceived > 0)
                                     {
-                                        m_receiveBuf.commit(bytesReceived);
-                                        (void)handleReceived();
+                                        m_receiveBuffer.commit(bytesReceived);
+                                        (void)handleReceived(m_receiveBuffer);
                                     }
                                     else
                                     {
@@ -82,21 +83,23 @@ void Server::receiveRequest()
                                 {
                                     receiveRequest();
                                 }
-                            });
+                            }, ZMQ_DONTWAIT);
 }
 
-bool Server::handleReceived()
+bool Server::handleReceived(StreamBuffer& receiveBuf)
 {
-    bool success = m_messageHandler.processReceived(m_receiveBuf, m_sendBuf);
-    if ((m_sendBuf.size() > 0) && success)
+    StreamBuffer sendBuffer;
+    bool         success = m_messageHandler.processReceived(receiveBuf, sendBuffer);
+
+    if ((sendBuffer.size() > 0) && success)
     {
         // Just send if we have something to send!
-        success = sendResponse();
+        success = sendResponse(sendBuffer);
     }
     else
     {
         LOG(error) << "Failed to process received message"
-                   << (((m_sendBuf.size() == 0) ? ": response message is empty" : ""));
+                   << (((sendBuffer.size() == 0) ? ": response message is empty" : ""));
         success = false;
     }
 
@@ -105,36 +108,33 @@ bool Server::handleReceived()
     return success;
 }
 
-bool Server::sendResponse()
+bool Server::sendResponse(const StreamBuffer& sendBuffer)
 {
-    bool success = false;
+    boost::system::error_code ec;
+    auto const                size = m_socket->send(sendBuffer.data(), 0, ec);
 
-    try
+    if (ec || (size == 0))
     {
-        auto const size = m_socket->send(m_sendBuf.data());
-        m_sendBuf.consume(size);
-        success = (size > 0);
-    }
-    catch (boost::system::system_error& error)
-    {
-        LOG(error) << "Failed to send message: " << error.what();
+        LOG(error) << "Failed to send message: "
+                   << (ec.failed() ? ec.message() : "response could not be sent");
+        return false;
     }
 
-    return success;
+    return true;
 }
 
 void Server::stop()
 {
     if (isRunning())
     {
-        try
+        boost::system::error_code ec;
+        m_socket->unbind(m_address, ec);
+
+        if (ec)
         {
-            m_socket->unbind(m_address);
+            LOG(error) << "Failed unbind from address: " << ec.message();
         }
-        catch (boost::system::system_error& error)
-        {
-            LOG(error) << "Failed unbind socket: " << error.what();
-        }
+
         m_isRunning = false;
     }
 }

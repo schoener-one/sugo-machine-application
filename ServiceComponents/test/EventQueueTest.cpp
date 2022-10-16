@@ -65,7 +65,7 @@ protected:
     EventQueue<Event> m_testQueue;
 };
 
-TEST_F(EventQueueTest, EventQueue_PushAndPull)
+TEST_F(EventQueueTest, PushAndPull)
 {
     Event       lastEvent = Event::One;
     std::thread t([&] {

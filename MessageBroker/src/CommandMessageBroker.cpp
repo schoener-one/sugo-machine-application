@@ -17,21 +17,45 @@
 #include "MessageProtocol.hpp"
 #include "Timer.hpp"
 
-using namespace sugo;
+using namespace sugo::message;
 
-CommandMessageBroker::CommandMessageBroker(const std::string& receiverId, IOContext& ioContext)
-    : m_server(createInProcessAddress(receiverId), *this, ioContext),
+namespace
+{
+/// @brief Address prefix
+static const std::string AddressPrefix{"inproc://"};
+
+constexpr const char* convertToString(CommandMessageBroker::Service serviceType)
+{
+    switch (serviceType)
+    {
+        case CommandMessageBroker::Service::Responder:
+            return ".srv";
+        case CommandMessageBroker::Service::Publisher:
+            return ".pub";
+        case CommandMessageBroker::Service::Subscriber:
+            return ".sub";
+    }
+    return "";
+}
+}  // namespace
+
+Address CommandMessageBroker::createFullQualifiedAddress(const Address& address,
+                                                         Service        serviceType)
+{
+    return AddressPrefix + address + convertToString(serviceType);
+}
+
+CommandMessageBroker::CommandMessageBroker(const Address& address, IOContext& ioContext)
+    : m_server(createFullQualifiedAddress(address, Service::Responder), *this, ioContext),
       m_client(ioContext),
+      m_publisher(createFullQualifiedAddress(address, Service::Publisher), ioContext),
+      m_subscriber(*this, ioContext),
       m_ioContext(ioContext)
 {
 }
 
 CommandMessageBroker::~CommandMessageBroker()
 {
-    if (isRunning())
-    {
-        LOG(warning) << "Still running";
-    }
 }
 
 bool CommandMessageBroker::start()
@@ -42,30 +66,31 @@ bool CommandMessageBroker::start()
         LOG(error) << "Failed to start io context";
         return false;
     }
-    return m_server.start();
+    const bool success = m_publisher.start();
+    return m_server.start() && success;
 }
 
 void CommandMessageBroker::stop()
 {
     m_server.stop();
+    m_publisher.stop();
     m_ioContext.stop();
 }
 
-bool CommandMessageBroker::send(const message::Command&                  message,
-                                const ICommandMessageBroker::ReceiverId& receiverId,
-                                message::CommandResponse&                response)
+bool CommandMessageBroker::send(const message::Command& message, const Address& address,
+                                message::CommandResponse& response)
 {
     if (m_isProcessingReceiveMessage.load())
     {
         LOG(fatal) << "Failed to send message: processing received message (deadlock)";
-        ASSERT_NOT_REACHABLE;
+        return false;
     }
 
-    LOG(debug) << "Sending message " << message.name() << " to " << receiverId;
-    const std::string                 address = createInProcessAddress(receiverId);
+    const std::string fullAddress = createFullQualifiedAddress(address, Service::Responder);
+    LOG(debug) << "Sending message " << message.name() << " to " << fullAddress;
     const std::lock_guard<std::mutex> lock(m_mutexClient);
 
-    if (!m_client.connect(address, MaxMessageTransmissionTime, MaxMessageTransmissionTime))
+    if (!m_client.connect(fullAddress, MaxMessageTransmissionTime, MaxMessageTransmissionTime))
     {
         LOG(error) << "Failed to connect to " << address;
         return false;
@@ -77,7 +102,7 @@ bool CommandMessageBroker::send(const message::Command&                  message
 
     if (!success)
     {
-        LOG(error) << "Failed to serialize command";
+        LOG(error) << "Failed to serialize message";
     }
 
     if (success)
@@ -90,15 +115,16 @@ bool CommandMessageBroker::send(const message::Command&                  message
             if (!success)
             {
                 const unsigned tryCount = MaxMessageTransmissionRetries - i + 1;
-                LOG(error) << "Failed to send message " << message.name() << " to " << receiverId << " (" << tryCount << "/"
-                           << MaxMessageTransmissionRetries << ")";
-                std::this_thread::sleep_for(
-                    MaxMessageTransmissionTime * tryCount);  // just wait a short time to retry!
+                LOG(error) << "Failed to send message " << message.name() << " to " << address
+                           << " (" << tryCount << "/" << MaxMessageTransmissionRetries << ")";
+                std::this_thread::sleep_for(MaxMessageTransmissionTime *
+                                            tryCount);  // just wait a short time to retry!
             }
         }
         if (!success)
         {
-            LOG(error) << "Failed to send message " << message.name() << " to " << receiverId << " completely";
+            LOG(error) << "Failed to send message " << message.name() << " to " << address
+                       << " completely";
         }
     }
 
@@ -120,7 +146,7 @@ bool CommandMessageBroker::send(const StreamBuffer& outBuf, message::CommandResp
     StreamBuffer inBuf;
     if (!m_client.send(outBuf, inBuf))
     {
-        LOG(error) << "Failed to send command";
+        LOG(error) << "Failed to send message";
         return false;
     }
 
@@ -129,7 +155,7 @@ bool CommandMessageBroker::send(const StreamBuffer& outBuf, message::CommandResp
         std::istream inStream(&inBuf);
         if (!response.ParseFromIstream(&inStream))
         {
-            LOG(error) << "Failed to parse command response";
+            LOG(error) << "Failed to parse message response";
             return false;
         }
     }
@@ -137,68 +163,95 @@ bool CommandMessageBroker::send(const StreamBuffer& outBuf, message::CommandResp
     return true;
 }
 
-bool CommandMessageBroker::notify(const message::Command&                      message,
-                                  const ICommandMessageBroker::ReceiverIdList& receivers)
+bool CommandMessageBroker::notify(const message::Command& message, const MessageId& topic)
 {
-    message::CommandResponse dummyResponse;  // Response will be ignored for notifications!
-    bool                     success = true;
-    message::Command         notification(message);
+    message::Command notification(message);
     notification.set_type(message::Command_Type_Notification);
+    LOG(debug) << "Notify message " << notification.name() << " from " << m_publisher.getAddress();
 
-    for (const auto& receiverId : receivers)
-    {
-        success = send(notification, receiverId, dummyResponse) && success;
-    }
-#ifndef NO_TEST_INTERFACE
-    if (!m_notificationReceiver.empty())
-    {
-        (void)send(notification, m_notificationReceiver, dummyResponse);
-    }
-#endif  // NO_TEST_INTERFACE
+    StreamBuffer outBuf;
+    std::ostream outStream(&outBuf);
 
-    return success;
+    if (!message.SerializeToOstream(&outStream))
+    {
+        LOG(error) << "Failed to serialize message";
+        return false;
+    }
+
+    return m_publisher.publish(topic, outBuf);
+}
+
+bool CommandMessageBroker::subscribe(const Address& address, const MessageId& topic)
+{
+    const auto fullAddress = createFullQualifiedAddress(address, Service::Publisher);
+    LOG(debug) << "Subscribing to " << fullAddress << "/" << topic;
+    return m_subscriber.subscribe(fullAddress, topic);
+}
+
+bool CommandMessageBroker::unsubscribe(const MessageId& topic)
+{
+    LOG(debug) << "Unsubscribing from " << topic;
+    return m_subscriber.unsubscribe(topic);
 }
 
 bool CommandMessageBroker::processReceived(StreamBuffer& inBuf, StreamBuffer& outBuf)
 {
     // TODO handle message IDs!
-    message::Command command;
+    message::Command message;
     std::istream     in(&inBuf);
 
-    if (!command.ParseFromIstream(&in))
+    if (!message.ParseFromIstream(&in))
     {
         // FIXME shouldn't return without reponse!
-        LOG(error) << "Failed to parse command";
+        LOG(error) << "Failed to parse message";
         return false;
     }
+
     m_isProcessingReceiveMessage = true;
 
-    const std::string& commandName = command.name();
-    // LOG(debug) << "Received command '" << commandName << "' (" << command.id() << ")";
-    Handler*                 handler = findHandler(commandName);
-    std::ostream             out(&outBuf);
-    message::CommandResponse response;
-
-    if (handler == nullptr)
+    if (message.type() == message::Command_Type_Notification)
     {
-        if (command.type() == message::Command_Type_Notification)
-        {
-            LOG(warning) << "Received unhandled notification: " << commandName;
-            response = message::createResponse(command);  // but must be answered!
-        }
-        else
-        {
-            LOG(error) << "Received unhandled command: " << commandName;
-            response = message::createUnsupportedCommandResponse(command);
-        }
+        return processReceivedNotification(message);
     }
     else
     {
-        response = (*handler)(command);
+        return processReceivedCommand(message, outBuf);
+    }
+}
+
+bool CommandMessageBroker::processReceivedCommand(const message::Command& message,
+                                                  StreamBuffer&           outBuf)
+{
+    std::ostream             out(&outBuf);
+    message::CommandResponse response;
+    MessageHandler*          handler = findHandler(message.name());
+
+    if (handler != nullptr)
+    {
+        response = (*handler)(message);
+    }
+    else
+    {
+        LOG(error) << "Received unhandled message: " << message.name();
+        response = message::createUnsupportedCommandResponse(message);
     }
 
-    response.set_id(command.id());
+    response.set_id(message.id());
     return response.SerializeToOstream(&out);
+}
+
+bool CommandMessageBroker::processReceivedNotification(const message::Command& message)
+{
+    MessageHandler* handler = findHandler(message.name());
+
+    if (handler == nullptr)
+    {
+        LOG(error) << "Received unhandled notification: " << message.name();
+        return false;
+    }
+
+    (void)(*handler)(message);
+    return true;
 }
 
 void CommandMessageBroker::processPost()
@@ -211,19 +264,19 @@ void CommandMessageBroker::processPost()
     }
 }
 
-void CommandMessageBroker::registerHandler(const ICommandMessageBroker::MessageId& messageId,
-                                           Handler&                                handler)
+void CommandMessageBroker::registerMessageHandler(const MessageId& messageId,
+                                                  MessageHandler&  handler)
 {
     m_handlers[messageId] = handler;
 }
 
-void CommandMessageBroker::registerHandler(const ICommandMessageBroker::MessageId& messageId,
-                                           Handler&&                               handler)
+void CommandMessageBroker::registerMessageHandler(const MessageId& messageId,
+                                                  MessageHandler&& handler)
 {
     m_handlers[messageId] = handler;
 }
 
-void CommandMessageBroker::unregisterHandler(const ICommandMessageBroker::MessageId& messageId)
+void CommandMessageBroker::unregisterMessageHandler(const MessageId& messageId)
 {
     auto iter = m_handlers.find(messageId);
     if (iter != m_handlers.end())
@@ -232,18 +285,16 @@ void CommandMessageBroker::unregisterHandler(const ICommandMessageBroker::Messag
     }
 }
 
-bool CommandMessageBroker::hasRegisteredHandler(
-    const ICommandMessageBroker::MessageId& messageId) const
+bool CommandMessageBroker::hasRegisteredMessageHandler(const MessageId& messageId) const
 {
     auto iter = m_handlers.find(messageId);
     return (iter != m_handlers.end());
 }
 
-CommandMessageBroker::Handler* CommandMessageBroker::findHandler(
-    const ICommandMessageBroker::ReceiverId& receiverId)
+CommandMessageBroker::MessageHandler* CommandMessageBroker::findHandler(const MessageId& messageId)
 {
-    Handler* handler = nullptr;
-    auto     iter    = m_handlers.find(receiverId);
+    MessageHandler* handler = nullptr;
+    auto            iter    = m_handlers.find(messageId);
     if (iter != m_handlers.end())
     {
         handler = &(iter->second);

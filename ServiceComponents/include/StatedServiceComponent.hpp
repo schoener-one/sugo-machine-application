@@ -12,20 +12,19 @@
 
 #include "Globals.hpp"
 #include "IStateMachine.hpp"
+#include "MessageProtocol.hpp"
 #include "ServiceComponent.hpp"
 
+#include <cassert>
 #include <mutex>
 
 namespace sugo
 {
 /**
- * Class to receive messages and drives a finite state machine by events.
+ * Base class for service components which are driven by finite state machine (FSM).
  *
  * @tparam StateT State type
  * @tparam EventT Event type
- *
- * @todo Needs to be transformed to a base class of all ServiceComponents in order
- *       to handle messages in a generic manner!
  */
 template <class StateT, class EventT>
 class StatedServiceComponent : public ServiceComponent
@@ -34,15 +33,22 @@ public:
     /**
      * @brief Construct a new stated service component object.
      *
-     * @param messageBroker        The message broker to be used for sending and receiving.
-     * @param stateMachine         The state machine of this component.
+     * @param messageBroker   The message broker to be used for sending and receiving.
+     * @param subscriptionIds List of notification ids to subscribe to.
+     * @param stateMachine    The state machine of this component.
      */
-    explicit StatedServiceComponent(ICommandMessageBroker&         messageBroker,
-                                    IStateMachine<StateT, EventT>& stateMachine)
-        : ServiceComponent(messageBroker), m_stateMachine(stateMachine)
+    explicit StatedServiceComponent(message::ICommandMessageBroker& messageBroker,
+                                    const NotificationIdList&       subscriptionIds,
+                                    IStateMachine<StateT, EventT>&  stateMachine)
+        : ServiceComponent(messageBroker, subscriptionIds), m_stateMachine(stateMachine)
     {
-        messageBroker.registerPostProcessHandler(
+    }
+
+    bool start() override
+    {
+        getCommandMessageBroker().registerPostProcessHandler(
             std::bind(&StatedServiceComponent::processAllEvents, this));
+        return ServiceComponent::start();
     }
 
 protected:
@@ -57,28 +63,37 @@ protected:
         }
     }
 
-    message::CommandResponse handleStateChangeCommand(const message::Command& command,
+    message::CommandResponse handleStateChangeMessage(const message::Command& command,
                                                       const EventT&           event)
     {
-        LOG(debug) << "Received command '" << command.name() << "' in state "
+        if (!m_stateMachine.checkNextEvent(event))
+        {
+            LOG(warning) << "Ignoring received message '" << command.name() << "' in invalid state "
+                         << m_stateMachine.getCurrentState();
+            return message::createErrorCommandResponse(
+                command,
+                Json({{message::protocol::IdErrorReason, message::protocol::IdErrorInvalidState}}));
+        }
+
+        LOG(debug) << "Received message '" << command.name() << "' in state "
                    << m_stateMachine.getCurrentState();
-        // FIXME do a state pre check here if a push would succeeded in current state!
+
         if (m_stateMachine.push(event))
         {
-            return createResponse(command);
+            return message::createCommandResponse(command);
         }
         else
         {
-            return createErrorResponse(
-                command,
-                Json({{protocol::IdErrorReason, protocol::IdErrorRequestTooMuchRequests}}));
+            return message::createErrorCommandResponse(
+                command, Json({{message::protocol::IdErrorReason,
+                                message::protocol::IdErrorRequestTooMuchRequests}}));
         };
     }
 
     message::CommandResponse handleCommandGetState(const message::Command& command)
     {
-        return createResponse(command,
-                              Json({{protocol::IdState, m_stateMachine.getCurrentState()}}));
+        return message::createCommandResponse(
+            command, Json({{message::protocol::IdState, m_stateMachine.getCurrentState()}}));
     }
 
 private:

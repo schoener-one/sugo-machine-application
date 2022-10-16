@@ -48,17 +48,27 @@ bool MotorService::startMotorRotation()
 {
     auto& stepperMotor =
         getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
-    return stepperMotor->rotate(hal::IStepperMotor::Direction::Forward);
+
+    if (!stepperMotor->rotate(hal::IStepperMotor::Direction::Forward))
+    {
+        LOG(error) << "Failed to start motor rotation";
+        return false;
+    }
+
+    return true;
 }
 
 bool MotorService::resetMotor()
 {
     auto& stepperMotor =
         getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
+
     if (!stepperMotor->reset())
     {
+        LOG(error) << "Failed to reset motor state";
         return false;
     }
+
     return true;
 }
 
@@ -66,5 +76,9 @@ void MotorService::stopMotorRotation(bool immediately)
 {
     auto& stepperMotor =
         getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
-    (void)stepperMotor->stop(immediately);
+
+    if (!stepperMotor->stop(immediately))
+    {
+        LOG(error) << "Failed to stop motor" << ((immediately) ? " immediately" : "");
+    }
 }

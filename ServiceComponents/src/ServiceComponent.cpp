@@ -12,28 +12,28 @@
 
 using namespace sugo;
 
-std::ostream& sugo::operator<<(std::ostream& ostr, const ServiceComponent::CommandId& commandId)
+bool ServiceComponent::start()
 {
-    ostr << commandId.getReceiverId() << "." << commandId.getId();
-    return ostr;
+    bool success = m_messageBroker.start();
+
+    if (success)
+    {
+        for (const auto& notification : m_subscriptionIds)
+        {
+            if (!m_messageBroker.subscribe(notification.getPublisherAddress(),
+                                           notification.getId()))
+            {
+                LOG(error) << "Failed to subscribe to " << notification;
+                success = false;
+            }
+        }
+    }
+
+    return success;
 }
 
-std::ostream& sugo::operator<<(std::ostream&                           ostr,
-                               const ServiceComponent::NotificationId& notificationId)
-{
-    ostr << notificationId.getId();
-    return ostr;
-}
-
-message::CommandResponse ServiceComponent::createUnsupportedCommandResponse(
-    const message::Command& command)
-{
-    LOG(warning) << "Received unhandled command '" << command.name() << "'";
-    return message::createUnsupportedCommandResponse(command);
-}
-
-message::CommandResponse ServiceComponent::send(const ServiceComponent::CommandId& commandId,
-                                                const Json&                        parameters)
+message::CommandResponse ServiceComponent::send(const message::CommandId& commandId,
+                                                const Json&               parameters)
 {
     message::Command command;
     command.set_name(commandId.getId());
@@ -42,25 +42,25 @@ message::CommandResponse ServiceComponent::send(const ServiceComponent::CommandI
         command.set_parameters(parameters.dump());
     }
     message::CommandResponse commandResponse;
-    const bool success = m_messageBroker.send(command, commandId.getReceiverId(), commandResponse);
+    const bool               success =
+        m_messageBroker.send(command, commandId.getReceiverAddress(), commandResponse);
     assert(success);
     return commandResponse;
 }
 
-message::CommandResponse ServiceComponent::forward(const ServiceComponent::CommandId& commandId,
-                                                   const message::Command&            command)
+message::CommandResponse ServiceComponent::forward(const message::CommandId& commandId,
+                                                   const message::Command&   command)
 {
     message::Command forwardCommand = command;
     forwardCommand.set_name(commandId.getId());
     message::CommandResponse commandResponse;
     const bool               success =
-        m_messageBroker.send(forwardCommand, commandId.getReceiverId(), commandResponse);
+        m_messageBroker.send(forwardCommand, commandId.getReceiverAddress(), commandResponse);
     assert(success);
     return commandResponse;
 }
 
-bool ServiceComponent::notify(const ServiceComponent::NotificationId& notificationId,
-                              const Json&                             parameters)
+bool ServiceComponent::notify(const message::NotificationId& notificationId, const Json& parameters)
 {
     message::Command command;
     command.set_name(notificationId.getId());
@@ -68,5 +68,6 @@ bool ServiceComponent::notify(const ServiceComponent::NotificationId& notificati
     {
         command.set_parameters(parameters.dump());
     }
-    return m_messageBroker.notify(command, notificationId.getReceiverIdList());
+    return m_messageBroker.notify(command, notificationId.getId());
 }
+

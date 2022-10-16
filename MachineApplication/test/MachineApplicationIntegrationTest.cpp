@@ -29,12 +29,16 @@
 #include "IntegrationTest.hpp"
 #include "Logger.hpp"
 #include "MachineConfig.hpp"
+#include "RemoteControlServer.hpp"
 #include "ServiceComponentsExecutionGroup.hpp"
 #include "ServiceLocator.hpp"
 #include "Thread.hpp"
+#include "UserInterfaceControl.hpp"
 
 using namespace sugo;
+using namespace sugo::message;
 using namespace hal;
+using namespace remote_control;
 
 using ::testing::_;
 using ::testing::MockFunction;
@@ -47,8 +51,7 @@ namespace sugo
 class MachineApplicationIntegrationTest : public IntegrationTest
 {
 protected:
-    inline static const ICommandMessageBroker::ReceiverId ReceiverId{
-        "MachineApplicationIntegrationTest"};
+    inline static const message::Address ReceiverId{"MachineApplicationIntegrationTest"};
 
     MachineApplicationIntegrationTest() : IntegrationTest(ReceiverId)
     {
@@ -61,17 +64,22 @@ protected:
         prepareForStartComponents();
         ASSERT_TRUE(m_components.start(m_serviceLocator));
 
-        // Add us to the receiver lists!
-        for (auto& bundle : m_components.getBundles())
-        {
-            CommandMessageBroker* broker = dynamic_cast<CommandMessageBroker*>(
-                &bundle->getServiceComponent().getCommandMessageBroker());
-            broker->setNotificationReceiver(ReceiverId);
-        }
+        // auto it = std::find_if(
+        //     m_components.getBundles().begin(), m_components.getBundles().end(),
+        //     [](const auto& bundle) { return (bundle->getId() == "UserInterfaceControl"); });
+        // assert((it != m_components.getBundles().end()) && (*it));
+
+        // IServiceComponent&    serviceComponent = it->get()->getServiceComponent();
+        // UserInterfaceControl* userInterfaceControl =
+        //     static_cast<UserInterfaceControl*>(&serviceComponent);
+        // m_remoteControlServer =
+        //     std::make_shared<RemoteControlServer>("", 4242u, "www", *userInterfaceControl);
+        // ASSERT_TRUE(m_remoteControlServer->start());
     }
 
     void TearDown() override
     {
+        // m_remoteControlServer->stop();
         m_components.stop();
         IntegrationTest::TearDown();
     }
@@ -114,6 +122,7 @@ protected:
     NiceMock<IHardwareAbstractionLayerMock> m_mockHardwareAbstractionLayer;
     ServiceLocator                          m_serviceLocator;
     ServiceComponentsExecutionGroup         m_components;
+    // std::shared_ptr<RemoteControlServer>    m_remoteControlServer;
 
     static constexpr unsigned DefaultMotorSpeed  = 100;
     static constexpr int32_t  DefaultTemperature = 25;
@@ -201,48 +210,54 @@ void MachineApplicationIntegrationTest::heatUp()
 {
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::Low))
         .WillOnce(Return(true));
+    EXPECT_NOTIFICATION_BEGIN(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
     ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
-    EXPECT_NOTIFICATION(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
+    EXPECT_NOTIFICATION_END(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
 
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::Low))
         .WillOnce(Return(true));
+    EXPECT_NOTIFICATION_BEGIN(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
     ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
-    EXPECT_NOTIFICATION(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
+    EXPECT_NOTIFICATION_END(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
 }
 
 void MachineApplicationIntegrationTest::coolDown()
 {
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::High))
         .WillOnce(Return(true));
+    EXPECT_NOTIFICATION_BEGIN(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
     ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MinHeaterTemperature, Unit::Celcius}));
-    EXPECT_NOTIFICATION(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
+    EXPECT_NOTIFICATION_END(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
 
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::High))
         .WillOnce(Return(true));
+    EXPECT_NOTIFICATION_BEGIN(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
     ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MinHeaterTemperature, Unit::Celcius}));
-    EXPECT_NOTIFICATION(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
+    EXPECT_NOTIFICATION_END(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
 }
 
 void MachineApplicationIntegrationTest::switchOnMachine()
 {
     prepareSwitchOn();
+    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationStarting);
     send(IMachineControl::CommandSwitchOn);
-    EXPECT_NOTIFICATION(IMachineControl, NotificationStarting);
+    EXPECT_NOTIFICATION_END(IMachineControl, NotificationStarting);
     EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
 
     // Heating up
-    heatUp();
     EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(true));
-    EXPECT_NOTIFICATION(IMachineControl, NotificationRunning);
+    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationRunning);
+    heatUp();
+    EXPECT_NOTIFICATION_END(IMachineControl, NotificationRunning);
 }
 
 void MachineApplicationIntegrationTest::switchOffMachine()
@@ -253,8 +268,9 @@ void MachineApplicationIntegrationTest::switchOffMachine()
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorFeeder, stop(false)).WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorCoiler, stop(false)).WillOnce(Return(true));
+    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationSwitchedOff);
     send(IMachineControl::CommandSwitchOff);
-    EXPECT_NOTIFICATION(IMachineControl, NotificationSwitchedOff);
+    EXPECT_NOTIFICATION_END(IMachineControl, NotificationSwitchedOff);
 }
 }  // namespace sugo
 
@@ -280,18 +296,40 @@ TEST_F(MachineApplicationIntegrationTest, HeaterCoolDown)
 
 TEST_F(MachineApplicationIntegrationTest, MotorErrorOccurred)
 {
+    // switchOn
     prepareSwitchOn();
+    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationStarting);
     send(IMachineControl::CommandSwitchOn);
-    EXPECT_NOTIFICATION(IMachineControl, NotificationStarting);
+    EXPECT_NOTIFICATION_END(IMachineControl, NotificationStarting);
     EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
 
-    heatUp();
+    // Simulate motor rotation error after heating up
+    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationErrorOccurred);
     EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
-    // Error occurres
-    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(false));
-    EXPECT_NOTIFICATION(IFilamentCoilMotor, NotificationStartMotorFailed);
-    EXPECT_NOTIFICATION(IFilamentCoilControl, NotificationErrorOccurred);
-    EXPECT_NOTIFICATION(IMachineControl, NotificationErrorOccurred);
+    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(false));  // Error occurred!
+    EXPECT_CALL(*m_mockStepperMotorFeeder, stop(false)).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, stop(true)).WillOnce(Return(true));
+
+    // Heat up
+    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::Low))
+        .Times(2)
+        .WillRepeatedly(Return(true));
+    ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
+        .WillByDefault(
+            Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
+
+    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::Low))
+        .Times(2)
+        .WillRepeatedly(Return(true));
+    ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
+        .WillByDefault(
+            Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
+
+    EXPECT_NOTIFICATION_END(IMachineControl, NotificationErrorOccurred);
     EXPECT_STATE(IMachineControl, Error);
+
+    // Switch off
+    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationSwitchedOff);
     send(IMachineControl::CommandSwitchOff);
+    EXPECT_NOTIFICATION_END(IMachineControl, NotificationSwitchedOff);
 }

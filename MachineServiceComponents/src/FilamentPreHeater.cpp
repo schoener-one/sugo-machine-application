@@ -14,6 +14,7 @@
 #include "MachineProtocol.hpp"
 
 using namespace sugo;
+using namespace sugo::message;
 
 FilamentPreHeater::FilamentPreHeater(ICommandMessageBroker& messageBroker,
                                      const ServiceLocator&  serviceLocator)
@@ -40,17 +41,17 @@ void FilamentPreHeater::onMinTemperatureReached()
 
 message::CommandResponse FilamentPreHeater::onCommandSwitchOn(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
+    return handleStateChangeMessage(command, Event(EventId::SwitchOn));
 }
 
 message::CommandResponse FilamentPreHeater::onCommandSwitchOff(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
+    return handleStateChangeMessage(command, Event(EventId::SwitchOff));
 }
 
 message::CommandResponse FilamentPreHeater::onCommandGetTemperature(const message::Command& command)
 {
-    return createResponse(command, Json({{protocol::IdTemperature, getTemperature()}}));
+    return createCommandResponse(command, Json({{protocol::IdTemperature, getTemperature()}}));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,26 +71,26 @@ void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilame
 void FilamentPreHeater::startHeating(const IFilamentPreHeater::Event& event,
                                      const IFilamentPreHeater::State&)
 {
-    if (event.getId() == EventId::MinTemperatureReached)
-    {
-        notify(NotificationTargetTemperatureRangeLeft);
-    }
     if (!switchHeater(true))
     {
         push(Event(EventId::ErrorOccurred));
+    }
+    if (event.getId() == EventId::MinTemperatureReached)
+    {
+        notify(NotificationTargetTemperatureRangeLeft);
     }
 }
 
 void FilamentPreHeater::stopHeating(const IFilamentPreHeater::Event& event,
                                     const IFilamentPreHeater::State&)
 {
-    if (event.getId() == EventId::MaxTemperatureReached)
-    {
-        notify(NotificationTargetTemperatureRangeReached);
-    }
     if (!switchHeater(false))
     {
         push(Event(EventId::ErrorOccurred));
+    }
+    if (event.getId() == EventId::MaxTemperatureReached)
+    {
+        notify(NotificationTargetTemperatureRangeReached);
     }
 }
 

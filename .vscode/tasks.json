@@ -20,16 +20,6 @@
             "group": "build"
         },
         {
-            "label": "x86_build-MachineApplicationTest",
-            "type": "shell",
-            "command": "cmake --build ${config:build.directory.x86} --target MachineApplicationTest",
-            "problemMatcher": {
-                "base": "$gcc",
-                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
-            },
-            "group": "build"
-        },
-        {
             "label": "x86_build-MachineApplicationIntegrationTest",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target MachineApplicationIntegrationTest",
@@ -60,9 +50,19 @@
             "group": "build"
         },
         {
-            "label": "x86_build-MessageBrokerTest",
+            "label": "x86_build-MessageBrokerIntegrationTest",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory.x86} --target MessageBrokerTest",
+            "command": "cmake --build ${config:build.directory.x86} --target MessageBrokerIntegrationTest",
+            "problemMatcher": {
+                "base": "$gcc",
+                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
+            "label": "x86_build-MessageBroker",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target MessageBroker",
             "problemMatcher": {
                 "base": "$gcc",
                 // "fileLocation": [ "relative", "${config:build.directory.x86}" ]

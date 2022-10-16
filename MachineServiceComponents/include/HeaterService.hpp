@@ -27,8 +27,6 @@ class HeaterService
 public:
     /// @brief Temperature value type
     using Temperature = int32_t;
-    /// @brief Temperature range handler
-    using TemperatureRangeHandler = std::function<void()>;
 
     /**
      * @brief Constructs a new heater service object.
@@ -50,29 +48,35 @@ protected:
      * @return false   If the heater could not be switched successfully.
      */
     bool switchHeater(bool switchOn);
+
     /**
-     * @brief Updates the current temperature and calls the appropriate handler.
-     *
-     * @param minTemperatureReached Min temperature reached handler to be called or nullptr.
-     * @param maxTemperatureReached Max temperature reached handler to be called or nullptr.
+     * @brief Updates the current temperature and calls the appropriate handler callbacks.
      */
-    void         updateHeaterTemperature(TemperatureRangeHandler minTemperatureReached = nullptr,
-                                         TemperatureRangeHandler maxTemperatureReached = nullptr);
+    void updateHeaterTemperature();
+    /**
+     * @brief Called if the max temperature range has been reached.
+     */
     virtual void onMaxTemperatureReached() = 0;
+    /**
+     * @brief Called if the min temperature range has been reached.
+     */
     virtual void onMinTemperatureReached() = 0;
     int32_t      getTemperature() const
     {
-        return m_lastTemperature.load();
+        return m_currentTemperature.load();
     }
     bool startTemperatureObservation();
     void stopTemperatureObservation();
 
 private:
+    void updateHeaterTemperatureAndCheck();
+
     const std::string        m_heaterId;
     const std::string        m_temperatureSensorId;
     const ServiceLocator&    m_serviceLocator;
     Timer                    m_temperatureObserver;
-    std::atomic<Temperature> m_lastTemperature = 0;
+    std::atomic<Temperature> m_currentTemperature     = 0;
+    Temperature              m_lastCheckedTemperature = 0;
 };
 
 }  // namespace sugo

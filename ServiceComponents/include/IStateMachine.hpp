@@ -25,9 +25,7 @@ template <class StateT = int, class EventT = int>
 class IStateMachine
 {
 public:
-    virtual ~IStateMachine()
-    {
-    }
+    virtual ~IStateMachine() = default;
 
     /**
      * Transition action function type.
@@ -65,5 +63,14 @@ public:
      * @return EventQueue Event queue instance.
      */
     virtual EventQueue<EventT>& getEventQueue() = 0;
+
+    /**
+     * @brief Checks if the event could be processed successfully.
+     * 
+     * @param event  Event to be checked according to the current state.
+     * @return true  If the could be processed successfully.
+     * @return false If the could not be processed successfully.
+     */
+    virtual bool checkNextEvent(const EventT& event) const = 0;
 };
 }  // namespace sugo

@@ -17,28 +17,29 @@
 #include "MessageProtocol.hpp"
 
 using namespace sugo;
+using namespace sugo::message;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
 message::CommandResponse FilamentFeederMotor::onCommandSwitchOn(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOn));
+    return handleStateChangeMessage(command, Event(EventId::SwitchOn));
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandSwitchOff(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::SwitchOff));
+    return handleStateChangeMessage(command, Event(EventId::SwitchOff));
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandStartMotor(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::StartMotor));
+    return handleStateChangeMessage(command, Event(EventId::StartMotor));
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandStopMotor(const message::Command& command)
 {
-    return handleStateChangeCommand(command, Event(EventId::StopMotor));
+    return handleStateChangeMessage(command, Event(EventId::StopMotor));
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandSetMotorSpeed(
@@ -47,11 +48,11 @@ message::CommandResponse FilamentFeederMotor::onCommandSetMotorSpeed(
     const auto& motorSpeed = Json::parse(command.parameters()).at(protocol::IdSpeed);
     if (motorSpeed.empty())
     {
-        return createErrorResponse(
-            command, Json({{protocol::IdErrorReason, protocol::IdErrorCommandParameterInvalid}}));
+        return createErrorCommandResponse(
+            command, Json({{message::protocol::IdErrorReason, message::protocol::IdErrorCommandParameterInvalid}}));
     }
     setMotorSpeed(motorSpeed.get<unsigned>());
-    return createResponse(command);
+    return createCommandResponse(command);
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandSetMotorOffsetSpeed(

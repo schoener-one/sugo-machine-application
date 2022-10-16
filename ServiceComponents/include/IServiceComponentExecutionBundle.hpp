@@ -11,7 +11,7 @@
 #pragma once
 
 #include "IRunnable.hpp"
-#include "ServiceComponent.hpp"
+#include "IServiceComponent.hpp"
 
 #include <string>
 
@@ -44,7 +44,7 @@ public:
      * 
      * @return ServiceComponent& 
      */
-    virtual ServiceComponent& getServiceComponent() = 0;
+    virtual IServiceComponent& getServiceComponent() = 0;
 };
 
 }  // namespace sugo

@@ -1,4 +1,4 @@
-# SugoMachine Firmware Architecture
+# Sugo Machine Firmware Architecture
 
 ## Introduction
 
@@ -15,8 +15,8 @@ This document covers the general component architecture and the communication mo
 
 | Definitions, Acronyms, Abbreviations     | Description                                                     |
 |------------------------------------------|-----------------------------------------------------------------|
-| Message                                  | Is the basic communication object for data transmission         |
-| Event                                    | Alias for Message. Definition is more used in connection to a state machine | 
+| Message                                  | Is the basic communication object for data transmission between components  |
+| Event                                    | Basic event which could occur within a component, i.e. triggered by a message. Definition is more used in connection to a state machine | 
 |||
 
 ---
@@ -30,19 +30,22 @@ The architecture provides a communication model between its functional component
 
 ### State machine
 
-Every components has at least one state machine, which is triggered by received _events_. Events can be pushed by the component to itself or
-can be received from other components. The state machine is configured by the component model.
+Every components has at least one base state machine, which is triggered by received _events_. Events can be pushed by the component itself, by 
+a timer or be caused by received messages from other components. The state machine is configured by the component model.
 
 ### Communication model
 
-Components of the system can only interact by using the system communication interface. A direct interaction between components is not allowed and not necessary.
-The root communication object is a message, which can be sent or received by a component.
+Components of the system can only interact by using the system communication interface. A direct interaction between components, i.e. by direct calls,
+is not allowed and not necessary.
+The basic communication object is a message, which can be sent or received by a components.
 
 The following communication types are supported.
 
 * Send message: The message consists of a source, destination and a type. It is sent from the source component to the destination receiver queue. The payload depends on the message type. A send message could be intended as synchronous or asynchronous message. The synchronous message requires a response message. 
 * Notification message: The message consists of a source and a type. It is sent from the source component to a group of subscribed components.
 * Subscribe message (_not yet implemented_): The message consists of a source, destination and a requested notification type to which the component wants to subscribe. A subscription has always a subscription timeout. If no subscription data has been sent within that time, the subscriber has to confirm the subscription with a re-subscribe message.
+
+([see communication design](CommunicationDesign.md))
 
 #### Messages
 

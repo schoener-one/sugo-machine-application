@@ -19,19 +19,27 @@
 #include "Client.hpp"
 #include "ICommandMessageBroker.hpp"
 #include "IOContext.hpp"
+#include "Publisher.hpp"
 #include "Server.hpp"
+#include "Subscriber.hpp"
 
-namespace sugo
+namespace sugo::message
 {
 /**
- * Class which handles command messages.
- * @todo Remove receiver-id list from interface.
+ * Class which handles messages.
+ *
  */
-class CommandMessageBroker : public ICommandMessageBroker, public Server::IMessageHandler
+class CommandMessageBroker : public ICommandMessageBroker, public IMessageHandler
 {
 public:
-    /// @brief Address prefix
-    inline static const std::string AddressPrefix{"inproc://"};
+    /// @brief Service types
+    enum class Service
+    {
+        Responder,  ///< Responder which receives requests and sends the response
+        Publisher,  ///< Publisher which publishes notifications
+        Subscriber  ///< Subscriber which could subscribe to a notification publisher
+    };
+
     /// @brief Maximum time to transmit a message (inclusive response).
     inline static constexpr std::chrono::milliseconds MaxMessageTransmissionTime{50};
     /// @brief Maximum of retries for a failed transmission.
@@ -40,21 +48,23 @@ public:
     /**
      * @brief Construct a new command message broker object
      *
-     * @param receiverId Receiver id to be used as an communication address.
-     * @param ioContext  Io context to be used for receiving messages.
+     * @param address   Address of this broker instance.
+     * @param ioContext Io context to be used for receiving messages.
      */
-    CommandMessageBroker(const std::string& receiverId, IOContext& ioContext);
+    CommandMessageBroker(const Address& address, IOContext& ioContext);
     ~CommandMessageBroker() override;
 
-    bool send(const message::Command& message, const ReceiverId& receiverId,
+    bool send(const message::Command& message, const Address& receiverAddress,
               message::CommandResponse& response) override;
-    bool notify(const message::Command& message, const ReceiverIdList& receiverIdList) override;
+    bool notify(const message::Command& message, const MessageId& topic) override;
+    bool subscribe(const Address& publisherAddress, const MessageId& topic) override;
+    bool unsubscribe(const MessageId& topic) override;
 
     bool start() override;
     void stop() override;
     bool isRunning() const override
     {
-        return m_server.isRunning() && m_ioContext.isRunning();
+        return m_server.isRunning() && m_publisher.isRunning() && m_ioContext.isRunning();
     }
 
     /**
@@ -71,37 +81,40 @@ public:
     }
 
     /**
-     * @brief Creates a in-process address
+     * @brief Creates a full qualified address based on the base address.
+     * For inproc communication: inproc://<base-address>.<service-type[pub|sub|srv]>
+     * For tcp communication:    tcp://<base-address>:<service-port>
      *
-     * @param receiverId Receiver identifier
-     * @return std::string Created in-process address.
+     * @param address Address without an prefix
+     * @return        The full qualified address
      */
-    inline static std::string createInProcessAddress(const ReceiverId& receiverId)
-    {
-        return AddressPrefix + receiverId;
-    }
+    static Address createFullQualifiedAddress(const Address& address, Service serviceType);
 
     /// @brief Handler type declaration
-    using typename ICommandMessageBroker::Handler;
+    using typename ICommandMessageBroker::MessageHandler;
 
-    void registerHandler(const MessageId& messageId, Handler& handler) override;
-    void registerHandler(const MessageId& messageId, Handler&& handler) override;
-    void unregisterHandler(const MessageId& messageId) override;
-    bool hasRegisteredHandler(const MessageId& messageId) const;
+    void registerMessageHandler(const MessageId& messageId, MessageHandler& handler) override;
+    void registerMessageHandler(const MessageId& messageId, MessageHandler&& handler) override;
+    void unregisterMessageHandler(const MessageId& messageId) override;
+    bool hasRegisteredMessageHandler(const MessageId& messageId) const;
 
 protected:
     bool processReceived(StreamBuffer& in, StreamBuffer& out) override;
     void processPost() override;
 
 private:
-    Handler* findHandler(const ReceiverId& receiverId);
-    bool     send(const StreamBuffer& outBuf, message::CommandResponse& response,
-                  bool ignoreReceiveMessage = false);
+    MessageHandler* findHandler(const MessageId& messageId);
+    bool            send(const StreamBuffer& outBuf, message::CommandResponse& response,
+                         bool ignoreReceiveMessage = false);
+    bool            processReceivedCommand(const message::Command& command, StreamBuffer& outBuf);
+    bool            processReceivedNotification(const message::Command& command);
 
-    using MessageReceiverMap = std::map<MessageId, Handler>;
+    using MessageReceiverMap = std::map<MessageId, MessageHandler>;
 
     Server             m_server;       ///< Server instance
     Client             m_client;       ///< Client instance
+    Publisher          m_publisher;    ///< Publisher instance
+    Subscriber         m_subscriber;   ///< Subscriber instance
     IOContext&         m_ioContext;    ///< Io context of the client and server instances.
     MessageReceiverMap m_handlers;     ///< Message handler map
     std::mutex         m_mutexClient;  ///< Mutex to restrict concurrent usage of the client.
@@ -109,24 +122,6 @@ private:
         nullptr;  ///< Callback function for message receive post processing.
     std::atomic_bool m_isProcessingReceiveMessage =
         false;  ///< Indicates if a received message is processed currently.
-
-#ifndef NO_TEST_INTERFACE
-    // TODO Use a derived CommandMessageBroker with additional test interface!
-
-    ReceiverId m_notificationReceiver;  // Additional receiver id for testing
-
-public:
-    /**
-     * @brief Sets an additional notification receiver id.
-     * Can be used to listen to notification in a test environment
-     *
-     * @param receiverId Receiver id which receives all component notifications.
-     */
-    void setNotificationReceiver(const ReceiverId& receiverId)
-    {
-        m_notificationReceiver = receiverId;
-    }
-#endif  // NO_TEST_INTERFACE
 };
 
-}  // namespace sugo
+}  // namespace sugo::message

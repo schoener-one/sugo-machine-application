@@ -68,14 +68,14 @@ public:
         m_queue.pop();
         return event;
     }
-
+    
     /**
      * @brief Indicates if the queue is empty or not.
      *
      * @return true  If the queue is empty
      * @return false If the queue is not empty
      */
-    bool empty()
+    bool empty() const
     {
         return m_queue.empty();
     }

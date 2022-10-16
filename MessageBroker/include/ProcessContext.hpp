@@ -16,7 +16,7 @@
 #include <functional>
 #include <mutex>
 
-namespace sugo
+namespace sugo::message
 {
 /**
  * Class representing the process context.

@@ -40,8 +40,9 @@ public:
     bool start(int argc, char const** argv);
 
 private:
-    bool parseCommandLine(int argc, char const** argv);
-    bool parseConfigurationFile();
+    static void addConfigurationOptions(IConfiguration& configuration);
+    bool        parseCommandLine(int argc, char const** argv);
+    bool        parseConfigurationFile();
 
     const std::string               m_name;
     Configuration                   m_configCommandLine;

@@ -22,9 +22,9 @@
 
 namespace bc = boost::container;
 
-namespace sugo
+namespace sugo::message
 {
-class EchoMessageHandler : public Server::IMessageHandler
+class EchoMessageHandler : public IMessageHandler
 {
 public:
     bool processReceived(StreamBuffer& inBuf, StreamBuffer& outBuf) override
@@ -44,15 +44,16 @@ public:
 
     bc::vector<std::string> m_receivedMessages;
 };
-}  // namespace sugo
+}  // namespace sugo::message
 
+using namespace sugo::message;
 using namespace sugo;
 
 class ClientServerIntegrationTest : public ::testing::Test
 {
 protected:
     const std::string addressServer = "inproc://server";
-    
+
     ClientServerIntegrationTest()
         : m_serverContext("server"),
           m_clientContext("client"),
@@ -96,10 +97,10 @@ protected:
     static std::string sendMessage(const std::string& message, Client& client);
 
     EchoMessageHandler m_messageHandler;
-    IOContext      m_serverContext, m_clientContext;
-    Server         m_server;
-    Client         m_client;
-    StreamBuffer   m_outBuf;
+    IOContext          m_serverContext, m_clientContext;
+    Server             m_server;
+    Client             m_client;
+    StreamBuffer       m_outBuf;
 };
 
 std::string ClientServerIntegrationTest::sendMessage(const std::string& message, Client& client)
@@ -127,7 +128,7 @@ TEST_F(ClientServerIntegrationTest, Server_ReplyRequest)
     EXPECT_TRUE(m_client.connect(addressServer));
     static const std::string message  = "How are you?";
     const std::string        response = sendMessage(message, m_client);
-    EXPECT_TRUE(m_client.disconnect(addressServer));
+    EXPECT_TRUE(m_client.disconnect());
     EXPECT_EQ(response, message);
 }
 
