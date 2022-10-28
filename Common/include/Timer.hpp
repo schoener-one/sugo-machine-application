@@ -13,8 +13,11 @@
 #include "IRunnable.hpp"
 #include "Thread.hpp"
 
+#include <atomic>
+#include <cassert>
 #include <chrono>
-#include <functional>
+#include <condition_variable>
+#include <mutex>
 #include <string>
 
 namespace sugo
@@ -28,17 +31,20 @@ class Timer
 public:
     /// @brief Timout handler callback
     using TimeoutHandler = std::function<void()>;
+    /// @brief Default timer clock
+    using clock = std::chrono::high_resolution_clock;
 
     /**
      * @brief Construct a new timer instance
      *
      * @param timeoutHandler Handler to be called in case of a timeout.
-     * @param name           Name of this timer.
+     * @param id             Id of this timer.
      */
-    Timer(TimeoutHandler timeoutHandler, const std::string& name = "Timer")
-        : m_thread(name), m_timeoutHandler(timeoutHandler)
+    Timer(TimeoutHandler timeoutHandler, const std::string& id)
+        : m_thread(id), m_timeoutHandler(timeoutHandler)
     {
     }
+
     /**
      * @brief Stops the timer and destroys the object
      *
@@ -46,7 +52,6 @@ public:
     ~Timer()
     {
         stop();
-        m_thread.join();
     }
 
     /**
@@ -59,14 +64,36 @@ public:
     template <typename RepT, typename PeriodT>
     bool start(const std::chrono::duration<RepT, PeriodT>& period)
     {
-        m_doRun = true;
-        return m_thread.start([&] {
-            for (; m_doRun;)
+        m_nextWakeUpTime = clock::now() + period;
+        m_doRun          = true;
+
+        std::unique_lock<std::mutex> lock(m_mutex);
+        return m_thread.start([this, &period] {
+            while (m_doRun)
             {
-                std::this_thread::sleep_for(period);
+                const auto now = clock::now();
+
+                if (this->m_nextWakeUpTime < now)
+                {
+                    // resync next wake up time!
+                    const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        now - this->m_nextWakeUpTime);
+                    const size_t periods = diff / period + 1;
+                    this->m_nextWakeUpTime += periods * period;
+                }
+
+                assert(this->m_nextWakeUpTime >= now);
+
+                {
+                    std::unique_lock<std::mutex> lock(this->m_mutex);
+                    m_condVariable.wait_until(lock, this->m_nextWakeUpTime);
+                }
+
+                this->m_nextWakeUpTime += period;
+
                 if (m_doRun)
                 {
-                    m_timeoutHandler();
+                    this->m_timeoutHandler();
                 }
             }
         });
@@ -91,17 +118,21 @@ public:
     void stop()
     {
         m_doRun = false;
-        // FIXME timer has to stop immediately!
-        // if (m_doRun)
-        // {
-        //     m_doRun = false;
-        //     m_thread.join();
-        // }
+        m_condVariable.notify_one();
+        std::unique_lock<std::mutex> lock(m_mutex);
+        if (m_thread.isRunning())
+        {
+            lock.unlock();
+            m_thread.join();
+        }
     }
 
 private:
-    Thread         m_thread;
-    bool           m_doRun = false;
-    TimeoutHandler m_timeoutHandler;
+    clock::time_point       m_nextWakeUpTime;
+    Thread                  m_thread;
+    std::atomic_bool        m_doRun = false;
+    TimeoutHandler          m_timeoutHandler;
+    std::mutex              m_mutex;
+    std::condition_variable m_condVariable;
 };
 }  // namespace sugo

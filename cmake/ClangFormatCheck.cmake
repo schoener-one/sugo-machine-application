@@ -3,6 +3,14 @@
 ##
 ## **********************************
 
+# FIXME remove globbing!
+file(GLOB_RECURSE SRC_ALL 
+    ${PROJECT_SOURCE_DIR}/*.cpp
+)
+file(GLOB_RECURSE HDR_ALL 
+    ${PROJECT_SOURCE_DIR}/*.hpp
+)
+
 set(CLANG_FORMAT_LOG ${CMAKE_CURRENT_BINARY_DIR}/clang-format.log)
 add_custom_command(
     OUTPUT            ${CLANG_FORMAT_LOG}

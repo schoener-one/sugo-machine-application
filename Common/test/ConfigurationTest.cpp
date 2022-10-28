@@ -19,11 +19,17 @@ namespace po = boost::program_options;
 class ConfigurationTest : public ::testing::Test
 {
 protected:
-    ConfigurationTest() {}
+    ConfigurationTest()
+    {
+    }
 
-    ~ConfigurationTest() override {}
+    ~ConfigurationTest() override
+    {
+    }
 
-    static void SetUpTestCase() {}
+    static void SetUpTestCase()
+    {
+    }
 
     void SetUp() override
     {
@@ -32,7 +38,9 @@ protected:
         m_config.add(Option("value.bool", true, "boolean"));
     }
 
-    void TearDown() override {}
+    void TearDown() override
+    {
+    }
 
     Configuration m_config;
 };
@@ -51,9 +59,4 @@ TEST_F(ConfigurationTest, Configuration_GetValue)
     EXPECT_EQ(m_config["value.unsigned"].get<unsigned>(), 6);
     EXPECT_EQ(m_config["value.boolhar"].get<char>(), 'L');
     EXPECT_EQ(m_config["value.bool"].get<bool>(), true);
-}
-
-TEST_F(ConfigurationTest, Configuration_GetInvalidValue)
-{
-    EXPECT_THROW(m_config["invalid.value"].get<unsigned>(), std::out_of_range);
 }

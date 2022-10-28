@@ -62,11 +62,6 @@ protected:
         }
     }
 
-    void sleepFor(std::chrono::seconds seconds)
-    {
-        std::this_thread::sleep_for(seconds);
-    }
-
     message::Command createCommand(const std::string& name, unsigned index = 0,
                                    const std::string&    parameters = "",
                                    message::Command_Type type       = message::Command_Type_Request)

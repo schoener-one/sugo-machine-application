@@ -40,6 +40,16 @@
             "group": "build"
         },
         {
+            "label": "x86_build-CommonTest",
+            "type": "shell",
+            "command": "cmake --build ${config:build.directory.x86} --target CommonTest",
+            "problemMatcher": {
+                "base": "$gcc",
+                // "fileLocation": [ "relative", "${config:build.directory.x86}" ]
+            },
+            "group": "build"
+        },
+        {
             "label": "x86_build-ServiceComponentsTest",
             "type": "shell",
             "command": "cmake --build ${config:build.directory.x86} --target ServiceComponentsTest",

@@ -28,7 +28,7 @@ template <class ComponentT, class... ComponentArgs>
 class ServiceComponentExecutionBundle : public IServiceComponentExecutionBundle
 {
 public:
-    ServiceComponentExecutionBundle(ComponentArgs&... componentArgs)
+    explicit ServiceComponentExecutionBundle(ComponentArgs&... componentArgs)
         : m_id(ComponentT::ReceiverId),
           m_ioContext(m_id),
           m_broker(m_id, m_ioContext),

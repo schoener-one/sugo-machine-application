@@ -29,7 +29,7 @@ public:
      * @param policy     Thread policy.
      * @param priority   Thread priority.
      */
-    IOContext(const std::string& instanceId, Thread::Policy policy = Thread::DefaultPolicy,
+    explicit IOContext(const std::string& instanceId, Thread::Policy policy = Thread::DefaultPolicy,
               int priority = Thread::DefaultPriority);
 
     /**

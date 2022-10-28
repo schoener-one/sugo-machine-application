@@ -2,6 +2,7 @@
 
 set(MODULE_NAME "MachineRemoteControl")
 
+add_compile_definitions(MG_ARCH=MG_ARCH_UNIX)
 add_library (${MODULE_NAME} STATIC 
     src/RemoteControlServer.cpp
     src/Connection.cpp

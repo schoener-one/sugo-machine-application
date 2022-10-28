@@ -91,7 +91,7 @@ public:
      * @param transitionNotFound Definition of the handler method for not
      *                           existing transitions.
      */
-    StateMachine(StateT initState, const TransitionTable transitions)
+    StateMachine(StateT initState, const TransitionTable& transitions)
         : m_state{initState}, m_transitions{transitions}, m_eventQueue{}
     {
     }

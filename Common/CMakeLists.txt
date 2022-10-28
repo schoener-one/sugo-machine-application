@@ -2,11 +2,11 @@
 # Module: Common
 
 add_library (Common STATIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Thread.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ConfigurationParser.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ConfigurationFileParser.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Configuration.cpp
+    src/Logger.cpp
+    src/Thread.cpp
+    src/ConfigurationParser.cpp
+    src/ConfigurationFileParser.cpp
+    src/Configuration.cpp
     )
 target_include_directories (Common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(Common ${Boost_LIBRARIES})

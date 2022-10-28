@@ -149,15 +149,21 @@ int16_t Max31865::getTemperature()
     adcCode >>= 1;
     const int32_t resistance =
         ((static_cast<int32_t>(adcCode) * RefResistanceOhm) + HalfFactor) / Factor;
-    for (const auto& item : ResistanceToTemperatureLookUpTable)
+    const auto entry = std::find_if(
+        ResistanceToTemperatureLookUpTable.cbegin(), ResistanceToTemperatureLookUpTable.cend(),
+        [&resistance](const ResistanceTemperature& resistanceTemperature) {
+            return (resistance > resistanceTemperature.resistance);
+        });
+
+    if (entry != ResistanceToTemperatureLookUpTable.cend())
     {
-        if (resistance <= item.resistance)
-        {
-            return item.temperature;
-        }
+        return entry->temperature;
     }
-    LOG(warning) << Me << "Failed to calculate temperature value";
-    return std::numeric_limits<int16_t>::max();
+    else
+    {
+        LOG(warning) << Me << "Failed to calculate temperature value";
+        return std::numeric_limits<int16_t>::max();
+    }
 }
 
 bool Max31865::writeSpiRegister(uint8_t startRegister, const ByteBuffer& writeData)

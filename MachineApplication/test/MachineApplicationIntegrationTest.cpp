@@ -64,17 +64,15 @@ protected:
         prepareForStartComponents();
         ASSERT_TRUE(m_components.start(m_serviceLocator));
 
-        // auto it = std::find_if(
-        //     m_components.getBundles().begin(), m_components.getBundles().end(),
-        //     [](const auto& bundle) { return (bundle->getId() == "UserInterfaceControl"); });
-        // assert((it != m_components.getBundles().end()) && (*it));
+        auto it = std::find_if(
+            m_components.getBundles().begin(), m_components.getBundles().end(),
+            [](const auto& bundle) { return (bundle->getId() == "UserInterfaceControl"); });
+        assert((it != m_components.getBundles().end()) && (*it));
 
-        // IServiceComponent&    serviceComponent = it->get()->getServiceComponent();
-        // UserInterfaceControl* userInterfaceControl =
-        //     static_cast<UserInterfaceControl*>(&serviceComponent);
-        // m_remoteControlServer =
-        //     std::make_shared<RemoteControlServer>("", 4242u, "www", *userInterfaceControl);
-        // ASSERT_TRUE(m_remoteControlServer->start());
+        IServiceComponent&    serviceComponent = it->get()->getServiceComponent();
+        UserInterfaceControl* userInterfaceControl =
+            static_cast<UserInterfaceControl*>(&serviceComponent);
+        userInterfaceControl->registerSendNotification(m_mockNotificationHandler.AsStdFunction());
     }
 
     void TearDown() override
@@ -118,6 +116,8 @@ protected:
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinRelaySwitchLightRun;
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinRelaySwitchLightPower;
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinRelaySwitchLightReady;
+
+    NiceMock<MockFunction<void(const Json&)>> m_mockNotificationHandler;
 
     NiceMock<IHardwareAbstractionLayerMock> m_mockHardwareAbstractionLayer;
     ServiceLocator                          m_serviceLocator;
@@ -332,4 +332,10 @@ TEST_F(MachineApplicationIntegrationTest, MotorErrorOccurred)
     EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationSwitchedOff);
     send(IMachineControl::CommandSwitchOff);
     EXPECT_NOTIFICATION_END(IMachineControl, NotificationSwitchedOff);
+}
+
+TEST_F(MachineApplicationIntegrationTest, TensionSensor)
+{
+    switchOnMachine();
+
 }

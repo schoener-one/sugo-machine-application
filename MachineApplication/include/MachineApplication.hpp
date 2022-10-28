@@ -28,7 +28,7 @@ public:
      *
      * @param appName Name of the application
      */
-    MachineApplication(const std::string& appName);
+    explicit MachineApplication(const std::string& appName);
 
     /**
      * Starts the application with command line arguments.

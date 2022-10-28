@@ -38,7 +38,7 @@ public:
         return true;
     }
 
-    void processPost()
+    void processPost() override
     {
     }
 

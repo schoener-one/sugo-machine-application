@@ -18,16 +18,6 @@ using namespace sugo;
 class CommandLineParserTest : public ::testing::Test
 {
 protected:
-    CommandLineParserTest() {}
-
-    ~CommandLineParserTest() override {}
-
-    static void SetUpTestCase() {}
-
-    void SetUp() override {}
-
-    void TearDown() override {}
-
     IConfigurationMock m_mockConfig;
 };
 
