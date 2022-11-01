@@ -15,8 +15,8 @@
 #include "IMachineControl.hpp"
 #include "MachineConfig.hpp"
 #include "MachineProtocol.hpp"
-#include "RemoteControlProtocol.hpp"
 #include "MessageProtocol.hpp"
+#include "RemoteControlProtocol.hpp"
 
 #include <cassert>
 #include <string>
@@ -45,9 +45,16 @@ Json UserInterfaceControl::createStateMessage(const std::string& type)
 {
     namespace rp             = remote_control::protocol;
     auto     machineResponse = send(IMachineControl::CommandGetMotorSpeed);
-    auto     response        = Json::parse(machineResponse.response());
-    auto     jsonSpeed       = response.at(protocol::IdSpeed);
-    unsigned speed           = (jsonSpeed.empty()) ? 0 : jsonSpeed.get<unsigned>();
+    unsigned speed           = 0;
+
+    if ((machineResponse.result() == CommandResponse_Result_SUCCESS) &&
+        !machineResponse.response().empty())
+    {
+        auto response  = Json::parse(machineResponse.response());
+        auto jsonSpeed = response.at(protocol::IdSpeed);
+        speed          = (jsonSpeed.empty()) ? 0 : jsonSpeed.get<unsigned>();
+    }
+
     return Json({{rp::IdType, type},
                  {rp::IdResult, rp::IdResultSuccess},
                  {rp::IdState, convertToString(m_lastMachineEvent)},
@@ -136,25 +143,25 @@ void UserInterfaceControl::updateMachineState()
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlStarting(
     const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::MachineStarting));
+    return handleEventMessage(command, Event(EventId::MachineStarting));
 }
 
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlRunning(
     const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::MachineRunning));
+    return handleEventMessage(command, Event(EventId::MachineRunning));
 }
 
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlSwitchedOff(
     const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::MachineSwitchedOff));
+    return handleEventMessage(command, Event(EventId::MachineSwitchedOff));
 }
 
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlErrorOccurred(
     const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::MachineError));
+    return handleEventMessage(command, Event(EventId::MachineError));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

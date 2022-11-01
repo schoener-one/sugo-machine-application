@@ -257,6 +257,7 @@ bool CommandMessageBroker::processReceivedNotification(const message::Command& m
 void CommandMessageBroker::processPost()
 {
     m_isProcessingReceiveMessage = false;
+    
     if (m_postProcess)
     {
         LOG(trace) << "Start post processing";

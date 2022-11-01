@@ -53,12 +53,12 @@ TEST_F(CommonTest, TimerStartStop)
     const std::chrono::milliseconds duration(1000);
     unsigned                        counts  = 0;
     std::chrono::time_point         stopTime = std::chrono::high_resolution_clock::now();
-    Timer                           timer([&counts, &stopTime] {
+    Timer                           timer(period, [&counts, &stopTime] {
         counts++;
         stopTime = std::chrono::high_resolution_clock::now();
     }, "TestTimer");
     auto                            startTime = std::chrono::high_resolution_clock::now();
-    EXPECT_TRUE(timer.start(period));
+    EXPECT_TRUE(timer.start());
     std::this_thread::sleep_for(duration);
     timer.stop();
     const unsigned expectedCounts = duration / period;
@@ -73,7 +73,7 @@ TEST_F(CommonTest, TimeoutHandlerDelay)
     const std::chrono::milliseconds duration(1000);
     unsigned                        counts  = 0;
     std::chrono::time_point         stopTime = std::chrono::high_resolution_clock::now();
-    Timer                           timer([&counts, &stopTime, &period] {
+    Timer                           timer(period, [&counts, &stopTime, &period] {
         counts++;
         stopTime = std::chrono::high_resolution_clock::now();
         if (counts == 3)
@@ -82,7 +82,7 @@ TEST_F(CommonTest, TimeoutHandlerDelay)
         }
     }, "TestTimer");
     auto                            startTime = std::chrono::high_resolution_clock::now();
-    EXPECT_TRUE(timer.start(period));
+    EXPECT_TRUE(timer.start());
     std::this_thread::sleep_for(duration);
     timer.stop();
     const unsigned expectedCounts = duration / period - 1; // One less because of the delay!

@@ -40,6 +40,7 @@ public:
     MOCK_METHOD(bool, push, (const test::Event&));
     MOCK_METHOD(bool, processNextEvent, ());
     MOCK_METHOD(EventQueue<test::Event>&, getEventQueue, ());
+    MOCK_METHOD(bool, checkNextEvent, (const test::Event&), (const));
 };
 
 }  // namespace sugo

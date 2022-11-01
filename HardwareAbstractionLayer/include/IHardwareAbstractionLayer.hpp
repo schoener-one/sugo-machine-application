@@ -29,12 +29,12 @@ class IHardwareAbstractionLayer : public IHalObject
 {
 public:
     /// GPIO controller map
-    using GpioControllerMap = std::map<IHalObject::Identifier, std::shared_ptr<IGpioControl>>;
+    using GpioControllerMap = std::map<Identifier, std::shared_ptr<IGpioControl>>;
     /// Stepper motor controller map
     using StepperMotorControllerMap =
-        std::map<IHalObject::Identifier, std::shared_ptr<IStepperMotorControl>>;
+        std::map<Identifier, std::shared_ptr<IStepperMotorControl>>;
     /// ADC input controller map
-    using TemperatureSensorControllerMap = std::map<IHalObject::Identifier, std::shared_ptr<ITemperatureSensorControl>>;
+    using TemperatureSensorControllerMap = std::map<Identifier, std::shared_ptr<ITemperatureSensorControl>>;
 
     /**
      * @brief Destroy the IHardwareAbstractionLayer object

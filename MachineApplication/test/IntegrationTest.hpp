@@ -25,8 +25,8 @@
 
 /// Expect a defined state of that component
 #define EXPECT_STATE(_COMP, _STATE) expectState<_COMP>(_COMP::State::_STATE)
-#define EXPECT_NOTIFICATION_BEGIN(_COMP, _NOTIF) subscribeToNotification<_COMP>(_COMP::_NOTIF)
-#define EXPECT_NOTIFICATION_END(_COMP, _NOTIF) waitForNotification<_COMP>(_COMP::_NOTIF)
+#define EXPECT_NOTIFICATION_SUBSCRIBE(_COMP, _NOTIF) subscribeToNotification<_COMP>(_COMP::_NOTIF)
+#define EXPECT_NOTIFICATION(_COMP, _NOTIF) waitForNotification<_COMP>(_COMP::_NOTIF)
 
 namespace sugo
 {
@@ -37,7 +37,8 @@ protected:
         : m_receiverAddress(address), m_ioContext(address), m_broker(address, m_ioContext)
     {
     }
-
+    virtual ~IntegrationTest() = default;
+    
     void SetUp() override
     {
         m_receivedNotifications.clear();
@@ -83,28 +84,31 @@ protected:
                     std::lock_guard<std::mutex> lock(m_mutex);
                     m_receivedNotifications.push_back(command.name());
                 }
-                m_condVar.notify_one();
                 return message::CommandResponse();
             });
         ASSERT_TRUE(
             m_broker.subscribe(notificationId.getPublisherAddress(), notificationId.getId()));
+        m_broker.registerPostProcessHandler([&] {
+            // Call out of receive context!
+            m_condVar.notify_one();
+        });
         LOG(debug) << "Subscribed for notification: " << notificationId.getId();
     }
 
     template <typename CompT>
     void waitForNotification(
         const message::NotificationId&   notificationId,
-        const std::chrono::milliseconds& maxTime = std::chrono::milliseconds(10000))
+        const std::chrono::milliseconds& maxTime = std::chrono::milliseconds(60000))
     {
         LOG(debug) << "Expect notification: " << notificationId.getId();
         std::unique_lock<std::mutex> lock(m_mutex);
-        std::cv_status               status = std::cv_status::timeout;
-        do
+        std::cv_status               status = std::cv_status::no_timeout;
+        while ((status == std::cv_status::no_timeout) &&
+               (!hasNotificationReceived(notificationId.getId())))
         {
             status = m_condVar.wait_for(lock, maxTime);
-        } while ((status == std::cv_status::no_timeout) &&
-                 (!hasNotificationReceived(notificationId.getId())));
-        EXPECT_NE(std::cv_status::timeout, status);
+            EXPECT_NE(std::cv_status::timeout, status);
+        }
         ASSERT_TRUE(m_broker.unsubscribe(notificationId.getId()));
         m_broker.unregisterMessageHandler(notificationId.getId());
         LOG(debug) << "Expected notification received: " << notificationId.getId();

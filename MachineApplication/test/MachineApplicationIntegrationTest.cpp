@@ -11,12 +11,15 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 #include "CommandMessageBroker.hpp"
 #include "Globals.hpp"
 #include "IFilamentCoilControl.hpp"
 #include "IFilamentCoilMotor.hpp"
 #include "IFilamentMergerHeater.hpp"
 #include "IFilamentPreHeater.hpp"
+#include "IFilamentTensionSensor.hpp"
 #include "IGpioControlMock.hpp"
 #include "IGpioPinMock.hpp"
 #include "IHardwareAbstractionLayerMock.hpp"
@@ -41,11 +44,19 @@ using namespace hal;
 using namespace remote_control;
 
 using ::testing::_;
+using ::testing::Invoke;
 using ::testing::MockFunction;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+namespace
+{
+MATCHER_P(speedEqual, other, "")
+{
+    return (arg == other);
+}
+}  // namespace
 namespace sugo
 {
 class MachineApplicationIntegrationTest : public IntegrationTest
@@ -77,9 +88,8 @@ protected:
 
     void TearDown() override
     {
-        // m_remoteControlServer->stop();
-        m_components.stop();
         IntegrationTest::TearDown();
+        m_components.stop();
     }
 
     static void SetUpTestCase()
@@ -116,16 +126,19 @@ protected:
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinRelaySwitchLightRun;
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinRelaySwitchLightPower;
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinRelaySwitchLightReady;
+    std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinSignalFilamentTensionLow;
+    std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinSignalFilamentTensionHigh;
 
     NiceMock<MockFunction<void(const Json&)>> m_mockNotificationHandler;
 
     NiceMock<IHardwareAbstractionLayerMock> m_mockHardwareAbstractionLayer;
     ServiceLocator                          m_serviceLocator;
     ServiceComponentsExecutionGroup         m_components;
-    // std::shared_ptr<RemoteControlServer>    m_remoteControlServer;
 
     static constexpr unsigned DefaultMotorSpeed  = 100;
     static constexpr int32_t  DefaultTemperature = 25;
+
+    unsigned m_nextMotorSpeed = 0;
 };
 
 void MachineApplicationIntegrationTest::prepareHardwareAbstractionLayer()
@@ -155,19 +168,32 @@ void MachineApplicationIntegrationTest::prepareHardwareAbstractionLayer()
                                 m_mockGpioControl = std::make_shared<NiceMock<IGpioControlMock>>());
     m_gpioPinMap.emplace(
         config::GpioPinRelaySwitchFeederHeaterId,
-        m_mockGpioPinRelaySwitchHeaterFeeder = std::make_shared<NiceMock<IGpioPinMock>>());
+        m_mockGpioPinRelaySwitchHeaterFeeder =
+            std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchFeederHeater"));
     m_gpioPinMap.emplace(
         config::GpioPinRelaySwitchMergerHeaterId,
-        m_mockGpioPinRelaySwitchHeaterMerger = std::make_shared<NiceMock<IGpioPinMock>>());
+        m_mockGpioPinRelaySwitchHeaterMerger =
+            std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchMergerHeater"));
     m_gpioPinMap.emplace(
         config::GpioPinRelaySwitchLightRunId,
-        m_mockGpioPinRelaySwitchLightRun = std::make_shared<NiceMock<IGpioPinMock>>());
+        m_mockGpioPinRelaySwitchLightRun =
+            std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchLightRun"));
     m_gpioPinMap.emplace(
         config::GpioPinRelaySwitchLightPowerId,
-        m_mockGpioPinRelaySwitchLightPower = std::make_shared<NiceMock<IGpioPinMock>>());
+        m_mockGpioPinRelaySwitchLightPower =
+            std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchLightPower"));
     m_gpioPinMap.emplace(
         config::GpioPinRelaySwitchLightReadyId,
-        m_mockGpioPinRelaySwitchLightReady = std::make_shared<NiceMock<IGpioPinMock>>());
+        m_mockGpioPinRelaySwitchLightReady =
+            std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchLightReady"));
+    m_gpioPinMap.emplace(
+        config::GpioPinSignalFilamentTensionLowId,
+        m_mockGpioPinSignalFilamentTensionLow =
+            std::make_shared<NiceMock<IGpioPinMock>>("GpioPinSignalFilamentTensionLow"));
+    m_gpioPinMap.emplace(
+        config::GpioPinSignalFilamentTensionHighId,
+        m_mockGpioPinSignalFilamentTensionHigh =
+            std::make_shared<NiceMock<IGpioPinMock>>("GpioPinSignalFilamentTensionHigh"));
 
     m_serviceLocator.add<IHardwareAbstractionLayer>(m_mockHardwareAbstractionLayer);
     ON_CALL(m_mockHardwareAbstractionLayer, getStepperMotorControllerMap())
@@ -204,60 +230,64 @@ void MachineApplicationIntegrationTest::prepareSwitchOn()
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::High))
         .WillOnce(Return(true));
+    ON_CALL(*m_mockGpioPinSignalFilamentTensionLow, getState())
+        .WillByDefault(Return(hal::IGpioPin::State::Low));
+    ON_CALL(*m_mockGpioPinSignalFilamentTensionHigh, getState())
+        .WillByDefault(Return(hal::IGpioPin::State::Low));
 }
 
 void MachineApplicationIntegrationTest::heatUp()
 {
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::Low))
         .WillOnce(Return(true));
-    EXPECT_NOTIFICATION_BEGIN(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
     ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
-    EXPECT_NOTIFICATION_END(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
+    EXPECT_NOTIFICATION(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
 
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::Low))
         .WillOnce(Return(true));
-    EXPECT_NOTIFICATION_BEGIN(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
     ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
-    EXPECT_NOTIFICATION_END(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
+    EXPECT_NOTIFICATION(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
 }
 
 void MachineApplicationIntegrationTest::coolDown()
 {
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::High))
         .WillOnce(Return(true));
-    EXPECT_NOTIFICATION_BEGIN(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
     ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MinHeaterTemperature, Unit::Celcius}));
-    EXPECT_NOTIFICATION_END(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
+    EXPECT_NOTIFICATION(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
 
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::High))
         .WillOnce(Return(true));
-    EXPECT_NOTIFICATION_BEGIN(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
     ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MinHeaterTemperature, Unit::Celcius}));
-    EXPECT_NOTIFICATION_END(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
+    EXPECT_NOTIFICATION(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
 }
 
 void MachineApplicationIntegrationTest::switchOnMachine()
 {
     prepareSwitchOn();
-    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationStarting);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationStarting);
     send(IMachineControl::CommandSwitchOn);
-    EXPECT_NOTIFICATION_END(IMachineControl, NotificationStarting);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationStarting);
     EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
 
     // Heating up
     EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(true));
-    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationRunning);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationRunning);
     heatUp();
-    EXPECT_NOTIFICATION_END(IMachineControl, NotificationRunning);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationRunning);
 }
 
 void MachineApplicationIntegrationTest::switchOffMachine()
@@ -268,9 +298,9 @@ void MachineApplicationIntegrationTest::switchOffMachine()
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorFeeder, stop(false)).WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorCoiler, stop(false)).WillOnce(Return(true));
-    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationSwitchedOff);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationSwitchedOff);
     send(IMachineControl::CommandSwitchOff);
-    EXPECT_NOTIFICATION_END(IMachineControl, NotificationSwitchedOff);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationSwitchedOff);
 }
 }  // namespace sugo
 
@@ -298,13 +328,13 @@ TEST_F(MachineApplicationIntegrationTest, MotorErrorOccurred)
 {
     // switchOn
     prepareSwitchOn();
-    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationStarting);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationStarting);
     send(IMachineControl::CommandSwitchOn);
-    EXPECT_NOTIFICATION_END(IMachineControl, NotificationStarting);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationStarting);
     EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
 
     // Simulate motor rotation error after heating up
-    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationErrorOccurred);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationErrorOccurred);
     EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(false));  // Error occurred!
     EXPECT_CALL(*m_mockStepperMotorFeeder, stop(false)).WillOnce(Return(true));
@@ -325,17 +355,81 @@ TEST_F(MachineApplicationIntegrationTest, MotorErrorOccurred)
         .WillByDefault(
             Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
 
-    EXPECT_NOTIFICATION_END(IMachineControl, NotificationErrorOccurred);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationErrorOccurred);
     EXPECT_STATE(IMachineControl, Error);
 
     // Switch off
-    EXPECT_NOTIFICATION_BEGIN(IMachineControl, NotificationSwitchedOff);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationSwitchedOff);
     send(IMachineControl::CommandSwitchOff);
-    EXPECT_NOTIFICATION_END(IMachineControl, NotificationSwitchedOff);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationSwitchedOff);
 }
 
-TEST_F(MachineApplicationIntegrationTest, TensionSensor)
+TEST_F(MachineApplicationIntegrationTest, TensionSensorTooLow)
 {
     switchOnMachine();
 
+    m_nextMotorSpeed      = DefaultMotorSpeed + config::MotorSpeedInc;
+    bool signalRisingEdge = true;
+    EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentTensionSensor, NotificationTensionTooLow);
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionLow, waitForEvent(_))
+        .WillRepeatedly(Invoke([&](std::chrono::nanoseconds timeout) {
+            if (signalRisingEdge)
+            {
+                signalRisingEdge = false;
+                return IGpioPin::Event{std::chrono::nanoseconds(0),
+                                       IGpioPin::EventType::RisingEdge};
+            }
+            else
+            {
+                std::this_thread::sleep_for(timeout);
+                return IGpioPin::Event{std::chrono::nanoseconds(0), IGpioPin::EventType::Timeout};
+            }
+        }));
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionLow, getState())
+        .WillRepeatedly(Return(hal::IGpioPin::State::High));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, setMaxSpeed(_))
+        .WillRepeatedly([&](hal::IStepperMotor::Speed speed) {
+            EXPECT_EQ(speed, m_nextMotorSpeed);
+            m_nextMotorSpeed =
+                std::clamp(m_nextMotorSpeed + config::MotorSpeedInc, 0u, config::MaxMotorSpeed);
+        });
+    EXPECT_NOTIFICATION(IFilamentTensionSensor, NotificationTensionTooLow);
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionLow, getState())
+        .WillRepeatedly(Return(hal::IGpioPin::State::Low));
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+}
+
+TEST_F(MachineApplicationIntegrationTest, TensionSensorTooHigh)
+{
+    switchOnMachine();
+
+    m_nextMotorSpeed      = DefaultMotorSpeed - config::MotorSpeedInc;
+    bool signalRisingEdge = true;
+    EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentTensionSensor, NotificationTensionTooHigh);
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionHigh, waitForEvent(_))
+        .WillRepeatedly(Invoke([&](std::chrono::nanoseconds timeout) {
+            if (signalRisingEdge)
+            {
+                signalRisingEdge = false;
+                return IGpioPin::Event{std::chrono::nanoseconds(0),
+                                       IGpioPin::EventType::RisingEdge};
+            }
+            else
+            {
+                std::this_thread::sleep_for(timeout);
+                return IGpioPin::Event{std::chrono::nanoseconds(0), IGpioPin::EventType::Timeout};
+            }
+        }));
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionHigh, getState())
+        .WillRepeatedly(Return(hal::IGpioPin::State::High));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, setMaxSpeed(_))
+        .WillRepeatedly([&](hal::IStepperMotor::Speed speed) {
+            EXPECT_EQ(speed, m_nextMotorSpeed);
+            m_nextMotorSpeed =
+                std::clamp(m_nextMotorSpeed - config::MotorSpeedInc, 0u, config::MaxMotorSpeed);
+        });
+    EXPECT_NOTIFICATION(IFilamentTensionSensor, NotificationTensionTooHigh);
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionHigh, getState())
+        .WillRepeatedly(Return(hal::IGpioPin::State::Low));
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 }

@@ -15,41 +15,66 @@
 #include "Logger.hpp"
 #include "MachineConfig.hpp"
 
+#include <algorithm>
+
 using namespace sugo;
 
-MotorService::MotorService(const std::string&    motorId,
-                                    const ServiceLocator& serviceLocator)
-    : m_motorId(motorId), m_serviceLocator(serviceLocator)
+MotorService::MotorService(const hal::Identifier& motorId, const ServiceLocator& serviceLocator)
+    : m_stepperMotor(getStepperMotor(serviceLocator.get<hal::IHardwareAbstractionLayer>(), motorId))
 {
 }
 
-void MotorService::setMotorSpeed(unsigned motorSpeed)
+bool MotorService::setMotorSpeed(unsigned motorSpeed)
 {
-    m_motorSpeed = motorSpeed;
+    bool valid = true;
+
+    if (motorSpeed <= config::MaxMotorSpeed)
+    {
+        m_motorSpeed = motorSpeed;
+    }
+    else
+    {
+        m_motorSpeed = config::MaxMotorSpeed;
+        valid      = false;
+    }
+
     setMotorSpeed();
+    return valid;
 }
 
 void MotorService::setMotorSpeed()
 {
-    auto& stepperMotor =
-        getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
     const auto motorSpeed = m_motorSpeed + m_motorOffsetSpeed;
     LOG(debug) << "Setting motor speed: " << motorSpeed;
-    stepperMotor->setMaxSpeed(hal::IStepperMotor::Speed(motorSpeed, hal::Unit::Rpm));
+    m_stepperMotor->setMaxSpeed(hal::IStepperMotor::Speed(motorSpeed, hal::Unit::Rpm));
 }
 
-void MotorService::setMotorOffsetSpeed(unsigned motorOffsetSpeed)
+bool MotorService::setMotorOffsetSpeed(int motorOffsetSpeed)
 {
-    m_motorOffsetSpeed = motorOffsetSpeed;
+    int  resultingSpeed = static_cast<int>(m_motorSpeed) + motorOffsetSpeed;
+    bool valid        = true;
+
+    if (resultingSpeed >= static_cast<int>(config::MinMotorSpeed) and (resultingSpeed <= static_cast<int>(config::MaxMotorSpeed)))
+    {
+        m_motorOffsetSpeed = motorOffsetSpeed;
+    }
+    else
+    {
+        resultingSpeed     = std::clamp(motorOffsetSpeed, static_cast<int>(config::MinMotorSpeed),
+                                    static_cast<int>(config::MaxMotorSpeed));
+        m_motorOffsetSpeed = static_cast<int>(m_motorSpeed) - resultingSpeed;
+        valid = false;
+    }
+
     setMotorSpeed();
+    return valid;
 }
 
 bool MotorService::startMotorRotation()
 {
-    auto& stepperMotor =
-        getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
+    setMotorSpeed();
 
-    if (!stepperMotor->rotate(hal::IStepperMotor::Direction::Forward))
+    if (!m_stepperMotor->rotate(hal::IStepperMotor::Direction::Forward))
     {
         LOG(error) << "Failed to start motor rotation";
         return false;
@@ -60,24 +85,21 @@ bool MotorService::startMotorRotation()
 
 bool MotorService::resetMotor()
 {
-    auto& stepperMotor =
-        getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
-
-    if (!stepperMotor->reset())
+    if (!m_stepperMotor->reset())
     {
         LOG(error) << "Failed to reset motor state";
         return false;
     }
+
+    m_motorOffsetSpeed = 0;
+    m_motorSpeed       = m_stepperMotor->getMaxSpeed().getValue();
 
     return true;
 }
 
 void MotorService::stopMotorRotation(bool immediately)
 {
-    auto& stepperMotor =
-        getStepperMotor(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_motorId);
-
-    if (!stepperMotor->stop(immediately))
+    if (!m_stepperMotor->stop(immediately))
     {
         LOG(error) << "Failed to stop motor" << ((immediately) ? " immediately" : "");
     }

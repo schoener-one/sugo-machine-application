@@ -13,24 +13,20 @@
 
 #include "IFilamentTensionSensor.hpp"
 #include "ServiceLocator.hpp"
+#include "FilamentTensionControlService.hpp"
 
 namespace sugo
 {
 /**
  * @class FilamentTensionSensor
  */
-class FilamentTensionSensor : public IFilamentTensionSensor
+class FilamentTensionSensor : public IFilamentTensionSensor, public FilamentTensionControlService
 {
 public:
     // Constructor / Destructor
     explicit FilamentTensionSensor(message::ICommandMessageBroker& messageBroker,
-                                   const ServiceLocator&  serviceLocator)
-        : IFilamentTensionSensor(messageBroker), m_serviceLocator(serviceLocator)
-    {
-    }
-    virtual ~FilamentTensionSensor()
-    {
-    }
+                                   const ServiceLocator&  serviceLocator);
+    virtual ~FilamentTensionSensor() = default;
 
 protected:
     // Command handlers
@@ -42,6 +38,9 @@ protected:
     void switchOn(const Event& event, const State& state) override;
     void switchOff(const Event& event, const State& state) override;
 
+    void onFilamentTensionEvent(FilamentTensionEvent event) override;
+
+private:
     const ServiceLocator& m_serviceLocator;
 };
 

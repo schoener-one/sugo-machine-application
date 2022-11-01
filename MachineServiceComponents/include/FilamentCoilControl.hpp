@@ -60,13 +60,13 @@ protected:
     void stopMotor(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
     void notifyRunning(const Event& event, const State& state) override;
+    void controlFilamentTension(const Event& event, const State& state) override;
 
 private:
     void switchOff();
 
     const ServiceLocator& m_serviceLocator;
-    int                   m_motorOffsetSpeed = 0;
-
+   
     friend class ControlService<FilamentCoilControl>;
 };
 

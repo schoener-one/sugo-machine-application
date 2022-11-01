@@ -21,12 +21,12 @@ using namespace sugo;
 // Commands
 message::CommandResponse MachineControl::onCommandSwitchOn(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event(EventId::SwitchOn));
 }
 
 message::CommandResponse MachineControl::onCommandSwitchOff(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event(EventId::SwitchOff));
 }
 
 message::CommandResponse MachineControl::onCommandIncreaseMotorSpeed(const message::Command&)
@@ -64,46 +64,46 @@ message::CommandResponse MachineControl::onNotificationFilamentMergerControlFeed
     const message::Command& command)
 {
     m_isFilamentMergerControlRunning = true;
-    return handleStateChangeMessage(command, Event(EventId::WaitForStarted));
+    return handleEventMessage(command, Event(EventId::WaitForStarted));
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentMergerControlFeedingStopped(
     const message::Command& command)
 {
     m_isFilamentMergerControlRunning = false;
-    return handleStateChangeMessage(command, Event(EventId::RunningStopped));
+    return handleEventMessage(command, Event(EventId::RunningStopped));
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentMergerControlHeatedUp(
     const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::MergerHeatedUp));
+    return handleEventMessage(command, Event(EventId::MergerHeatedUp));
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentMergerControlErrorOccurred(
     const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::ErrorOccurred));
+    return handleEventMessage(command, Event(EventId::ErrorOccurred));
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentCoilControlCoilRunning(
     const message::Command& command)
 {
     m_isFilamentCoilControlRunning = true;
-    return handleStateChangeMessage(command, Event(EventId::WaitForStarted));
+    return handleEventMessage(command, Event(EventId::WaitForStarted));
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentCoilControlCoilStopped(
     const message::Command& command)
 {
     m_isFilamentCoilControlRunning = false;
-    return handleStateChangeMessage(command, Event(EventId::RunningStopped));
+    return handleEventMessage(command, Event(EventId::RunningStopped));
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentCoilControlErrorOccurred(
     const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::ErrorOccurred));
+    return handleEventMessage(command, Event(EventId::ErrorOccurred));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

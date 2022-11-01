@@ -24,15 +24,18 @@ FilamentMergerHeater::FilamentMergerHeater(ICommandMessageBroker& messageBroker,
 {
 }
 
-void FilamentMergerHeater::onMaxTemperatureReached()
+void FilamentMergerHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
 {
-    push(Event(EventId::MaxTemperatureReached));
-    processAllEvents();
-}
+    switch (event)
+    {
+        case MinTemperatureReached:
+            push(Event(EventId::MinTemperatureReached));
+            break;
+        case MaxTemperatureReached:
+            push(Event(EventId::MaxTemperatureReached));
+            break;
+    }
 
-void FilamentMergerHeater::onMinTemperatureReached()
-{
-    push(Event(EventId::MinTemperatureReached));
     processAllEvents();
 }
 
@@ -41,12 +44,12 @@ void FilamentMergerHeater::onMinTemperatureReached()
 
 message::CommandResponse FilamentMergerHeater::onCommandSwitchOn(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event(EventId::SwitchOn));
 }
 
 message::CommandResponse FilamentMergerHeater::onCommandSwitchOff(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event(EventId::SwitchOff));
 }
 
 message::CommandResponse FilamentMergerHeater::onCommandGetTemperature(

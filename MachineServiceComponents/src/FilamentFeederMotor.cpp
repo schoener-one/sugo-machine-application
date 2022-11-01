@@ -24,41 +24,38 @@ using namespace sugo::message;
 
 message::CommandResponse FilamentFeederMotor::onCommandSwitchOn(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event(EventId::SwitchOn));
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandSwitchOff(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event(EventId::SwitchOff));
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandStartMotor(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::StartMotor));
+    return handleEventMessage(command, Event(EventId::StartMotor));
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandStopMotor(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::StopMotor));
+    return handleEventMessage(command, Event(EventId::StopMotor));
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandSetMotorSpeed(
     const message::Command& command)
 {
     const auto& motorSpeed = Json::parse(command.parameters()).at(protocol::IdSpeed);
+
     if (motorSpeed.empty())
     {
         return createErrorCommandResponse(
-            command, Json({{message::protocol::IdErrorReason, message::protocol::IdErrorCommandParameterInvalid}}));
+            command, Json({{message::protocol::IdErrorReason,
+                            message::protocol::IdErrorCommandParameterInvalid}}));
     }
-    setMotorSpeed(motorSpeed.get<unsigned>());
-    return createCommandResponse(command);
-}
 
-message::CommandResponse FilamentFeederMotor::onCommandSetMotorOffsetSpeed(
-    const message::Command& command)
-{
-    return createUnsupportedCommandResponse(command);
+    (void)setMotorSpeed(motorSpeed.get<unsigned>());
+    return createCommandResponse(command);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

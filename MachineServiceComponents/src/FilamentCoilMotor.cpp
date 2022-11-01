@@ -24,48 +24,66 @@ using namespace sugo::message::protocol;
 
 message::CommandResponse FilamentCoilMotor::onCommandSwitchOn(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event(EventId::SwitchOn));
 }
 
 message::CommandResponse FilamentCoilMotor::onCommandSwitchOff(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event(EventId::SwitchOff));
 }
 
 message::CommandResponse FilamentCoilMotor::onCommandStartMotor(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::StartMotor));
+    return handleEventMessage(command, Event(EventId::StartMotor));
 }
 
 message::CommandResponse FilamentCoilMotor::onCommandStopMotor(const message::Command& command)
 {
-    return handleStateChangeMessage(command, Event(EventId::StopMotor));
+    return handleEventMessage(command, Event(EventId::StopMotor));
 }
 
 message::CommandResponse FilamentCoilMotor::onCommandSetMotorSpeed(const message::Command& command)
 {
     const auto& motorSpeed = Json::parse(command.parameters()).at(protocol::IdSpeed);
+
     if (motorSpeed.empty())
     {
         return createErrorCommandResponse(
             command, Json({{message::protocol::IdErrorReason,
                             message::protocol::IdErrorCommandParameterInvalid}}));
     }
-    setMotorSpeed(motorSpeed.get<unsigned>());
+
+    (void)setMotorSpeed(motorSpeed.get<unsigned>());
     return createCommandResponse(command);
 }
 
-message::CommandResponse FilamentCoilMotor::onCommandSetMotorOffsetSpeed(
+message::CommandResponse FilamentCoilMotor::onCommandIncreaseMotorOffsetSpeed(
     const message::Command& command)
 {
-    const auto& motorSpeed = Json::parse(command.parameters()).at(protocol::IdSpeed);
-    if (motorSpeed.empty())
+    const auto& motorSpeedJson = Json::parse(command.parameters()).at(protocol::IdSpeed);
+    int         motorSpeed     = config::MotorSpeedInc;
+
+    if (!motorSpeedJson.empty())
     {
-        return createErrorCommandResponse(
-            command, Json({{message::protocol::IdErrorReason,
-                            message::protocol::IdErrorCommandParameterInvalid}}));
+        motorSpeed = motorSpeedJson.get<int>();
     }
-    setMotorOffsetSpeed(motorSpeed.get<unsigned>());
+
+    (void)setMotorOffsetSpeed(motorSpeed);
+    return createCommandResponse(command);
+}
+
+message::CommandResponse FilamentCoilMotor::onCommandDecreaseMotorOffsetSpeed(
+    const message::Command& command)
+{
+    const auto& motorSpeedJson = Json::parse(command.parameters()).at(protocol::IdSpeed);
+    int         motorSpeed     = -1 * config::MotorSpeedInc;
+
+    if (!motorSpeedJson.empty())
+    {
+        motorSpeed = -1 * motorSpeedJson.get<int>();
+    }
+
+    (void)setMotorOffsetSpeed(motorSpeed);
     return createCommandResponse(command);
 }
 

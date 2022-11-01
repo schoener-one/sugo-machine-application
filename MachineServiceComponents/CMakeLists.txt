@@ -21,6 +21,8 @@ add_library(${MODULE_NAME}
     src/UserInterfaceControl.cpp
     src/HeaterService.cpp
     src/MotorService.cpp
+    src/GpioPinEventObserver.cpp
+    src/FilamentTensionControlService.cpp
     )
 target_include_directories (${MODULE_NAME}
     PUBLIC

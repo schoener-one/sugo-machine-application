@@ -53,7 +53,7 @@ public:
      */
     enum EventType
     {
-        TimeoutEvent,  ///< Timeout event
+        Timeout,  ///< Timeout event
         RisingEdge,    ///< Rising edge event
         FallingEdge    ///< Falling edge event
     };
@@ -67,7 +67,7 @@ public:
         /// Time when the event occurred.
         std::chrono::nanoseconds timestamp = std::chrono::nanoseconds(0);
         /// Type of the event.
-        EventType type = EventType::TimeoutEvent;
+        EventType type = EventType::Timeout;
     };
 
     virtual ~IGpioPin()

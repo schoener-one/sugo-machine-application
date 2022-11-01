@@ -19,12 +19,15 @@
 
 using namespace sugo;
 
-HeaterService::HeaterService(const std::string& heaterId, const std::string& temperatureSensorId,
-                             const ServiceLocator& serviceLocator)
+HeaterService::HeaterService(const hal::Identifier& heaterId,
+                             const hal::Identifier& temperatureSensorId,
+                             const ServiceLocator&  serviceLocator)
     : m_heaterId(heaterId),
       m_temperatureSensorId(temperatureSensorId),
       m_serviceLocator(serviceLocator),
-      m_temperatureObserver([&]() { updateHeaterTemperatureAndCheck(); }, heaterId + "Timer"),
+      m_temperatureObserver(
+          config::TemperatureObservationPeriod, [&]() { updateHeaterTemperatureAndCheck(); },
+          heaterId + "Timer"),
       m_lastCheckedTemperature(std::numeric_limits<Temperature>::min())
 {
 }
@@ -58,13 +61,13 @@ void HeaterService::updateHeaterTemperatureAndCheck()
         {
             LOG(debug) << "Max temperature reached: " << m_lastCheckedTemperature << "/"
                        << m_currentTemperature;
-            onMaxTemperatureReached();
+            onTemperatureLimitEvent(TemperatureLimitEvent::MaxTemperatureReached);
         }
         else if (m_currentTemperature <= config::MinHeaterTemperature)
         {
             LOG(debug) << "Min temperature reached: " << m_lastCheckedTemperature << "/"
                        << m_currentTemperature;
-            onMinTemperatureReached();
+            onTemperatureLimitEvent(TemperatureLimitEvent::MinTemperatureReached);
         }
 
         m_lastCheckedTemperature = m_currentTemperature;
@@ -73,7 +76,7 @@ void HeaterService::updateHeaterTemperatureAndCheck()
 
 bool HeaterService::startTemperatureObservation()
 {
-    return m_temperatureObserver.start(config::TemperatureObservationPeriod);
+    return m_temperatureObserver.start();
 }
 
 void HeaterService::stopTemperatureObservation()

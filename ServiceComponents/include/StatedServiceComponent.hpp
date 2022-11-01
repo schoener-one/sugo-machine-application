@@ -63,8 +63,8 @@ protected:
         }
     }
 
-    message::CommandResponse handleStateChangeMessage(const message::Command& command,
-                                                      const EventT&           event)
+    message::CommandResponse handleEventMessage(const message::Command& command,
+                                                const EventT&           event)
     {
         if (!m_stateMachine.checkNextEvent(event))
         {

@@ -242,7 +242,6 @@ components:
           - StartMotor
           - StopMotor
           - SetMotorSpeed
-          - SetMotorOffsetSpeed
       outbound:
         notifications:
           - StartMotorSucceeded
@@ -449,6 +448,8 @@ components:
         - StopMotor
         - StopMotorSucceeded
         - StopMotorFailed
+        - TensionTooLow
+        - TensionTooHigh
         - ErrorOccurred
       statemachine:
         start: 'Off'
@@ -500,6 +501,14 @@ components:
             event: StopMotor
             action: stopMotor
           - state: Running
+            next: Running
+            event: TensionTooHigh
+            action: controlFilamentTension
+          - state: Running
+            next: Running
+            event: TensionTooLow
+            action: controlFilamentTension
+          - state: Running
             next: 'Off'
             event: SwitchOff
             action: switchOff
@@ -522,6 +531,15 @@ components:
   - FilamentCoilMotor:
       <<: *BaseMotor
       description: "Hardware service component controls the filament coil motor of the filament coil unit"
+      inbound:
+        commands:
+          - SwitchOn
+          - SwitchOff
+          - StartMotor
+          - StopMotor
+          - SetMotorSpeed
+          - IncreaseMotorOffsetSpeed
+          - DecreaseMotorOffsetSpeed
 
 
   - FilamentTensionSensor:

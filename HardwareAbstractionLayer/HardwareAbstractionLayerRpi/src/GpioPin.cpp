@@ -105,7 +105,7 @@ IGpioPin::Event GpioPin::waitForEvent(std::chrono::nanoseconds timeout)
 {
     if (!m_line.event_wait(timeout))
     {
-        return Event{timeout, EventType::TimeoutEvent};
+        return Event{timeout, EventType::Timeout};
     }
 
     auto event = m_line.event_read();

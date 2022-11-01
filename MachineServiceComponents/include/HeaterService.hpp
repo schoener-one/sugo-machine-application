@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "IHalObject.hpp"
 #include "ServiceLocator.hpp"
 #include "Timer.hpp"
 
@@ -20,7 +21,7 @@
 namespace sugo
 {
 /**
- * @class Class represents a heater
+ * @class Class provides a heater control service.
  */
 class HeaterService
 {
@@ -35,11 +36,22 @@ public:
      * @param temperatureSensorId Temperature sensor id to be used.
      * @param serviceLocator      Service locator to retrieve the HAL.
      */
-    explicit HeaterService(const std::string& heaterId, const std::string& temperatureSensorId,
-                           const ServiceLocator& serviceLocator);
+    explicit HeaterService(const hal::Identifier& heaterId,
+                           const hal::Identifier& temperatureSensorId,
+                           const ServiceLocator&  serviceLocator);
     virtual ~HeaterService() = default;
 
 protected:
+    /**
+     * @brief Temperature limit event.
+     * 
+     */
+    enum TemperatureLimitEvent
+    {
+        MaxTemperatureReached,
+        MinTemperatureReached
+    };
+
     /**
      * @brief
      *
@@ -53,26 +65,42 @@ protected:
      * @brief Updates the current temperature and calls the appropriate handler callbacks.
      */
     void updateHeaterTemperature();
+
     /**
-     * @brief Called if the max temperature range has been reached.
+     * @brief Called if a new temperature limit event has occurred.
      */
-    virtual void onMaxTemperatureReached() = 0;
+    virtual void onTemperatureLimitEvent(TemperatureLimitEvent event) = 0;
+
     /**
-     * @brief Called if the min temperature range has been reached.
+     * @brief Returns the current temperature.
+     * 
+     * @return The current temperature. 
      */
-    virtual void onMinTemperatureReached() = 0;
     int32_t      getTemperature() const
     {
         return m_currentTemperature.load();
     }
+
+    /**
+     * @brief Starts the temperature sensor observation.
+     * 
+     * @return true  If observation could be started successfully.
+     * @return false If observation could not be started successfully.
+     */
+
     bool startTemperatureObservation();
+    
+    /**
+     * @brief Stops the temperature sensor observation.
+     * 
+     */
     void stopTemperatureObservation();
 
 private:
     void updateHeaterTemperatureAndCheck();
 
-    const std::string        m_heaterId;
-    const std::string        m_temperatureSensorId;
+    const hal::Identifier    m_heaterId;
+    const hal::Identifier    m_temperatureSensorId;
     const ServiceLocator&    m_serviceLocator;
     Timer                    m_temperatureObserver;
     std::atomic<Temperature> m_currentTemperature     = 0;

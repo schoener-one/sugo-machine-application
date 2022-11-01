@@ -42,5 +42,5 @@ IGpioPin::Direction GpioPin::getDirection() const
 
 IGpioPin::Event GpioPin::waitForEvent(std::chrono::nanoseconds timeout)
 {
-    return Event{timeout, EventType::TimeoutEvent};
+    return Event{timeout, EventType::Timeout};
 }

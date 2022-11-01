@@ -16,6 +16,9 @@
 
 namespace sugo::hal
 {
+/// @brief HAL object identifier type
+using Identifier = std::string;
+
 /**
  * @brief Base class of all HAL objects
  *
@@ -24,9 +27,6 @@ namespace sugo::hal
 class IHalObject
 {
 public:
-    /// Hal identifier type
-    using Identifier = std::string;
-
     /// Hal object map
     template <class HalObjectT>
     using Map = std::map<Identifier, std::shared_ptr<HalObjectT>>;
@@ -67,6 +67,18 @@ public:
         return m_id;
     }
 
+    /**
+     * @brief Compares the a HAL object own id with a another id.
+     * 
+     * @param id     Id to be compared.
+     * @return true  If the object id is equal to the compared id.
+     * @return false If the object id is not equal to the compared id.
+     */
+    bool operator== (const hal::Identifier& id) const
+    {
+        return (id == getId());
+    }
+    
 private:
     Identifier m_id;
 };

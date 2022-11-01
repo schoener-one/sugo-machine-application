@@ -19,7 +19,7 @@ namespace sugo::hal
 class IGpioPinMock : public IGpioPin
 {
 public:
-    IGpioPinMock() : IGpioPin("IGpioPinMock")
+    IGpioPinMock(const hal::Identifier& id) : IGpioPin(id)
     {
     }
 
