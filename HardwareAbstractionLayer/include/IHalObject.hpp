@@ -69,16 +69,16 @@ public:
 
     /**
      * @brief Compares the a HAL object own id with a another id.
-     * 
+     *
      * @param id     Id to be compared.
      * @return true  If the object id is equal to the compared id.
      * @return false If the object id is not equal to the compared id.
      */
-    bool operator== (const hal::Identifier& id) const
+    bool operator==(const hal::Identifier& id) const
     {
         return (id == getId());
     }
-    
+
 private:
     Identifier m_id;
 };

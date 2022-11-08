@@ -17,7 +17,9 @@ namespace sugo
 class IRunnable
 {
 public:
-    virtual ~IRunnable() {}
+    virtual ~IRunnable()
+    {
+    }
 
     /**
      * Starts the runnable instance.

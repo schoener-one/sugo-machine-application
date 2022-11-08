@@ -77,8 +77,8 @@ private:
         assert(connection != m_connections.end());
         return connection->second;
     }
-    void sendNotification(const Json& notification);
-    
+    void sendNotification(const Json &notification);
+
     std::string                         m_address;
     unsigned short                      m_port;
     std::string                         m_docRoot;

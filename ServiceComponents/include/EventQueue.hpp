@@ -68,7 +68,7 @@ public:
         m_queue.pop();
         return event;
     }
-    
+
     /**
      * @brief Indicates if the queue is empty or not.
      *

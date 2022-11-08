@@ -38,4 +38,4 @@ public:
     virtual void waitUntilFinished() = 0;
 };
 
-}  // namespace sugo
+}  // namespace sugo::message

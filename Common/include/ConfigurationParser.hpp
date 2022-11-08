@@ -20,13 +20,18 @@ namespace sugo
 class ConfigurationParser
 {
 public:
-    virtual ~ConfigurationParser() {}
+    virtual ~ConfigurationParser()
+    {
+    }
 
     /** Adds a new configuration to the parser.
      *
      * @param configuration Configuration set to be added.
      */
-    void add(IConfiguration& configuration) { m_configurationList.push_back(&configuration); }
+    void add(IConfiguration& configuration)
+    {
+        m_configurationList.push_back(&configuration);
+    }
 
     /**
      * Parses the command line option passed based on the set configurations.
@@ -38,7 +43,9 @@ public:
     bool parse();
 
 protected:
-    ConfigurationParser() {}
+    ConfigurationParser()
+    {
+    }
 
     using ParsedOptions = boost::program_options::parsed_options;
     using VariablesMap  = boost::program_options::variables_map;

@@ -27,7 +27,6 @@ bool TemperatureSensor::init(const IConfiguration& configuration)
 
 void TemperatureSensor::finalize()
 {
-
 }
 
 TemperatureSensor::Temperature TemperatureSensor::getTemperature() const

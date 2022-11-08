@@ -67,4 +67,4 @@ private:
     std::mutex       m_mutex;                  ///< Mutex
 };
 
-}  // namespace sugo
+}  // namespace sugo::message

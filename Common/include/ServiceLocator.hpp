@@ -10,9 +10,9 @@
 
 #pragma once
 
-#include <unordered_map>
 #include <boost/any.hpp>
 #include <cassert>
+#include <unordered_map>
 
 namespace sugo
 {
@@ -33,8 +33,8 @@ public:
     template <class ServiceT>
     ServiceT& get() const
     {
-        const size_t hash = typeid(ServiceT).hash_code();
-        ServiceT* service = boost::any_cast<ServiceT*>(m_services.at(hash));
+        const size_t hash    = typeid(ServiceT).hash_code();
+        ServiceT*    service = boost::any_cast<ServiceT*>(m_services.at(hash));
         assert(service != nullptr);
         return *service;
     }

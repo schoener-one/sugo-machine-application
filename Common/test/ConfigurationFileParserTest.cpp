@@ -23,15 +23,26 @@ using namespace sugo;
 class ConfigurationFileParserTest : public ::testing::Test
 {
 protected:
-    ConfigurationFileParserTest() {}
+    ConfigurationFileParserTest()
+    {
+    }
 
-    ~ConfigurationFileParserTest() override {}
+    ~ConfigurationFileParserTest() override
+    {
+    }
 
-    static void SetUpTestCase() { Logger::init(); }
+    static void SetUpTestCase()
+    {
+        Logger::init();
+    }
 
-    void SetUp() override {}
+    void SetUp() override
+    {
+    }
 
-    void TearDown() override {}
+    void TearDown() override
+    {
+    }
 
     IConfigurationMock m_mockConfig;
 };

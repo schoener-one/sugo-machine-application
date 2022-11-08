@@ -51,19 +51,23 @@ TEST_F(CommonTest, TimerStartStop)
 {
     const std::chrono::milliseconds period(200);
     const std::chrono::milliseconds duration(1000);
-    unsigned                        counts  = 0;
+    unsigned                        counts   = 0;
     std::chrono::time_point         stopTime = std::chrono::high_resolution_clock::now();
-    Timer                           timer(period, [&counts, &stopTime] {
-        counts++;
-        stopTime = std::chrono::high_resolution_clock::now();
-    }, "TestTimer");
-    auto                            startTime = std::chrono::high_resolution_clock::now();
+    Timer                           timer(
+        period,
+        [&counts, &stopTime] {
+            counts++;
+            stopTime = std::chrono::high_resolution_clock::now();
+        },
+        "TestTimer");
+    auto startTime = std::chrono::high_resolution_clock::now();
     EXPECT_TRUE(timer.start());
     std::this_thread::sleep_for(duration);
     timer.stop();
     const unsigned expectedCounts = duration / period;
     EXPECT_EQ(expectedCounts, counts);
-    const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime);
+    const auto elapsedTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime);
     EXPECT_NEAR(elapsedTime.count(), duration.count(), 10);
 }
 
@@ -71,22 +75,26 @@ TEST_F(CommonTest, TimeoutHandlerDelay)
 {
     const std::chrono::milliseconds period(200);
     const std::chrono::milliseconds duration(1000);
-    unsigned                        counts  = 0;
+    unsigned                        counts   = 0;
     std::chrono::time_point         stopTime = std::chrono::high_resolution_clock::now();
-    Timer                           timer(period, [&counts, &stopTime, &period] {
-        counts++;
-        stopTime = std::chrono::high_resolution_clock::now();
-        if (counts == 3)
-        {
-            std::this_thread::sleep_for(period);
-        }
-    }, "TestTimer");
-    auto                            startTime = std::chrono::high_resolution_clock::now();
+    Timer                           timer(
+        period,
+        [&counts, &stopTime, &period] {
+            counts++;
+            stopTime = std::chrono::high_resolution_clock::now();
+            if (counts == 3)
+            {
+                std::this_thread::sleep_for(period);
+            }
+        },
+        "TestTimer");
+    auto startTime = std::chrono::high_resolution_clock::now();
     EXPECT_TRUE(timer.start());
     std::this_thread::sleep_for(duration);
     timer.stop();
-    const unsigned expectedCounts = duration / period - 1; // One less because of the delay!
+    const unsigned expectedCounts = duration / period - 1;  // One less because of the delay!
     EXPECT_EQ(expectedCounts, counts);
-    const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime);
+    const auto elapsedTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime);
     EXPECT_NEAR(elapsedTime.count(), duration.count(), 10);
 }

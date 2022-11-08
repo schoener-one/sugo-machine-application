@@ -109,10 +109,7 @@ IGpioPin::Event GpioPin::waitForEvent(std::chrono::nanoseconds timeout)
     }
 
     auto event = m_line.event_read();
-    return Event
-    {
-        event.timestamp, (event.event_type == gpiod::line_event::RISING_EDGE)
-                             ? EventType::RisingEdge
-                             : EventType::FallingEdge
-    };
+    return Event{event.timestamp, (event.event_type == gpiod::line_event::RISING_EDGE)
+                                      ? EventType::RisingEdge
+                                      : EventType::FallingEdge};
 }

@@ -10,8 +10,8 @@
 
 #include "StepperMotorControl.hpp"
 #include "HalHelper.hpp"
-#include "StepperMotor.hpp"
 #include "I2cControl.hpp"
+#include "StepperMotor.hpp"
 
 #include <cassert>
 

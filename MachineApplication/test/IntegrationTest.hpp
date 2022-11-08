@@ -38,7 +38,7 @@ protected:
     {
     }
     virtual ~IntegrationTest() = default;
-    
+
     void SetUp() override
     {
         m_receivedNotifications.clear();

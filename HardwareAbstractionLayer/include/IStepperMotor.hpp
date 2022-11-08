@@ -29,7 +29,7 @@ public:
     using Speed = UnitValue<unsigned>;
     /// Position type
     using Position = int32_t;
-    
+
     /// Direction of rotation.
     enum Direction
     {
@@ -49,7 +49,7 @@ public:
      * @brief Resets the device to the default state.
      * If it was running before it will be stopped. All parameters like
      * speed will also be set to default.
-     * 
+     *
      * @return true  if the reset was successful.
      * @return false if the reset failed.
      */
@@ -68,10 +68,10 @@ public:
     virtual bool rotateToPosition(Position position) = 0;
 
     /**
-     * @brief Starts rotating the stepper motor continuously. 
+     * @brief Starts rotating the stepper motor continuously.
      * The caller will not be blocked by that call. The rotation has to be
      * stopped by a stop() call.
-     * 
+     *
      * @param direction Direction of rotation.
      * @return true If the motor could be started.
      * @return false If the motor could not be started.
@@ -91,7 +91,7 @@ public:
 
     /**
      * @brief Returns the current position of the motor.
-     * 
+     *
      * @return Position Current position of the motor.
      */
     virtual Position getPosition() const = 0;

@@ -53,7 +53,7 @@ protected:
 
     /**
      * @brief Indicates if the sensor observation is still running.
-     * 
+     *
      * @return true  If the sensor observation is running.
      * @return false If the sensor observation is not running.
      */
@@ -64,7 +64,7 @@ protected:
 
     /**
      * @brief Stops the filament tension sensor observation.
-     * 
+     *
      */
     void stopSensorObservation();
 
@@ -76,10 +76,12 @@ protected:
     virtual void onFilamentTensionEvent(FilamentTensionEvent event) = 0;
 
 private:
-    void filterFilamentTensionEvent(const hal::IGpioPin::Event& gpioEvent, const hal::Identifier& pinId);
+    void filterFilamentTensionEvent(const hal::IGpioPin::Event& gpioEvent,
+                                    const hal::Identifier&      pinId);
 
     GpioPinEventObserver              m_lowTensionSensorId;
     GpioPinEventObserver              m_highTensionSensorId;
-    std::atomic<FilamentTensionEvent> m_lastFilamentTensionEvent = FilamentTensionEvent::FilamentTensionNormal;
+    std::atomic<FilamentTensionEvent> m_lastFilamentTensionEvent =
+        FilamentTensionEvent::FilamentTensionNormal;
 };
 }  // namespace sugo

@@ -64,7 +64,7 @@ public:
 
     /**
      * @brief Waits for the thread to be finished.
-     * 
+     *
      */
     void join()
     {

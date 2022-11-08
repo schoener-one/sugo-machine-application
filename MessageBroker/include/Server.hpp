@@ -13,11 +13,11 @@
 #include <istream>
 #include <memory>
 
+#include "IMessageHandler.hpp"
 #include "IOContext.hpp"
 #include "IRunnable.hpp"
-#include "StreamBuffer.hpp"
-#include "IMessageHandler.hpp"
 #include "Message.hpp"
+#include "StreamBuffer.hpp"
 
 namespace sugo::message
 {
@@ -67,4 +67,4 @@ private:
     StreamBuffer                  m_receiveBuffer;
 };
 
-}  // namespace sugo
+}  // namespace sugo::message

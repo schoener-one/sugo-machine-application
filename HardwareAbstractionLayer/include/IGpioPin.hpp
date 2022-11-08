@@ -53,9 +53,9 @@ public:
      */
     enum EventType
     {
-        Timeout,  ///< Timeout event
-        RisingEdge,    ///< Rising edge event
-        FallingEdge    ///< Falling edge event
+        Timeout,     ///< Timeout event
+        RisingEdge,  ///< Rising edge event
+        FallingEdge  ///< Falling edge event
     };
 
     /**

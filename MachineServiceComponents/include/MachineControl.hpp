@@ -11,10 +11,10 @@
 
 #pragma once
 
+#include "ControlService.hpp"
 #include "IMachineControl.hpp"
 #include "MachineConfig.hpp"
 #include "ServiceLocator.hpp"
-#include "ControlService.hpp"
 
 namespace sugo
 {
@@ -65,7 +65,7 @@ protected:
 
 private:
     void switchOff();
-    
+
     const ServiceLocator& m_serviceLocator;
     bool                  m_isFilamentMergerControlRunning = false;
     bool                  m_isFilamentCoilControlRunning   = false;

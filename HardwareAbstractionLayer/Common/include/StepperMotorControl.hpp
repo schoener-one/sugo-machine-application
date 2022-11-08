@@ -11,8 +11,8 @@
 #pragma once
 
 #include "IConfiguration.hpp"
-#include "IStepperMotorControl.hpp"
 #include "IGpioPin.hpp"
+#include "IStepperMotorControl.hpp"
 
 namespace sugo::hal
 {
@@ -30,7 +30,7 @@ public:
     {
     }
     ~StepperMotorControl() override;
-    
+
     bool init(const IConfiguration& configuration) override;
 
     void finalize();

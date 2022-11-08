@@ -14,7 +14,7 @@
 
 namespace
 {
-    sugo::hal::IStepperMotor::Position s_curPosition = 0;
+sugo::hal::IStepperMotor::Position s_curPosition = 0;
 }
 using namespace sugo::hal;
 

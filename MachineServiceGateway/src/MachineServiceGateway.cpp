@@ -34,8 +34,8 @@ using namespace message;
 
 void MachineServiceGateway::addConfigurationOptions(IConfiguration& configuration)
 {
-    configuration.add(
-        Option("machine-service-gateway.address", std::string("*"), "Network address of the service"));
+    configuration.add(Option("machine-service-gateway.address", std::string("*"),
+                             "Network address of the service"));
     configuration.add(Option("machine-service-gateway.port", 1234u, "Network port of the service"));
 }
 
@@ -46,7 +46,8 @@ MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroke
       m_jsonRpcServer(
           std::string("tcp://") +
               configuration.getOption("machine-service-gateway.address").get<std::string>() + ":" +
-              std::to_string(configuration.getOption("machine-service-gateway.port").get<unsigned>()),
+              std::to_string(
+                  configuration.getOption("machine-service-gateway.port").get<unsigned>()),
           *this, ioContext)
 {
 }

@@ -16,11 +16,11 @@
 #include <queue>
 #include <vector>
 
+#include "IntegrationTest.hpp"
 #include "Logger.hpp"
 #include "Publisher.hpp"
 #include "StreamBuffer.hpp"
 #include "Subscriber.hpp"
-#include "IntegrationTest.hpp"
 
 using ::testing::_;
 using ::testing::Invoke;
@@ -129,8 +129,8 @@ protected:
 
     void receiveMessage(StreamBuffer& inBuf)
     {
-        std::istream                 in(&inBuf);
-        std::string                  message;
+        std::istream in(&inBuf);
+        std::string  message;
         std::getline(in, message);
         notifyReceivedMessage(message);
     }

@@ -22,7 +22,7 @@
  * and jumps to an fatal error handler (Release) or throws
  * an assert (Debug).
  * @todo Handle Release build asserts here!
- * 
+ *
  */
 #define ASSERT_NOT_REACHABLE               \
     LOG(fatal) << "Should not be reached"; \
@@ -32,4 +32,4 @@ namespace sugo
 {
 /// @brief JSON data representation
 using Json = nlohmann::json;
-}
+}  // namespace sugo

@@ -30,7 +30,7 @@ public:
      * @param priority   Thread priority.
      */
     explicit IOContext(const std::string& instanceId, Thread::Policy policy = Thread::DefaultPolicy,
-              int priority = Thread::DefaultPriority);
+                       int priority = Thread::DefaultPriority);
 
     /**
      * @brief Get the asio io_context.
@@ -46,4 +46,4 @@ private:
     boost::asio::io_context m_asioContext;
 };
 
-}  // namespace sugo
+}  // namespace sugo::message

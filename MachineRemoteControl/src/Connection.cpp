@@ -113,7 +113,7 @@ void Connection::handleWebsocketMessage(const mg_str &message, IRequestHandler &
     }
 }
 
-void Connection::sendMessage(const Json& response)
+void Connection::sendMessage(const Json &response)
 {
     assert(m_connection != nullptr);
     const std::string message = response.dump();

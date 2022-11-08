@@ -13,8 +13,8 @@
 #include "CommandMessageBroker.hpp"
 #include "IOContext.hpp"
 #include "IRunnable.hpp"
-#include "IServiceComponentExecutionBundle.hpp"
 #include "IServiceComponent.hpp"
+#include "IServiceComponentExecutionBundle.hpp"
 
 namespace sugo
 {

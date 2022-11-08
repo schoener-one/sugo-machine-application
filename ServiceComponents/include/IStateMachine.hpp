@@ -50,27 +50,28 @@ public:
 
     /**
      * @brief Process the next event pushed to the queue.
-     * This call could be blocked by another calling thread or if the queue is empty! 
-     * 
+     * This call could be blocked by another calling thread or if the queue is empty!
+     *
      * @return true  If the next event could be processed.
-     * @return false If the next event could not be processed because of a transition not found error.
+     * @return false If the next event could not be processed because of a transition not found
+     * error.
      */
     virtual bool processNextEvent() = 0;
 
     /**
      * @brief Returns the event queue.
-     * 
+     *
      * @return EventQueue Event queue instance.
      */
-    virtual EventQueue<EventT>& getEventQueue() = 0;
+    virtual EventQueue<EventT> &getEventQueue() = 0;
 
     /**
      * @brief Checks if the event could be processed successfully.
-     * 
+     *
      * @param event  Event to be checked according to the current state.
      * @return true  If the could be processed successfully.
      * @return false If the could not be processed successfully.
      */
-    virtual bool checkNextEvent(const EventT& event) const = 0;
+    virtual bool checkNextEvent(const EventT &event) const = 0;
 };
 }  // namespace sugo

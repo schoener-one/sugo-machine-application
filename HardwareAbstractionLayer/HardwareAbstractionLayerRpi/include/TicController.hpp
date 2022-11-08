@@ -307,10 +307,11 @@ public:
     bool setStepMode(StepMode stepMode);
 
     /**
-     * @brief This command temporarily sets the stepper motor coil current limit of the driver on the
-     * Tic. The provided value will override the corresponding setting from the Tic’s non-volatile memory
-     * until the next Reset (or Reinitialize) command or full microcontroller reset.
-     * 
+     * @brief This command temporarily sets the stepper motor coil current limit of the driver on
+     * the Tic. The provided value will override the corresponding setting from the Tic’s
+     * non-volatile memory until the next Reset (or Reinitialize) command or full microcontroller
+     * reset.
+     *
      * @param currentLimit Current limit to be set (7-bit) in milli-Amper (mA).
      * @return true if succeeded
      * @return false if failed

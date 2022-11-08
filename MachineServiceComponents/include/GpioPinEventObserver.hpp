@@ -50,7 +50,7 @@ public:
 
     /**
      * @brief Returns the pin id.
-     * 
+     *
      * @return The pin id.
      */
     const hal::Identifier& getId() const

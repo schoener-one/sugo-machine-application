@@ -193,7 +193,9 @@ TEST_F(HardwareAbstractionLayerTest, IHardwareAbstractionLayer_SetConfiguration)
             .get<unsigned>();
     EXPECT_EQ(pinValue, 17);
     const std::vector<std::string>& tempSensorEnabled =
-        config.getOption("hardware-abstraction-layer.temperature-sensor-control.temperature-sensor-enabled")
+        config
+            .getOption(
+                "hardware-abstraction-layer.temperature-sensor-control.temperature-sensor-enabled")
             .get<const std::vector<std::string>&>();
     EXPECT_EQ(tempSensorEnabled.size(), 2);
     const std::vector<std::string>& motorEnabled =

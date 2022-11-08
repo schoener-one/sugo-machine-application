@@ -10,9 +10,9 @@
 
 #include "HardwareAbstractionLayer.hpp"
 
-#include "IConfiguration.hpp"
 #include "GpioControl.hpp"
 #include "HalHelper.hpp"
+#include "IConfiguration.hpp"
 #include "StepperMotorControl.hpp"
 #include "TemperatureSensorControl.hpp"
 
@@ -56,7 +56,7 @@ bool HardwareAbstractionLayer::init(const IConfiguration& configuration)
     if (success)
     {
         const auto& pinMap = m_gpioControllerMap.at("gpio-control")->getGpioPinMap();
-        success      = (pinMap.count("motor-control-error") == 1) &&
+        success            = (pinMap.count("motor-control-error") == 1) &&
                   (pinMap.count("motor-control-reset") == 1);
         if (success)
         {

@@ -170,7 +170,8 @@ void Subscriber::receiveNotification(SubscriberSocketData& socketData, bool expe
             {
                 receiveNotification(socketData, !moreToReceive);
             }
-        }, (expectMoreToReceive) ? ZMQ_RCVMORE : 0);
+        },
+        (expectMoreToReceive) ? ZMQ_RCVMORE : 0);
 }
 
 bool Subscriber::handleReceived(StreamBuffer& receiveBuf)

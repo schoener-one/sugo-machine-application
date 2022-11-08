@@ -66,7 +66,7 @@ private:
     void switchOff();
 
     const ServiceLocator& m_serviceLocator;
-   
+
     friend class ControlService<FilamentCoilControl>;
 };
 

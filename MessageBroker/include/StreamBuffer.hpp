@@ -15,7 +15,7 @@ namespace sugo::message
 {
 /**
  * Stream buffer class with fix buffer size.
- * 
+ *
  * @todo Replace this streambuffer by an own MessageBuffer implementation with fix buffer size!
  */
 class StreamBuffer : public boost::asio::streambuf

@@ -55,6 +55,7 @@ public:
     {
         return m_address;
     }
+
 private:
     std::string                      m_address;
     std::unique_ptr<PublisherSocket> m_socket;

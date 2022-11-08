@@ -23,7 +23,7 @@ namespace sugo
 class StatedServiceComponentTestable : public StatedServiceComponent<test::State, test::Event>
 {
 public:
-    StatedServiceComponentTestable(message::ICommandMessageBroker&                   messageBroker,
+    StatedServiceComponentTestable(message::ICommandMessageBroker&          messageBroker,
                                    IStateMachine<test::State, test::Event>& stateMachine)
         : StatedServiceComponent<test::State, test::Event>(messageBroker, {}, stateMachine)
     {
@@ -71,7 +71,7 @@ protected:
 
 TEST_F(StatedServiceComponentTest, Send)
 {
-    const CommandId   commandId("test", "send-this");
+    const CommandId commandId("test", "send-this");
     EXPECT_CALL(m_mockCommandMessageBroker, send(_, commandId.getReceiverAddress(), _))
         .WillOnce(::testing::Return(true));
     const message::CommandResponse response = m_component.send(commandId, "test-parameters");
@@ -80,7 +80,7 @@ TEST_F(StatedServiceComponentTest, Send)
 
 TEST_F(StatedServiceComponentTest, Notify)
 {
-    const NotificationId   notificationId("", "send-this");
+    const NotificationId notificationId("", "send-this");
     EXPECT_CALL(m_mockCommandMessageBroker, notify(_, _)).WillOnce(::testing::Return(true));
     const bool success = m_component.notify(notificationId, "test-parameters");
     EXPECT_TRUE(success);

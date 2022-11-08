@@ -34,7 +34,7 @@ public:
 
     bool read(Address address, const ByteBuffer& command, ByteBuffer& retValue) const;
     bool write(Address address, const ByteBuffer& command) const;
-    
+
 private:
     constexpr static int InvalidFileDescriptor = -1;
 

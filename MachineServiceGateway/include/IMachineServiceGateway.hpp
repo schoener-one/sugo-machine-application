@@ -13,8 +13,8 @@
 
 namespace sugo
 {
-    struct IMachineServiceGateway
-    {
-        inline static const std::string ReceiverId{"MachineService"};
-    };
-}  // namespace sugo::IMachineServiceGateway
+struct IMachineServiceGateway
+{
+    inline static const std::string ReceiverId{"MachineService"};
+};
+}  // namespace sugo

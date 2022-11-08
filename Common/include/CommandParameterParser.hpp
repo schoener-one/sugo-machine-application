@@ -21,14 +21,21 @@ namespace sugo
 class CommandParameterParser
 {
 public:
-    explicit CommandParameterParser(const std::string& parameters) : m_parameters(parameters) {}
+    explicit CommandParameterParser(const std::string& parameters) : m_parameters(parameters)
+    {
+    }
 
     class CommandParameterParseException : public std::exception
     {
     public:
-        explicit CommandParameterParseException(const std::string& what) : m_message(what) {}
+        explicit CommandParameterParseException(const std::string& what) : m_message(what)
+        {
+        }
 
-        const char* what() const noexcept override { return m_message.c_str(); }
+        const char* what() const noexcept override
+        {
+            return m_message.c_str();
+        }
 
     private:
         const std::string m_message;

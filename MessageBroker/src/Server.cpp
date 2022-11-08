@@ -58,32 +58,34 @@ bool Server::start()
 
 void Server::receiveRequest()
 {
-    m_socket->async_receive(m_receiveBuffer.prepare(StreamBuffer::MaxBufferSize),
-                            [&](boost::system::error_code ec, std::size_t bytesReceived) {
-                                LOG(trace) << "Received " << bytesReceived << " bytes";
+    m_socket->async_receive(
+        m_receiveBuffer.prepare(StreamBuffer::MaxBufferSize),
+        [&](boost::system::error_code ec, std::size_t bytesReceived) {
+            LOG(trace) << "Received " << bytesReceived << " bytes";
 
-                                if (!ec)
-                                {
-                                    if (bytesReceived > 0)
-                                    {
-                                        m_receiveBuffer.commit(bytesReceived);
-                                        (void)handleReceived(m_receiveBuffer);
-                                    }
-                                    else
-                                    {
-                                        LOG(warning) << "Received empty buffer";
-                                    }
-                                }
-                                else
-                                {
-                                    LOG(error) << "Receive error occurred: " << ec.message();
-                                }
+            if (!ec)
+            {
+                if (bytesReceived > 0)
+                {
+                    m_receiveBuffer.commit(bytesReceived);
+                    (void)handleReceived(m_receiveBuffer);
+                }
+                else
+                {
+                    LOG(warning) << "Received empty buffer";
+                }
+            }
+            else
+            {
+                LOG(error) << "Receive error occurred: " << ec.message();
+            }
 
-                                if (isRunning())
-                                {
-                                    receiveRequest();
-                                }
-                            }, ZMQ_DONTWAIT);
+            if (isRunning())
+            {
+                receiveRequest();
+            }
+        },
+        ZMQ_DONTWAIT);
 }
 
 bool Server::handleReceived(StreamBuffer& receiveBuf)

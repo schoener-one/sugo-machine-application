@@ -8,8 +8,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <gpiod.hpp>
 #include <unistd.h>
+#include <gpiod.hpp>
 
 #include "GpioControl.hpp"
 #include "GpioPin.hpp"
@@ -41,13 +41,14 @@ bool GpioControl::init(const IConfiguration& configuration)
         return false;
     }
 
-    return initEnabledSubComponents<IGpioPin, GpioPin, gpiod::chip>(configuration, "gpio-pin", m_gpioPinMap, *m_device);
+    return initEnabledSubComponents<IGpioPin, GpioPin, gpiod::chip>(configuration, "gpio-pin",
+                                                                    m_gpioPinMap, *m_device);
 }
 
 void GpioControl::finalize()
 {
     m_gpioPinMap.clear();
-    
+
     if (m_device != nullptr)
     {
         delete m_device;

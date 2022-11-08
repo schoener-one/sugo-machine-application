@@ -11,9 +11,9 @@
 
 #pragma once
 
+#include "FilamentTensionControlService.hpp"
 #include "IFilamentTensionSensor.hpp"
 #include "ServiceLocator.hpp"
-#include "FilamentTensionControlService.hpp"
 
 namespace sugo
 {
@@ -25,7 +25,7 @@ class FilamentTensionSensor : public IFilamentTensionSensor, public FilamentTens
 public:
     // Constructor / Destructor
     explicit FilamentTensionSensor(message::ICommandMessageBroker& messageBroker,
-                                   const ServiceLocator&  serviceLocator);
+                                   const ServiceLocator&           serviceLocator);
     virtual ~FilamentTensionSensor() = default;
 
 protected:

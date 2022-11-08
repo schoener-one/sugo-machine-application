@@ -63,7 +63,7 @@ message::CommandResponse FilamentPreHeater::onCommandGetTemperature(const messag
 void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilamentPreHeater::State&)
 {
     updateHeaterTemperature();
-    
+
     if (!startTemperatureObservation())
     {
         push(Event(EventId::SwitchOnFailed));

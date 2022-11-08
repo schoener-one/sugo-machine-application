@@ -25,7 +25,7 @@ class FilamentPreHeater : public IFilamentPreHeater, public HeaterService
 public:
     // Constructor / Destructor
     explicit FilamentPreHeater(message::ICommandMessageBroker& messageBroker,
-                               const ServiceLocator&  serviceLocator);
+                               const ServiceLocator&           serviceLocator);
     virtual ~FilamentPreHeater() = default;
 
 protected:

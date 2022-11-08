@@ -14,8 +14,8 @@
 #include <memory>
 #include <string>
 
-#include "ITemperatureSensor.hpp"
 #include "IHalObject.hpp"
+#include "ITemperatureSensor.hpp"
 
 namespace sugo::hal
 {

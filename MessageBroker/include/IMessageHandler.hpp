@@ -25,8 +25,8 @@ public:
      * @brief Called to process a new received message.
      *
      * @param      receivedMessage Input stream buffer as received message.
-     * @param[out] responseMessage Output stream buffer to write the response to. Depending on the received
-     * message the response could be not expected.
+     * @param[out] responseMessage Output stream buffer to write the response to. Depending on the
+     * received message the response could be not expected.
      * @return true if the message could be processed.
      */
     virtual bool processReceived(StreamBuffer& receivedMessage, StreamBuffer& responseMessage) = 0;

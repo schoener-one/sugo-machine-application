@@ -26,7 +26,9 @@ public:
      * @param argc          Argument count.
      * @param argv          Argument string vector.
      */
-    CommandLineParser(int argc, char const** argv) : m_argumentCount(argc), m_arguments(argv) {}
+    CommandLineParser(int argc, char const** argv) : m_argumentCount(argc), m_arguments(argv)
+    {
+    }
 
 protected:
     // ConfigurationParser {{

@@ -41,8 +41,8 @@ public:
 
     /**
      * @brief Get the Service Component object
-     * 
-     * @return ServiceComponent& 
+     *
+     * @return ServiceComponent&
      */
     virtual IServiceComponent& getServiceComponent() = 0;
 };

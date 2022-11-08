@@ -70,4 +70,3 @@ bool ServiceComponent::notify(const message::NotificationId& notificationId, con
     }
     return m_messageBroker.notify(command, notificationId.getId());
 }
-

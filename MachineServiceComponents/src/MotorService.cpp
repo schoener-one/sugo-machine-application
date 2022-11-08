@@ -35,7 +35,7 @@ bool MotorService::setMotorSpeed(unsigned motorSpeed)
     else
     {
         m_motorSpeed = config::MaxMotorSpeed;
-        valid      = false;
+        valid        = false;
     }
 
     setMotorSpeed();
@@ -52,9 +52,10 @@ void MotorService::setMotorSpeed()
 bool MotorService::setMotorOffsetSpeed(int motorOffsetSpeed)
 {
     int  resultingSpeed = static_cast<int>(m_motorSpeed) + motorOffsetSpeed;
-    bool valid        = true;
+    bool valid          = true;
 
-    if (resultingSpeed >= static_cast<int>(config::MinMotorSpeed) and (resultingSpeed <= static_cast<int>(config::MaxMotorSpeed)))
+    if (resultingSpeed >= static_cast<int>(config::MinMotorSpeed) and
+        (resultingSpeed <= static_cast<int>(config::MaxMotorSpeed)))
     {
         m_motorOffsetSpeed = motorOffsetSpeed;
     }
@@ -63,7 +64,7 @@ bool MotorService::setMotorOffsetSpeed(int motorOffsetSpeed)
         resultingSpeed     = std::clamp(motorOffsetSpeed, static_cast<int>(config::MinMotorSpeed),
                                     static_cast<int>(config::MaxMotorSpeed));
         m_motorOffsetSpeed = static_cast<int>(m_motorSpeed) - resultingSpeed;
-        valid = false;
+        valid              = false;
     }
 
     setMotorSpeed();

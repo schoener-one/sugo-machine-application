@@ -15,6 +15,6 @@
 
 namespace sugo::hal
 {
-    using Byte = uint8_t;
-    using ByteBuffer = std::vector<Byte>;
-}
+using Byte       = uint8_t;
+using ByteBuffer = std::vector<Byte>;
+}  // namespace sugo::hal

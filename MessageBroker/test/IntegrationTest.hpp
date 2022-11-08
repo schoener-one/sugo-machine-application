@@ -55,6 +55,6 @@ protected:
     std::queue<sugo::message::MessageId> m_messageReceiveQueue;
 
 private:
-    std::mutex                           m_mutex;
-    std::condition_variable              m_condVar;
+    std::mutex              m_mutex;
+    std::condition_variable m_condVar;
 };

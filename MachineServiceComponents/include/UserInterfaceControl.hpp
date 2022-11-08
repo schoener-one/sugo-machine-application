@@ -27,7 +27,7 @@ class UserInterfaceControl : public IUserInterfaceControl, public remote_control
 public:
     // Constructor / Destructor
     explicit UserInterfaceControl(message::ICommandMessageBroker& messageBroker,
-                                  const ServiceLocator&  serviceLocator)
+                                  const ServiceLocator&           serviceLocator)
         : IUserInterfaceControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }

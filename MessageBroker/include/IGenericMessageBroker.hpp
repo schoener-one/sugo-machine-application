@@ -39,7 +39,7 @@ public:
 
     /**
      * @brief Sends notification messages to every subscriber.
-     * 
+     *
      * @param message Notification message.
      * @param topic The topic id for which the notification should be published.
      * @return true if the notification could be sent.
@@ -49,8 +49,8 @@ public:
     /**
      * @brief Subscribes to a publisher topic.
      * After this instance has subscribed to a publisher successfully notification messages
-     * could be received by an registered MessageHandler. 
-     * 
+     * could be received by an registered MessageHandler.
+     *
      * @param publisher Publisher address to subscribe to.
      * @param topic   Publisher topic to subscribe to.
      * @return true     If successfully subscribed.
@@ -61,7 +61,7 @@ public:
 
     /**
      * @brief Unsubscribes to a publisher topic.
-     * 
+     *
      * @param topic   Publisher topic to unsubscribe from.
      * @return true     If successfully unsubscribed.
      * @return false    If not successfully unsubscribed.
@@ -70,7 +70,7 @@ public:
 
     /**
      * @brief Sends a synchronous request message to a receiver instance and returns there response.
-     * 
+     *
      * @param message         Message to be sent.
      * @param receiverAddress Receiver id which should receive the message.
      * @param response        Response of the request.
@@ -81,7 +81,7 @@ public:
 
     /**
      * @brief Registers a new message handler.
-     * 
+     *
      * @param messageId Message identifier.
      * @param handler   Handler to be invoked on message receive.
      */
@@ -89,7 +89,7 @@ public:
 
     /**
      * @brief Registers a new message handler.
-     * 
+     *
      * @param messageId Message identifier.
      * @param handler   Handler to be invoked on message receive.
      */
@@ -97,14 +97,14 @@ public:
 
     /**
      * @brief Unregisters an existing message handler.
-     * 
+     *
      * @param messageId Message identifier.
      */
     virtual void unregisterMessageHandler(const MessageIdT& messageId) = 0;
 
     /**
      * @brief Indicates if a handler has been registered for a message id.
-     * 
+     *
      * @param messageId Message identifier.
      * @return true if the handler could be registered.
      */
@@ -119,4 +119,4 @@ public:
     virtual void registerPostProcessHandler(Runnable postProcess) = 0;
 };
 
-}  // namespace sugo
+}  // namespace sugo::message

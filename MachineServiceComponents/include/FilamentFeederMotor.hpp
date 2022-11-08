@@ -25,7 +25,7 @@ class FilamentFeederMotor : public IFilamentFeederMotor, public MotorService
 public:
     // Constructor / Destructor
     explicit FilamentFeederMotor(message::ICommandMessageBroker& messageBroker,
-                                 const ServiceLocator&  serviceLocator)
+                                 const ServiceLocator&           serviceLocator)
         : IFilamentFeederMotor(messageBroker),
           MotorService(config::StepperMotorFeederId, serviceLocator)
     {

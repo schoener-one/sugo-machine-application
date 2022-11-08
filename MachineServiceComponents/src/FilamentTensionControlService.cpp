@@ -85,7 +85,8 @@ void FilamentTensionControlService::filterFilamentTensionEvent(
             break;
     }
 
-    if ((nextEvent != m_lastFilamentTensionEvent) or (nextEvent == FilamentTensionLow) or (nextEvent == FilamentTensionHigh))
+    if ((nextEvent != m_lastFilamentTensionEvent) or (nextEvent == FilamentTensionLow) or
+        (nextEvent == FilamentTensionHigh))
     {
         m_lastFilamentTensionEvent = nextEvent;
         onFilamentTensionEvent(m_lastFilamentTensionEvent);

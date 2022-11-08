@@ -66,7 +66,8 @@ bool I2cControl::read(Address address, const ByteBuffer& command, ByteBuffer& re
     ByteBuffer tmpCommand(command);
     i2c_msg    messages[] = {
         {address, 0, static_cast<uint16_t>(tmpCommand.size()), tmpCommand.data()},
-        {address, I2C_M_RD | I2C_M_STOP, static_cast<uint16_t>(readBuffer.size()), readBuffer.data()},
+        {address, I2C_M_RD | I2C_M_STOP, static_cast<uint16_t>(readBuffer.size()),
+         readBuffer.data()},
     };
     i2c_rdwr_ioctl_data ioctl_data = {messages, 2};
 

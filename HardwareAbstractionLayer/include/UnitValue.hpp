@@ -76,12 +76,12 @@ public:
 
     /**
      * @brief Compares two unit values.
-     * 
-     * @param other 
+     *
+     * @param other
      * @return true  If they are equal.
      * @return false If they are not equal.
      */
-    bool operator== (const UnitValue<ValueT>& other) const
+    bool operator==(const UnitValue<ValueT>& other) const
     {
         return (other.m_unit == m_unit) && (other.m_value == m_value);
     }

@@ -113,7 +113,7 @@ public:
     bool checkNextEvent(const EventT& event) const override
     {
         std::lock_guard<std::mutex> lock(m_mutexEventProcessing);
-        const auto ti = findTransition(event);
+        const auto                  ti = findTransition(event);
         return (ti != m_transitions.end());
     }
 
@@ -125,15 +125,15 @@ public:
         {
             return false;
         }
-        
+
         EventT event = m_eventQueue.pull();
-        
+
         if (!processEvent(event))
         {
             LOG(fatal) << "Transition for event " << event << " not found in state " << m_state;
             ASSERT_NOT_REACHABLE;
         }
-        
+
         return true;
     }
 
@@ -172,11 +172,11 @@ private:
 
     typename TransitionTable::const_iterator findTransition(const EventT& event) const
     {
-        return std::find_if(
-            m_transitions.begin(), m_transitions.end(), [&](const Transition& arg) -> bool {
-                return m_state == arg.state && event == arg.event &&
-                       (arg.guard == nullptr || arg.guard());
-            });
+        return std::find_if(m_transitions.begin(), m_transitions.end(),
+                            [&](const Transition& arg) -> bool {
+                                return m_state == arg.state && event == arg.event &&
+                                       (arg.guard == nullptr || arg.guard());
+                            });
     }
 
     StateT                m_state;                 ///< Current state.

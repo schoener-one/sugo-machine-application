@@ -12,9 +12,9 @@
 
 #include <array>
 
+#include "HalTypes.hpp"
 #include "IGpioPin.hpp"
 #include "SpiControl.hpp"
-#include "HalTypes.hpp"
 
 namespace sugo::hal
 {

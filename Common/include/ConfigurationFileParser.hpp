@@ -27,7 +27,9 @@ public:
      * @param inStream Input stream to be parsed. The stream must be valid
      * until parsing has been don.
      */
-    explicit ConfigurationFileParser(std::istream& inStream) : m_inStream(inStream) {}
+    explicit ConfigurationFileParser(std::istream& inStream) : m_inStream(inStream)
+    {
+    }
 
 protected:
     // ConfigurationParser {{

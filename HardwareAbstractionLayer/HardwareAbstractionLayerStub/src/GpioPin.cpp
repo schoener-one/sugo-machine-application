@@ -20,7 +20,8 @@ bool GpioPin::init(const IConfiguration& configuration)
                                                                          : Direction::Out);
     LOG(debug) << getId() << ".pin: " << configuration.getOption("pin").get<unsigned>();
     LOG(debug) << getId() << ".direction: " << m_direction;
-    LOG(debug) << getId() << ".activate-high: " << configuration.getOption("active-high").get<bool>();
+    LOG(debug) << getId()
+               << ".activate-high: " << configuration.getOption("active-high").get<bool>();
     return true;
 }
 

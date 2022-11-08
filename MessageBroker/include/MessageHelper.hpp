@@ -38,7 +38,7 @@ inline static message::CommandResponse createCommandResponse(
 /**
  * @brief Creates a error command response.
  * Should be used if the command could not be executed successfully.
- * 
+ *
  * @param command      Command this response is based on.
  * @param errorMessage Command error response payload.
  * @param errorCode    Command execution result.
@@ -55,9 +55,9 @@ inline static message::CommandResponse createErrorCommandResponse(
 /**
  * @brief Creates a unsupported command response.
  * Should be created if the requested command is not supported.
- * 
- * @param command 
- * @return message::CommandResponse 
+ *
+ * @param command
+ * @return message::CommandResponse
  */
 inline static message::CommandResponse createUnsupportedCommandResponse(
     const message::Command& command)

@@ -14,10 +14,10 @@
 #include <memory>
 #include <string>
 
-#include "ITemperatureSensorControl.hpp"
 #include "IGpioControl.hpp"
 #include "IHalObject.hpp"
 #include "IStepperMotorControl.hpp"
+#include "ITemperatureSensorControl.hpp"
 
 namespace sugo::hal
 {
@@ -31,10 +31,10 @@ public:
     /// GPIO controller map
     using GpioControllerMap = std::map<Identifier, std::shared_ptr<IGpioControl>>;
     /// Stepper motor controller map
-    using StepperMotorControllerMap =
-        std::map<Identifier, std::shared_ptr<IStepperMotorControl>>;
+    using StepperMotorControllerMap = std::map<Identifier, std::shared_ptr<IStepperMotorControl>>;
     /// ADC input controller map
-    using TemperatureSensorControllerMap = std::map<Identifier, std::shared_ptr<ITemperatureSensorControl>>;
+    using TemperatureSensorControllerMap =
+        std::map<Identifier, std::shared_ptr<ITemperatureSensorControl>>;
 
     /**
      * @brief Destroy the IHardwareAbstractionLayer object

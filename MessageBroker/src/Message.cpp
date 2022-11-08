@@ -17,7 +17,8 @@ std::ostream& sugo::message::operator<<(std::ostream& ostr, const message::Comma
     return ostr;
 }
 
-std::ostream& sugo::message::operator<<(std::ostream& ostr, const message::NotificationId& notificationId)
+std::ostream& sugo::message::operator<<(std::ostream&                  ostr,
+                                        const message::NotificationId& notificationId)
 {
     ostr << notificationId.getPublisherAddress() << "/" << notificationId.getId();
     return ostr;

@@ -48,10 +48,13 @@ public:
     static constexpr Severity DefaultSeverity = Severity::debug;
 
     static void reinit(const std::string& instanceName = std::string());
-    static void init(Severity severity = DefaultSeverity, const std::string& instanceName = std::string());
+    static void init(Severity           severity     = DefaultSeverity,
+                     const std::string& instanceName = std::string());
 
 private:
-    Logger() {}
+    Logger()
+    {
+    }
 
     static Severity m_severity;
 };

@@ -21,7 +21,7 @@ namespace sugo::hal
 {
 template <class ISubCompT, class SubCompT, class... SubCompParams>
 inline bool initSubComponents(const IConfiguration& configuration, const std::string& baseName,
-                              const std::string&                                            subId,
+                              const std::string&                                subId,
                               std::map<Identifier, std::shared_ptr<ISubCompT>>& map,
                               SubCompParams&... params)
 {
@@ -39,9 +39,10 @@ inline bool initSubComponents(const IConfiguration& configuration, const std::st
 }
 
 template <class ISubCompT, class SubCompT, class... SubCompParams>
-inline bool initEnabledSubComponents(
-    const IConfiguration& configuration, const std::string& prefixId,
-    std::map<Identifier, std::shared_ptr<ISubCompT>>& map, SubCompParams&... params)
+inline bool initEnabledSubComponents(const IConfiguration& configuration,
+                                     const std::string&    prefixId,
+                                     std::map<Identifier, std::shared_ptr<ISubCompT>>& map,
+                                     SubCompParams&... params)
 {
     auto&       option = configuration.getOption(prefixId + "-enabled");
     const auto& subIds = option.get<const std::vector<std::string>&>();

@@ -111,7 +111,7 @@ public:
         GenericNotificationId<IdT, PublisherAddressT>&&) = default;
 
     /**
-     * @brief Returns the publisher address according to the notification. 
+     * @brief Returns the publisher address according to the notification.
      *
      * @return The publisher address.
      */

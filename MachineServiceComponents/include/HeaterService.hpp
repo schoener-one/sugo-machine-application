@@ -44,7 +44,7 @@ public:
 protected:
     /**
      * @brief Temperature limit event.
-     * 
+     *
      */
     enum TemperatureLimitEvent
     {
@@ -73,26 +73,26 @@ protected:
 
     /**
      * @brief Returns the current temperature.
-     * 
-     * @return The current temperature. 
+     *
+     * @return The current temperature.
      */
-    int32_t      getTemperature() const
+    int32_t getTemperature() const
     {
         return m_currentTemperature.load();
     }
 
     /**
      * @brief Starts the temperature sensor observation.
-     * 
+     *
      * @return true  If observation could be started successfully.
      * @return false If observation could not be started successfully.
      */
 
     bool startTemperatureObservation();
-    
+
     /**
      * @brief Stops the temperature sensor observation.
-     * 
+     *
      */
     void stopTemperatureObservation();
 

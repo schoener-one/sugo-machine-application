@@ -11,21 +11,22 @@
 
 #pragma once
 
+#include "ControlService.hpp"
 #include "IFilamentMergerControl.hpp"
 #include "ServiceLocator.hpp"
-#include "ControlService.hpp"
 
 namespace sugo
 {
 /**
  * @class FilamentMergerControl
  */
-class FilamentMergerControl : public IFilamentMergerControl, public ControlService<FilamentMergerControl>
+class FilamentMergerControl : public IFilamentMergerControl,
+                              public ControlService<FilamentMergerControl>
 {
 public:
     // Constructor / Destructor
     explicit FilamentMergerControl(message::ICommandMessageBroker& messageBroker,
-                                   const ServiceLocator&  serviceLocator)
+                                   const ServiceLocator&           serviceLocator)
         : IFilamentMergerControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }
@@ -68,7 +69,7 @@ protected:
 
 private:
     void switchOff();
-    
+
     const ServiceLocator& m_serviceLocator;
     bool                  m_isPreHeaterTemperatureReached    = false;
     bool                  m_isMergerHeaterTemperatureReached = false;

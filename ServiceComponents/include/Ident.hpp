@@ -16,7 +16,10 @@ namespace sugo
 template <class IdT = int>
 struct Comparator
 {
-    bool operator()(const IdT id1, const IdT id2) const { return (id1 == id2); }
+    bool operator()(const IdT id1, const IdT id2) const
+    {
+        return (id1 == id2);
+    }
 };
 
 /**
@@ -25,7 +28,10 @@ struct Comparator
 template <class IdT = int, bool retValue = true>
 struct NoneComperator
 {
-    bool operator()(const IdT, const IdT) const { return retValue; }
+    bool operator()(const IdT, const IdT) const
+    {
+        return retValue;
+    }
 };
 
 /**
@@ -40,13 +46,18 @@ public:
      *
      * @param id Identifier of the event.
      */
-    explicit Ident(IdT id) : m_id(id) {}
+    explicit Ident(IdT id) : m_id(id)
+    {
+    }
 
     /**
      * Returns the Id of the event.
      * @return
      */
-    IdT getId() const { return m_id; }
+    IdT getId() const
+    {
+        return m_id;
+    }
 
     /**
      * Compares this event object to another one.
@@ -54,7 +65,10 @@ public:
      * @param other Other event object to be compared.
      * @return true if both have the same id, otherwise false.
      */
-    bool operator==(const Ident &other) const { return operator==(other.getId()); }
+    bool operator==(const Ident &other) const
+    {
+        return operator==(other.getId());
+    }
 
     /**
      * Compares this object to the passed id.
@@ -73,7 +87,10 @@ public:
      *
      * @return Event identifier type.
      */
-    operator IdT() const { return m_id; }
+    operator IdT() const
+    {
+        return m_id;
+    }
 
 private:
     IdT m_id;
@@ -89,7 +106,9 @@ public:
     /**
      * Creates a new object.
      */
-    AnyIdent() : Ident<>(0) {}
+    AnyIdent() : Ident<>(0)
+    {
+    }
 };
 
 }  // namespace sugo
