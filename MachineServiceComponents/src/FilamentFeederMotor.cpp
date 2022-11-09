@@ -24,22 +24,22 @@ using namespace sugo::message;
 
 message::CommandResponse FilamentFeederMotor::onCommandSwitchOn(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event::SwitchOn);
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandSwitchOff(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event::SwitchOff);
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandStartMotor(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StartMotor));
+    return handleEventMessage(command, Event::StartMotor);
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandStopMotor(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StopMotor));
+    return handleEventMessage(command, Event::StopMotor);
 }
 
 message::CommandResponse FilamentFeederMotor::onCommandSetMotorSpeed(
@@ -66,11 +66,11 @@ void FilamentFeederMotor::switchOn(const IFilamentFeederMotor::Event&,
 {
     if (resetMotor())
     {
-        push(Event(EventId::SwitchOnSucceeded));
+        push(Event::SwitchOnSucceeded);
     }
     else
     {
-        push(Event(EventId::SwitchOnFailed));
+        push(Event::SwitchOnFailed);
     }
 }
 
@@ -79,12 +79,12 @@ void FilamentFeederMotor::startMotor(const IFilamentFeederMotor::Event&,
 {
     if (startMotorRotation())
     {
-        push(Event(EventId::StartMotorSucceeded));
+        push(Event::StartMotorSucceeded);
         notify(NotificationStartMotorSucceeded);
     }
     else
     {
-        push(Event(EventId::StartMotorFailed));
+        push(Event::StartMotorFailed);
         notify(NotificationStartMotorFailed);
     }
 }

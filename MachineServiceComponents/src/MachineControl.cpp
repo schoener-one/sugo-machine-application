@@ -21,12 +21,12 @@ using namespace sugo;
 // Commands
 message::CommandResponse MachineControl::onCommandSwitchOn(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event::SwitchOn);
 }
 
 message::CommandResponse MachineControl::onCommandSwitchOff(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event::SwitchOff);
 }
 
 message::CommandResponse MachineControl::onCommandIncreaseMotorSpeed(const message::Command&)
@@ -64,46 +64,46 @@ message::CommandResponse MachineControl::onNotificationFilamentMergerControlFeed
     const message::Command& command)
 {
     m_isFilamentMergerControlRunning = true;
-    return handleEventMessage(command, Event(EventId::WaitForStarted));
+    return handleEventMessage(command, Event::WaitForStarted);
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentMergerControlFeedingStopped(
     const message::Command& command)
 {
     m_isFilamentMergerControlRunning = false;
-    return handleEventMessage(command, Event(EventId::RunningStopped));
+    return handleEventMessage(command, Event::RunningStopped);
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentMergerControlHeatedUp(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::MergerHeatedUp));
+    return handleEventMessage(command, Event::MergerHeatedUp);
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentMergerControlErrorOccurred(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::ErrorOccurred));
+    return handleEventMessage(command, Event::ErrorOccurred);
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentCoilControlCoilRunning(
     const message::Command& command)
 {
     m_isFilamentCoilControlRunning = true;
-    return handleEventMessage(command, Event(EventId::WaitForStarted));
+    return handleEventMessage(command, Event::WaitForStarted);
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentCoilControlCoilStopped(
     const message::Command& command)
 {
     m_isFilamentCoilControlRunning = false;
-    return handleEventMessage(command, Event(EventId::RunningStopped));
+    return handleEventMessage(command, Event::RunningStopped);
 }
 
 message::CommandResponse MachineControl::onNotificationFilamentCoilControlErrorOccurred(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::ErrorOccurred));
+    return handleEventMessage(command, Event::ErrorOccurred);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -114,16 +114,16 @@ void MachineControl::switchOn(const IMachineControl::Event&, const IMachineContr
     const auto responseFilamentMerger = send(IFilamentMergerControl::CommandSwitchOn);
     if (responseFilamentMerger.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::SwitchOnFailed));
+        push(Event::SwitchOnFailed);
         return;
     }
     const auto responseFilamentCoilControl = send(IFilamentCoilControl::CommandSwitchOn);
     if (responseFilamentCoilControl.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::SwitchOnFailed));
+        push(Event::SwitchOnFailed);
         return;
     }
-    push(Event(EventId::SwitchOnSucceeded));
+    push(Event::SwitchOnSucceeded);
     notify(NotificationStarting);
 }
 
@@ -135,24 +135,24 @@ void MachineControl::startMachine(const IMachineControl::Event&, const IMachineC
                                            Json({{protocol::IdSpeed, m_motorSpeed}}));
     if (responseStartFeeding.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::StartingFailed));
+        push(Event::StartingFailed);
         return;
     }
     const auto responseStartCoil = send(IFilamentCoilControl::CommandStartCoil);
     if (responseStartCoil.result() != message::CommandResponse_Result_SUCCESS)
     {
         send(IFilamentMergerControl::CommandStopFeeding);
-        push(Event(EventId::StartingFailed));
+        push(Event::StartingFailed);
         return;
     }
-    push(Event(EventId::WaitForStarted));
+    push(Event::WaitForStarted);
 }
 
 void MachineControl::waitForStarted(const IMachineControl::Event&, const IMachineControl::State&)
 {
     if (m_isFilamentMergerControlRunning && m_isFilamentCoilControlRunning)
     {
-        push(Event(EventId::StartingSucceeded));
+        push(Event::StartingSucceeded);
         notify(NotificationRunning);
     }
 }

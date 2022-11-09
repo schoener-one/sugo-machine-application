@@ -25,17 +25,17 @@ using namespace sugo;
 using namespace remote_control;
 using namespace sugo::message;
 
-std::string UserInterfaceControl::convertToString(UserInterfaceControl::EventId event)
+std::string UserInterfaceControl::convertToString(const UserInterfaceControl::Event& event)
 {
     switch (event)
     {
-        case EventId::MachineSwitchedOff:
+        case Event::MachineSwitchedOff:
             return "off";
-        case EventId::MachineStarting:
+        case Event::MachineStarting:
             return "starting";
-        case EventId::MachineRunning:
+        case Event::MachineRunning:
             return "running";
-        case EventId::MachineError:
+        case Event::MachineError:
             return "error";
     }
     return "";
@@ -143,25 +143,25 @@ void UserInterfaceControl::updateMachineState()
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlStarting(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::MachineStarting));
+    return handleEventMessage(command, Event::MachineStarting);
 }
 
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlRunning(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::MachineRunning));
+    return handleEventMessage(command, Event::MachineRunning);
 }
 
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlSwitchedOff(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::MachineSwitchedOff));
+    return handleEventMessage(command, Event::MachineSwitchedOff);
 }
 
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlErrorOccurred(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::MachineError));
+    return handleEventMessage(command, Event::MachineError);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -171,24 +171,25 @@ void UserInterfaceControl::handleMachineStateChange(const Event& event, const St
 
 {
     auto& hal          = m_serviceLocator.get<hal::IHardwareAbstractionLayer>();
-    m_lastMachineEvent = event.getId();
-    switch (event.getId())
+    m_lastMachineEvent = event;
+
+    switch (event)
     {
-        case EventId::MachineError:
+        case Event::MachineError:
         // TODO Make LED lights flashing on error!
-        case EventId::MachineSwitchedOff:
+        case Event::MachineSwitchedOff:
             (void)getGpioPin(hal, config::GpioPinRelaySwitchLightRunId)
                 ->setState(hal::IGpioPin::State::Low);
             (void)getGpioPin(hal, config::GpioPinRelaySwitchLightReadyId)
                 ->setState(hal::IGpioPin::State::Low);
             break;
-        case EventId::MachineStarting:
+        case Event::MachineStarting:
             (void)getGpioPin(hal, config::GpioPinRelaySwitchLightRunId)
                 ->setState(hal::IGpioPin::State::High);
             (void)getGpioPin(hal, config::GpioPinRelaySwitchLightReadyId)
                 ->setState(hal::IGpioPin::State::Low);
             break;
-        case EventId::MachineRunning:
+        case Event::MachineRunning:
             (void)getGpioPin(hal, config::GpioPinRelaySwitchLightRunId)
                 ->setState(hal::IGpioPin::State::High);
             (void)getGpioPin(hal, config::GpioPinRelaySwitchLightReadyId)

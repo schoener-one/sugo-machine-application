@@ -29,10 +29,10 @@ void FilamentMergerHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
     switch (event)
     {
         case MinTemperatureReached:
-            push(Event(EventId::MinTemperatureReached));
+            push(Event::MinTemperatureReached);
             break;
         case MaxTemperatureReached:
-            push(Event(EventId::MaxTemperatureReached));
+            push(Event::MaxTemperatureReached);
             break;
     }
 
@@ -44,12 +44,12 @@ void FilamentMergerHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
 
 message::CommandResponse FilamentMergerHeater::onCommandSwitchOn(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event::SwitchOn);
 }
 
 message::CommandResponse FilamentMergerHeater::onCommandSwitchOff(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event::SwitchOff);
 }
 
 message::CommandResponse FilamentMergerHeater::onCommandGetTemperature(
@@ -67,10 +67,10 @@ void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
     updateHeaterTemperature();
     if (!startTemperatureObservation())
     {
-        push(Event(EventId::SwitchOnFailed));
+        push(Event::SwitchOnFailed);
         return;
     }
-    push(Event(EventId::SwitchOnSucceeded));
+    push(Event::SwitchOnSucceeded);
 }
 
 void FilamentMergerHeater::startHeating(const IFilamentMergerHeater::Event& event,
@@ -78,9 +78,9 @@ void FilamentMergerHeater::startHeating(const IFilamentMergerHeater::Event& even
 {
     if (!switchHeater(true))
     {
-        push(Event(EventId::ErrorOccurred));
+        push(Event::ErrorOccurred);
     }
-    if (event.getId() == EventId::MinTemperatureReached)
+    if (event == Event::MinTemperatureReached)
     {
         notify(NotificationTargetTemperatureRangeLeft);
     }
@@ -91,9 +91,9 @@ void FilamentMergerHeater::stopHeating(const IFilamentMergerHeater::Event& event
 {
     if (!switchHeater(false))
     {
-        push(Event(EventId::ErrorOccurred));
+        push(Event::ErrorOccurred);
     }
-    if (event.getId() == EventId::MaxTemperatureReached)
+    if (event == Event::MaxTemperatureReached)
     {
         notify(NotificationTargetTemperatureRangeReached);
     }
@@ -105,7 +105,7 @@ void FilamentMergerHeater::switchOff(const IFilamentMergerHeater::Event&,
     stopTemperatureObservation();
     if (!switchHeater(false))
     {
-        push(Event(EventId::ErrorOccurred));
+        push(Event::ErrorOccurred);
     }
 }
 

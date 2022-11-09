@@ -23,58 +23,58 @@ using namespace sugo::message;
 
 message::CommandResponse FilamentCoilControl::onCommandSwitchOn(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event::SwitchOn);
 }
 
 message::CommandResponse FilamentCoilControl::onCommandSwitchOff(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event::SwitchOff);
 }
 
 message::CommandResponse FilamentCoilControl::onCommandStartCoil(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StartMotor));
+    return handleEventMessage(command, Event::StartMotor);
 }
 
 message::CommandResponse FilamentCoilControl::onCommandStopCoil(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StopMotor));
+    return handleEventMessage(command, Event::StopMotor);
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorTensionTooLow(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::TensionTooLow));
+    return handleEventMessage(command, Event::TensionTooLow);
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorTensionTooHigh(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::TensionTooHigh));
+    return handleEventMessage(command, Event::TensionTooHigh);
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorErrorOccurred(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::ErrorOccurred));
+    return handleEventMessage(command, Event::ErrorOccurred);
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorStartMotorSucceeded(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StartMotorSucceeded));
+    return handleEventMessage(command, Event::StartMotorSucceeded);
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorStartMotorFailed(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StartMotorFailed));
+    return handleEventMessage(command, Event::StartMotorFailed);
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorErrorOccurred(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::ErrorOccurred));
+    return handleEventMessage(command, Event::ErrorOccurred);
 }
 
 message::CommandResponse FilamentCoilControl::onCommandSetMotorSpeed(
@@ -92,18 +92,18 @@ void FilamentCoilControl::switchOn(const IFilamentCoilControl::Event&,
     const auto responseSwitchOnCoilMotor = send(IFilamentCoilMotor::CommandSwitchOn);
     if (responseSwitchOnCoilMotor.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::SwitchOnFailed));
+        push(Event::SwitchOnFailed);
         return;
     }
 
     const auto responseSwitchOnTensionSensor = send(IFilamentTensionSensor::CommandSwitchOn);
     if (responseSwitchOnTensionSensor.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::SwitchOnFailed));
+        push(Event::SwitchOnFailed);
         return;
     }
 
-    push(Event(EventId::SwitchOnSucceeded));
+    push(Event::SwitchOnSucceeded);
 }
 
 void FilamentCoilControl::switchOff(const IFilamentCoilControl::Event&,
@@ -131,11 +131,11 @@ void FilamentCoilControl::stopMotor(const IFilamentCoilControl::Event&,
     const auto response = send(IFilamentCoilMotor::CommandStopMotor);
     if (response.result() == message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::StopMotorSucceeded));
+        push(Event::StopMotorSucceeded);
     }
     else
     {
-        push(Event(EventId::StopMotorFailed));
+        push(Event::StopMotorFailed);
     }
     notify(NotificationCoilStopped);
 }
@@ -146,7 +146,7 @@ void FilamentCoilControl::startMotor(const IFilamentCoilControl::Event&,
     const auto response = send(IFilamentCoilMotor::CommandStartMotor);
     if (response.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::StartMotorFailed));
+        push(Event::StartMotorFailed);
     }
 }
 
@@ -161,12 +161,12 @@ void FilamentCoilControl::controlFilamentTension(const IFilamentCoilControl::Eve
 {
     message::CommandResponse response;
 
-    if (event == EventId::TensionTooLow)
+    if (event == Event::TensionTooLow)
     {
         response = send(IFilamentCoilMotor::CommandIncreaseMotorOffsetSpeed,
                         Json({{protocol::IdSpeed, config::MotorSpeedInc}}));
     }
-    else if (event == EventId::TensionTooHigh)
+    else if (event == Event::TensionTooHigh)
     {
         response = send(IFilamentCoilMotor::CommandDecreaseMotorOffsetSpeed,
                         Json({{protocol::IdSpeed, config::MotorSpeedInc}}));
@@ -174,6 +174,6 @@ void FilamentCoilControl::controlFilamentTension(const IFilamentCoilControl::Eve
 
     if (response.result() != CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::ErrorOccurred));
+        push(Event::ErrorOccurred);
     }
 }

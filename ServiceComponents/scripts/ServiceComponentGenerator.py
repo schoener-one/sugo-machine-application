@@ -73,7 +73,6 @@ class Generator:
 #include "ICommandMessageBroker.hpp"
 #include "StatedServiceComponent.hpp"
 #include "StateMachine.hpp"
-#include "Ident.hpp"
 
 namespace sugo
 {{
@@ -86,17 +85,16 @@ enum State
 }};
 
 /// Event identifiers of the component interface I{context.name}
-enum EventId
+enum Event
 {{
 {newline.join(f'    {event},' for event in context.component.events)}
 }};
 
-using Event        = Ident<EventId>;
 using StateMachine = StateMachine<State, Event>;
 }} // namespace {context.namespace}
 
 std::ostream& operator<<(std::ostream& ostr, {context.namespace}::State const& value);
-std::ostream& operator<<(std::ostream& ostr, {context.namespace}::EventId const& value);
+std::ostream& operator<<(std::ostream& ostr, {context.namespace}::Event const& value);
 
 /**
  * @brief Interface class
@@ -109,7 +107,6 @@ public:
     using State        = {context.namespace}::State;
     using StateMachine = {context.namespace}::StateMachine;
     using Event        = {context.namespace}::Event;
-    using EventId      = {context.namespace}::EventId;
 
     inline static const message::Address ReceiverId{{"{context.name}"}};
     
@@ -207,11 +204,11 @@ std::ostream& sugo::operator<<(std::ostream& ostr, {context.namespace}::State co
     return ostr;
 }}
 
-std::ostream& sugo::operator<<(std::ostream& ostr, {context.namespace}::EventId const& value)
+std::ostream& sugo::operator<<(std::ostream& ostr, {context.namespace}::Event const& value)
 {{
     switch (value)
     {{
-{newline.join(f'        case {context.namespace}::EventId::{event}:{newline}            ostr << "{event}";{newline}            break;' for event in context.component.events)}
+{newline.join(f'        case {context.namespace}::Event::{event}:{newline}            ostr << "{event}";{newline}            break;' for event in context.component.events)}
         default:
             ASSERT_NOT_REACHABLE;
     }}
@@ -254,7 +251,7 @@ message::CommandResponse I{context.name}::onCommandGetState(const message::Comma
         out_str = ''
         for trans in context.component.statemachine.transitions:
             make_action = f', StateMachine::MakeAction(&I{context.name}::{trans.action}, this)' if trans.action else ""
-            out_str += f'''Transition(State::{trans.state}, State::{trans.next}, Event(EventId::{trans.event}){make_action}),
+            out_str += f'''Transition(State::{trans.state}, State::{trans.next}, Event::{trans.event}{make_action}),
             '''
         return out_str
     

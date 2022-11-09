@@ -78,7 +78,7 @@ public:
     }
 
 private:
-    Identifier m_id;
+    const Identifier m_id;
 };
 
 }  // namespace sugo::hal

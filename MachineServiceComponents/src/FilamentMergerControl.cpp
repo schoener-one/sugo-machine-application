@@ -22,24 +22,24 @@ using namespace sugo::message;
 
 message::CommandResponse FilamentMergerControl::onCommandSwitchOn(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event::SwitchOn);
 }
 
 message::CommandResponse FilamentMergerControl::onCommandSwitchOff(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event::SwitchOff);
 }
 
 message::CommandResponse FilamentMergerControl::onCommandStartFeeding(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StartMotor));
+    return handleEventMessage(command, Event::StartMotor);
 }
 
 message::CommandResponse FilamentMergerControl::onCommandStopFeeding(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StopMotor));
+    return handleEventMessage(command, Event::StopMotor);
 }
 
 message::CommandResponse FilamentMergerControl::onCommandGetTemperatures(
@@ -57,7 +57,7 @@ FilamentMergerControl::onNotificationFilamentPreHeaterTargetTemperatureRangeReac
     // TODO add support for state change conditions!
     if (stateChange && m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
     {
-        return handleEventMessage(command, Event(EventId::HeatingUpSucceeded));
+        return handleEventMessage(command, Event::HeatingUpSucceeded);
     }
     return createCommandResponse(command);
 }
@@ -65,7 +65,7 @@ FilamentMergerControl::onNotificationFilamentPreHeaterTargetTemperatureRangeReac
 message::CommandResponse FilamentMergerControl::onNotificationFilamentPreHeaterErrorOccurred(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::ErrorOccurred));
+    return handleEventMessage(command, Event::ErrorOccurred);
 }
 
 message::CommandResponse
@@ -77,7 +77,7 @@ FilamentMergerControl::onNotificationFilamentMergerHeaterTargetTemperatureRangeR
     // TODO add support for state change conditions!
     if (stateChange && m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
     {
-        return handleEventMessage(command, Event(EventId::HeatingUpSucceeded));
+        return handleEventMessage(command, Event::HeatingUpSucceeded);
     }
     return createCommandResponse(command);
 }
@@ -85,26 +85,26 @@ FilamentMergerControl::onNotificationFilamentMergerHeaterTargetTemperatureRangeR
 message::CommandResponse FilamentMergerControl::onNotificationFilamentMergerHeaterErrorOccurred(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::ErrorOccurred));
+    return handleEventMessage(command, Event::ErrorOccurred);
 }
 
 message::CommandResponse
 FilamentMergerControl::onNotificationFilamentFeederMotorStartMotorSucceeded(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StartMotorSucceeded));
+    return handleEventMessage(command, Event::StartMotorSucceeded);
 }
 
 message::CommandResponse FilamentMergerControl::onNotificationFilamentFeederMotorStartMotorFailed(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::StartMotorFailed));
+    return handleEventMessage(command, Event::StartMotorFailed);
 }
 
 message::CommandResponse FilamentMergerControl::onNotificationFilamentFeederMotorErrorOccurred(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::ErrorOccurred));
+    return handleEventMessage(command, Event::ErrorOccurred);
 }
 
 message::CommandResponse FilamentMergerControl::onCommandSetMotorSpeed(
@@ -124,11 +124,11 @@ void FilamentMergerControl::switchOn(const IFilamentMergerControl::Event&,
     const auto responseFeederMotor     = send(IFilamentFeederMotor::CommandSwitchOn);
     if (responseFeederMotor.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::SwitchOnFailed));
+        push(Event::SwitchOnFailed);
     }
     else
     {
-        push(Event(EventId::SwitchOnSucceeded));
+        push(Event::SwitchOnSucceeded);
     }
 }
 
@@ -151,7 +151,7 @@ void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&,
     const auto response = send(IFilamentFeederMotor::CommandStartMotor);
     if (response.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::StartMotorFailed));
+        push(Event::StartMotorFailed);
     }
 }
 
@@ -161,11 +161,11 @@ void FilamentMergerControl::stopMotor(const IFilamentMergerControl::Event&,
     const auto response = send(IFilamentFeederMotor::CommandStopMotor);
     if (response.result() == message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::StopMotorSucceeded));
+        push(Event::StopMotorSucceeded);
     }
     else
     {
-        push(Event(EventId::StopMotorFailed));
+        push(Event::StopMotorFailed);
     }
     notify(NotificationFeedingStopped);
 }
@@ -188,12 +188,12 @@ void FilamentMergerControl::heatingUp(const IFilamentMergerControl::Event&,
     const auto responsePreHeater = send(IFilamentPreHeater::CommandSwitchOn);
     if (responsePreHeater.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::HeatingUpFailed));
+        push(Event::HeatingUpFailed);
     }
     const auto responseMergerHeater = send(IFilamentMergerHeater::CommandSwitchOn);
     if (responseMergerHeater.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event(EventId::HeatingUpFailed));
+        push(Event::HeatingUpFailed);
     }
 }
 

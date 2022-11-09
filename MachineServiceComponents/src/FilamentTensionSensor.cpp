@@ -41,12 +41,12 @@ void FilamentTensionSensor::onFilamentTensionEvent(FilamentTensionEvent event)
 
 message::CommandResponse FilamentTensionSensor::onCommandSwitchOn(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOn));
+    return handleEventMessage(command, Event::SwitchOn);
 }
 
 message::CommandResponse FilamentTensionSensor::onCommandSwitchOff(const message::Command& command)
 {
-    return handleEventMessage(command, Event(EventId::SwitchOff));
+    return handleEventMessage(command, Event::SwitchOff);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,11 +63,11 @@ void FilamentTensionSensor::switchOn(const IFilamentTensionSensor::Event&,
 {
     if (!startSensorObservation())
     {
-        push(Event(EventId::SwitchOnFailed));
+        push(Event::SwitchOnFailed);
         return;
     }
 
-    push(Event(EventId::SwitchOnSucceeded));
+    push(Event::SwitchOnSucceeded);
 }
 
 void FilamentTensionSensor::handleError(const IFilamentTensionSensor::Event&,

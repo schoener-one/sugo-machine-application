@@ -60,11 +60,11 @@ protected:
 private:
     void               updateMachineState();
     Json               createStateMessage(const std::string& type);
-    static std::string convertToString(UserInterfaceControl::EventId event);
+    static std::string convertToString(const UserInterfaceControl::Event& event);
 
     const ServiceLocator&    m_serviceLocator;
     SendNotificationCallback m_cbSendNotification = nullptr;
-    EventId                  m_lastMachineEvent   = EventId::MachineSwitchedOff;
+    Event                    m_lastMachineEvent   = Event::MachineSwitchedOff;
 };
 
 }  // namespace sugo
