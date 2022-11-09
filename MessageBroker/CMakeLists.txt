@@ -1,5 +1,7 @@
 set(MODULE MessageBroker)
 
+add_subdirectory(proto)
+
 add_library (${MODULE} STATIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Client.cpp

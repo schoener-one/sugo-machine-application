@@ -9,7 +9,6 @@ add_executable(MessageBrokerIntegrationTest
 target_compile_options(MessageBrokerIntegrationTest PUBLIC "-DUNIT_TEST")
 target_link_libraries(MessageBrokerIntegrationTest
     Common
-    Protocol
     MessageBroker
     ${Protobuf_LIBRARIES}
     ${Boost_LIBRARIES}

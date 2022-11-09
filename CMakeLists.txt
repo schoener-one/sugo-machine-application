@@ -27,7 +27,6 @@ include(cmake/ClangFormatCheck.cmake)
 ## The Sugo machine project!
 ##
 add_subdirectory(${PROJECT_SOURCE_DIR}/Common)
-add_subdirectory(${PROJECT_SOURCE_DIR}/Protocol)
 add_subdirectory(${PROJECT_SOURCE_DIR}/MessageBroker)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ServiceComponents)
 add_subdirectory(${PROJECT_SOURCE_DIR}/MachineServiceGateway)
