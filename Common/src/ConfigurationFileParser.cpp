@@ -96,7 +96,7 @@ public:
 };
 }  // namespace
 
-ConfigurationParser::ParsedOptions ConfigurationFileParser::runParser(
+ConfigurationParser::ParsedOptions ConfigurationFileParser::parseOptionDescriptions(
     const IConfiguration::OptionDescriptions& optionDescriptions)
 {
     ::JsonParser<char> parser(m_inStream);

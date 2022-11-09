@@ -33,9 +33,10 @@ namespace sugo::remote_control
 class RemoteControlServer : public IRunnable
 {
 public:
+    /// @brief Maximum connection allowed to connect.
     static const unsigned MaxConnections = 3u;
 
-    RemoteControlServer(const std::string address, unsigned short port, const std::string docRoot,
+    RemoteControlServer(const std::string &address, unsigned short port, const std::string &docRoot,
                         IRequestHandler &requestHandler);
     ~RemoteControlServer();
 

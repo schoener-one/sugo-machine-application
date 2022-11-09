@@ -146,6 +146,7 @@ bool MachineApplication::start(int argc, char const** argv)
     }
 
     m_components.waitUntilFinished();
+    remoteControlServer.stop();
     machineServiceGateway.stop();
     LOG(info) << "Application " << m_name << " stopped";
     return true;

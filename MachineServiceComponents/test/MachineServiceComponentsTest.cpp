@@ -32,7 +32,7 @@ using ::testing::ReturnRef;
 
 class TestFilamentCoilMotor : public FilamentCoilMotor
 {
-    FRIEND_TEST(MachineServiceComponentsTest, FilamentCoilMotor_Start);
+    FRIEND_TEST(MachineServiceComponentsTest, StartFilamentCoilMotor);
 
 public:
     using FilamentCoilMotor::FilamentCoilMotor;
@@ -44,10 +44,6 @@ protected:
     MachineServiceComponentsTest()
         : m_mockStepperMotorControl(new NiceMock<IStepperMotorControlMock>()),
           m_mockStepperMotor(new IStepperMotorMock())
-    {
-    }
-
-    ~MachineServiceComponentsTest() override
     {
     }
 
@@ -85,7 +81,7 @@ protected:
     ServiceLocator                          m_serviceLocator;
 };
 
-TEST_F(MachineServiceComponentsTest, FilamentCoilMotor_Start)
+TEST_F(MachineServiceComponentsTest, StartFilamentCoilMotor)
 {
     TestFilamentCoilMotor comp(m_mockCommandMessageBroker, m_serviceLocator);
 
@@ -98,12 +94,15 @@ TEST_F(MachineServiceComponentsTest, FilamentCoilMotor_Start)
     message::Command command;
     command.set_id(4);
     auto response = comp.onCommandSwitchOn(command);
+    comp.processAllEvents();
+
     EXPECT_EQ(response.result(), message::CommandResponse_Result_SUCCESS);
     EXPECT_EQ(comp.getCurrentState(), FilamentCoilMotor::State::Stopped);
 
     EXPECT_CALL(*m_mockStepperMotor, rotate(IStepperMotor::Direction::Forward))
         .WillOnce(Return(true));
     response = comp.onCommandStartMotor(command);
+    comp.processAllEvents();
     EXPECT_EQ(response.id(), 4);
     EXPECT_EQ(response.result(), message::CommandResponse_Result_SUCCESS);
     EXPECT_EQ(comp.getCurrentState(), FilamentCoilMotor::State::Running);

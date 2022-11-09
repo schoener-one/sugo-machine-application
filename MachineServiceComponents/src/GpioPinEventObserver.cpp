@@ -27,10 +27,7 @@ GpioPinEventObserver::GpioPinEventObserver(
 
 GpioPinEventObserver::~GpioPinEventObserver()
 {
-    if (isRunning())
-    {
-        stop();
-    }
+    doStop();
 }
 
 bool GpioPinEventObserver::start()
@@ -57,7 +54,12 @@ bool GpioPinEventObserver::start()
 
 void GpioPinEventObserver::stop()
 {
-    if (isRunning())
+    doStop();
+}
+
+void GpioPinEventObserver::doStop()
+{
+    if (m_thread.isRunning())
     {
         m_doObserve = false;
         m_thread.join();

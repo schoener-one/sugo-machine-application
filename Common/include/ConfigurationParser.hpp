@@ -20,9 +20,7 @@ namespace sugo
 class ConfigurationParser
 {
 public:
-    virtual ~ConfigurationParser()
-    {
-    }
+    virtual ~ConfigurationParser() = default;
 
     /** Adds a new configuration to the parser.
      *
@@ -43,10 +41,6 @@ public:
     bool parse();
 
 protected:
-    ConfigurationParser()
-    {
-    }
-
     using ParsedOptions = boost::program_options::parsed_options;
     using VariablesMap  = boost::program_options::variables_map;
 
@@ -55,7 +49,7 @@ protected:
         return std::move(IConfiguration::OptionDescriptions());
     }
 
-    virtual ParsedOptions runParser(
+    virtual ParsedOptions parseOptionDescriptions(
         const IConfiguration::OptionDescriptions& optionDescriptions) = 0;
 
     virtual bool notifyFinished(const VariablesMap&                       variablesMap,

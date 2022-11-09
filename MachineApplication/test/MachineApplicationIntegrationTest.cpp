@@ -32,7 +32,6 @@
 #include "IntegrationTest.hpp"
 #include "Logger.hpp"
 #include "MachineConfig.hpp"
-#include "RemoteControlServer.hpp"
 #include "ServiceComponentsExecutionGroup.hpp"
 #include "ServiceLocator.hpp"
 #include "Thread.hpp"

@@ -22,7 +22,8 @@ namespace sugo
  * @param idPin GPIO pin identifier.
  * @return auto& GPIO pin object.
  */
-inline auto& getGpioPin(hal::IHardwareAbstractionLayer& hal, const hal::Identifier& idPin)
+inline static auto& getGpioPin(const hal::IHardwareAbstractionLayer& hal,
+                               const hal::Identifier&                idPin)
 {
     assert(hal.getGpioControllerMap().count(config::GpioControlId) == 1);
     auto& gpioController = hal.getGpioControllerMap().at(config::GpioControlId);
@@ -39,8 +40,8 @@ inline auto& getGpioPin(hal::IHardwareAbstractionLayer& hal, const hal::Identifi
  * @param sensorId Temperature sensor identifier.
  * @return auto& Temperature sensor object.
  */
-inline auto& getTemperatureSensor(hal::IHardwareAbstractionLayer& hal,
-                                  const hal::Identifier&          sensorId)
+inline static auto& getTemperatureSensor(const hal::IHardwareAbstractionLayer& hal,
+                                         const hal::Identifier&                sensorId)
 {
     assert(hal.getTemperatureSensorControllerMap().count(config::TemperatureSensorControlId) == 1);
     auto& temperatureSensorController =
@@ -58,7 +59,8 @@ inline auto& getTemperatureSensor(hal::IHardwareAbstractionLayer& hal,
  * @param sensorId Stepper motor sensor identifier.
  * @return auto& Stepper motor object.
  */
-inline auto& getStepperMotor(hal::IHardwareAbstractionLayer& hal, const hal::Identifier& idMotor)
+inline static auto& getStepperMotor(const hal::IHardwareAbstractionLayer& hal,
+                                    const hal::Identifier&                idMotor)
 {
     assert(hal.getStepperMotorControllerMap().count(config::StepperMotorControlId) == 1);
     auto& stepperMotorController =

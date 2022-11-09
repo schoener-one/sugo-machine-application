@@ -32,9 +32,8 @@ public:
     }
 
 protected:
-    // ConfigurationParser {{
-    ParsedOptions runParser(const IConfiguration::OptionDescriptions& optionDescriptions) override;
-    // ConfigurationParser }}
+    ParsedOptions parseOptionDescriptions(
+        const IConfiguration::OptionDescriptions& optionDescriptions) override;
 
 private:
     std::istream& m_inStream;

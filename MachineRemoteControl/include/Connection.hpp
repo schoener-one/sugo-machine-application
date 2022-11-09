@@ -31,10 +31,8 @@ public:
     /// @brief Uniq identifier for a connection
     using Identifier = IRequestHandler::ClientId;
 
-    Connection()
-    {
-    }
-    Connection(mg_connection *connection) : m_connection(connection)
+    Connection() = default;
+    explicit Connection(mg_connection *connection) : m_connection(connection)
     {
     }
     Connection(const Connection &) = default;

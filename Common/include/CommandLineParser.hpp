@@ -31,7 +31,6 @@ public:
     }
 
 protected:
-    // ConfigurationParser {{
     IConfiguration::OptionDescriptions getOptionDescriptions() override
     {
         IConfiguration::OptionDescriptions optionDescriptions("Allowed commandline options");
@@ -39,7 +38,8 @@ protected:
         return optionDescriptions;
     }
 
-    ParsedOptions runParser(const IConfiguration::OptionDescriptions& optionDescriptions) override
+    ParsedOptions parseOptionDescriptions(
+        const IConfiguration::OptionDescriptions& optionDescriptions) override
     {
         return boost::program_options::parse_command_line(m_argumentCount, m_arguments,
                                                           optionDescriptions);
@@ -56,7 +56,6 @@ protected:
         }
         return ConfigurationParser::notifyFinished(variablesMap, optionDescriptions, withSuccess);
     }
-    // ConfigurationParser }}
 
 private:
     int          m_argumentCount;

@@ -54,14 +54,6 @@ protected:
         Logger::init();
     }
 
-    void SetUp() override
-    {
-    }
-
-    void TearDown() override
-    {
-    }
-
     EventQueue<Event> m_testQueue;
 };
 

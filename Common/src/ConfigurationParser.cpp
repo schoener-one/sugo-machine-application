@@ -31,7 +31,7 @@ bool ConfigurationParser::parse()
             commandLineOpts.add(descriptions);
         }
 
-        po::store(runParser(commandLineOpts), variablesMap);
+        po::store(parseOptionDescriptions(commandLineOpts), variablesMap);
         po::notify(variablesMap);
     }
     catch (std::exception& ex)

@@ -20,8 +20,9 @@
 using namespace sugo;
 using namespace sugo::remote_control;
 
-RemoteControlServer::RemoteControlServer(const std::string address, unsigned short port,
-                                         const std::string docRoot, IRequestHandler &requestHandler)
+RemoteControlServer::RemoteControlServer(const std::string &address, unsigned short port,
+                                         const std::string &docRoot,
+                                         IRequestHandler &  requestHandler)
     : m_address(address),
       m_port(port),
       m_docRoot(docRoot),

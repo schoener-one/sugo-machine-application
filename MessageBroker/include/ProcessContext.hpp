@@ -31,9 +31,10 @@ public:
      * @param policy     Thread policy to be used.
      * @param priority   Priority to be apply to the working instances.
      */
-    ProcessContext(const std::string& instanceId, Thread::Policy policy = Thread::DefaultPolicy,
-                   int priority = Thread::DefaultPriority);
-    virtual ~ProcessContext();
+    explicit ProcessContext(const std::string& instanceId,
+                            Thread::Policy     policy   = Thread::DefaultPolicy,
+                            int                priority = Thread::DefaultPriority);
+    virtual ~ProcessContext() = default;
 
     ProcessContext& operator=(const ProcessContext&) = delete;
     ProcessContext& operator=(ProcessContext&&) = delete;

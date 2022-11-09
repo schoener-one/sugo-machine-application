@@ -30,14 +30,6 @@ using namespace sugo;
 class HardwareAbstractionLayerSmokeTest : public ::testing::Test
 {
 protected:
-    HardwareAbstractionLayerSmokeTest()
-    {
-    }
-
-    ~HardwareAbstractionLayerSmokeTest() override
-    {
-    }
-
     static void SetUpTestCase()
     {
         Logger::init();
@@ -54,10 +46,6 @@ protected:
 
         ASSERT_TRUE(parser.parse());
         ASSERT_TRUE(m_hal.init(m_configuration));
-    }
-
-    void TearDown() override
-    {
     }
 
     constexpr static char m_configFile[] = "HardwareAbstractionLayer/conf/MachineConfig.json";
@@ -149,14 +137,14 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_MotorControl)
         EXPECT_TRUE(stepperMotor->rotate(IStepperMotor::Direction::Forward));
         std::this_thread::sleep_for(std::chrono::seconds(10));
         stepperMotor->getPosition();
-        EXPECT_NEAR(stepperMotor->getSpeed().getValue(), maxSpeed, 2);
+        EXPECT_NEAR(stepperMotor->getSpeed().getValue(), maxSpeed, 2u);
         EXPECT_TRUE(stepperMotor->stop(false));
         std::this_thread::sleep_for(std::chrono::seconds(1));
         EXPECT_EQ(stepperMotor->getSpeed().getValue(), 0);
 
         EXPECT_TRUE(stepperMotor->rotate(IStepperMotor::Direction::Backward));
         std::this_thread::sleep_for(std::chrono::seconds(10));
-        EXPECT_NEAR(stepperMotor->getSpeed().getValue(), maxSpeed * -1, 2);
+        EXPECT_NEAR(stepperMotor->getSpeed().getValue(), maxSpeed, 2u);
         EXPECT_TRUE(stepperMotor->stop(false));
         std::this_thread::sleep_for(std::chrono::seconds(1));
         EXPECT_EQ(stepperMotor->getSpeed().getValue(), 0);

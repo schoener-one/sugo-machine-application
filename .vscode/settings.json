@@ -109,5 +109,6 @@
         "netfwd": "cpp",
         "climits": "cpp",
         "cassert": "cpp"
-    }
+    },
+    "sonarlint.pathToCompileCommands": "${workspaceFolder}/build.x86.DEBUG/compile_commands.json"
 }

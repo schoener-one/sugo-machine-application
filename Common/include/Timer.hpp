@@ -53,7 +53,7 @@ public:
      */
     ~GenericTimer()
     {
-        stop();
+        doStop();
     }
 
     bool start() override
@@ -100,18 +100,20 @@ public:
 
     void stop() override
     {
-        m_doRun = false;
-        m_condVariable.notify_one();
-        std::unique_lock<std::mutex> lock(m_mutex);
+        doStop();
+    }
 
+private:
+    void doStop()
+    {
         if (m_thread.isRunning())
         {
-            lock.unlock();
+            m_doRun = false;
+            m_condVariable.notify_one();
             m_thread.join();
         }
     }
 
-private:
     const TimePeriodT       m_period;
     Clock::time_point       m_nextWakeUpTime;
     Thread                  m_thread;

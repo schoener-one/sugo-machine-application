@@ -41,12 +41,10 @@ public:
     }
 
     /**
-     * @brief Destroy the IHalObject object.
+     * @brief Destroys the IHalObject object.
      *
      */
-    virtual ~IHalObject()
-    {
-    }
+    virtual ~IHalObject() = default;
 
     /**
      * @brief Initializes the hardware abstraction layer object

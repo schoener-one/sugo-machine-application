@@ -196,7 +196,6 @@ namespace {{
 using namespace sugo;
 using Transition = I{context.name}::StateMachine::Transition;
 
-// cppcheck-suppress unusedFunction
 std::ostream& sugo::operator<<(std::ostream& ostr, {context.namespace}::State const& value)
 {{
     switch (value)

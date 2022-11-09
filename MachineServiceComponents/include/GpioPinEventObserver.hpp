@@ -59,6 +59,8 @@ public:
     }
 
 private:
+    void doStop();
+
     std::shared_ptr<hal::IGpioPin>  m_pin;
     EventHandler                    m_eventHandler;
     const std::chrono::milliseconds m_maxGpioPinObservationTimeout;

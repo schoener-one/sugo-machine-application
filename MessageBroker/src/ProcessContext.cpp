@@ -18,10 +18,6 @@ ProcessContext::ProcessContext(const std::string& instanceId, Thread::Policy pol
 {
 }
 
-ProcessContext::~ProcessContext()
-{
-}
-
 void ProcessContext::waitUntilFinished()
 {
     if (m_thread.isRunning())
