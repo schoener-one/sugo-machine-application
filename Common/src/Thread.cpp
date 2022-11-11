@@ -1,12 +1,17 @@
-/*
- * Thread.cpp
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @file
+ * @license: Copyright 2022, Schoener-One
  *
- *  Created on: 08.12.2019
- *      Author: denis
+ * @author: denis@schoener-one
+ * @date:   2019-12-08
  */
+///////////////////////////////////////////////////////////////////////////////
+
 #include <pthread.h>
 #include <sched.h>
 #include <cassert>
+#include <iomanip>
 
 #include <sys/mman.h>
 #include <Thread.hpp>

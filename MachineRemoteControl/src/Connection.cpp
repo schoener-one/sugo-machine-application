@@ -13,6 +13,7 @@
 
 #include <mongoose.h>
 #include <cassert>
+#include <iomanip>
 
 namespace
 {

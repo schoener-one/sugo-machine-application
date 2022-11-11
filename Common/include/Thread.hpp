@@ -1,12 +1,14 @@
-/*
- * Thread.hpp
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @file
+ * @license: Copyright 2022, Schoener-One
  *
- *  Created on: 08.12.2019
- *      Author: denis
+ * @author: denis@schoener-one
+ * @date:   2019-12-08
  */
+///////////////////////////////////////////////////////////////////////////////
 
-#ifndef THREAD_HPP_
-#define THREAD_HPP_
+#pragma once
 
 #include <condition_variable>
 #include <functional>
@@ -105,5 +107,3 @@ private:
     Policy                  m_policy;
 };
 }  // namespace sugo
-
-#endif /* THREAD_HPP_ */

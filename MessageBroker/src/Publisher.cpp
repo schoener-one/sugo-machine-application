@@ -13,7 +13,6 @@
 
 #include <azmq/socket.hpp>
 #include <boost/asio/buffer.hpp>
-#include <zmq.hpp>
 
 namespace sugo::message
 {

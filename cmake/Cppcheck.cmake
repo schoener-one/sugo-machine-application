@@ -15,6 +15,7 @@ if (CMAKE_CXX_CPPCHECK)
         "--suppress=unusedFunction"
         "--suppress=unmatchedSuppression"
         "--suppress=*:${CMAKE_BINARY_DIR}/*"
+        "--suppress=preprocessorErrorDirective:*/Command.pb.h"
         "--template=!CPPCHECK: {file}:{line}: {id} ({severity}) - {message}"
     )
 endif()
