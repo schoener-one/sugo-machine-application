@@ -10,11 +10,7 @@
 
 #pragma once
 
-#include <boost/filesystem.hpp>
-#include <boost/log/trivial.hpp>
-#include <cassert>
 #include <jsonrpcpp/json.hpp>
-
 #include "Logger.hpp"
 
 /**

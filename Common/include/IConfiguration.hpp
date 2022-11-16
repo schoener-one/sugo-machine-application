@@ -23,14 +23,10 @@ namespace sugo
 class IConfiguration
 {
 protected:
-    IConfiguration()
-    {
-    }
+    IConfiguration() = default;
 
 public:
-    virtual ~IConfiguration()
-    {
-    }
+    virtual ~IConfiguration() = default;
 
     using OptionDescriptions = boost::program_options::options_description;
     using VariablesMap       = boost::program_options::variables_map;

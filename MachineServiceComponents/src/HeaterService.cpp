@@ -19,22 +19,21 @@
 
 using namespace sugo;
 
-HeaterService::HeaterService(const hal::Identifier& heaterId,
-                             const hal::Identifier& temperatureSensorId,
-                             const ServiceLocator&  serviceLocator)
-    : m_heaterId(heaterId),
-      m_temperatureSensorId(temperatureSensorId),
+HeaterService::HeaterService(hal::Identifier heaterId, hal::Identifier temperatureSensorId,
+                             const ServiceLocator& serviceLocator)
+    : m_heaterId(std::move(heaterId)),
+      m_temperatureSensorId(std::move(temperatureSensorId)),
       m_serviceLocator(serviceLocator),
       m_temperatureObserver(
           config::TemperatureObservationPeriod, [&]() { updateHeaterTemperatureAndCheck(); },
-          heaterId + "Timer"),
+          m_heaterId + "Timer"),
       m_lastCheckedTemperature(std::numeric_limits<Temperature>::min())
 {
 }
 
 bool HeaterService::switchHeater(bool switchOn)
 {
-    auto pinHeaterMerger =
+    const auto& pinHeaterMerger =
         getGpioPin(m_serviceLocator.get<hal::IHardwareAbstractionLayer>(), m_heaterId);
     LOG(debug) << "Switch heater " << m_heaterId << " " << (switchOn ? "on" : "off");
     return pinHeaterMerger->setState(switchOn ? hal::IGpioPin::State::High

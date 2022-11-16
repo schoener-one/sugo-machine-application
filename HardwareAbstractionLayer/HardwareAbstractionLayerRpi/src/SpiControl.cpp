@@ -12,9 +12,6 @@
 #include "SpiControl.hpp"
 #include "Logger.hpp"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <fcntl.h>
 #include <getopt.h>
 #include <linux/types.h>

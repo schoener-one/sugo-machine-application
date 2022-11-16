@@ -33,7 +33,8 @@ Client::Client(IOContext& ioContext)
 {
 }
 
-Client::~Client()
+Client::~Client()  // NOLINT(modernize-use-equals-default) - std::unique_ptr/std::default_delete
+                   // sizeof unknown
 {
 }
 

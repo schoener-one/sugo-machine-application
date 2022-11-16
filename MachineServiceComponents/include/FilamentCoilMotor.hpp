@@ -30,9 +30,6 @@ public:
           MotorService(config::StepperMotorCoilerId, serviceLocator)
     {
     }
-    virtual ~FilamentCoilMotor()
-    {
-    }
 
 protected:
     // Command handlers

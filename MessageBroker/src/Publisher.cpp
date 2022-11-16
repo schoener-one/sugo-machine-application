@@ -27,14 +27,14 @@ public:
 
 using namespace sugo::message;
 
-Publisher::Publisher(const std::string& address, IOContext& ioContext)
-    : m_address(address),
-      m_socket(std::make_unique<PublisherSocket>(ioContext.getContext())),
-      m_isRunning(false)
+Publisher::Publisher(std::string address, IOContext& ioContext)
+    : m_address(std::move(address)),
+      m_socket(std::make_unique<PublisherSocket>(ioContext.getContext()))
 {
 }
 
-Publisher::~Publisher()
+Publisher::~Publisher()  // NOLINT(modernize-use-equals-default) -
+                         // std::unique_ptr/std::default_delete sizeof unknown
 {
 }
 

@@ -26,7 +26,6 @@ public:
     // Constructor / Destructor
     explicit FilamentTensionSensor(message::ICommandMessageBroker& messageBroker,
                                    const ServiceLocator&           serviceLocator);
-    virtual ~FilamentTensionSensor() = default;
 
 protected:
     // Command handlers

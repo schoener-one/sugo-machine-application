@@ -75,12 +75,13 @@ message::CommandResponse FilamentCoilMotor::onCommandIncreaseMotorOffsetSpeed(
 message::CommandResponse FilamentCoilMotor::onCommandDecreaseMotorOffsetSpeed(
     const message::Command& command)
 {
-    const auto& motorSpeedJson = Json::parse(command.parameters()).at(protocol::IdSpeed);
-    int         motorSpeed     = -1 * config::MotorSpeedInc;
+    static constexpr int negativeMultiplier = -1;
+    const auto&          motorSpeedJson = Json::parse(command.parameters()).at(protocol::IdSpeed);
+    int                  motorSpeed = negativeMultiplier * static_cast<int>(config::MotorSpeedInc);
 
     if (!motorSpeedJson.empty())
     {
-        motorSpeed = -1 * motorSpeedJson.get<int>();
+        motorSpeed = negativeMultiplier * motorSpeedJson.get<int>();
     }
 
     (void)setMotorOffsetSpeed(motorSpeed);

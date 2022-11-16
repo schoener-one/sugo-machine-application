@@ -12,7 +12,6 @@
 #pragma once
 
 #include <linux/spi/spidev.h>
-#include <stdint.h>
 #include <string>
 
 namespace sugo::hal
@@ -72,7 +71,7 @@ private:
     bool setChipSelect(SPIChipSelect CS_Mode);
     bool setMode(SPIMode mode);
 
-    struct spi_ioc_transfer m_tr;
+    struct spi_ioc_transfer m_tr = {};
     int                     m_fd = InvalidFileDescriptor;
     uint16_t                m_mode;
 };

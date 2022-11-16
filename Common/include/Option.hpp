@@ -7,8 +7,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef OPTION_HPP_
-#define OPTION_HPP_
+#pragma once
 
 #include <cassert>
 #include <string>
@@ -32,17 +31,12 @@ public:
     using OptionDescription = boost::program_options::option_description;
     using Description       = boost::shared_ptr<OptionDescription>;
 
-    Option()
-    {
-    }
+    Option()                     = default;
+    Option(const Option& option) = default;
+    Option(Option&& option)      = default;
 
-    Option(const Option& option)
-        : m_description(option.m_description), m_value(option.m_value), m_name(option.m_name)
-    {
-    }
-
-    Option(const std::string& newName, const Option& option)
-        : m_description(option.m_description), m_value(option.m_value), m_name(newName)
+    Option(std::string newName, const Option& option)
+        : m_description(option.m_description), m_value(option.m_value), m_name(std::move(newName))
     {
     }
 
@@ -67,7 +61,7 @@ public:
 
     const Description& getDescription() const
     {
-        assert(m_description);
+        assert((m_description != nullptr));
         return m_description;
     }
 
@@ -77,12 +71,13 @@ public:
         return boost::any_cast<ValueT>(m_value);
     }
 
-    void setValue(boost::any newValue)
+    void setValue(const boost::any& newValue)
     {
         m_value = newValue;
     }
 
     Option& operator=(const Option&) = default;
+    Option& operator=(Option&&) = default;
 
 private:
     void applyDefault()
@@ -96,5 +91,3 @@ private:
 };
 
 }  // namespace sugo
-
-#endif  // OPTION_HPP_

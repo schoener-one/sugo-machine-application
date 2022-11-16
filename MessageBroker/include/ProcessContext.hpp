@@ -34,7 +34,7 @@ public:
     explicit ProcessContext(const std::string& instanceId,
                             Thread::Policy     policy   = Thread::DefaultPolicy,
                             int                priority = Thread::DefaultPriority);
-    virtual ~ProcessContext() = default;
+    ~ProcessContext() override = default;
 
     ProcessContext& operator=(const ProcessContext&) = delete;
     ProcessContext& operator=(ProcessContext&&) = delete;

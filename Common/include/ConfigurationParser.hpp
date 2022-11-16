@@ -56,6 +56,7 @@ protected:
                                 const IConfiguration::OptionDescriptions& optionDescriptions,
                                 bool                                      withSuccess);
 
+private:
     using ConfigurationList = std::list<IConfiguration*>;
     ConfigurationList m_configurationList;
 };

@@ -42,7 +42,7 @@ void Connection::handleHttpMessage(mg_http_message *message, std::string &docRoo
 
         // Upgrade to websocket. From now on, a m_connection is a full-duplex
         // Websocket m_connection, which will receive MG_EV_WS_MSG events.
-        mg_ws_upgrade(m_connection, message, nullptr);
+        mg_ws_upgrade(m_connection, message, nullptr);  // NOLINT(cppcoreguidelines-pro-type-vararg)
     }
     else if (mg_http_match_uri(message, "/state"))
     {

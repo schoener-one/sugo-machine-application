@@ -16,6 +16,7 @@
 #include "StepperMotorControl.hpp"
 #include "TemperatureSensorControl.hpp"
 
+#include <limits>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -103,9 +104,9 @@ void HardwareAbstractionLayer::addConfigurationOptions(sugo::IConfiguration& con
     configuration.add(Option(motor + "-enabled",  std::vector<std::string>{}, "HAL: List of stepper-motor names to be enabled", true));
     for (const auto& name : {".feeder", ".coiler"})
     {
-        configuration.add(Option(motor + name + ".i2c-address",   255u,                       "HAL: Motor I2C address"));
-        configuration.add(Option(motor + name + ".direction",     std::string("forward"),      "HAL: Motor rotation direction (forward, backward)"));
-        configuration.add(Option(motor + name + ".max-speed-rpm", 0u,                          "HAL: Motor rotation maximum speed [rpm]"));
+        configuration.add(Option(motor + name + ".i2c-address",   static_cast<unsigned>(std::numeric_limits<uint8_t>::max()), "HAL: Motor I2C address"));
+        configuration.add(Option(motor + name + ".direction",     std::string("forward"), "HAL: Motor rotation direction (forward, backward)"));
+        configuration.add(Option(motor + name + ".max-speed-rpm", 0u,                     "HAL: Motor rotation maximum speed [rpm]"));
     }
     // TemperatureSensorControl
     const static std::string temperatureSensorControl = "hardware-abstraction-layer.temperature-sensor-control";

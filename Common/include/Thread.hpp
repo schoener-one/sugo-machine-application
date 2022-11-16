@@ -41,7 +41,7 @@ public:
      *
      * @param id Identifier of this thread
      */
-    explicit Thread(const std::string& id);
+    explicit Thread(std::string id);
     ~Thread() = default;
 
     /// @brief Runnable function type.
@@ -101,9 +101,9 @@ private:
     std::string             m_id;
     std::mutex              m_mutex;
     std::condition_variable m_condVar;
-    bool                    m_isReady;
+    bool                    m_isReady = false;
     std::thread             m_thread;
     Runnable                m_runnable = nullptr;
-    Policy                  m_policy;
+    Policy                  m_policy   = Policy::PolicyCurrent;
 };
 }  // namespace sugo

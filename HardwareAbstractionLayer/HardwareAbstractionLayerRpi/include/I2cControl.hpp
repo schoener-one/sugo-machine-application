@@ -30,7 +30,7 @@ public:
     ~I2cControl();
 
     bool init(const std::string& device);
-    void finalize(void);
+    void finalize();
 
     bool read(Address address, const ByteBuffer& command, ByteBuffer& retValue) const;
     bool write(Address address, const ByteBuffer& command) const;

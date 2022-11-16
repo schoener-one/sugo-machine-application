@@ -34,7 +34,6 @@ public:
      * @param serviceLocator Service locator which contains the HAL interface.
      */
     explicit MotorService(const hal::Identifier& motorId, const ServiceLocator& serviceLocator);
-    virtual ~MotorService() = default;
 
 protected:
     /**

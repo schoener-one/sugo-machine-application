@@ -56,12 +56,4 @@ inline bool initEnabledSubComponents(const IConfiguration& configuration,
     }
     return true;
 }
-
-template <typename ValueT = int32_t>
-inline ValueT toInteger(const ByteBuffer& buffer)
-{
-    assert(buffer.size() >= sizeof(ValueT));
-    return static_cast<ValueT>(buffer.at(0)) | (static_cast<ValueT>(buffer.at(1)) << 8) |
-           (static_cast<ValueT>(buffer.at(2)) << 16) | (static_cast<ValueT>(buffer.at(3)) << 24);
-}
 }  // namespace sugo::hal

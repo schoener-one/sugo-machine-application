@@ -52,7 +52,7 @@ public:
      * @param ioContext Io context to be used for receiving messages.
      */
     CommandMessageBroker(const Address& address, IOContext& ioContext);
-    ~CommandMessageBroker() override;
+    ~CommandMessageBroker() override = default;
 
     bool send(const message::Command& message, const Address& receiverAddress,
               message::CommandResponse& response) override;
@@ -75,7 +75,7 @@ public:
      *
      * @param postProcess Callback function to be called for post processing.
      */
-    void registerPostProcessHandler(Thread::Runnable postProcess)
+    void registerPostProcessHandler(Thread::Runnable postProcess) override
     {
         m_postProcess = postProcess;
     }
@@ -96,7 +96,7 @@ public:
     void registerMessageHandler(const MessageId& messageId, MessageHandler& handler) override;
     void registerMessageHandler(const MessageId& messageId, MessageHandler&& handler) override;
     void unregisterMessageHandler(const MessageId& messageId) override;
-    bool hasRegisteredMessageHandler(const MessageId& messageId) const;
+    bool hasRegisteredMessageHandler(const MessageId& messageId) const override;
 
 protected:
     bool processReceived(StreamBuffer& in, StreamBuffer& out) override;

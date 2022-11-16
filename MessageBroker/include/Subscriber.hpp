@@ -33,7 +33,7 @@ public:
     static constexpr size_t MaxSubscriptionSockets = 8u;
 
     explicit Subscriber(IMessageHandler& messageHandler, IOContext& ioContext);
-    virtual ~Subscriber();
+    virtual ~Subscriber() = default;
 
     /**
      * @brief Subscribe to a notification.
@@ -60,6 +60,8 @@ public:
 private:
     struct SubscriberSocketData
     {
+        ~SubscriberSocketData();
+
         Address                           address;        ///< Publisher connection address
         std::unique_ptr<SubscriberSocket> socket;         ///< Subscriber socket
         StreamBuffer                      receiveBuffer;  ///< Receive buffer

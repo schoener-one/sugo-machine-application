@@ -31,13 +31,10 @@ public:
         : IUserInterfaceControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }
-    virtual ~UserInterfaceControl()
-    {
-    }
 
     bool receiveRequest(remote_control::IRequestHandler::ClientId clientId, const Json& request,
                         Json& response) override;
-    void registerSendNotification(SendNotificationCallback callback)
+    void registerSendNotification(SendNotificationCallback callback) override
     {
         m_cbSendNotification = callback;
         updateMachineState();

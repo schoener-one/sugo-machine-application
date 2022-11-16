@@ -23,14 +23,12 @@ namespace sugo::hal
 class GpioPin : public IGpioPin
 {
 public:
-    GpioPin(const Identifier& id, gpiod::chip chip) : IGpioPin(id), m_chip(chip)
+    GpioPin(const Identifier& id, gpiod::chip chip) : IGpioPin(id), m_chip(std::move(chip))
     {
     }
-
     ~GpioPin() override;
 
     bool init(const IConfiguration& configuration) override;
-
     void finalize();
 
     State     getState() const override;

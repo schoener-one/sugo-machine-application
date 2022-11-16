@@ -27,14 +27,15 @@ public:
 using namespace sugo::message;
 namespace asio = boost::asio;
 
-Server::Server(const std::string& address, IMessageHandler& messageHandler, IOContext& ioContext)
-    : m_address(address),
+Server::Server(std::string address, IMessageHandler& messageHandler, IOContext& ioContext)
+    : m_address(std::move(address)),
       m_messageHandler(messageHandler),
       m_socket(std::make_unique<ServerSocket>(ioContext.getContext()))
 {
 }
 
-Server::~Server()
+Server::~Server()  // NOLINT(modernize-use-equals-default) - std::unique_ptr/std::default_delete
+                   // sizeof unknown
 {
 }
 

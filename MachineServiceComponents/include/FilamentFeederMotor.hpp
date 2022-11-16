@@ -30,7 +30,6 @@ public:
           MotorService(config::StepperMotorFeederId, serviceLocator)
     {
     }
-    virtual ~FilamentFeederMotor() = default;
 
 protected:
     // Command handlers

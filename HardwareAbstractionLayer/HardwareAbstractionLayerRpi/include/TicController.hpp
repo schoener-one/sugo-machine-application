@@ -16,8 +16,8 @@
 #include "IGpioPin.hpp"
 #include "IStepperMotor.hpp"
 
-#include <assert.h>
 #include <algorithm>
+#include <cassert>
 
 #ifndef PACKED
 #define PACKED __attribute__((packed, aligned(1)))

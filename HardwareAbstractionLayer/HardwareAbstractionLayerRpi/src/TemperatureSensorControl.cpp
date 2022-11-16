@@ -20,6 +20,12 @@
 
 using namespace sugo::hal;
 
+TemperatureSensorControl::TemperatureSensorControl(const Identifier&               id,
+                                                   const IGpioControl::GpioPinMap& gpioPins)
+    : ITemperatureSensorControl(id), m_gpioPins(gpioPins)
+{
+}
+
 TemperatureSensorControl::~TemperatureSensorControl()
 {
     finalize();
@@ -33,7 +39,7 @@ bool TemperatureSensorControl::init(const IConfiguration& configuration)
         std::string("/dev/") + configuration.getOption("device").get<std::string>();
     LOG(debug) << getId() << ": using SPI device '" << device << "'";
 
-    m_spiControl = new SpiControl;
+    m_spiControl = std::make_unique<SpiControl>();
     if (!m_spiControl->init(device))
     {
         LOG(error) << getId() << ": Failed to initialize SPI device: " << device;
@@ -52,7 +58,7 @@ void TemperatureSensorControl::finalize()
 {
     if (m_spiControl != nullptr)
     {
-        delete m_spiControl;
+        m_spiControl.reset();
         m_spiControl = nullptr;
     }
     m_temperatureSensorMap.clear();

@@ -36,9 +36,9 @@ public:
      * @param pin          GPIO pin to observe.
      * @param eventHandler Event handler to be called in case of an event.
      */
-    GpioPinEventObserver(const std::shared_ptr<hal::IGpioPin> pin, EventHandler eventHandler,
+    GpioPinEventObserver(std::shared_ptr<hal::IGpioPin> pin, EventHandler eventHandler,
                          const std::chrono::milliseconds& maxGpioPinObservationTimeout);
-    virtual ~GpioPinEventObserver();
+    ~GpioPinEventObserver() override;
 
     bool start() override;
     void stop() override;

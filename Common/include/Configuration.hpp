@@ -26,24 +26,20 @@ namespace sugo
 class Configuration : public IConfiguration
 {
 public:
-    Configuration()
-    {
-    }
+    Configuration() = default;
 
     explicit Configuration(std::initializer_list<Option> list)
     {
         for (auto& option : list)
         {
-            add(option);
+            doAdd(option);
         }
     }
 
-    virtual ~Configuration()
-    {
-    }
+    ~Configuration() override = default;
 
     // IConfiguration {{
-    virtual OptionDescriptions getOptionDescriptions() const override
+    OptionDescriptions getOptionDescriptions() const override
     {
         OptionDescriptions descriptions;
         for (auto& option : m_mapOptions)
@@ -53,7 +49,7 @@ public:
         return descriptions;
     }
 
-    virtual bool set(const VariablesMap& mapVariables) override
+    bool set(const VariablesMap& mapVariables) override
     {
         for (auto& item : mapVariables)
         {
@@ -68,7 +64,7 @@ public:
 
     void add(const Option& option) override
     {
-        m_mapOptions.insert({option.getName(), option});
+        doAdd(option);
     }
 
     const Option& getOption(const std::string& name) const override
@@ -83,6 +79,11 @@ public:
     // IConfiguration }}
 
 private:
+    void doAdd(const Option& option)
+    {
+        m_mapOptions.insert({option.getName(), option});
+    }
+
     /// List of options
     using OptionMap = std::map<std::string, Option>;
     OptionMap m_mapOptions;

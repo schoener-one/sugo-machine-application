@@ -20,12 +20,11 @@
 using namespace sugo;
 using namespace sugo::remote_control;
 
-RemoteControlServer::RemoteControlServer(const std::string &address, unsigned short port,
-                                         const std::string &docRoot,
-                                         IRequestHandler &  requestHandler)
-    : m_address(address),
+RemoteControlServer::RemoteControlServer(std::string address, unsigned short port,
+                                         std::string docRoot, IRequestHandler &requestHandler)
+    : m_address(std::move(address)),
       m_port(port),
-      m_docRoot(docRoot),
+      m_docRoot(std::move(docRoot)),
       m_requestHandler(requestHandler),
       m_serverStatus(std::make_unique<mg_mgr>()),
       m_thread("RemoteControlServer")
@@ -36,7 +35,8 @@ RemoteControlServer::RemoteControlServer(const std::string &address, unsigned sh
         [&](const Json &notification) { sendNotification(notification); });
 }
 
-RemoteControlServer::~RemoteControlServer()
+RemoteControlServer::~RemoteControlServer()  // NOLINT(modernize-use-equals-default) -
+                                             // std::unique_ptr/std::default_delete sizeof unknown
 {
 }
 
@@ -144,7 +144,7 @@ bool RemoteControlServer::listen()
         m_serverStatus.get(), url.c_str(),
         [](mg_connection *connection, int event, void *eventData, void *data) {
             assert(data != nullptr);
-            RemoteControlServer *server = static_cast<RemoteControlServer *>(data);
+            auto *server = static_cast<RemoteControlServer *>(data);
             server->handleEvent(connection, event, eventData);
         },
         this);
@@ -156,7 +156,9 @@ bool RemoteControlServer::listen()
 
     for (m_doListen = true; m_doListen;)
     {
-        mg_mgr_poll(m_serverStatus.get(), 1000);
+        static constexpr int pollTimeoutMs =
+            1000;  // TODO request value from configuration interface!
+        mg_mgr_poll(m_serverStatus.get(), pollTimeoutMs);
     }
     m_connections.clear();
     LOG(debug) << "Finish listening";

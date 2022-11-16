@@ -54,10 +54,6 @@ CommandMessageBroker::CommandMessageBroker(const Address& address, IOContext& io
 {
 }
 
-CommandMessageBroker::~CommandMessageBroker()
-{
-}
-
 bool CommandMessageBroker::start()
 {
     assert(!m_ioContext.isRunning());

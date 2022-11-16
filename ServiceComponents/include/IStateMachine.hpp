@@ -33,6 +33,11 @@ public:
     using Action = std::function<void(const EventT &, const StateT &)>;
 
     /**
+     * Transition guard function type.
+     */
+    using Guard = std::function<bool(void)>;
+
+    /**
      * Returns the current state.
      * @return the current state.
      */

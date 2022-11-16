@@ -36,9 +36,17 @@ public:
     /// @brief Maximum connection allowed to connect.
     static const unsigned MaxConnections = 3u;
 
-    RemoteControlServer(const std::string &address, unsigned short port, const std::string &docRoot,
+    /**
+     * @brief Construct a new remove control server.
+     *
+     * @param address        Network interface address of the server for listening.
+     * @param port           Port on which the service is provided.
+     * @param docRoot        Document root folder.
+     * @param requestHandler Request handler.
+     */
+    RemoteControlServer(std::string address, unsigned short port, std::string docRoot,
                         IRequestHandler &requestHandler);
-    ~RemoteControlServer();
+    ~RemoteControlServer() override;
 
     bool start() override;
     void stop() override;

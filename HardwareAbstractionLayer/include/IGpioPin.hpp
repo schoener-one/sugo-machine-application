@@ -70,10 +70,6 @@ public:
         EventType type = EventType::Timeout;
     };
 
-    virtual ~IGpioPin()
-    {
-    }
-
     /**
      * @brief Returns the state of the pin.
      *

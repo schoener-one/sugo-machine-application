@@ -33,10 +33,21 @@ namespace
 {
 using MachineServiceGatewayExecutionBundle =
     ServiceComponentExecutionBundle<MachineServiceGateway, IOContext, const IConfiguration>;
+
+template <class _ServiceComponentT>
+inline _ServiceComponentT& getServiceComponentFromBundles(
+    sugo::ServiceComponentsExecutionGroup::ServiceComponentExecutionBundles& bundles)
+{
+    auto it = std::find_if(bundles.begin(), bundles.end(), [](const auto& bundle) {
+        return (bundle->getId() == sugo::IUserInterfaceControl::ReceiverId);
+    });
+    assert((it != bundles.end()) && (*it));
+    return static_cast<_ServiceComponentT&>(it->get()->getServiceComponent());
+}
 }  // namespace
 
-MachineApplication::MachineApplication(const std::string& appName)
-    : m_name(appName),
+MachineApplication::MachineApplication(std::string appName)
+    : m_name(std::move(appName)),
       m_configCommandLine({Option("config-file", std::string(), "Configuration file")})
 {
 }
@@ -50,7 +61,7 @@ bool MachineApplication::parseCommandLine(int argc, char const** argv)
 
 bool MachineApplication::parseConfigurationFile()
 {
-    const std::string fileName = m_configCommandLine["config-file"].get<std::string>();
+    const auto fileName = m_configCommandLine["config-file"].get<std::string>();
 
     if (!fileName.empty())
     {
@@ -69,10 +80,12 @@ bool MachineApplication::parseConfigurationFile()
 
 void MachineApplication::addConfigurationOptions(IConfiguration& configuration)
 {
+    static constexpr unsigned short defaultNetworkPort = 8080u;
     configuration.add(Option("machine-remote-control-service.address", std::string(""),
                              "Network address of the service"));
     configuration.add(Option("machine-remote-control-service.port",
-                             static_cast<unsigned short>(8080u), "Network port of the service"));
+                             static_cast<unsigned short>(defaultNetworkPort),
+                             "Network port of the service"));
     configuration.add(Option("machine-remote-control-service.doc-root", std::string("www"),
                              "Network address of the service"));
 }
@@ -125,17 +138,13 @@ bool MachineApplication::start(int argc, char const** argv)
     }
 
     // Start remote control server
-    auto it = std::find_if(
-        m_components.getBundles().begin(), m_components.getBundles().end(),
-        [](const auto& bundle) { return (bundle->getId() == IUserInterfaceControl::ReceiverId); });
-    assert((it != m_components.getBundles().end()) && (*it));
-    IServiceComponent& serviceComponent = it->get()->getServiceComponent();
-
+    auto& serviceComponent =
+        getServiceComponentFromBundles<UserInterfaceControl>(m_components.getBundles());
     remote_control::RemoteControlServer remoteControlServer(
         m_configuration.getOption("machine-remote-control-service.address").get<std::string>(),
         m_configuration.getOption("machine-remote-control-service.port").get<unsigned short>(),
         m_configuration.getOption("machine-remote-control-service.doc-root").get<std::string>(),
-        *static_cast<UserInterfaceControl*>(&serviceComponent));
+        serviceComponent);
 
     if (!remoteControlServer.start())
     {

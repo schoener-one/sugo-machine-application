@@ -30,9 +30,6 @@ public:
         : IFilamentMergerControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }
-    virtual ~FilamentMergerControl()
-    {
-    }
 
 protected:
     // Command handlers

@@ -20,7 +20,7 @@
 #include <Command.pb.h>
 
 #include "Globals.hpp"
-#include "String.hpp"
+#include "StringTokenizer.hpp"
 
 namespace
 {
@@ -34,9 +34,11 @@ using namespace message;
 
 void MachineServiceGateway::addConfigurationOptions(IConfiguration& configuration)
 {
+    static constexpr unsigned short defaultPortNumber = 1234u;
     configuration.add(Option("machine-service-gateway.address", std::string("*"),
                              "Network address of the service"));
-    configuration.add(Option("machine-service-gateway.port", 1234u, "Network port of the service"));
+    configuration.add(
+        Option("machine-service-gateway.port", defaultPortNumber, "Network port of the service"));
 }
 
 MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroker,
@@ -47,7 +49,7 @@ MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroke
           std::string("tcp://") +
               configuration.getOption("machine-service-gateway.address").get<std::string>() + ":" +
               std::to_string(
-                  configuration.getOption("machine-service-gateway.port").get<unsigned>()),
+                  configuration.getOption("machine-service-gateway.port").get<unsigned short>()),
           *this, ioContext)
 {
 }
@@ -106,10 +108,10 @@ bool MachineServiceGateway::processReceived(StreamBuffer& inBuf, StreamBuffer& o
     return success;
 }
 
-jsonrpcpp::Response MachineServiceGateway::processCommand(jsonrpcpp::request_ptr request)
+jsonrpcpp::Response MachineServiceGateway::processCommand(const jsonrpcpp::request_ptr& request)
 {
-    String::Tokens      tokens = String::split<'.'>(request->method());
-    jsonrpcpp::Response response;
+    StringTokenizer::Tokens tokens = StringTokenizer::split<'.'>(request->method());
+    jsonrpcpp::Response     response;
 
     if (tokens.size() == MethodTokenCount && (tokens[MethodTokenReceiverId].size() > 0) &&
         (tokens[MethodTokenMethodId].size() > 0))

@@ -41,7 +41,7 @@ public:
         if (!options.options.empty() && options.options.back().string_key == name)
         {
             auto& option = options.options.back();
-            assert(!option.value.empty());
+            assert(option.value.empty() == false);
             option.value.push_back(value);
         }
         else
@@ -56,7 +56,8 @@ public:
         }
     }
 
-    static void parseChildren(std::string prefix, pt::ptree& tree, po::parsed_options& options)
+    static void parseChildren(const std::string& prefix, pt::ptree& tree,
+                              po::parsed_options& options)
     {
         if (tree.size() == 0)
         {

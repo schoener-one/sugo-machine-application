@@ -25,11 +25,11 @@ public:
     {
     }
 
-    virtual ~GenericMessageId()                    = default;
-    GenericMessageId(const GenericMessageId<IdT>&) = default;
-    GenericMessageId(GenericMessageId<IdT>&&)      = default;
+    virtual ~GenericMessageId()                        = default;
+    GenericMessageId(const GenericMessageId<IdT>&)     = default;
+    GenericMessageId(GenericMessageId<IdT>&&) noexcept = default;
     GenericMessageId<IdT>& operator=(const GenericMessageId<IdT>&) = default;
-    GenericMessageId<IdT>& operator=(GenericMessageId<IdT>&&) = default;
+    GenericMessageId<IdT>& operator=(GenericMessageId<IdT>&&) noexcept = default;
 
     operator const IdT&() const
     {
@@ -46,7 +46,7 @@ public:
         return m_id;
     }
 
-protected:
+private:
     const IdT m_id;
 };
 
@@ -65,13 +65,13 @@ public:
     {
     }
 
-    virtual ~GenericCommandId()                                      = default;
-    GenericCommandId(const GenericCommandId<IdT, ReceiverAddressT>&) = default;
-    GenericCommandId(GenericCommandId<IdT, ReceiverAddressT>&&)      = default;
-    GenericCommandId<IdT, ReceiverAddressT>& operator                =(
+    virtual ~GenericCommandId()                                          = default;
+    GenericCommandId(const GenericCommandId<IdT, ReceiverAddressT>&)     = default;
+    GenericCommandId(GenericCommandId<IdT, ReceiverAddressT>&&) noexcept = default;
+    GenericCommandId<IdT, ReceiverAddressT>& operator                    =(
         const GenericCommandId<IdT, ReceiverAddressT>&) = default;
-    GenericCommandId<IdT, ReceiverAddressT>& operator=(GenericCommandId<IdT, ReceiverAddressT>&&) =
-        default;
+    GenericCommandId<IdT, ReceiverAddressT>& operator                    =(
+        GenericCommandId<IdT, ReceiverAddressT>&&) noexcept = default;
 
     /**
      * @brief Returns the receiver address.
@@ -83,7 +83,7 @@ public:
         return m_receiverAddress;
     }
 
-protected:
+private:
     const ReceiverAddressT m_receiverAddress;
 };
 
@@ -102,13 +102,13 @@ public:
     {
     }
 
-    virtual ~GenericNotificationId()                                            = default;
-    GenericNotificationId(const GenericNotificationId<IdT, PublisherAddressT>&) = default;
-    GenericNotificationId(GenericNotificationId<IdT, PublisherAddressT>&&)      = default;
-    GenericNotificationId<IdT, PublisherAddressT>& operator                     =(
+    virtual ~GenericNotificationId()                                                = default;
+    GenericNotificationId(const GenericNotificationId<IdT, PublisherAddressT>&)     = default;
+    GenericNotificationId(GenericNotificationId<IdT, PublisherAddressT>&&) noexcept = default;
+    GenericNotificationId<IdT, PublisherAddressT>& operator                         =(
         const GenericNotificationId<IdT, PublisherAddressT>&) = default;
-    GenericNotificationId<IdT, PublisherAddressT>& operator                     =(
-        GenericNotificationId<IdT, PublisherAddressT>&&) = default;
+    GenericNotificationId<IdT, PublisherAddressT>& operator                         =(
+        GenericNotificationId<IdT, PublisherAddressT>&&) noexcept = default;
 
     /**
      * @brief Returns the publisher address according to the notification.
@@ -120,7 +120,7 @@ public:
         return m_publisherAddress;
     }
 
-protected:
+private:
     const PublisherAddressT m_publisherAddress;
 };
 }  // namespace sugo::message

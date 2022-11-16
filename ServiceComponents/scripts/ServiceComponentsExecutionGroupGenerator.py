@@ -101,7 +101,7 @@ public:
 
 private:
 
-    ServiceComponentExecutionBundles m_bundles; ///< The service component execution bundles.
+    ServiceComponentExecutionBundles m_bundles = {{}}; ///< The service component execution bundles.
 }};
 
 }}  // namespace sugo
@@ -172,7 +172,7 @@ void ServiceComponentsExecutionGroup::stop()
         out_str = str()
         i = 0
         for name in components:
-            out_str += f'''m_bundles[{i}] = std::make_unique<ServiceComponentExecutionBundle<{name}, const ServiceLocator>>(serviceLocator);
+            out_str += f'''m_bundles[{i}] = std::make_unique<ServiceComponentExecutionBundle<{name}, const ServiceLocator>>(serviceLocator); // NOLINT(cppcoreguidelines-avoid-magic-numbers) - automatically generated
     '''
             i += 1
         return out_str

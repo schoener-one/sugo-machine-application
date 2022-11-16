@@ -26,7 +26,6 @@ public:
     // Constructor / Destructor
     explicit FilamentMergerHeater(message::ICommandMessageBroker& messageBroker,
                                   const ServiceLocator&           serviceLocator);
-    virtual ~FilamentMergerHeater() = default;
 
 protected:
     // Command handlers

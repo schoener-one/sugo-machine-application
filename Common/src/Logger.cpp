@@ -33,8 +33,9 @@ Logger::Severity Logger::m_severity = Logger::DefaultSeverity;
 
 void Logger::reinit(const std::string& instanceName)
 {
-    std::ostringstream instanceId;
-    instanceId << instanceName << "@" << std::hex << std::setw(8) << std::setfill('0')
+    std::ostringstream        instanceId;
+    static constexpr unsigned intHexSize = 8u;
+    instanceId << instanceName << "@" << std::hex << std::setw(intHexSize) << std::setfill('0')
                << std::this_thread::get_id();
 
     logging::add_common_attributes();
@@ -56,12 +57,13 @@ void Logger::init(Severity severity, const std::string& instanceName)
     reinit(instanceName);
 
     // console sink
-    auto consoleSink = logging::add_console_log(std::clog);
+    auto                      consoleSink  = logging::add_console_log(std::clog);
+    static constexpr unsigned sizeSeverity = 5u;
     consoleSink->set_formatter(
         expr::stream << "["
                      << expr::format_date_time<boost::posix_time::ptime>("TimeStamp",
                                                                          "%Y-%m-%d %H:%M:%S.%f")
-                     << "] [" << std::setw(5)
+                     << "] [" << std::setw(sizeSeverity)
                      << expr::attr<logging::trivial::severity_level>("Severity") << "] "
                      << expr::smessage << " [" << expr::attr<std::string>("File") << ":"
                      << expr::attr<int>("Line") << ":" << expr::attr<std::string>("Function")

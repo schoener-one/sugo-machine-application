@@ -29,7 +29,7 @@ public:
         : IStepperMotor(id), m_i2cControl(i2cControl), m_ioErr(ioErr), m_ioRst(ioRst)
     {
     }
-    ~StepperMotor();
+    ~StepperMotor() override;
 
     bool init(const IConfiguration& configuration) override;
     void finalize();
@@ -46,7 +46,7 @@ public:
     {
         return m_maxSpeed;
     }
-    void setMaxSpeed(Speed maxSpeed)
+    void setMaxSpeed(Speed maxSpeed) override
     {
         m_maxSpeed = maxSpeed;
     }

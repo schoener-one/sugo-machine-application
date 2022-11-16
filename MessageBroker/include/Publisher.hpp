@@ -27,8 +27,8 @@ class PublisherSocket;
 class Publisher : public IRunnable
 {
 public:
-    explicit Publisher(const Address& address, IOContext& ioContext);
-    virtual ~Publisher();
+    explicit Publisher(Address address, IOContext& ioContext);
+    ~Publisher() override;
 
     /**
      * @brief Publish a message to a specified topic.

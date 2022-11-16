@@ -43,7 +43,7 @@ public:
      * @param id             Id of this timer.
      */
     GenericTimer(const TimePeriodT& period, TimeoutHandler timeoutHandler, const std::string& id)
-        : m_period(period), m_thread(id), m_timeoutHandler(timeoutHandler)
+        : m_period(period), m_thread(id), m_timeoutHandler(std::move(timeoutHandler))
     {
     }
 
@@ -51,7 +51,7 @@ public:
      * @brief Stops the timer and destroys the object
      *
      */
-    ~GenericTimer()
+    ~GenericTimer() override
     {
         doStop();
     }

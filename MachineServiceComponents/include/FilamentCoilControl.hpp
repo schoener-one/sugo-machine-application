@@ -29,9 +29,6 @@ public:
         : IFilamentCoilControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }
-    virtual ~FilamentCoilControl()
-    {
-    }
 
 protected:
     // Command handlers

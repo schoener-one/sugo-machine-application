@@ -49,7 +49,7 @@ protected:
     void processPost() override{};
 
 private:
-    jsonrpcpp::Response processCommand(jsonrpcpp::request_ptr request);
+    jsonrpcpp::Response processCommand(const jsonrpcpp::request_ptr& request);
 
     message::Server m_jsonRpcServer;
 };

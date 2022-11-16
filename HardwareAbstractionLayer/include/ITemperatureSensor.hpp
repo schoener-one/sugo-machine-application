@@ -28,14 +28,6 @@ public:
     using Temperature = UnitValue<RawTemperature>;
 
     /**
-     * @brief Destroy the ITemperatureSensor object.
-     *
-     */
-    virtual ~ITemperatureSensor()
-    {
-    }
-
-    /**
      * @brief Returns a unit translated value according to the used filter.
      *
      * @return Temperature Unit translated value.

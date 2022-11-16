@@ -52,9 +52,7 @@ public:
                      const std::string& instanceName = std::string());
 
 private:
-    Logger()
-    {
-    }
+    Logger() = default;
 
     static Severity m_severity;
 };

@@ -9,6 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "I2cControl.hpp"
+#include "Ios.hpp"
 #include "Logger.hpp"
 
 #include <fcntl.h>
@@ -74,9 +75,9 @@ bool I2cControl::read(Address address, const ByteBuffer& command, ByteBuffer& re
     const int retValue = ::ioctl(m_fd, I2C_RDWR, &ioctl_data);
     if (retValue != 2)
     {
-        LOG(error) << Me << "Failed to read from device address: " << std::hex << std::setw(2)
-                   << std::setfill('0') << static_cast<uint32_t>(address) << " ("
-                   << std::strerror(errno) << ")";
+        LOG(error) << Me << "Failed to read from device address: "
+                   << sugo::ios::hex(static_cast<uint32_t>(address)) << " (" << std::strerror(errno)
+                   << ")";
         return false;
     }
     return true;

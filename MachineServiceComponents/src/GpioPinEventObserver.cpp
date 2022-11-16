@@ -16,10 +16,10 @@ using namespace sugo;
 using namespace sugo::hal;
 
 GpioPinEventObserver::GpioPinEventObserver(
-    const std::shared_ptr<IGpioPin> pin, EventHandler eventHandler,
+    std::shared_ptr<IGpioPin> pin, EventHandler eventHandler,
     const std::chrono::milliseconds& maxGpioPinObservationTimeout)
-    : m_pin(pin),
-      m_eventHandler(eventHandler),
+    : m_pin(std::move(pin)),
+      m_eventHandler(std::move(eventHandler)),
       m_maxGpioPinObservationTimeout(maxGpioPinObservationTimeout),
       m_thread(m_pin->getId() + "Observer")
 {

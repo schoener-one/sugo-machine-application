@@ -35,7 +35,9 @@ Subscriber::Subscriber(IMessageHandler& messageHandler, IOContext& ioContext)
     }
 }
 
-Subscriber::~Subscriber()
+Subscriber::SubscriberSocketData::~SubscriberSocketData()  // NOLINT(modernize-use-equals-default) -
+                                                           // std::unique_ptr/std::default_delete
+                                                           // sizeof unknown
 {
 }
 

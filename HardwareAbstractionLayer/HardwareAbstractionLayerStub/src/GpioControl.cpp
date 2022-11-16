@@ -14,7 +14,7 @@
 
 using namespace sugo::hal;
 
-GpioControl::~GpioControl()
+GpioControl::~GpioControl()  // NOLINT(modernize-use-equals-default)
 {
 }
 

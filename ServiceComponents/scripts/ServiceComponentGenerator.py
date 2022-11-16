@@ -117,12 +117,12 @@ public:
 {Generator._generate_notifications(context.name, context.component.outbound.notifications) if len(context.component.outbound.notifications) else ''}    
     // Constructor / Destructor
     explicit I{context.name}(message::ICommandMessageBroker& messageBroker);
-    virtual ~I{context.name}(){{}}
+    ~I{context.name}() = default;
 
     I{context.name}(const I{context.name}&) = default;
     I{context.name}& operator=(const I{context.name}&) = default;
-    I{context.name}(I{context.name}&&) = default;
-    I{context.name}& operator=(I{context.name}&&) = default;
+    I{context.name}(I{context.name}&&) noexcept = default;
+    I{context.name}& operator=(I{context.name}&&) noexcept = default;
     
 protected:
     // Message handlers
@@ -224,7 +224,7 @@ I{context.name}::I{context.name}(message::ICommandMessageBroker& messageBroker)
           }}),
       StatedServiceComponent<I{context.name}::State, I{context.name}::Event>(messageBroker, SubscriptionIds, *this)
 {{
-    registerMessageHandler(CommandGetState, std::bind(&I{context.name}::onCommandGetState, this, std::placeholders::_1));
+    registerMessageHandler(CommandGetState, [this](const message::Command& command) {{ return this->onCommandGetState(command); }});
 {Generator._generate_command_handler_registrations(context.name, context.component.inbound.commands)}
 {Generator._generate_notification_handler_registrations(context.name, context.component.inbound.notifications)}
 }}
@@ -260,7 +260,7 @@ message::CommandResponse I{context.name}::onCommandGetState(const message::Comma
         out_str = ''
         for command in commands:
             command_name = command.replace('.', '')
-            out_str += f'''    registerMessageHandler(Command{command_name}, std::bind(&I{context_name}::onCommand{command_name}, this, std::placeholders::_1));
+            out_str += f'''    registerMessageHandler(Command{command_name}, [this](const message::Command& command) {{ return this->onCommand{command_name}(command); }});
 '''
         return out_str
 
@@ -269,7 +269,7 @@ message::CommandResponse I{context.name}::onCommandGetState(const message::Comma
         out_str = ''
         for notification in notifications:
             component_name, notification_name = notification.split('.')
-            out_str += f'''    registerMessageHandler(I{component_name}::Notification{notification_name}, std::bind(&I{context_name}::onNotification{component_name}{notification_name}, this, std::placeholders::_1));
+            out_str += f'''    registerMessageHandler(I{component_name}::Notification{notification_name}, [this](const message::Command& command) {{ return this->onNotification{component_name}{notification_name}(command); }});
 '''
         return out_str
 

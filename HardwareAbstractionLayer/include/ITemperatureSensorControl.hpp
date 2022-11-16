@@ -30,14 +30,6 @@ public:
     using TemperatureSensorMap = IHalObject::Map<ITemperatureSensor>;
 
     /**
-     * @brief Destroy the ITemperatureSensorControl object.
-     *
-     */
-    virtual ~ITemperatureSensorControl()
-    {
-    }
-
-    /**
      * @brief Returns a map of available ADC inputs
      *
      * @return const TemperatureSensorMap& Map of available ADC inputs

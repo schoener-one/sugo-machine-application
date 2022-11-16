@@ -34,7 +34,7 @@ public:
         : m_messageBroker(messageBroker), m_subscriptionIds(subscriptionIds)
     {
     }
-    virtual ~ServiceComponent() = default;
+    ~ServiceComponent() override = default;
 
     bool start() override;
 

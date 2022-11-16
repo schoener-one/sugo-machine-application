@@ -20,7 +20,6 @@
 
 namespace
 {
-constexpr char   Me[]         = "TicController";
 constexpr size_t MaxBlockSize = 15u;  ///< Maximum size a read response at once!
 
 template <class ValueT = int32_t>
@@ -54,7 +53,7 @@ TicController::TicController(I2cControl::Address address, I2cControl& i2cControl
       m_i2c(i2cControl),
       m_ioErr(ioErr),
       m_ioRst(ioRst),
-      m_me(std::string(Me) + "(" + std::to_string(static_cast<unsigned>(m_address)) + "): ")
+      m_me("TicController(" + std::to_string(static_cast<unsigned>(m_address)) + "): ")
 {
 }
 

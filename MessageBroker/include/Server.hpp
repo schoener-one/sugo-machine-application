@@ -35,9 +35,8 @@ public:
      * @param messageHandler Instance to handle received messages.
      * @param ioContext IO context.
      */
-    Server(const Address& address, IMessageHandler& messageHandler, IOContext& ioContext);
-
-    virtual ~Server();
+    Server(Address address, IMessageHandler& messageHandler, IOContext& ioContext);
+    ~Server() override;
 
     /**
      * Returns the binded address.

@@ -37,14 +37,6 @@ public:
         std::map<Identifier, std::shared_ptr<ITemperatureSensorControl>>;
 
     /**
-     * @brief Destroy the IHardwareAbstractionLayer object
-     *
-     */
-    virtual ~IHardwareAbstractionLayer()
-    {
-    }
-
-    /**
      * @brief Returns a map of available GPIO controllers.
      *
      * @return const GpioControllerMap& Map of available controllers.

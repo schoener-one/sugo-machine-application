@@ -205,10 +205,7 @@ pipeline {
                 stage('Static code analysis') {
                     steps {
                         sh """
-                            find Common CupRotationTray HardwareAbstractionLayer* Hardware* Machine* ServiceComponents | \
-                            grep -E "\\.hpp|\\.cpp" | \
-                            grep -vi test | \
-                            xargs clang-tidy -p ${BUILD_X86_DEBUG} -checks=-*,clang-analyzer-*,-clang-analyzer-cplusplus*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-* | \
+                            ./scripts/clang-tidy-check.sh ${BUILD_X86_DEBUG} Common CupRotationTray HardwareAbstractionLayer* Hardware* Machine* ServiceComponents" 2>&1 | \
                             tee clang-tidy-check.log
                         """
                     }

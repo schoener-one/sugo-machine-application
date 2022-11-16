@@ -34,7 +34,7 @@ message::CommandResponse MachineControl::onCommandIncreaseMotorSpeed(const messa
     m_motorSpeed = ((m_motorSpeed + config::MotorSpeedInc) % config::MaxMotorSpeed);
     LOG(debug) << "Increase motor speed to " << m_motorSpeed;
     const Json parameters({protocol::IdSpeed, m_motorSpeed});
-    const auto responseCoilControl = send(IFilamentCoilControl::CommandSetMotorSpeed, parameters);
+    auto       responseCoilControl = send(IFilamentCoilControl::CommandSetMotorSpeed, parameters);
     if (responseCoilControl.result() != message::CommandResponse_Result_SUCCESS)
     {
         return responseCoilControl;
@@ -47,7 +47,7 @@ message::CommandResponse MachineControl::onCommandDecreaseMotorSpeed(const messa
     m_motorSpeed = ((m_motorSpeed - config::MotorSpeedInc) % config::MaxMotorSpeed);
     LOG(debug) << "Decrease motor speed to " << m_motorSpeed;
     const Json parameters({protocol::IdSpeed, m_motorSpeed});
-    const auto responseCoilControl = send(IFilamentCoilControl::CommandSetMotorSpeed, parameters);
+    auto       responseCoilControl = send(IFilamentCoilControl::CommandSetMotorSpeed, parameters);
     if (responseCoilControl.result() != message::CommandResponse_Result_SUCCESS)
     {
         return responseCoilControl;

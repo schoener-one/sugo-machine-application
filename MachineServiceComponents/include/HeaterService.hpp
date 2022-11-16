@@ -36,10 +36,8 @@ public:
      * @param temperatureSensorId Temperature sensor id to be used.
      * @param serviceLocator      Service locator to retrieve the HAL.
      */
-    explicit HeaterService(const hal::Identifier& heaterId,
-                           const hal::Identifier& temperatureSensorId,
-                           const ServiceLocator&  serviceLocator);
-    virtual ~HeaterService() = default;
+    explicit HeaterService(hal::Identifier heaterId, hal::Identifier temperatureSensorId,
+                           const ServiceLocator& serviceLocator);
 
 protected:
     /**

@@ -26,7 +26,6 @@ public:
     // Constructor / Destructor
     explicit FilamentPreHeater(message::ICommandMessageBroker& messageBroker,
                                const ServiceLocator&           serviceLocator);
-    virtual ~FilamentPreHeater() = default;
 
 protected:
     // Command handlers

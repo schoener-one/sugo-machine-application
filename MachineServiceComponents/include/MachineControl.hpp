@@ -30,9 +30,6 @@ public:
         : IMachineControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }
-    virtual ~MachineControl()
-    {
-    }
 
 protected:
     // Command handlers

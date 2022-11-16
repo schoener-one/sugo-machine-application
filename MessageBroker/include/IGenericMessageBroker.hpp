@@ -29,7 +29,7 @@ template <typename MessageT, typename MessageIdT, typename ResponseT, typename A
 class IGenericMessageBroker : public IRunnable
 {
 protected:
-    virtual ~IGenericMessageBroker() = default;
+    ~IGenericMessageBroker() override = default;
 
 public:
     /// @brief Handler definition which reacts to a request.

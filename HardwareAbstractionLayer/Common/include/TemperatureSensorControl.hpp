@@ -13,6 +13,8 @@
 #include "IGpioControl.hpp"
 #include "ITemperatureSensorControl.hpp"
 
+#include <memory>
+
 namespace sugo::hal
 {
 class SpiControl;
@@ -24,10 +26,7 @@ class SpiControl;
 class TemperatureSensorControl : public ITemperatureSensorControl
 {
 public:
-    TemperatureSensorControl(const Identifier& id, const IGpioControl::GpioPinMap& gpioPins)
-        : ITemperatureSensorControl(id), m_gpioPins(gpioPins)
-    {
-    }
+    TemperatureSensorControl(const Identifier& id, const IGpioControl::GpioPinMap& gpioPins);
     ~TemperatureSensorControl() override;
 
     bool init(const IConfiguration& configuration) override;
@@ -42,7 +41,7 @@ public:
 private:
     const IGpioControl::GpioPinMap& m_gpioPins;
     TemperatureSensorMap            m_temperatureSensorMap;
-    SpiControl*                     m_spiControl = nullptr;
+    std::unique_ptr<SpiControl>     m_spiControl;
 };
 
 }  // namespace sugo::hal

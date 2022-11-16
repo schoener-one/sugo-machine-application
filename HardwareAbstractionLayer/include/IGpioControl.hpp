@@ -29,14 +29,6 @@ public:
     constexpr static int InfiniteTimeout = -1;
 
     /**
-     * @brief Destroy the IGpioController object
-     *
-     */
-    virtual ~IGpioControl()
-    {
-    }
-
-    /**
      * @brief Returns a map of available GPIOs.
      *
      * @return const GpioPinMap& Map of available GPIOs.

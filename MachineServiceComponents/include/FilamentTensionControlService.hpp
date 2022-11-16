@@ -29,7 +29,6 @@ public:
     FilamentTensionControlService(const hal::Identifier& lowTensionSensorId,
                                   const hal::Identifier& highTensionSensorId,
                                   const ServiceLocator&  serviceLocator);
-    ~FilamentTensionControlService() = default;
 
 protected:
     /**

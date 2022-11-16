@@ -41,9 +41,7 @@ public:
      * @brief Destroy the IStepperMotor object.
      *
      */
-    virtual ~IStepperMotor()
-    {
-    }
+    ~IStepperMotor() override = default;
 
     /**
      * @brief Resets the device to the default state.

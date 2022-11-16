@@ -75,12 +75,14 @@ StepperMotor::Position StepperMotor::getPosition() const
 
 StepperMotor::StepCount StepperMotor::getMicroStepCount() const
 {
-    return 1u;
+    static constexpr StepCount microStepCount = 1u;
+    return microStepCount;
 }
 
 StepperMotor::StepCount StepperMotor::getStepsPerRound() const
 {
-    return 200u;
+    static constexpr StepCount stepsPerRound = 200u;
+    return stepsPerRound;
 }
 
 StepperMotor::Speed StepperMotor::getSpeed() const

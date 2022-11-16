@@ -17,6 +17,7 @@
 #include <Thread.hpp>
 
 #include "Globals.hpp"
+#include "Ios.hpp"
 
 namespace
 {
@@ -25,7 +26,7 @@ constexpr std::size_t MaxThreadNameSize = 15;  // + \0 = 16!
 
 using namespace sugo;
 
-Thread::Thread(const std::string& id) : m_id(id), m_isReady(false), m_policy(PolicyCurrent)
+Thread::Thread(std::string id) : m_id(std::move(id))
 {
 }
 
@@ -33,7 +34,7 @@ bool Thread::start(Runnable function, Policy policy, int priority)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     m_isReady  = false;
-    m_runnable = function;
+    m_runnable = std::move(function);
     m_policy   = policy;
 
     m_thread = std::thread([&] {
@@ -52,8 +53,7 @@ bool Thread::start(Runnable function, Policy policy, int priority)
             m_condVar.wait(lockThread, [&] { return m_isReady; });
             // now start...
             LOG(trace) << "Starting new " << ((m_policy == PolicyRealTime) ? "real-time " : "")
-                       << "thread: " << std::hex << std::setw(8) << std::setfill('0')
-                       << std::this_thread::get_id();
+                       << "thread: " << sugo::ios::hex<>(std::this_thread::get_id());
             try
             {
                 m_runnable();
@@ -73,7 +73,6 @@ bool Thread::start(Runnable function, Policy policy, int priority)
         }
         m_isReady = false;
     });
-    assert(m_thread.joinable() == true);
     // Set thread visible name
     const std::string shortName(
         m_id.substr(0, (m_id.size() > MaxThreadNameSize) ? MaxThreadNameSize : m_id.size()));
@@ -101,9 +100,9 @@ bool Thread::prepareRealTimeContext()
 
 bool Thread::setRealTimePolicy(int priority)
 {
-    sched_param schedParam;
+    sched_param schedParam{0};
     int         policy = 0;
-    bool success       = pthread_getschedparam(m_thread.native_handle(), &policy, &schedParam) == 0;
+    bool success = (pthread_getschedparam(m_thread.native_handle(), &policy, &schedParam) == 0);
 
     if (success)
     {

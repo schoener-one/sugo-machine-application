@@ -24,7 +24,7 @@ namespace sugo
 class IServiceComponentExecutionBundle : public IRunnable
 {
 public:
-    virtual ~IServiceComponentExecutionBundle() = default;
+    ~IServiceComponentExecutionBundle() override = default;
 
     /**
      * @brief Returns the id of the component.

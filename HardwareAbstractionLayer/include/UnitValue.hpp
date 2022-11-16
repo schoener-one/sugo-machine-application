@@ -48,11 +48,11 @@ public:
 
     UnitValue(const UnitValue<ValueT>&) = default;
 
-    UnitValue(UnitValue<ValueT>&&) = default;
+    UnitValue(UnitValue<ValueT>&&) noexcept = default;
 
     UnitValue<ValueT>& operator=(const UnitValue<ValueT>& other) = default;
 
-    UnitValue<ValueT>& operator=(UnitValue<ValueT>&& other) = default;
+    UnitValue<ValueT>& operator=(UnitValue<ValueT>&& other) noexcept = default;
 
     ValueT getValue() const
     {

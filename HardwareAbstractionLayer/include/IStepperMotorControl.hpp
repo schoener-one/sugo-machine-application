@@ -25,14 +25,6 @@ public:
     using StepperMotorMap = IHalObject::Map<IStepperMotor>;
 
     /**
-     * @brief Destroy the IStepperMotorControl object
-     *
-     */
-    virtual ~IStepperMotorControl()
-    {
-    }
-
-    /**
      * @brief Resets the controller and devices
      *
      */

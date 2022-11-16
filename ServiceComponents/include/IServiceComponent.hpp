@@ -27,7 +27,7 @@ public:
     /// @brief List of notification ids.
     using NotificationIdList = std::vector<message::NotificationId>;
 
-    virtual ~IServiceComponent() = default;
+    ~IServiceComponent() override = default;
 
     /**
      * @brief Returns the message broker.

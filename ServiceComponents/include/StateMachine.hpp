@@ -28,20 +28,20 @@ class StateMachine : public IStateMachine<StateT, EventT>
 {
 public:
     using typename IStateMachine<StateT, EventT>::Action;
-
-    /**
-     * Transition guard function type.
-     */
-    using Guard = std::function<bool(void)>;
+    using typename IStateMachine<StateT, EventT>::Guard;
 
     /**
      * Transition type.
      */
     struct Transition
     {
-        Transition(StateT _state, StateT _next, EventT _event, Action _action = nullptr,
-                   Guard _guard = nullptr)
-            : state(_state), next(_next), event(_event), action(_action), guard(_guard)
+        Transition(StateT paramState, StateT paramNext, EventT paramEvent,
+                   Action paramAction = nullptr, Guard paramGuard = nullptr)
+            : state(paramState),
+              next(paramNext),
+              event(paramEvent),
+              action(std::move(paramAction)),
+              guard(std::move(paramGuard))
         {
         }
 
@@ -60,27 +60,27 @@ public:
     /**
      * Helper method to create a new action function in the transition table.
      *
-     * @param _func Action function to be called.
-     * @param _obj  Instance to be called.
+     * @param func Action function to be called.
+     * @param instance  Instance to be called.
      * @return      Action object.
      */
-    template <class ClassT, class BFuncT>
-    static Action MakeAction(BFuncT&& _func, ClassT* _instance)
+    template <class _ClassT, class _FuncT>
+    static Action MakeAction(_FuncT&& func, _ClassT* instance)
     {
-        return std::bind(_func, _instance, std::placeholders::_1, std::placeholders::_2);
+        return std::bind(func, instance, std::placeholders::_1, std::placeholders::_2);
     }
 
     /**
      * Helper method to create a new guard function in the transition table.
      *
-     * @param _func Action function to be called.
-     * @param _obj  Instance to be called.
+     * @param func Action function to be called.
+     * @param instance  Instance to be called.
      * @return      Guard object.
      */
-    template <class ClassT, class BFuncT>
-    static Guard MakeGuard(BFuncT&& _func, ClassT* _instance)
+    template <class _ClassT, class _FuncT>
+    static Guard MakeGuard(_FuncT&& func, _ClassT* instance)
     {
-        return std::bind(_func, _instance);
+        return std::bind(func, instance);
     }
 
     /**
@@ -92,13 +92,10 @@ public:
      *                           existing transitions.
      */
     StateMachine(StateT initState, const TransitionTable& transitions)
-        : m_state{initState}, m_transitions{transitions}, m_eventQueue{}
+        : m_state{initState}, m_transitions{transitions}
     {
     }
-
-    virtual ~StateMachine() override
-    {
-    }
+    ~StateMachine() override = default;
 
     StateT getCurrentState() const override
     {

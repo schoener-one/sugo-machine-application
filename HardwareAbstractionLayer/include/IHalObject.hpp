@@ -36,7 +36,7 @@ public:
      *
      * @param id Identifier of that object
      */
-    explicit IHalObject(const Identifier& id) : m_id(id)
+    explicit IHalObject(Identifier id) : m_id(std::move(id))
     {
     }
 

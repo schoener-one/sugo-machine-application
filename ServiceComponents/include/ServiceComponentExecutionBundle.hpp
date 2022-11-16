@@ -35,7 +35,7 @@ public:
           m_component(m_broker, componentArgs...)
     {
     }
-    ~ServiceComponentExecutionBundle() = default;
+    ~ServiceComponentExecutionBundle() override = default;
 
     bool start() override
     {
