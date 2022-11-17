@@ -25,8 +25,8 @@ namespace sugo
 inline static auto& getGpioPin(const hal::IHardwareAbstractionLayer& hal,
                                const hal::Identifier&                idPin)
 {
-    assert(hal.getGpioControllerMap().count(config::GpioControlId) == 1);
-    auto& gpioController = hal.getGpioControllerMap().at(config::GpioControlId);
+    assert(hal.getGpioControllerMap().count(hal::id::GpioControl) == 1);
+    auto& gpioController = hal.getGpioControllerMap().at(hal::id::GpioControl);
     assert(gpioController->getGpioPinMap().count(idPin) == 1);
     auto& gpioPin = gpioController->getGpioPinMap().at(idPin);
     assert(gpioPin);
@@ -43,9 +43,9 @@ inline static auto& getGpioPin(const hal::IHardwareAbstractionLayer& hal,
 inline static auto& getTemperatureSensor(const hal::IHardwareAbstractionLayer& hal,
                                          const hal::Identifier&                sensorId)
 {
-    assert(hal.getTemperatureSensorControllerMap().count(config::TemperatureSensorControlId) == 1);
+    assert(hal.getTemperatureSensorControllerMap().count(hal::id::TemperatureSensorControl) == 1);
     auto& temperatureSensorController =
-        hal.getTemperatureSensorControllerMap().at(config::TemperatureSensorControlId);
+        hal.getTemperatureSensorControllerMap().at(hal::id::TemperatureSensorControl);
     assert(temperatureSensorController->getTemperatureSensorMap().count(sensorId) == 1);
     auto& temperatureSensor = temperatureSensorController->getTemperatureSensorMap().at(sensorId);
     assert(temperatureSensor);
@@ -62,9 +62,9 @@ inline static auto& getTemperatureSensor(const hal::IHardwareAbstractionLayer& h
 inline static auto& getStepperMotor(const hal::IHardwareAbstractionLayer& hal,
                                     const hal::Identifier&                idMotor)
 {
-    assert(hal.getStepperMotorControllerMap().count(config::StepperMotorControlId) == 1);
+    assert(hal.getStepperMotorControllerMap().count(hal::id::StepperMotorControl) == 1);
     auto& stepperMotorController =
-        hal.getStepperMotorControllerMap().at(config::StepperMotorControlId);
+        hal.getStepperMotorControllerMap().at(hal::id::StepperMotorControl);
     assert(stepperMotorController->getStepperMotorMap().count(idMotor) == 1);
     auto& stepperMotor = stepperMotorController->getStepperMotorMap().at(idMotor);
     assert(stepperMotor);

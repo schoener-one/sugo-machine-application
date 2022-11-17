@@ -10,6 +10,7 @@ target_link_libraries(HardwareAbstractionLayerInterface INTERFACE Common)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Common/include)
 
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
+    add_compile_definitions(HAL_SIMULATION_ENABLE)
     message("Using HardwareAbstractionLayerStub (x86)")
     add_subdirectory(HardwareAbstractionLayerStub)
 else()

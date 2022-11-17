@@ -15,6 +15,7 @@ if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
     include(ExternalProject)
     ExternalProject_Add(azmq_external
         GIT_REPOSITORY    https://github.com/zeromq/azmq.git
+        GIT_TAG           v1.0.3
         GIT_SHALLOW       ON
         PREFIX            azmq
         CONFIGURE_COMMAND ${CMAKE_COMMAND} -B <BINARY_DIR> -S <SOURCE_DIR> -GNinja -DAZMQ_NO_TESTS=1 -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>

@@ -22,7 +22,7 @@ using namespace sugo::message;
 namespace
 {
 /// @brief Address prefix
-static const std::string AddressPrefix{"inproc://"};
+const std::string AddressPrefix{"inproc://"};
 
 constexpr const char* convertToString(CommandMessageBroker::Service serviceType)
 {
@@ -42,7 +42,8 @@ constexpr const char* convertToString(CommandMessageBroker::Service serviceType)
 Address CommandMessageBroker::createFullQualifiedAddress(const Address& address,
                                                          Service        serviceType)
 {
-    return AddressPrefix + address + convertToString(serviceType);
+    std::string fullQualifiedAddress = AddressPrefix + address + convertToString(serviceType);
+    return fullQualifiedAddress;
 }
 
 CommandMessageBroker::CommandMessageBroker(const Address& address, IOContext& ioContext)

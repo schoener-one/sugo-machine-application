@@ -59,10 +59,10 @@ bool StepperMotor::init(const sugo::IConfiguration& configuration)
 {
     assert(m_controller == nullptr);
 
-    const I2cControl::Address address =
-        static_cast<I2cControl::Address>(configuration.getOption("i2c-address").get<unsigned>());
-    m_maxSpeed =
-        StepperMotor::Speed(configuration.getOption("max-speed-rpm").get<unsigned>(), Unit::Rpm);
+    const I2cControl::Address address = static_cast<I2cControl::Address>(
+        configuration.getOption(option::id::I2cAddress).get<unsigned>());
+    m_maxSpeed = StepperMotor::Speed(
+        configuration.getOption(option::id::MaxSpeedRpm).get<unsigned>(), Unit::Rpm);
     m_initMaxSpeed = m_maxSpeed;
     LOG(debug) << getId() << ".i2c-address: " << address;
     LOG(debug) << getId() << ".max-speed-rpm: " << m_maxSpeed;
@@ -220,9 +220,13 @@ bool StepperMotor::waitAndShutdown(std::chrono::milliseconds remainingMotionTime
 {
     assert(m_controller != nullptr);
 
-    // Wait until motor reached target position!
+    // FIXME Workaround to ensure that the current velocity is not zero!
     TicController::State state;
-    bool                 errorOccurred = false;
+    m_controller->getState(state);
+
+    // Wait until motor reached target position!
+    bool errorOccurred = false;
+
     do
     {
         errorOccurred = (!m_controller->getState(state)) ||

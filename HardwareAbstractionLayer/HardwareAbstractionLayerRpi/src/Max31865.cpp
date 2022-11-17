@@ -152,7 +152,7 @@ int16_t Max31865::getTemperature()
     const auto entry = std::find_if(
         ResistanceToTemperatureLookUpTable.cbegin(), ResistanceToTemperatureLookUpTable.cend(),
         [&resistance](const ResistanceTemperature& resistanceTemperature) {
-            return (resistance > resistanceTemperature.resistance);
+            return (resistance <= resistanceTemperature.resistance);
         });
 
     if (entry != ResistanceToTemperatureLookUpTable.cend())

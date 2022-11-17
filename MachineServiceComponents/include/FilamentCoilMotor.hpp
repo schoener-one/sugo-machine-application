@@ -27,7 +27,7 @@ public:
     explicit FilamentCoilMotor(message::ICommandMessageBroker& messageBroker,
                                const ServiceLocator&           serviceLocator)
         : IFilamentCoilMotor(messageBroker),
-          MotorService(config::StepperMotorCoilerId, serviceLocator)
+          MotorService(hal::id::StepperMotorCoiler, serviceLocator)
     {
     }
 

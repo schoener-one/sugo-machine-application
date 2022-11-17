@@ -30,10 +30,7 @@ public:
      * @param subscriptionIds List of notification ids to subscribe to.
      */
     explicit ServiceComponent(message::ICommandMessageBroker& messageBroker,
-                              const NotificationIdList&       subscriptionIds)
-        : m_messageBroker(messageBroker), m_subscriptionIds(subscriptionIds)
-    {
-    }
+                              const NotificationIdList&       subscriptionIds);
     ~ServiceComponent() override = default;
 
     bool start() override;

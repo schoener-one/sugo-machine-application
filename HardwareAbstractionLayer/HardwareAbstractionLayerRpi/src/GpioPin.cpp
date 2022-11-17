@@ -38,7 +38,7 @@ bool GpioPin::init(const IConfiguration& configuration)
         return false;
     }
 
-    const bool activeHigh = configuration.getOption("active-high").get<bool>();
+    const bool activeHigh = configuration.getOption(option::id::ActiveHigh).get<bool>();
     m_direction =
         (configuration.getOption("direction").get<std::string>() == "in" ? Direction::In
                                                                          : Direction::Out);

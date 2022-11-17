@@ -13,12 +13,10 @@
 #include <string>
 
 #include "IConfiguration.hpp"
+#include "Identifier.hpp"
 
 namespace sugo::hal
 {
-/// @brief HAL object identifier type
-using Identifier = std::string;
-
 /**
  * @brief Base class of all HAL objects
  *

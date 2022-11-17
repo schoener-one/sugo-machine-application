@@ -12,6 +12,12 @@
 
 using namespace sugo;
 
+ServiceComponent::ServiceComponent(message::ICommandMessageBroker& messageBroker,
+                                   const NotificationIdList&       subscriptionIds)
+    : m_messageBroker(messageBroker), m_subscriptionIds(subscriptionIds)
+{
+}
+
 bool ServiceComponent::start()
 {
     bool success = m_messageBroker.start();

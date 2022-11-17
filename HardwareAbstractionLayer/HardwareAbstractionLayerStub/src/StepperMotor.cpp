@@ -25,13 +25,13 @@ StepperMotor::~StepperMotor()
 
 bool StepperMotor::init(const sugo::IConfiguration& configuration)
 {
-    const uint8_t address =
-        static_cast<uint8_t>(configuration.getOption("i2c-address").get<unsigned>());
+    const auto address =
+        static_cast<uint8_t>(configuration.getOption(option::id::I2cAddress).get<unsigned>());
     m_maxSpeed = StepperMotor::StepperMotor::Speed(
-        configuration.getOption("max-speed-rpm").get<unsigned>(), Unit::Rpm);
+        configuration.getOption(option::id::MaxSpeedRpm).get<unsigned>(), Unit::Rpm);
     m_initMaxSpeed = m_maxSpeed;
-    LOG(debug) << getId() << ".i2c-address: " << address;
-    LOG(debug) << getId() << ".max-speed-rpm: " << m_maxSpeed.getValue();
+    LOG(debug) << getId() << "." << option::id::I2cAddress << ": " << address;
+    LOG(debug) << getId() << "." << option::id::MaxSpeedRpm << ": " << m_maxSpeed.getValue();
     s_curPosition = 0;
     return true;
 }

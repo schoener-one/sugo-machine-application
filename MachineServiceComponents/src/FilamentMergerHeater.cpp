@@ -10,7 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentMergerHeater.hpp"
-#include "MachineConfig.hpp"
+#include "Identifier.hpp"
 #include "MachineProtocol.hpp"
 
 using namespace sugo;
@@ -19,7 +19,7 @@ using namespace sugo::message;
 FilamentMergerHeater::FilamentMergerHeater(ICommandMessageBroker& messageBroker,
                                            const ServiceLocator&  serviceLocator)
     : IFilamentMergerHeater(messageBroker),
-      HeaterService(config::GpioPinRelaySwitchMergerHeaterId, config::TemperatureSensorMergerId,
+      HeaterService(hal::id::GpioPinRelaySwitchHeaterMerger, hal::id::TemperatureSensorMerger,
                     serviceLocator)
 {
 }

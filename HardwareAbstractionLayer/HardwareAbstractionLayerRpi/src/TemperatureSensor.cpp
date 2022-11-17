@@ -25,7 +25,8 @@ bool TemperatureSensor::init(const IConfiguration& configuration)
 {
     assert(m_driver == nullptr);
 
-    const std::string chipSelect = configuration.getOption("chip-select").get<std::string>();
+    const std::string chipSelect =
+        configuration.getOption(option::id::ChipSelect).get<std::string>();
     LOG(debug) << getId() << ": chip-select set to " << chipSelect;
 
     auto& ioCs = m_gpioPins.at(chipSelect);

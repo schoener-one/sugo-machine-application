@@ -1,7 +1,12 @@
 {
-    "sugo-machine-service": {
-        "address": "*",
+    "machine-service-gateway": {
+        "address": "127.0.0.1",
         "port": 1234
+    },
+    "machine-remote-control": {
+        "address": "127.0.0.1",
+        "port": 8080,
+        "doc-root": "MachineRemoteControl/www"
     },
     "hardware-abstraction-layer": {
         "gpio-control": {

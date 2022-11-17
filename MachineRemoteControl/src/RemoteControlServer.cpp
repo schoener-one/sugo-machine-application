@@ -20,6 +20,28 @@
 using namespace sugo;
 using namespace sugo::remote_control;
 
+void RemoteControlServer::addConfigurationOptions(IConfiguration &configuration)
+{
+    static constexpr unsigned short defaultNetworkPort = 8080u;
+    configuration.add(Option("machine-remote-control.address", std::string(""),
+                             "Network address of the service"));
+    configuration.add(Option("machine-remote-control.port",
+                             static_cast<unsigned short>(defaultNetworkPort),
+                             "Network port of the service"));
+    configuration.add(Option("machine-remote-control.doc-root", std::string("www"),
+                             "Network address of the service"));
+}
+
+RemoteControlServer::RemoteControlServer(const IConfiguration &configuration,
+                                         IRequestHandler &     requestHandler)
+    : RemoteControlServer(
+          configuration.getOption("machine-remote-control.address").get<std::string>(),
+          configuration.getOption("machine-remote-control.port").get<unsigned short>(),
+          configuration.getOption("machine-remote-control.doc-root").get<std::string>(),
+          requestHandler)
+{
+}
+
 RemoteControlServer::RemoteControlServer(std::string address, unsigned short port,
                                          std::string docRoot, IRequestHandler &requestHandler)
     : m_address(std::move(address)),
@@ -28,7 +50,6 @@ RemoteControlServer::RemoteControlServer(std::string address, unsigned short por
       m_requestHandler(requestHandler),
       m_serverStatus(std::make_unique<mg_mgr>()),
       m_thread("RemoteControlServer")
-
 {
     mg_log_set(MG_LL_ERROR);
     requestHandler.registerSendNotification(
@@ -125,7 +146,7 @@ void RemoteControlServer::handleEvent(mg_connection *mgConnection, int event, vo
         case MG_EV_MQTT_MSG:    // MQTT PUBLISH received        struct mg_mqtt_message *
         case MG_EV_MQTT_OPEN:   // MQTT CONNACK received        int *connack_status_code
         case MG_EV_SNTP_TIME:   // SNTP time received           uint64_t *milliseconds
-            LOG(debug) << "Event " << event << " not handled";
+            LOG(trace) << "Event " << event << " not handled";
             break;
         case MG_EV_POLL:  // mg_mgr_poll iteration        uint64_t *milliseconds
             LOG(trace) << "Event " << event << " not handled";

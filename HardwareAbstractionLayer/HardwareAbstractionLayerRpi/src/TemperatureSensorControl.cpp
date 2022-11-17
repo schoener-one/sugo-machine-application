@@ -49,7 +49,8 @@ bool TemperatureSensorControl::init(const IConfiguration& configuration)
 
     bool success = initEnabledSubComponents<ITemperatureSensor, TemperatureSensor, SpiControl&,
                                             const IGpioControl::GpioPinMap&>(
-        configuration, "temperature-sensor", m_temperatureSensorMap, *m_spiControl, m_gpioPins);
+        configuration, option::id::TemperatureSensor, m_temperatureSensorMap, *m_spiControl,
+        m_gpioPins);
 
     return success;
 }

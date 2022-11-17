@@ -164,7 +164,7 @@
         {
             "label": "rpi_build-init",
             "type": "shell",
-            "command": ". ${config:sdk.env}; cmake -B${config:build.directory.rpi} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type} -DCODE_COVERAGE=ON"
+            "command": ". ${config:sdk.env}; cmake -B${config:build.directory.rpi} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type}"
         },
         {
             "label": "rpi_build-HardwareAbstractionLayerTest",
@@ -233,7 +233,7 @@
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"mkdir -p HardwareAbstractionLayer/conf\";",
-                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/HardwareAbstractionLayer/conf/MachineConfig.json\" \"root@${config:remote.host}:HardwareAbstractionLayer/conf/MachineConfig.json\""
+                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/HardwareAbstractionLayer/conf/HardwareConfig.json\" \"root@${config:remote.host}:HardwareAbstractionLayer/conf/HardwareConfig.json\""
             ]
         },
         {

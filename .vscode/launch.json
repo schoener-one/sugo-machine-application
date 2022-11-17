@@ -81,7 +81,7 @@
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "MIMode": "gdb",
-            "args": ["--config-file", "${workspaceFolder}/conf/MachineConfig.json"]
+            "args": ["--config-file", "${workspaceFolder}/MachineApplication/conf/MachineConfig.json"]
         },
         {
             "name": "Machine Application Integration Test (x86)",

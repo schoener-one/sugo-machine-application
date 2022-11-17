@@ -10,7 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentPreHeater.hpp"
-#include "MachineConfig.hpp"
+#include "Identifier.hpp"
 #include "MachineProtocol.hpp"
 
 using namespace sugo;
@@ -19,7 +19,7 @@ using namespace sugo::message;
 FilamentPreHeater::FilamentPreHeater(ICommandMessageBroker& messageBroker,
                                      const ServiceLocator&  serviceLocator)
     : IFilamentPreHeater(messageBroker),
-      HeaterService(config::GpioPinRelaySwitchFeederHeaterId, config::TemperatureSensorFeederId,
+      HeaterService(hal::id::GpioPinRelaySwitchHeaterFeeder, hal::id::TemperatureSensorFeeder,
                     serviceLocator)
 {
 }

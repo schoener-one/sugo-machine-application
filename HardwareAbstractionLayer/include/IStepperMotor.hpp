@@ -136,7 +136,7 @@ public:
      * @param rpm Speed of the rotation.
      * @return std::chrono::microseconds The time between one step to the next step position.
      */
-    std::chrono::microseconds getTimePerStep(unsigned rpm) const
+    inline std::chrono::microseconds getTimePerStep(unsigned rpm) const
     {
         using namespace std::literals::chrono_literals;
         return (60000000us / static_cast<int64_t>(rpm * getStepsPerRound()));

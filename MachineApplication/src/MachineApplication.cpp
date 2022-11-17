@@ -28,6 +28,7 @@ namespace po = boost::program_options;
 using namespace sugo;
 using namespace sugo::message;
 using namespace hal;
+using namespace remote_control;
 
 namespace
 {
@@ -78,23 +79,11 @@ bool MachineApplication::parseConfigurationFile()
     }
 }
 
-void MachineApplication::addConfigurationOptions(IConfiguration& configuration)
-{
-    static constexpr unsigned short defaultNetworkPort = 8080u;
-    configuration.add(Option("machine-remote-control-service.address", std::string(""),
-                             "Network address of the service"));
-    configuration.add(Option("machine-remote-control-service.port",
-                             static_cast<unsigned short>(defaultNetworkPort),
-                             "Network port of the service"));
-    configuration.add(Option("machine-remote-control-service.doc-root", std::string("www"),
-                             "Network address of the service"));
-}
-
 bool MachineApplication::start(int argc, char const** argv)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    addConfigurationOptions(m_configuration);
+    RemoteControlServer::addConfigurationOptions(m_configuration);
     HardwareAbstractionLayer::addConfigurationOptions(m_configuration);
     MachineServiceGateway::addConfigurationOptions(m_configuration);
 
@@ -109,15 +98,15 @@ bool MachineApplication::start(int argc, char const** argv)
         return false;
     }
 
-    ServiceLocator serviceLocator;
-    serviceLocator.add<IConfiguration>(m_configuration);
-
     HardwareAbstractionLayer hal;
-    serviceLocator.add<IHardwareAbstractionLayer>(hal);
-    if (!serviceLocator.get<IHardwareAbstractionLayer>().init(m_configuration))
+    if (!hal.init(m_configuration))
     {
         return false;
     }
+
+    ServiceLocator serviceLocator;
+    serviceLocator.add<IConfiguration>(m_configuration);
+    serviceLocator.add<IHardwareAbstractionLayer>(hal);
 
     // Start service components
     if (!m_components.start(serviceLocator))
@@ -140,11 +129,7 @@ bool MachineApplication::start(int argc, char const** argv)
     // Start remote control server
     auto& serviceComponent =
         getServiceComponentFromBundles<UserInterfaceControl>(m_components.getBundles());
-    remote_control::RemoteControlServer remoteControlServer(
-        m_configuration.getOption("machine-remote-control-service.address").get<std::string>(),
-        m_configuration.getOption("machine-remote-control-service.port").get<unsigned short>(),
-        m_configuration.getOption("machine-remote-control-service.doc-root").get<std::string>(),
-        serviceComponent);
+    remote_control::RemoteControlServer remoteControlServer(m_configuration, serviceComponent);
 
     if (!remoteControlServer.start())
     {
@@ -157,6 +142,8 @@ bool MachineApplication::start(int argc, char const** argv)
     m_components.waitUntilFinished();
     remoteControlServer.stop();
     machineServiceGateway.stop();
+    hal.finalize();
+
     LOG(info) << "Application " << m_name << " stopped";
     return true;
 }

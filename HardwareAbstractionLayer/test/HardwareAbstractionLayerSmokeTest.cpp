@@ -48,7 +48,26 @@ protected:
         ASSERT_TRUE(m_hal.init(m_configuration));
     }
 
-    constexpr static char m_configFile[] = "HardwareAbstractionLayer/conf/MachineConfig.json";
+    void TestRotationTo(IStepperMotor& stepperMotor, const int32_t position)
+    {
+        std::cout << "Stepper motor " << stepperMotor.getId() << " rotates to: " << position << std::endl;
+        EXPECT_TRUE(stepperMotor.rotateToPosition(position));
+        EXPECT_EQ(stepperMotor.getPosition(), position);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
+    void TestRotate(IStepperMotor& stepperMotor, const IStepperMotor::Direction direction, const unsigned maxSpeed) 
+    {
+        stepperMotor.setMaxSpeed({maxSpeed, Unit::Rpm});
+        std::cout << "Stepper motor " << stepperMotor.getId() << " rotated in direction: " << direction << std::endl;
+        EXPECT_TRUE(stepperMotor.rotate(direction));
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        EXPECT_NEAR(stepperMotor.getSpeed().getValue(), maxSpeed, 2u);
+        EXPECT_TRUE(stepperMotor.stop(false));
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        EXPECT_EQ(stepperMotor.getSpeed().getValue(), 0);
+    }
+    constexpr static char m_configFile[] = "HardwareAbstractionLayer/conf/HardwareConfig.json";
 
     Configuration            m_configuration;
     HardwareAbstractionLayer m_hal;
@@ -57,31 +76,37 @@ protected:
 TEST_F(HardwareAbstractionLayerSmokeTest, Test_GpioControl)
 {
     // GPIO control
-    auto& gpioControl = m_hal.getGpioControllerMap().at("gpio-control");
+    auto& gpioControl = m_hal.getGpioControllerMap().at(id::GpioControl);
     EXPECT_TRUE(gpioControl);
+
     // GPIO in-pins
-    for (const std::string pin :
-         {"signal-button-start", "signal-button-stop", "signal-filament-tension-low",
-          "signal-filament-tension-high", "motor-control-error"})
+    for (const std::string pin : {
+             id::GpioPinSignalButtonStart, id::GpioPinSignalButtonStop,
+             id::GpioPinSignalFilamentTensionLow, id::GpioPinSignalFilamentTensionHigh,
+             //   id::GpioPinMotorControlError
+         })
     {
-        std::cout << "GPIO IN pin: " << pin << std::endl;
+        std::cout << "IO in pin: " << pin << std::endl;
         auto& gpioInPin = gpioControl->getGpioPinMap().at(pin);
         EXPECT_TRUE(gpioInPin);
         EXPECT_EQ(gpioInPin->getDirection(), IGpioPin::Direction::In);
-        std::cout << "GPIO IN pin state: " << gpioInPin->getState() << std::endl;
+        std::cout << "IO in pin state: " << gpioInPin->getState() << std::endl;
     }
+
     // GPIO out-pins
     for (const std::string pin :
-         {"relay-switch-fan-feeder", "relay-switch-fan-merger", "relay-switch-heater-feeder",
-          "relay-switch-heater-merger", "relay-switch-light-power", "relay-switch-light-run",
-          "relay-switch-light-ready"})
+         {id::GpioPinRelaySwitchFanFeeder, id::GpioPinRelaySwitchFanMerger,
+          id::GpioPinRelaySwitchHeaterFeeder, id::GpioPinRelaySwitchHeaterMerger,
+          id::GpioPinRelaySwitchLightPower, id::GpioPinRelaySwitchLightRun,
+          id::GpioPinRelaySwitchLightReady, id::GpioPinTemperatureSensorControlCsFeeder,
+          id::GpioPinTemperatureSensorControlCsMerger, id::GpioPinMotorControlReset})
     {
-        std::cout << "GPIO OUT pin: " << pin << std::endl;
+        std::cout << "IO out pin: " << pin << std::endl;
         auto& gpioOutPin = gpioControl->getGpioPinMap().at(pin);
         EXPECT_TRUE(gpioOutPin);
         EXPECT_EQ(gpioOutPin->getDirection(), IGpioPin::Direction::Out);
         auto gpioState = gpioOutPin->getState();
-        if (pin == "relay-switch-light-power")
+        if (pin == id::GpioPinRelaySwitchLightPower or pin == id::GpioPinMotorControlReset)
         {
             EXPECT_EQ(gpioState, IGpioPin::State::High);
         }
@@ -103,10 +128,12 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_GpioControl)
 TEST_F(HardwareAbstractionLayerSmokeTest, Test_MotorControl)
 {
     // Stepper motor control
-    auto& stepperMotorControl = m_hal.getStepperMotorControllerMap().at("stepper-motor-control");
+    auto& stepperMotorControl = m_hal.getStepperMotorControllerMap().at(id::StepperMotorControl);
     EXPECT_TRUE(stepperMotorControl);
-    const unsigned    maxSpeed      = 100u;
-    constexpr int32_t stepsPerRound = 1600;
+    const unsigned    defaultMaxSpeed = 100u;
+    const unsigned    maxSpeed        = 50u;
+    constexpr int32_t stepsPerRound   = 1600;
+    constexpr int64_t timePerStep     = 60000000LL / static_cast<int64_t>(maxSpeed * stepsPerRound);
 
     // Stepper motors
     for (const std::string motorName : {"feeder", "coiler"})
@@ -116,52 +143,39 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_MotorControl)
         EXPECT_TRUE(stepperMotor);
 
         EXPECT_EQ(stepperMotor->getStepsPerRound(), stepsPerRound);
-        EXPECT_EQ(stepperMotor->getMaxSpeed(), maxSpeed);
+        EXPECT_EQ(stepperMotor->getMaxSpeed(), defaultMaxSpeed);
         EXPECT_EQ(stepperMotor->getPosition(), 0);
-        std::cout << "rotate to: " << stepsPerRound << std::endl;
-        EXPECT_TRUE(stepperMotor->rotateToPosition(stepsPerRound));
-        EXPECT_EQ(stepperMotor->getPosition(), stepsPerRound);
-        std::cout << "rotate to: " << stepsPerRound << std::endl;
-        EXPECT_TRUE(stepperMotor->rotateToPosition(stepsPerRound));
-        EXPECT_EQ(stepperMotor->getPosition(), stepsPerRound);
-        std::cout << "rotate to: " << (stepsPerRound / 2) << std::endl;
-        EXPECT_TRUE(stepperMotor->rotateToPosition(stepsPerRound / 2));
-        EXPECT_EQ(stepperMotor->getPosition(), stepsPerRound / 2);
-        std::cout << "rotate to: " << (0) << std::endl;
-        EXPECT_TRUE(stepperMotor->rotateToPosition(0));
-        EXPECT_EQ(stepperMotor->getPosition(), 0);
-        std::cout << "rotate to: " << (stepsPerRound * -2) << std::endl;
-        EXPECT_TRUE(stepperMotor->rotateToPosition(stepsPerRound * -2));
-        EXPECT_EQ(stepperMotor->getPosition(), stepsPerRound * -2);
+        stepperMotor->setMaxSpeed({maxSpeed, Unit::Rpm});
+        EXPECT_EQ(stepperMotor->getTimePerStep(maxSpeed).count(), timePerStep);
 
-        EXPECT_TRUE(stepperMotor->rotate(IStepperMotor::Direction::Forward));
-        std::this_thread::sleep_for(std::chrono::seconds(10));
-        stepperMotor->getPosition();
-        EXPECT_NEAR(stepperMotor->getSpeed().getValue(), maxSpeed, 2u);
-        EXPECT_TRUE(stepperMotor->stop(false));
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        EXPECT_EQ(stepperMotor->getSpeed().getValue(), 0);
+        TestRotationTo(*stepperMotor, stepsPerRound);
+        TestRotationTo(*stepperMotor, stepsPerRound * 1 / 4);
+        TestRotationTo(*stepperMotor, stepsPerRound * 2 / 4);
+        TestRotationTo(*stepperMotor, stepsPerRound * 3 / 4);
+        TestRotationTo(*stepperMotor, stepsPerRound * 2);
+        TestRotationTo(*stepperMotor, stepsPerRound * 2 + 100);
+        TestRotationTo(*stepperMotor, stepsPerRound * -2);
 
-        EXPECT_TRUE(stepperMotor->rotate(IStepperMotor::Direction::Backward));
-        std::this_thread::sleep_for(std::chrono::seconds(10));
-        EXPECT_NEAR(stepperMotor->getSpeed().getValue(), maxSpeed, 2u);
-        EXPECT_TRUE(stepperMotor->stop(false));
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        EXPECT_EQ(stepperMotor->getSpeed().getValue(), 0);
+        TestRotate(*stepperMotor, IStepperMotor::Direction::Forward, maxSpeed);
+        TestRotate(*stepperMotor, IStepperMotor::Direction::Forward, 80);
+        TestRotate(*stepperMotor, IStepperMotor::Direction::Backward, maxSpeed);
+        TestRotate(*stepperMotor, IStepperMotor::Direction::Backward, 80);
     }
 }
 
 TEST_F(HardwareAbstractionLayerSmokeTest, Test_TemperatureSensorControl)
 {
     auto& tempSensorControl =
-        m_hal.getTemperatureSensorControllerMap().at("temperature-sensor-control");
+        m_hal.getTemperatureSensorControllerMap().at(id::TemperatureSensorControl);
     EXPECT_TRUE(tempSensorControl);
 
-    for (const std::string sensorName : {"temperature-sensor-feeder", "temperature-sensor-merger"})
+    for (const std::string sensorName : {id::TemperatureSensorFeeder, id::TemperatureSensorMerger})
     {
         auto& tempSensor = tempSensorControl->getTemperatureSensorMap().at(sensorName);
         EXPECT_TRUE(tempSensor);
         const auto temperature = tempSensor->getTemperature();
+        std::cout << "Sensor " << sensorName << " temperature: " << temperature << "°C"
+                  << std::endl;
         EXPECT_EQ(temperature.getUnit(), Unit::Celcius);
         EXPECT_NEAR(temperature.getValue(), 25, 10);
     }

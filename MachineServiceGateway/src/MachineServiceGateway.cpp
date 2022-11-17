@@ -27,6 +27,8 @@ namespace
 constexpr unsigned MethodTokenCount      = 2u;  ///< method string: '<receiver-id>.<method-id>'
 constexpr unsigned MethodTokenReceiverId = 0u;
 constexpr unsigned MethodTokenMethodId   = 1u;
+
+const sugo::IServiceComponent::NotificationIdList EmptyNotificationIdList{};
 }  // namespace
 
 using namespace sugo;
@@ -44,7 +46,7 @@ void MachineServiceGateway::addConfigurationOptions(IConfiguration& configuratio
 MachineServiceGateway::MachineServiceGateway(ICommandMessageBroker& messageBroker,
                                              IOContext&             ioContext,
                                              const IConfiguration&  configuration)
-    : ServiceComponent(messageBroker, {}),
+    : ServiceComponent(messageBroker, EmptyNotificationIdList),
       m_jsonRpcServer(
           std::string("tcp://") +
               configuration.getOption("machine-service-gateway.address").get<std::string>() + ":" +

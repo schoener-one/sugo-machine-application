@@ -41,8 +41,8 @@ bool GpioControl::init(const IConfiguration& configuration)
         return false;
     }
 
-    return initEnabledSubComponents<IGpioPin, GpioPin, gpiod::chip>(configuration, "gpio-pin",
-                                                                    m_gpioPinMap, *m_device);
+    return initEnabledSubComponents<IGpioPin, GpioPin, gpiod::chip>(
+        configuration, option::id::GpioPin, m_gpioPinMap, *m_device);
 }
 
 void GpioControl::finalize()

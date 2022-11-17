@@ -8,6 +8,8 @@ add_library (HardwareAbstractionLayer STATIC
     src/GpioPin.cpp
     src/TemperatureSensor.cpp
     src/StepperMotor.cpp
+    src/Simulator.cpp
+    src/HardwareAbstractionLayer.cpp
     )
 target_include_directories (HardwareAbstractionLayer PRIVATE
     include

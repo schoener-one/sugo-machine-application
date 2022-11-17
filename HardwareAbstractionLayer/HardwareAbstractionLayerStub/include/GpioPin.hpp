@@ -22,8 +22,10 @@ class GpioPin : public IGpioPin
 {
 public:
     using IGpioPin::IGpioPin;
+    ~GpioPin() override;
 
     bool init(const IConfiguration& configuration) override;
+    void finalize();
 
     State     getState() const override;
     bool      setState(State state) override;

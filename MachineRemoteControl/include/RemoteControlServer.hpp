@@ -12,6 +12,7 @@
 
 #include "Connection.hpp"
 #include "Globals.hpp"
+#include "IConfiguration.hpp"
 #include "IRequestHandler.hpp"
 #include "IRunnable.hpp"
 #include "Thread.hpp"
@@ -36,6 +37,20 @@ public:
     /// @brief Maximum connection allowed to connect.
     static const unsigned MaxConnections = 3u;
 
+    /**
+     * @brief Set the Configuration options.
+     *
+     * @param configuration Configuration object to which the options will be added.
+     */
+    static void addConfigurationOptions(IConfiguration &configuration);
+
+    /**
+     * @brief Construct a new remove control server.
+     *
+     * @param configuration  Configuration for this server.
+     * @param requestHandler Request handler.
+     */
+    RemoteControlServer(const IConfiguration &configuration, IRequestHandler &requestHandler);
     /**
      * @brief Construct a new remove control server.
      *

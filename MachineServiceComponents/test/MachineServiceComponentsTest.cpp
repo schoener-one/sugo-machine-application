@@ -68,7 +68,7 @@ protected:
     }
 
     inline static const std::string StepperMotorName{"coiler"};
-    inline static const std::string StepperMotorControlName{"stepper-motor-control"};
+    inline static const std::string StepperMotorControlName{id::StepperMotorControl};
 
     IHardwareAbstractionLayer::StepperMotorControllerMap m_stepperMotorControllerMap;
     IStepperMotorControl::StepperMotorMap                m_stepperMotorMap;

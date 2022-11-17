@@ -13,7 +13,6 @@
 #include "HardwareAbstractionLayerHelper.hpp"
 #include "IHardwareAbstractionLayer.hpp"
 #include "IMachineControl.hpp"
-#include "MachineConfig.hpp"
 #include "MachineProtocol.hpp"
 #include "MessageProtocol.hpp"
 #include "RemoteControlProtocol.hpp"
@@ -107,8 +106,8 @@ bool UserInterfaceControl::receiveRequest(remote_control::IRequestHandler::Clien
 
             const std::string result =
                 machineResponse.result() == message::CommandResponse_Result_SUCCESS
-                    ? rp::IdResultError
-                    : rp::IdResultSuccess;
+                    ? rp::IdResultSuccess
+                    : rp::IdResultError;
             response = {{rp::IdType, rp::IdTypeResponseCommand}, {rp::IdResult, result}};
         }
         else
@@ -129,12 +128,15 @@ bool UserInterfaceControl::receiveRequest(remote_control::IRequestHandler::Clien
 
 void UserInterfaceControl::updateMachineState()
 {
+    namespace rp = remote_control::protocol;
+
     if (m_cbSendNotification == nullptr)
     {
         LOG(warning) << "No callback for send notification available";
         return;
     }
-    m_cbSendNotification(createStateMessage("state-notification"));
+
+    m_cbSendNotification(createStateMessage(rp::IdTypeNotificationState));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,21 +180,21 @@ void UserInterfaceControl::handleMachineStateChange(const Event& event, const St
         case Event::MachineError:
         // TODO Make LED lights flashing on error!
         case Event::MachineSwitchedOff:
-            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightRunId)
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightRun)
                 ->setState(hal::IGpioPin::State::Low);
-            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightReadyId)
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightReady)
                 ->setState(hal::IGpioPin::State::Low);
             break;
         case Event::MachineStarting:
-            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightRunId)
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightRun)
                 ->setState(hal::IGpioPin::State::High);
-            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightReadyId)
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightReady)
                 ->setState(hal::IGpioPin::State::Low);
             break;
         case Event::MachineRunning:
-            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightRunId)
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightRun)
                 ->setState(hal::IGpioPin::State::High);
-            (void)getGpioPin(hal, config::GpioPinRelaySwitchLightReadyId)
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightReady)
                 ->setState(hal::IGpioPin::State::High);
             break;
     }

@@ -13,6 +13,15 @@
 #include "IConfiguration.hpp"
 #include "IHardwareAbstractionLayer.hpp"
 
+#ifdef HAL_SIMULATION_ENABLE
+#include <memory>
+
+namespace sugo::hal
+{
+class Simulator;
+}  // namespace sugo::hal
+#endif  // HAL_SIMULATION_ENABLE
+
 namespace sugo::hal
 {
 /**
@@ -22,11 +31,11 @@ namespace sugo::hal
 class HardwareAbstractionLayer : public IHardwareAbstractionLayer
 {
 public:
-    HardwareAbstractionLayer() : IHardwareAbstractionLayer("hardware-abstraction-layer")
-    {
-    }
+    HardwareAbstractionLayer();
+    ~HardwareAbstractionLayer() override;
 
     bool init(const IConfiguration& configuration) override;
+    void finalize();
 
     const GpioControllerMap& getGpioControllerMap() const override
     {
@@ -44,16 +53,22 @@ public:
     }
 
     /**
-     * @brief Set the Configuration object.
+     * @brief Set the Configuration options.
      *
-     * @param configuration Configuration to be set.
+     * @param configuration Configuration object to which the options will be added.
      */
     static void addConfigurationOptions(sugo::IConfiguration& configuration);
 
 private:
+    void postInitialization();
+    void postFinalization();
+
     GpioControllerMap              m_gpioControllerMap;
     StepperMotorControllerMap      m_stepperMotorControllerMap;
     TemperatureSensorControllerMap m_temperatureSensorControllerMap;
+#ifdef HAL_SIMULATION_ENABLE
+    std::unique_ptr<Simulator> m_simulator;
+#endif  // HAL_SIMULATION_ENABLE
 };
 
 }  // namespace sugo::hal

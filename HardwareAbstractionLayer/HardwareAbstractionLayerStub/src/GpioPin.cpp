@@ -10,8 +10,14 @@
 
 #include "GpioPin.hpp"
 #include "Logger.hpp"
+#include "Simulator.hpp"
 
 using namespace sugo::hal;
+
+GpioPin::~GpioPin()
+{
+    finalize();
+}
 
 bool GpioPin::init(const IConfiguration& configuration)
 {
@@ -21,19 +27,23 @@ bool GpioPin::init(const IConfiguration& configuration)
     LOG(debug) << getId() << ".pin: " << configuration.getOption("pin").get<unsigned>();
     LOG(debug) << getId() << ".direction: " << m_direction;
     LOG(debug) << getId()
-               << ".activate-high: " << configuration.getOption("active-high").get<bool>();
+               << ".active-high: " << configuration.getOption(option::id::ActiveHigh).get<bool>();
+
     return true;
+}
+
+void GpioPin::finalize()
+{
 }
 
 IGpioPin::State GpioPin::getState() const
 {
-    return m_state;
+    return Simulator::getInstance().getState(getId());
 }
 
 bool GpioPin::setState(GpioPin::State state)
 {
-    m_state = state;
-    return false;
+    return Simulator::getInstance().setState(getId(), state);
 }
 
 IGpioPin::Direction GpioPin::getDirection() const

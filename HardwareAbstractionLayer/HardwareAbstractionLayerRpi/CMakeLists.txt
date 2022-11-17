@@ -13,6 +13,7 @@ add_library (HardwareAbstractionLayer STATIC
     src/I2cControl.cpp
     src/TicController.cpp
     src/StepperMotor.cpp
+    src/HardwareAbstractionLayer.cpp
     )
 target_include_directories (HardwareAbstractionLayer PRIVATE
     include

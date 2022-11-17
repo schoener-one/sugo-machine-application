@@ -143,54 +143,54 @@ protected:
 void MachineApplicationIntegrationTest::prepareHardwareAbstractionLayer()
 {
     m_stepperMotorControllerMap.emplace(
-        config::StepperMotorControlId,
+        hal::id::StepperMotorControl,
         m_mockStepperMotorControl = std::make_shared<NiceMock<IStepperMotorControlMock>>());
     m_stepperMotorMap.emplace(
-        config::StepperMotorCoilerId,
+        hal::id::StepperMotorCoiler,
         m_mockStepperMotorCoiler = std::make_shared<NiceMock<IStepperMotorMock>>());
     m_stepperMotorMap.emplace(
-        config::StepperMotorFeederId,
+        hal::id::StepperMotorFeeder,
         m_mockStepperMotorFeeder = std::make_shared<NiceMock<IStepperMotorMock>>());
 
     m_temperatureSensorControllerMap.emplace(
-        config::TemperatureSensorControlId,
+        hal::id::TemperatureSensorControl,
         m_mockTemperatureSensorControl =
             std::make_shared<NiceMock<ITemperatureSensorControlMock>>());
     m_temperatureSensorMap.emplace(
-        config::TemperatureSensorMergerId,
+        hal::id::TemperatureSensorMerger,
         m_mockTemperatureSensorMerger = std::make_shared<NiceMock<ITemperatureSensorMock>>());
     m_temperatureSensorMap.emplace(
-        config::TemperatureSensorFeederId,
+        hal::id::TemperatureSensorFeeder,
         m_mockTemperatureSensorFeeder = std::make_shared<NiceMock<ITemperatureSensorMock>>());
 
-    m_gpioControllerMap.emplace(config::GpioControlId,
+    m_gpioControllerMap.emplace(hal::id::GpioControl,
                                 m_mockGpioControl = std::make_shared<NiceMock<IGpioControlMock>>());
     m_gpioPinMap.emplace(
-        config::GpioPinRelaySwitchFeederHeaterId,
+        hal::id::GpioPinRelaySwitchHeaterFeeder,
         m_mockGpioPinRelaySwitchHeaterFeeder =
             std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchFeederHeater"));
     m_gpioPinMap.emplace(
-        config::GpioPinRelaySwitchMergerHeaterId,
+        hal::id::GpioPinRelaySwitchHeaterMerger,
         m_mockGpioPinRelaySwitchHeaterMerger =
             std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchMergerHeater"));
     m_gpioPinMap.emplace(
-        config::GpioPinRelaySwitchLightRunId,
+        hal::id::GpioPinRelaySwitchLightRun,
         m_mockGpioPinRelaySwitchLightRun =
             std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchLightRun"));
     m_gpioPinMap.emplace(
-        config::GpioPinRelaySwitchLightPowerId,
+        hal::id::GpioPinRelaySwitchLightPower,
         m_mockGpioPinRelaySwitchLightPower =
             std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchLightPower"));
     m_gpioPinMap.emplace(
-        config::GpioPinRelaySwitchLightReadyId,
+        hal::id::GpioPinRelaySwitchLightReady,
         m_mockGpioPinRelaySwitchLightReady =
             std::make_shared<NiceMock<IGpioPinMock>>("GpioPinRelaySwitchLightReady"));
     m_gpioPinMap.emplace(
-        config::GpioPinSignalFilamentTensionLowId,
+        hal::id::GpioPinSignalFilamentTensionLow,
         m_mockGpioPinSignalFilamentTensionLow =
             std::make_shared<NiceMock<IGpioPinMock>>("GpioPinSignalFilamentTensionLow"));
     m_gpioPinMap.emplace(
-        config::GpioPinSignalFilamentTensionHighId,
+        hal::id::GpioPinSignalFilamentTensionHigh,
         m_mockGpioPinSignalFilamentTensionHigh =
             std::make_shared<NiceMock<IGpioPinMock>>("GpioPinSignalFilamentTensionHigh"));
 

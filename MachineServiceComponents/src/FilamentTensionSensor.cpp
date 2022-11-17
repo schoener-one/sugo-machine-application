@@ -10,7 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FilamentTensionSensor.hpp"
-#include "MachineConfig.hpp"
+#include "Identifier.hpp"
 
 using namespace sugo;
 using namespace sugo::message;
@@ -18,8 +18,8 @@ using namespace sugo::message;
 FilamentTensionSensor::FilamentTensionSensor(message::ICommandMessageBroker& messageBroker,
                                              const ServiceLocator&           serviceLocator)
     : IFilamentTensionSensor(messageBroker),
-      FilamentTensionControlService(config::GpioPinSignalFilamentTensionLowId,
-                                    config::GpioPinSignalFilamentTensionHighId, serviceLocator),
+      FilamentTensionControlService(hal::id::GpioPinSignalFilamentTensionLow,
+                                    hal::id::GpioPinSignalFilamentTensionHigh, serviceLocator),
       m_serviceLocator(serviceLocator)
 {
 }

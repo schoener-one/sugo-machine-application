@@ -20,9 +20,3 @@ if (CMAKE_BUILD_TYPE STREQUAL "RELEASE")
     # FIXME Remove NO_TEST_INTERFACE
     add_compile_options(-Werror)
 endif()
-
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-    add_compile_definitions(TARGET_X86)
-else()
-    add_compile_definitions(TARGET_RPI)
-endif()

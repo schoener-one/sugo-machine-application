@@ -38,7 +38,7 @@ void Connection::handleHttpMessage(mg_http_message *message, std::string &docRoo
     assert(m_connection != nullptr);
     if (mg_http_match_uri(message, "/websocket"))
     {
-        LOG(info) << getId() << ": Websocket update request received";
+        LOG(debug) << getId() << ": Websocket update request received";
 
         // Upgrade to websocket. From now on, a m_connection is a full-duplex
         // Websocket m_connection, which will receive MG_EV_WS_MSG events.
@@ -48,7 +48,7 @@ void Connection::handleHttpMessage(mg_http_message *message, std::string &docRoo
     {
         if (mg_match(message->method, mg_str("GET"), nullptr))
         {
-            LOG(info) << getId() << "Event request received";
+            LOG(debug) << getId() << "Event request received";
         }
     }
     else
@@ -75,14 +75,14 @@ void Connection::handleWebsocketOpen(mg_http_message *)
 {
     assert(m_connection != nullptr);
     m_isOpenWebsocket = true;
-    LOG(info) << getId() << ": Open websocket connection";
+    LOG(debug) << getId() << ": Open websocket connection";
 }
 
 void Connection::handleWebsocketMessage(mg_ws_message *message, IRequestHandler &handler)
 {
     assert(m_connection != nullptr);
-    LOG(info) << getId() << ": Websocket message received (" << std::hex << std::setw(2)
-              << std::setfill('0') << static_cast<unsigned>(message->flags) << ")";
+    LOG(debug) << getId() << ": Websocket message received (" << std::hex << std::setw(2)
+               << std::setfill('0') << static_cast<unsigned>(message->flags) << ")";
     switch (message->flags & WebsocketOpMask)
     {
         // WEBSOCKET_OP_CONTINUE 0
@@ -98,7 +98,7 @@ void Connection::handleWebsocketMessage(mg_ws_message *message, IRequestHandler 
             mg_ws_send(m_connection, "", 0, WEBSOCKET_OP_PONG);
             break;
         default:
-            LOG(debug) << getId() << ": Unhandled websocket message";
+            LOG(warning) << getId() << ": Unhandled websocket message";
             break;
     }
 }
@@ -131,8 +131,8 @@ void Connection::sendMessage(const Json &response)
 void Connection::handleWebsocketControl(mg_ws_message *message)
 {
     assert(m_connection != nullptr);
-    LOG(info) << getId() << ": Websocket control message received (" << std::hex << std::setw(2)
-              << std::setfill('0') << static_cast<unsigned>(message->flags) << ")";
+    LOG(debug) << getId() << ": Websocket control message received (" << std::hex << std::setw(2)
+               << std::setfill('0') << static_cast<unsigned>(message->flags) << ")";
     switch (message->flags & WebsocketOpMask)
     {
         case WEBSOCKET_OP_CLOSE:
@@ -140,7 +140,7 @@ void Connection::handleWebsocketControl(mg_ws_message *message)
             LOG(debug) << getId() << ": received close request";
             break;
         default:
-            LOG(debug) << getId() << ": Unhandled websocket control message";
+            LOG(warning) << getId() << ": Unhandled websocket control message";
             break;
     }
 }

@@ -50,31 +50,46 @@ inline std::ostream& operator<<(std::ostream& ostr, const std::vector<ValueT>& v
 
 using namespace sugo::hal;
 
+void HardwareAbstractionLayer::finalize()
+{
+    postFinalization();
+}
+
 bool HardwareAbstractionLayer::init(const IConfiguration& configuration)
 {
-    bool success = initSubComponents<IGpioControl, GpioControl>(
-        configuration, getId(), "gpio-control", m_gpioControllerMap);
-    if (success)
+    if (!initSubComponents<IGpioControl, GpioControl>(configuration, getId(), id::GpioControl,
+                                                      m_gpioControllerMap))
     {
-        const auto& pinMap = m_gpioControllerMap.at("gpio-control")->getGpioPinMap();
-        success            = (pinMap.count("motor-control-error") == 1) &&
-                  (pinMap.count("motor-control-reset") == 1);
-        if (success)
-        {
-            success = initSubComponents<ITemperatureSensorControl, TemperatureSensorControl>(
-                configuration, getId(), "temperature-sensor-control",
-                m_temperatureSensorControllerMap, pinMap);
-        }
-
-        if (success)
-        {
-            success = initSubComponents<IStepperMotorControl, StepperMotorControl>(
-                configuration, getId(), "stepper-motor-control", m_stepperMotorControllerMap,
-                *pinMap.at("motor-control-error"), *pinMap.at("motor-control-reset"));
-        }
+        LOG(error) << "Failed to initialize sub components: " << id::GpioControl;
+        return false;
     }
 
-    return success;
+    const auto& pinMap = m_gpioControllerMap.at(id::GpioControl)->getGpioPinMap();
+    if ((pinMap.count(id::GpioPinMotorControlError) != 1) or
+        (pinMap.count(id::GpioPinMotorControlReset) != 1))
+    {
+        LOG(error) << "Missing mandatory configuration entries";
+        return false;
+    }
+
+    if (!initSubComponents<ITemperatureSensorControl, TemperatureSensorControl>(
+            configuration, getId(), id::TemperatureSensorControl, m_temperatureSensorControllerMap,
+            pinMap))
+    {
+        LOG(error) << "Failed to initialize sub components: " << id::TemperatureSensorControl;
+        return false;
+    }
+
+    if (!initSubComponents<IStepperMotorControl, StepperMotorControl>(
+            configuration, getId(), id::StepperMotorControl, m_stepperMotorControllerMap,
+            *pinMap.at(id::GpioPinMotorControlError), *pinMap.at(id::GpioPinMotorControlReset)))
+    {
+        LOG(error) << "Failed to initialize sub components: " << id::StepperMotorControl;
+        return false;
+    }
+
+    postInitialization();
+    return true;
 }
 
 void HardwareAbstractionLayer::addConfigurationOptions(sugo::IConfiguration& configuration)

@@ -29,10 +29,7 @@ class ServiceComponentExecutionBundle : public IServiceComponentExecutionBundle
 {
 public:
     explicit ServiceComponentExecutionBundle(ComponentArgs&... componentArgs)
-        : m_id(ComponentT::ReceiverId),
-          m_ioContext(m_id),
-          m_broker(m_id, m_ioContext),
-          m_component(m_broker, componentArgs...)
+        : m_ioContext(m_id), m_broker(m_id, m_ioContext), m_component(m_broker, componentArgs...)
     {
     }
     ~ServiceComponentExecutionBundle() override = default;
@@ -68,7 +65,7 @@ public:
     }
 
 private:
-    const decltype(ComponentT::ReceiverId) m_id;
+    const decltype(ComponentT::ReceiverId) m_id = ComponentT::ReceiverId;
     message::IOContext                     m_ioContext;
     message::CommandMessageBroker          m_broker;
     ComponentT                             m_component;
