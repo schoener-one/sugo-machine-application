@@ -44,7 +44,8 @@ message::CommandResponse FilamentCoilMotor::onCommandStopMotor(const message::Co
 
 message::CommandResponse FilamentCoilMotor::onCommandSetMotorSpeed(const message::Command& command)
 {
-    const auto& motorSpeed = Json::parse(command.parameters()).at(protocol::IdSpeed);
+    const auto  parameters = Json::parse(command.parameters());
+    const auto& motorSpeed = parameters.at(protocol::IdSpeed);
 
     if (motorSpeed.empty())
     {
@@ -60,31 +61,19 @@ message::CommandResponse FilamentCoilMotor::onCommandSetMotorSpeed(const message
 message::CommandResponse FilamentCoilMotor::onCommandIncreaseMotorOffsetSpeed(
     const message::Command& command)
 {
-    const auto& motorSpeedJson = Json::parse(command.parameters()).at(protocol::IdSpeed);
-    int         motorSpeed     = config::MotorSpeedInc;
-
-    if (!motorSpeedJson.empty())
-    {
-        motorSpeed = motorSpeedJson.get<int>();
-    }
-
-    (void)setMotorOffsetSpeed(motorSpeed);
+    const int motorSpeedIncrement = static_cast<int>(
+        m_serviceLocator.get<IConfiguration>().getOption(id::MotorSpeedIncrement).get<unsigned>());
+    (void)addMotorOffsetSpeed(motorSpeedIncrement);
     return createCommandResponse(command);
 }
 
 message::CommandResponse FilamentCoilMotor::onCommandDecreaseMotorOffsetSpeed(
     const message::Command& command)
 {
-    static constexpr int negativeMultiplier = -1;
-    const auto&          motorSpeedJson = Json::parse(command.parameters()).at(protocol::IdSpeed);
-    int                  motorSpeed = negativeMultiplier * static_cast<int>(config::MotorSpeedInc);
-
-    if (!motorSpeedJson.empty())
-    {
-        motorSpeed = negativeMultiplier * motorSpeedJson.get<int>();
-    }
-
-    (void)setMotorOffsetSpeed(motorSpeed);
+    static constexpr int negativeMultiplier  = -1;
+    const int            motorSpeedIncrement = static_cast<int>(
+        m_serviceLocator.get<IConfiguration>().getOption(id::MotorSpeedIncrement).get<unsigned>());
+    (void)addMotorOffsetSpeed(negativeMultiplier * motorSpeedIncrement);
     return createCommandResponse(command);
 }
 

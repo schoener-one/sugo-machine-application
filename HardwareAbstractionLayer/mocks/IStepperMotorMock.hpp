@@ -27,6 +27,7 @@ public:
     MOCK_METHOD(bool, reset, ());
     MOCK_METHOD(bool, rotateToPosition, (Position position));
     MOCK_METHOD(bool, rotate, (Direction direction));
+    MOCK_METHOD(bool, rotate, ());
     MOCK_METHOD(bool, stop, (bool stopImmediately));
     MOCK_METHOD(Position, getPosition, (), (const));
     MOCK_METHOD(StepCount, getMicroStepCount, (), (const));
@@ -34,5 +35,6 @@ public:
     MOCK_METHOD(Speed, getSpeed, (), (const));
     MOCK_METHOD(Speed, getMaxSpeed, (), (const));
     MOCK_METHOD(void, setMaxSpeed, (Speed maxSpeed));
+    MOCK_METHOD(bool, setSpeed, (Speed));
 };
 }  // namespace sugo::hal

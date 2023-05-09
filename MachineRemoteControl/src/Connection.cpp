@@ -107,8 +107,9 @@ void Connection::handleWebsocketMessage(const mg_str &message, IRequestHandler &
 {
     assert(m_connection != nullptr);
 
-    Json response;
-    if (handler.receiveRequest(getId(), Json::parse(toString(message)), response))
+    Json       response;
+    const Json request = Json::parse(toString(message));
+    if (handler.receiveRequest(getId(), request, response))
     {
         sendMessage(response);
     }

@@ -1,10 +1,21 @@
 {
+    "machine-control": {
+        "motor-speed": {
+            "max": 50,
+            "default": 25,
+            "increment": 2
+        },
+        "heater": {
+            "max-temperature": 110,
+            "min-temperature": 100
+        }
+    },
     "machine-service-gateway": {
         "address": "127.0.0.1",
-        "port": 1234
+        "port": 4242
     },
     "machine-remote-control": {
-        "address": "127.0.0.1",
+        "address": "0.0.0.0",
         "port": 8080,
         "doc-root": "MachineRemoteControl/www"
     },
@@ -29,7 +40,7 @@
                 "motor-control-reset"
             ],
             "gpio-pin": {
-                "relay-switch-heater-merger": {
+                "relay-switch-heater-feeder": {
                     "pin": 4,
                     "direction": "out"
                 },
@@ -45,7 +56,8 @@
                 },
                 "signal-filament-tension-low": {
                     "pin": 12,
-                    "direction": "in"
+                    "direction": "in",
+                    "active-high": false
                 },
                 "motor-control-error": {
                     "pin": 13,
@@ -53,7 +65,8 @@
                 },
                 "signal-filament-tension-high": {
                     "pin": 16,
-                    "direction": "in"
+                    "direction": "in",
+                    "active-high": false
                 },
                 "relay-switch-light-run": {
                     "pin": 17,
@@ -71,7 +84,7 @@
                     "pin": 20,
                     "direction": "out"
                 },
-                "relay-switch-heater-feeder": {
+                "relay-switch-heater-merger": {
                     "pin": 21,
                     "direction": "out"
                 },
@@ -106,12 +119,14 @@
             ],
             "motor": {
                 "feeder": {
-                    "i2c-address": 15,
-                    "max-speed-rpm": "100"
+                    "i2c-address": 14,
+                    "max-speed-rpm": "50",
+                    "direction": "forward"
                 },
                 "coiler": {
-                    "i2c-address": 14,
-                    "max-speed-rpm": "100"
+                    "i2c-address": 15,
+                    "max-speed-rpm": "50",
+                    "direction": "backward"
                 }
             }
         },

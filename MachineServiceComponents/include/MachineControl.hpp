@@ -26,17 +26,17 @@ class MachineControl : public IMachineControl, public ControlService<MachineCont
 public:
     // Constructor / Destructor
     explicit MachineControl(message::ICommandMessageBroker& messageBroker,
-                            const ServiceLocator&           serviceLocator)
-        : IMachineControl(messageBroker), m_serviceLocator(serviceLocator)
-    {
-    }
+                            const ServiceLocator&           serviceLocator);
 
 protected:
     // Command handlers
     message::CommandResponse onCommandSwitchOn(const message::Command& command) override;
     message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
+    message::CommandResponse onCommandStart(const message::Command& command) override;
+    message::CommandResponse onCommandStartHeatless(const message::Command& command) override;
     message::CommandResponse onCommandIncreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandDecreaseMotorSpeed(const message::Command& command) override;
+    message::CommandResponse onCommandStop(const message::Command& command) override;
     message::CommandResponse onCommandGetMotorSpeed(const message::Command& command) override;
     message::CommandResponse onNotificationFilamentMergerControlFeedingRunning(
         const message::Command& command) override;
@@ -54,11 +54,15 @@ protected:
         const message::Command& command) override;
 
     // Transition actions
-    void startMachine(const Event& event, const State& state) override;
-    void switchOff(const Event& event, const State& state) override;
-    void handleError(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
-    void waitForStarted(const Event& event, const State& state) override;
+    void startHeating(const Event& event, const State& state) override;
+    void stopMachine(const Event& event, const State& state) override;
+    void switchOff(const Event& event, const State& state) override;
+    void checkStartingState(const Event& event, const State& state) override;
+    void handleError(const Event& event, const State& state) override;
+    void notifyStopped(const Event& event, const State& state) override;
+    void startMachine(const Event& event, const State& state) override;
+    void checkStoppingState(const Event& event, const State& state) override;
 
 private:
     void switchOff();
@@ -66,7 +70,7 @@ private:
     const ServiceLocator& m_serviceLocator;
     bool                  m_isFilamentMergerControlRunning = false;
     bool                  m_isFilamentCoilControlRunning   = false;
-    unsigned              m_motorSpeed                     = config::DefaultMotorSpeed;
+    unsigned              m_motorSpeed                     = 0;
 
     friend class ControlService<MachineControl>;
 };

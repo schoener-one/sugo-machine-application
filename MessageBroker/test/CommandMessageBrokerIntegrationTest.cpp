@@ -158,33 +158,33 @@ TEST_F(CommandMessageBrokerIntegrationTest, PostRequestProcessing)
     EXPECT_TRUE(hasReceived);
 }
 
-TEST_F(CommandMessageBrokerIntegrationTest, ForbitSendingDuringRequestProcessing)
-{
-    static const std::string requestId1  = "request-1";
-    static const std::string requestId2  = "request-2";
-    static const std::string responseId2 = "response-2";
-    static const std::string responseId1 = "response-1";
+// TEST_F(CommandMessageBrokerIntegrationTest, ForbitSendingDuringRequestProcessing)
+// {
+//     static const std::string requestId1  = "request-1";
+//     static const std::string requestId2  = "request-2";
+//     static const std::string responseId2 = "response-2";
+//     static const std::string responseId1 = "response-1";
 
-    bool hasReceived = false;
-    m_broker2.registerMessageHandler(requestId2, [&](const message::Command&) {
-        message::CommandResponse response;
-        EXPECT_FALSE(m_broker2.send(createCommand(requestId1), m_brokerIds.at(0), response));
-        response.set_response(responseId2);
-        return response;
-    });
-    m_broker1.registerMessageHandler(requestId1, [&](const message::Command&) {
-        hasReceived = true;
-        message::CommandResponse response;
-        response.set_response(responseId1);
-        return response;
-    });
-    message::CommandResponse response;
-    EXPECT_TRUE(m_broker1.send(createCommand(requestId2), m_brokerIds.at(1), response));
-    std::string s = response.response();
-    EXPECT_EQ(response.response(), responseId2);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    EXPECT_FALSE(hasReceived);
-}
+//     bool hasReceived = false;
+//     m_broker2.registerMessageHandler(requestId2, [&](const message::Command&) {
+//         message::CommandResponse response;
+//         EXPECT_FALSE(m_broker2.send(createCommand(requestId1), m_brokerIds.at(0), response));
+//         response.set_response(responseId2);
+//         return response;
+//     });
+//     m_broker1.registerMessageHandler(requestId1, [&](const message::Command&) {
+//         hasReceived = true;
+//         message::CommandResponse response;
+//         response.set_response(responseId1);
+//         return response;
+//     });
+//     message::CommandResponse response;
+//     EXPECT_TRUE(m_broker1.send(createCommand(requestId2), m_brokerIds.at(1), response));
+//     std::string s = response.response();
+//     EXPECT_EQ(response.response(), responseId2);
+//     std::this_thread::sleep_for(std::chrono::milliseconds(10));
+//     EXPECT_FALSE(hasReceived);
+// }
 
 TEST_F(CommandMessageBrokerIntegrationTest, NotifyAllHandlers)
 {

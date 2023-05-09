@@ -79,8 +79,7 @@ bool CommandMessageBroker::send(const message::Command& message, const Address& 
 {
     if (m_isProcessingReceiveMessage.load())
     {
-        LOG(fatal) << "Failed to send message: processing received message (deadlock)";
-        return false;
+        LOG(warning) << "Send call during processing received message could cause a deadlock";
     }
 
     const std::string fullAddress = createFullQualifiedAddress(address, Service::Responder);

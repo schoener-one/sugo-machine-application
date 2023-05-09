@@ -37,7 +37,7 @@ The I2C, SPI and UART interfaces are provided over the GPIO pin header.
 | 01  | 3.3V DC   | motor-control-dc                    | \| | signal-board-dc                  | 5V DC   | 02 |
 | 03  | SDA1 (I2C)| motor-control-i2c-sda               | \| | relay-board-dc                   | 5V DC   | 04 |
 | 05  | SCL1 (I2C)| motor-control-i2c-scl               | \| | serial-com-gnd                   | GND     | 06 |
-| 07  | GPIO 04   | relay-switch-heater-merger (out)    | \| | serial-com-txd                   | TXD     | 08 |
+| 07  | GPIO 04   | relay-switch-heater-feeder (out)    | \| | serial-com-txd                   | TXD     | 08 |
 | 09  | GND       | signal-board-gnd                    | \| | serial-com-rxd                   | RXD     | 10 |
 | 11  | GPIO 17   | relay-switch-light-run (out)        | \| | relay-switch-light-ready (out)   | GPIO 18 | 12 |
 | 13  | GPIO 27   | temperature-sensor-control-cs-feeder (out) | \| | relay-switch-board-gnd    | GND     | 14 |
@@ -53,7 +53,7 @@ The I2C, SPI and UART interfaces are provided over the GPIO pin header.
 | 33  | GPIO 13   | motor-control-error (in)            | \| |                                  | GND     | 34 |
 | 35  | GPIO 19   | motor-control-reset (out)           | \| | signal-filament-tension-high (in)| GPIO 16 | 36 |
 | 37  | GPIO 26   | relay-switch-fan-feeder (out)       | \| | relay-switch-fan-merger (out)    | GPIO 20 | 38 |
-| 39  | GND       | motor-control-gnd                   | \| | relay-switch-heater-feeder (out) | GPIO 21 | 40 |
+| 39  | GND       | motor-control-gnd                   | \| | relay-switch-heater-merger (out) | GPIO 21 | 40 |
 |||||||
 
 ### UART console interface

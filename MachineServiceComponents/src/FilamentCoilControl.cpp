@@ -33,6 +33,17 @@ message::CommandResponse FilamentCoilControl::onCommandSwitchOff(const message::
 
 message::CommandResponse FilamentCoilControl::onCommandStartCoil(const message::Command& command)
 {
+    const auto  parameters     = Json::parse(command.parameters());
+    const auto& tensionControl = parameters.at(protocol::IdTensionControl);
+
+    if (tensionControl.empty())
+    {
+        return createErrorCommandResponse(
+            command, Json({{message::protocol::IdErrorReason,
+                            message::protocol::IdErrorCommandParameterInvalid}}));
+    }
+
+    m_controlTension = tensionControl.get<bool>();
     return handleEventMessage(command, Event::StartMotor);
 }
 
@@ -129,11 +140,7 @@ void FilamentCoilControl::stopMotor(const IFilamentCoilControl::Event&,
                                     const IFilamentCoilControl::State&)
 {
     const auto response = send(IFilamentCoilMotor::CommandStopMotor);
-    if (response.result() == message::CommandResponse_Result_SUCCESS)
-    {
-        push(Event::StopMotorSucceeded);
-    }
-    else
+    if (response.result() != message::CommandResponse_Result_SUCCESS)
     {
         push(Event::StopMotorFailed);
     }
@@ -159,21 +166,27 @@ void FilamentCoilControl::notifyRunning(const IFilamentCoilControl::Event&,
 void FilamentCoilControl::controlFilamentTension(const IFilamentCoilControl::Event& event,
                                                  const IFilamentCoilControl::State&)
 {
-    message::CommandResponse response;
+    if (m_controlTension)
+    {
+        message::CommandResponse response;
 
-    if (event == Event::TensionTooLow)
-    {
-        response = send(IFilamentCoilMotor::CommandIncreaseMotorOffsetSpeed,
-                        Json({{protocol::IdSpeed, config::MotorSpeedInc}}));
-    }
-    else if (event == Event::TensionTooHigh)
-    {
-        response = send(IFilamentCoilMotor::CommandDecreaseMotorOffsetSpeed,
-                        Json({{protocol::IdSpeed, config::MotorSpeedInc}}));
-    }
+        if (event == Event::TensionTooLow)
+        {
+            response = send(IFilamentCoilMotor::CommandIncreaseMotorOffsetSpeed);
+        }
+        else if (event == Event::TensionTooHigh)
+        {
+            response = send(IFilamentCoilMotor::CommandDecreaseMotorOffsetSpeed);
+        }
 
-    if (response.result() != CommandResponse_Result_SUCCESS)
+        if (response.result() != CommandResponse_Result_SUCCESS)
+        {
+            push(Event::ErrorOccurred);
+        }
+    }
+    else
     {
-        push(Event::ErrorOccurred);
+        LOG(debug) << "Ignoring tension event " << event
+                   << " because tension control is turned off";
     }
 }

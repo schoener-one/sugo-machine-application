@@ -36,7 +36,7 @@ using namespace message;
 
 void MachineServiceGateway::addConfigurationOptions(IConfiguration& configuration)
 {
-    static constexpr unsigned short defaultPortNumber = 1234u;
+    static constexpr unsigned short defaultPortNumber = 4242u;
     configuration.add(Option("machine-service-gateway.address", std::string("*"),
                              "Network address of the service"));
     configuration.add(

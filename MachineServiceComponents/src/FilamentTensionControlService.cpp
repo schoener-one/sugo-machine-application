@@ -18,18 +18,27 @@ using namespace sugo;
 FilamentTensionControlService::FilamentTensionControlService(
     const hal::Identifier& lowTensionSensorId, const hal::Identifier& highTensionSensorId,
     const ServiceLocator& serviceLocator)
-    : m_lowTensionSensorId(
+    : m_lowTensionSensorObserver(
           getGpioPin(serviceLocator.get<hal::IHardwareAbstractionLayer>(), lowTensionSensorId),
           [this](const hal::IGpioPin::Event& event, const hal::Identifier& pinId) {
               this->filterFilamentTensionEvent(event, pinId);
           },
-          config::MaxGpioPinObservationTimeout),
-      m_highTensionSensorId(
+          std::chrono::milliseconds(serviceLocator.get<IConfiguration>()
+                                        .getOption(id::ObservationTimeoutGpioPin)
+                                        .get<unsigned>())),
+      m_highTensionSensorObserver(
           getGpioPin(serviceLocator.get<hal::IHardwareAbstractionLayer>(), highTensionSensorId),
           [this](const hal::IGpioPin::Event& event, const hal::Identifier& pinId) {
               this->filterFilamentTensionEvent(event, pinId);
           },
-          config::MaxGpioPinObservationTimeout)
+          std::chrono::milliseconds(serviceLocator.get<IConfiguration>()
+                                        .getOption(id::ObservationTimeoutGpioPin)
+                                        .get<unsigned>())),
+      m_tensionEventRepeatTimer(
+          std::chrono::milliseconds(serviceLocator.get<IConfiguration>()
+                                        .getOption(id::ObservationTimeoutTension)
+                                        .get<unsigned>()),
+          [this] { this->repeatFilamentTensionEvent(); }, lowTensionSensorId + "Timer")
 {
 }
 
@@ -38,16 +47,16 @@ bool FilamentTensionControlService::startSensorObservation()
     assert(!isSensorObservationRunning());
     m_lastFilamentTensionEvent = FilamentTensionEvent::FilamentTensionNormal;
 
-    if (!m_lowTensionSensorId.start())
+    if (!m_lowTensionSensorObserver.start())
     {
         LOG(error) << "Failed to start low tension sensor observation";
         return false;
     }
 
-    if (!m_highTensionSensorId.start())
+    if (!m_highTensionSensorObserver.start())
     {
         LOG(error) << "Failed to start high tension sensor observation";
-        m_lowTensionSensorId.stop();
+        m_lowTensionSensorObserver.stop();
         return false;
     }
 
@@ -56,39 +65,59 @@ bool FilamentTensionControlService::startSensorObservation()
 
 void FilamentTensionControlService::stopSensorObservation()
 {
-    m_lowTensionSensorId.stop();
-    m_highTensionSensorId.stop();
+    m_lowTensionSensorObserver.stop();
+    m_highTensionSensorObserver.stop();
+    m_tensionEventRepeatTimer.stop();
+}
+
+void FilamentTensionControlService::repeatFilamentTensionEvent()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_lastFilamentTensionEvent != FilamentTensionNormal)
+    {
+        // Repeat event call as long as the tension is not at normal level!
+        onFilamentTensionEvent(m_lastFilamentTensionEvent);
+    }
 }
 
 void FilamentTensionControlService::filterFilamentTensionEvent(
     const hal::IGpioPin::Event& gpioEvent, const hal::Identifier& pinId)
 {
-    FilamentTensionEvent nextEvent = FilamentTensionNormal;
+    FilamentTensionEvent currentEvent = FilamentTensionNormal;
 
     switch (gpioEvent.type)
     {
         case hal::IGpioPin::EventType::RisingEdge:
-            if (pinId == m_lowTensionSensorId.getId())
+            if (pinId == m_lowTensionSensorObserver.getId())
             {
-                nextEvent = FilamentTensionLow;
+                currentEvent = FilamentTensionLow;
             }
             else
             {
-                nextEvent = FilamentTensionHigh;
+                currentEvent = FilamentTensionHigh;
             }
             break;
         case hal::IGpioPin::EventType::FallingEdge:
-            nextEvent = FilamentTensionNormal;
+            currentEvent = FilamentTensionNormal;
             break;
         case hal::IGpioPin::EventType::Timeout:
-            nextEvent = m_lastFilamentTensionEvent;
+            currentEvent = m_lastFilamentTensionEvent;
             break;
     }
 
-    if ((nextEvent != m_lastFilamentTensionEvent) or (nextEvent == FilamentTensionLow) or
-        (nextEvent == FilamentTensionHigh))
+    if (currentEvent != m_lastFilamentTensionEvent)
     {
-        m_lastFilamentTensionEvent = nextEvent;
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_lastFilamentTensionEvent = currentEvent;
         onFilamentTensionEvent(m_lastFilamentTensionEvent);
+
+        if (currentEvent == FilamentTensionNormal)
+        {
+            m_tensionEventRepeatTimer.stop();
+        }
+        else
+        {
+            m_tensionEventRepeatTimer.start();
+        }
     }
 }

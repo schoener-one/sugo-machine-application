@@ -17,65 +17,56 @@
 
 #include <algorithm>
 
+namespace
+{
+constexpr unsigned HalfSpeedDivider = 2u;
+}
+
 using namespace sugo;
 
 MotorService::MotorService(const hal::Identifier& motorId, const ServiceLocator& serviceLocator)
-    : m_stepperMotor(getStepperMotor(serviceLocator.get<hal::IHardwareAbstractionLayer>(), motorId))
+    : m_stepperMotor(
+          getStepperMotor(serviceLocator.get<hal::IHardwareAbstractionLayer>(), motorId)),
+      m_maxMotorSpeed(m_stepperMotor->getMaxSpeed().getValue()),
+      m_motorSpeed(0)
 {
 }
 
 bool MotorService::setMotorSpeed(unsigned motorSpeed)
 {
-    bool valid = true;
+    m_motorSpeed = motorSpeed;
 
-    if (motorSpeed <= config::MaxMotorSpeed)
+    if (m_motorSpeed > m_maxMotorSpeed)
     {
-        m_motorSpeed = motorSpeed;
-    }
-    else
-    {
-        m_motorSpeed = config::MaxMotorSpeed;
-        valid        = false;
+        m_motorSpeed = m_maxMotorSpeed;
     }
 
-    setMotorSpeed();
-    return valid;
+    return setMotorSpeed();
 }
 
-void MotorService::setMotorSpeed()
+bool MotorService::setMotorSpeed()
 {
-    const auto motorSpeed = m_motorSpeed + m_motorOffsetSpeed;
+    assert(static_cast<unsigned>(std::abs(m_motorOffsetSpeed)) <= m_motorSpeed);
+    const int motorSpeed = static_cast<int>(m_motorSpeed) + m_motorOffsetSpeed;
     LOG(debug) << "Setting motor speed: " << motorSpeed;
-    m_stepperMotor->setMaxSpeed(hal::IStepperMotor::Speed(motorSpeed, hal::Unit::Rpm));
+    return m_stepperMotor->setSpeed(
+        hal::IStepperMotor::Speed(static_cast<unsigned>(motorSpeed), hal::Unit::Rpm));
 }
 
-bool MotorService::setMotorOffsetSpeed(int motorOffsetSpeed)
+bool MotorService::addMotorOffsetSpeed(int motorOffsetSpeed)
 {
-    int  resultingSpeed = static_cast<int>(m_motorSpeed) + motorOffsetSpeed;
-    bool valid          = true;
-
-    if (resultingSpeed >= static_cast<int>(config::MinMotorSpeed) and
-        (resultingSpeed <= static_cast<int>(config::MaxMotorSpeed)))
-    {
-        m_motorOffsetSpeed = motorOffsetSpeed;
-    }
-    else
-    {
-        resultingSpeed     = std::clamp(motorOffsetSpeed, static_cast<int>(config::MinMotorSpeed),
-                                    static_cast<int>(config::MaxMotorSpeed));
-        m_motorOffsetSpeed = static_cast<int>(m_motorSpeed) - resultingSpeed;
-        valid              = false;
-    }
-
-    setMotorSpeed();
-    return valid;
+    int resultingSpeed =
+        std::clamp(static_cast<int>(m_motorSpeed) + m_motorOffsetSpeed + motorOffsetSpeed, 0,
+                   static_cast<int>(m_maxMotorSpeed));
+    m_motorOffsetSpeed = resultingSpeed - static_cast<int>(m_motorSpeed);
+    return setMotorSpeed();
 }
 
 bool MotorService::startMotorRotation()
 {
     setMotorSpeed();
 
-    if (!m_stepperMotor->rotate(hal::IStepperMotor::Direction::Forward))
+    if (!m_stepperMotor->rotate())
     {
         LOG(error) << "Failed to start motor rotation";
         return false;
@@ -93,7 +84,7 @@ bool MotorService::resetMotor()
     }
 
     m_motorOffsetSpeed = 0;
-    m_motorSpeed       = m_stepperMotor->getMaxSpeed().getValue();
+    m_motorSpeed       = 0;
 
     return true;
 }

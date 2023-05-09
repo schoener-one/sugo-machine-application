@@ -27,7 +27,8 @@ public:
     explicit FilamentCoilMotor(message::ICommandMessageBroker& messageBroker,
                                const ServiceLocator&           serviceLocator)
         : IFilamentCoilMotor(messageBroker),
-          MotorService(hal::id::StepperMotorCoiler, serviceLocator)
+          MotorService(hal::id::StepperMotorCoiler, serviceLocator),
+          m_serviceLocator(serviceLocator)
     {
     }
 
@@ -48,6 +49,9 @@ protected:
     void handleError(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
     void startMotor(const Event& event, const State& state) override;
+
+private:
+    const ServiceLocator& m_serviceLocator;
 };
 
 }  // namespace sugo

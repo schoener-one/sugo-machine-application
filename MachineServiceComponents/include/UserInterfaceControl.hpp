@@ -42,6 +42,10 @@ public:
 
 protected:
     // Command handlers
+    message::CommandResponse onNotificationMachineControlStopped(
+        const message::Command& command) override;
+    message::CommandResponse onNotificationMachineControlHeatingUp(
+        const message::Command& command) override;
     message::CommandResponse onNotificationMachineControlStarting(
         const message::Command& command) override;
     message::CommandResponse onNotificationMachineControlRunning(

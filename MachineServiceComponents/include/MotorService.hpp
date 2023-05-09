@@ -54,17 +54,18 @@ protected:
      * @return true      If the offset speed value could be set successfully.
      * @return false     If the offset speed value could not be set successfully.
      */
-    bool setMotorOffsetSpeed(int motorOffsetSpeed);
+    bool addMotorOffsetSpeed(int motorOffsetSpeed);
     bool startMotorRotation();
     bool resetMotor();
     void stopMotorRotation(bool immediately = false);
 
 private:
-    void setMotorSpeed();
+    bool setMotorSpeed();
 
     std::shared_ptr<hal::IStepperMotor> m_stepperMotor;
+    const unsigned                      m_maxMotorSpeed    = 0;
     unsigned                            m_motorSpeed       = 0;
-    unsigned                            m_motorOffsetSpeed = 0;
+    int                                 m_motorOffsetSpeed = 0;
 };
 
 }  // namespace sugo

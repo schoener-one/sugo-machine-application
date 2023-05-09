@@ -18,6 +18,7 @@
 #include "CommandMessageBroker.hpp"
 #include "ConfigurationFileParser.hpp"
 #include "HardwareAbstractionLayer.hpp"
+#include "MachineConfig.hpp"
 #include "MachineServiceGateway.hpp"
 #include "RemoteControlServer.hpp"
 #include "ServiceComponentExecutionBundle.hpp"
@@ -86,6 +87,7 @@ bool MachineApplication::start(int argc, char const** argv)
     RemoteControlServer::addConfigurationOptions(m_configuration);
     HardwareAbstractionLayer::addConfigurationOptions(m_configuration);
     MachineServiceGateway::addConfigurationOptions(m_configuration);
+    MachineConfig::addConfigurationOptions(m_configuration);
 
     LOG(info) << "Starting application " << m_name;
     if (!parseCommandLine(argc, argv))

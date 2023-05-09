@@ -63,6 +63,5 @@ void GpioPinEventObserver::doStop()
     {
         m_doObserve = false;
         m_thread.join();
-        m_pin.reset();
     }
 }

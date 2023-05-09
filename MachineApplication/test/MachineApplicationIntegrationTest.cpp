@@ -15,6 +15,7 @@
 
 #include "CommandMessageBroker.hpp"
 #include "Globals.hpp"
+#include "IConfigurationMock.hpp"
 #include "IFilamentCoilControl.hpp"
 #include "IFilamentCoilMotor.hpp"
 #include "IFilamentMergerHeater.hpp"
@@ -32,6 +33,7 @@
 #include "IntegrationTest.hpp"
 #include "Logger.hpp"
 #include "MachineConfig.hpp"
+#include "MachineServiceComponentsTestHelper.hpp"
 #include "ServiceComponentsExecutionGroup.hpp"
 #include "ServiceLocator.hpp"
 #include "Thread.hpp"
@@ -56,6 +58,7 @@ MATCHER_P(speedEqual, other, "")
     return (arg == other);
 }
 }  // namespace
+
 namespace sugo
 {
 class MachineApplicationIntegrationTest : public IntegrationTest
@@ -70,7 +73,8 @@ protected:
     void SetUp() override
     {
         IntegrationTest::SetUp();
-
+        m_serviceLocator.add<IConfiguration>(m_mockConfiguration);
+        m_machineConfig.prepareOptions(m_mockConfiguration);
         prepareForStartComponents();
         ASSERT_TRUE(m_components.start(m_serviceLocator));
 
@@ -96,9 +100,10 @@ protected:
         Logger::init(Logger::Severity::debug, ReceiverId);
     }
 
+    void prepareConfigOptions();
     void prepareHardwareAbstractionLayer();
     void prepareForStartComponents();
-    void prepareSwitchOn();
+    void prepareSwitchOn(bool);
     void heatUp();
     void coolDown();
     void switchOnMachine();
@@ -130,15 +135,14 @@ protected:
 
     NiceMock<MockFunction<void(const Json&)>> m_mockNotificationHandler;
 
+    NiceMock<IConfigurationMock>            m_mockConfiguration;
     NiceMock<IHardwareAbstractionLayerMock> m_mockHardwareAbstractionLayer;
+    test::MachineConfiguration              m_machineConfig;
     ServiceLocator                          m_serviceLocator;
     ServiceComponentsExecutionGroup         m_components;
 
-    static constexpr unsigned DefaultMotorSpeed  = 100;
-    static constexpr int32_t  DefaultTemperature = 25;
-
     unsigned m_nextMotorSpeed = 0;
-};
+};  // namespace IntegrationTest
 
 void MachineApplicationIntegrationTest::prepareHardwareAbstractionLayer()
 {
@@ -213,22 +217,29 @@ void MachineApplicationIntegrationTest::prepareForStartComponents()
     prepareHardwareAbstractionLayer();
     ON_CALL(*m_mockStepperMotorCoiler, reset()).WillByDefault(Return(true));
     ON_CALL(*m_mockStepperMotorCoiler, getMaxSpeed())
-        .WillByDefault(Return(IStepperMotor::Speed{DefaultMotorSpeed, Unit::Rpm}));
+        .WillByDefault(
+            Return(IStepperMotor::Speed{test::MachineConfiguration::MotorSpeedDefault, Unit::Rpm}));
     ON_CALL(*m_mockStepperMotorFeeder, reset()).WillByDefault(Return(true));
     ON_CALL(*m_mockStepperMotorFeeder, getMaxSpeed())
-        .WillByDefault(Return(IStepperMotor::Speed{DefaultMotorSpeed, Unit::Rpm}));
+        .WillByDefault(
+            Return(IStepperMotor::Speed{test::MachineConfiguration::MotorSpeedDefault, Unit::Rpm}));
     ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
-        .WillByDefault(Return(ITemperatureSensor::Temperature{DefaultTemperature, Unit::Celcius}));
+        .WillByDefault(Return(ITemperatureSensor::Temperature{
+            test::MachineConfiguration::DefaultTemperature, Unit::Celcius}));
     ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
-        .WillByDefault(Return(ITemperatureSensor::Temperature{DefaultTemperature, Unit::Celcius}));
+        .WillByDefault(Return(ITemperatureSensor::Temperature{
+            test::MachineConfiguration::DefaultTemperature, Unit::Celcius}));
 }
 
-void MachineApplicationIntegrationTest::prepareSwitchOn()
+void MachineApplicationIntegrationTest::prepareSwitchOn(bool expectHeating = true)
 {
-    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::High))
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::High))
-        .WillOnce(Return(true));
+    if (expectHeating)
+    {
+        EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::High))
+            .WillOnce(Return(true));
+        EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::High))
+            .WillOnce(Return(true));
+    }
     ON_CALL(*m_mockGpioPinSignalFilamentTensionLow, getState())
         .WillByDefault(Return(hal::IGpioPin::State::Low));
     ON_CALL(*m_mockGpioPinSignalFilamentTensionHigh, getState())
@@ -241,16 +252,16 @@ void MachineApplicationIntegrationTest::heatUp()
         .WillOnce(Return(true));
     EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
     ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
-        .WillByDefault(
-            Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
+        .WillByDefault(Return(ITemperatureSensor::Temperature{
+            test::MachineConfiguration::HeaterTemperatureMax, Unit::Celcius}));
     EXPECT_NOTIFICATION(IFilamentPreHeater, NotificationTargetTemperatureRangeReached);
 
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::Low))
         .WillOnce(Return(true));
     EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
     ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
-        .WillByDefault(
-            Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
+        .WillByDefault(Return(ITemperatureSensor::Temperature{
+            test::MachineConfiguration::HeaterTemperatureMax, Unit::Celcius}));
     EXPECT_NOTIFICATION(IFilamentMergerHeater, NotificationTargetTemperatureRangeReached);
 }
 
@@ -260,30 +271,34 @@ void MachineApplicationIntegrationTest::coolDown()
         .WillOnce(Return(true));
     EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
     ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
-        .WillByDefault(
-            Return(ITemperatureSensor::Temperature{config::MinHeaterTemperature, Unit::Celcius}));
+        .WillByDefault(Return(ITemperatureSensor::Temperature{
+            test::MachineConfiguration::HeaterTemperatureMin, Unit::Celcius}));
     EXPECT_NOTIFICATION(IFilamentPreHeater, NotificationTargetTemperatureRangeLeft);
 
     EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::High))
         .WillOnce(Return(true));
     EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
     ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
-        .WillByDefault(
-            Return(ITemperatureSensor::Temperature{config::MinHeaterTemperature, Unit::Celcius}));
+        .WillByDefault(Return(ITemperatureSensor::Temperature{
+            test::MachineConfiguration::HeaterTemperatureMin, Unit::Celcius}));
     EXPECT_NOTIFICATION(IFilamentMergerHeater, NotificationTargetTemperatureRangeLeft);
 }
 
 void MachineApplicationIntegrationTest::switchOnMachine()
 {
     prepareSwitchOn();
-    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationStarting);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationStopped);
     send(IMachineControl::CommandSwitchOn);
-    EXPECT_NOTIFICATION(IMachineControl, NotificationStarting);
-    EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationStopped);
+    EXPECT_STATE(IMachineControl, Stopped);
+
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationHeatingUp);
+    send(IMachineControl::CommandStart);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationHeatingUp);
 
     // Heating up
-    EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
-    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockStepperMotorFeeder, rotate()).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate()).WillOnce(Return(true));
     EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationRunning);
     heatUp();
     EXPECT_NOTIFICATION(IMachineControl, NotificationRunning);
@@ -326,34 +341,19 @@ TEST_F(MachineApplicationIntegrationTest, HeaterCoolDown)
 TEST_F(MachineApplicationIntegrationTest, MotorErrorOccurred)
 {
     // switchOn
-    prepareSwitchOn();
-    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationStarting);
+    prepareSwitchOn(false);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationStopped);
     send(IMachineControl::CommandSwitchOn);
-    EXPECT_NOTIFICATION(IMachineControl, NotificationStarting);
-    EXPECT_STATE(IMachineControl, WaitingForHeatedUp);
+    EXPECT_NOTIFICATION(IMachineControl, NotificationStopped);
+    EXPECT_STATE(IMachineControl, Stopped);
 
     // Simulate motor rotation error after heating up
     EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationErrorOccurred);
-    EXPECT_CALL(*m_mockStepperMotorFeeder, rotate(_)).WillOnce(Return(true));
-    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate(_)).WillOnce(Return(false));  // Error occurred!
+    EXPECT_CALL(*m_mockStepperMotorFeeder, rotate()).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate()).WillOnce(Return(false));  // Error occurred!
     EXPECT_CALL(*m_mockStepperMotorFeeder, stop(false)).WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorCoiler, stop(true)).WillOnce(Return(true));
-
-    // Heat up
-    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterFeeder, setState(hal::IGpioPin::State::Low))
-        .Times(2)
-        .WillRepeatedly(Return(true));
-    ON_CALL(*m_mockTemperatureSensorFeeder, getTemperature())
-        .WillByDefault(
-            Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
-
-    EXPECT_CALL(*m_mockGpioPinRelaySwitchHeaterMerger, setState(hal::IGpioPin::State::Low))
-        .Times(2)
-        .WillRepeatedly(Return(true));
-    ON_CALL(*m_mockTemperatureSensorMerger, getTemperature())
-        .WillByDefault(
-            Return(ITemperatureSensor::Temperature{config::MaxHeaterTemperature, Unit::Celcius}));
-
+    send(IMachineControl::CommandStartHeatless);
     EXPECT_NOTIFICATION(IMachineControl, NotificationErrorOccurred);
     EXPECT_STATE(IMachineControl, Error);
 
@@ -367,7 +367,8 @@ TEST_F(MachineApplicationIntegrationTest, TensionSensorTooLow)
 {
     switchOnMachine();
 
-    m_nextMotorSpeed      = DefaultMotorSpeed + config::MotorSpeedInc;
+    m_nextMotorSpeed = test::MachineConfiguration::MotorSpeedDefault +
+                       test::MachineConfiguration::MotorSpeedIncrement;
     bool signalRisingEdge = true;
     EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentTensionSensor, NotificationTensionTooLow);
     EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionLow, waitForEvent(_))
@@ -390,7 +391,8 @@ TEST_F(MachineApplicationIntegrationTest, TensionSensorTooLow)
         .WillRepeatedly([&](hal::IStepperMotor::Speed speed) {
             EXPECT_EQ(speed, m_nextMotorSpeed);
             m_nextMotorSpeed =
-                std::clamp(m_nextMotorSpeed + config::MotorSpeedInc, 0u, config::MaxMotorSpeed);
+                std::clamp(m_nextMotorSpeed + test::MachineConfiguration::MotorSpeedIncrement, 0u,
+                           test::MachineConfiguration::MotorSpeedMax);
         });
     EXPECT_NOTIFICATION(IFilamentTensionSensor, NotificationTensionTooLow);
     EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionLow, getState())
@@ -402,7 +404,8 @@ TEST_F(MachineApplicationIntegrationTest, TensionSensorTooHigh)
 {
     switchOnMachine();
 
-    m_nextMotorSpeed      = DefaultMotorSpeed - config::MotorSpeedInc;
+    m_nextMotorSpeed = test::MachineConfiguration::MotorSpeedDefault -
+                       test::MachineConfiguration::MotorSpeedIncrement;
     bool signalRisingEdge = true;
     EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentTensionSensor, NotificationTensionTooHigh);
     EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionHigh, waitForEvent(_))
@@ -425,7 +428,8 @@ TEST_F(MachineApplicationIntegrationTest, TensionSensorTooHigh)
         .WillRepeatedly([&](hal::IStepperMotor::Speed speed) {
             EXPECT_EQ(speed, m_nextMotorSpeed);
             m_nextMotorSpeed =
-                std::clamp(m_nextMotorSpeed - config::MotorSpeedInc, 0u, config::MaxMotorSpeed);
+                std::clamp(m_nextMotorSpeed - test::MachineConfiguration::MotorSpeedIncrement, 0u,
+                           test::MachineConfiguration::MotorSpeedMax);
         });
     EXPECT_NOTIFICATION(IFilamentTensionSensor, NotificationTensionTooHigh);
     EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionHigh, getState())

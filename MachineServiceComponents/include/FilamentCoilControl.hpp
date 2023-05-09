@@ -63,6 +63,7 @@ private:
     void switchOff();
 
     const ServiceLocator& m_serviceLocator;
+    bool                  m_controlTension = false;  // Indicates if tension control is on or off
 
     friend class ControlService<FilamentCoilControl>;
 };

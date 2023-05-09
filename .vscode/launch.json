@@ -45,10 +45,10 @@
             "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--generate-state-diagrams"]
         },
         {
-            "name": "Debug HAL SmokeTest",
+            "name": "Debug HAL SmokeTest (x86)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory.x86}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest",
+            "program": "${config:build.directory}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "MIMode": "gdb"
@@ -57,7 +57,7 @@
             "name": "Debug HAL SmokeTest (remote)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory.rpi}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest",
+            "program": "${config:build.directory}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest",
             "miDebuggerServerAddress": "${config:remote.host}:${config:remote.port}",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
@@ -74,10 +74,29 @@
             //"preLaunchTask": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest"
         },
         {
-            "name": "Machine Application (x86)",
+            "name": "Debug MachineApplication (remote)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory.x86}/MachineApplication/MachineApplication",
+            "program": "${config:build.directory}/MachineApplication/MachineApplication",
+            "miDebuggerServerAddress": "${config:remote.host}:${config:remote.port}",
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "miDebuggerPath": "${workspaceFolder}/../sdk/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gdb",
+            "MIMode": "gdb",
+            "args": [],
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Debug Machine Application (x86)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${config:build.directory}/MachineApplication/MachineApplication",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "MIMode": "gdb",
@@ -87,17 +106,17 @@
             "name": "Machine Application Integration Test (x86)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory.x86}/MachineApplication/test/MachineApplicationIntegrationTest",
+            "program": "${config:build.directory}/MachineApplication/test/MachineApplicationIntegrationTest",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "MIMode": "gdb",
             "args": []
         },
         {
-            "name": "Machine Remote Control Server (x86)",
+            "name": "Debug Machine Remote Control Server (x86)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory.x86}/MachineRemoteControl/MachineRemoteControlServer",
+            "program": "${config:build.directory}/MachineRemoteControl/MachineRemoteControlServer",
             "cwd": "${workspaceFolder}/MachineRemoteControl",
             "stopAtEntry": false,
             "MIMode": "gdb",

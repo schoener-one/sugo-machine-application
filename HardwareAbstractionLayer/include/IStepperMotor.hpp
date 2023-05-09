@@ -77,6 +77,17 @@ public:
     virtual bool rotate(Direction direction) = 0;
 
     /**
+     * @brief Starts rotating the stepper motor continuously.
+     * The caller will not be blocked by that call. The rotation has to be
+     * stopped by a stop() call. The
+     *
+     * @note The configured rotation direction is used.
+     * @return true If the motor could be started.
+     * @return false If the motor could not be started.
+     */
+    virtual bool rotate() = 0;
+
+    /**
      * @brief Stops a running rotation. The method blocks the caller
      *        until the motor has stopped rotation.
      *
@@ -129,6 +140,16 @@ public:
      * @param maxSpeed Sets the max speed in RPMs.
      */
     virtual void setMaxSpeed(Speed maxSpeed) = 0;
+
+    /**
+     * @brief Sets the target speed of the motor.
+     *
+     * @note The rotation direction cannot be changed until motor has been stopped again!
+     * @param speed Velocity to be set.
+     * @return true If the speed could be set successfully.
+     * @return false If the speed could not be set successfully.
+     */
+    virtual bool setSpeed(Speed speed) = 0;
 
     /**
      * @brief Returns the time between one step to the next step position.

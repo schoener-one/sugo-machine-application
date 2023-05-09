@@ -65,6 +65,7 @@ void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
                                     const IFilamentMergerHeater::State&)
 {
     updateHeaterTemperature();
+
     if (!startTemperatureObservation())
     {
         push(Event::SwitchOnFailed);
@@ -79,7 +80,9 @@ void FilamentMergerHeater::startHeating(const IFilamentMergerHeater::Event& even
     if (!switchHeater(true))
     {
         push(Event::ErrorOccurred);
+        return;
     }
+
     if (event == Event::MinTemperatureReached)
     {
         notify(NotificationTargetTemperatureRangeLeft);
@@ -92,7 +95,9 @@ void FilamentMergerHeater::stopHeating(const IFilamentMergerHeater::Event& event
     if (!switchHeater(false))
     {
         push(Event::ErrorOccurred);
+        return;
     }
+
     if (event == Event::MaxTemperatureReached)
     {
         notify(NotificationTargetTemperatureRangeReached);
@@ -103,6 +108,7 @@ void FilamentMergerHeater::switchOff(const IFilamentMergerHeater::Event&,
                                      const IFilamentMergerHeater::State&)
 {
     stopTemperatureObservation();
+
     if (!switchHeater(false))
     {
         push(Event::ErrorOccurred);

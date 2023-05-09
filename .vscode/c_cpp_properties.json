@@ -6,11 +6,10 @@
                 "${workspaceFolder}/**"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/clang-10",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-clang-x64",
-            "compileCommands": "${workspaceFolder}/build.x86.DEBUG/compile_commands.json"
+            "intelliSenseMode": "linux-gcc-x64",
+            "compileCommands": "${config:build.compile_commands}"
         }
     ],
     "version": 4

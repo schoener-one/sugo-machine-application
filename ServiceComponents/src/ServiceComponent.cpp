@@ -57,7 +57,7 @@ message::CommandResponse ServiceComponent::send(const message::CommandId& comman
 message::CommandResponse ServiceComponent::forward(const message::CommandId& commandId,
                                                    const message::Command&   command)
 {
-    message::Command forwardCommand = command;
+    message::Command forwardCommand{command};
     forwardCommand.set_name(commandId.getId());
     message::CommandResponse commandResponse;
     const bool               success =

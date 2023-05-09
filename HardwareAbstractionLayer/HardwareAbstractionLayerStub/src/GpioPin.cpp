@@ -21,9 +21,9 @@ GpioPin::~GpioPin()
 
 bool GpioPin::init(const IConfiguration& configuration)
 {
-    m_direction =
-        (configuration.getOption("direction").get<std::string>() == "in" ? Direction::In
-                                                                         : Direction::Out);
+    m_direction = (configuration.getOption(option::id::Direction).get<std::string>() == "in"
+                       ? Direction::In
+                       : Direction::Out);
     LOG(debug) << getId() << ".pin: " << configuration.getOption("pin").get<unsigned>();
     LOG(debug) << getId() << ".direction: " << m_direction;
     LOG(debug) << getId()

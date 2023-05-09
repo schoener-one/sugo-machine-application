@@ -27,11 +27,14 @@ bool StepperMotor::init(const sugo::IConfiguration& configuration)
 {
     const auto address =
         static_cast<uint8_t>(configuration.getOption(option::id::I2cAddress).get<unsigned>());
-    m_maxSpeed = StepperMotor::StepperMotor::Speed(
+    m_maxSpeed = IStepperMotor::Speed(
         configuration.getOption(option::id::MaxSpeedRpm).get<unsigned>(), Unit::Rpm);
-    m_initMaxSpeed = m_maxSpeed;
+    m_direction = (configuration.getOption(option::id::Direction).get<std::string>() == "backward")
+                      ? IStepperMotor::Direction::Backward
+                      : IStepperMotor::Direction::Forward;
     LOG(debug) << getId() << "." << option::id::I2cAddress << ": " << address;
-    LOG(debug) << getId() << "." << option::id::MaxSpeedRpm << ": " << m_maxSpeed.getValue();
+    LOG(debug) << getId() << "." << option::id::MaxSpeedRpm << ": " << m_maxSpeed;
+    LOG(debug) << getId() << "." << option::id::Direction << ": " << m_direction;
     s_curPosition = 0;
     return true;
 }
@@ -46,7 +49,6 @@ bool StepperMotor::reset()
     {
         stop(true);
     }
-    setMaxSpeed(m_initMaxSpeed);
     return true;
 }
 
@@ -58,7 +60,7 @@ bool StepperMotor::rotateToPosition(Position position)
 
 bool StepperMotor::rotate(Direction direction)
 {
-    (void)direction;
+    m_direction = direction;
     return true;
 }
 
@@ -88,4 +90,17 @@ StepperMotor::StepCount StepperMotor::getStepsPerRound() const
 StepperMotor::Speed StepperMotor::getSpeed() const
 {
     return Speed(0u, Unit::Rpm);
+}
+
+bool StepperMotor::setSpeed(Speed speed)
+{
+    if (speed.getValue() > m_maxSpeed.getValue())
+    {
+        LOG(error) << getId() << ": Set target speed (" << speed << ") exceeds max speed ("
+                   << m_maxSpeed << ")";
+        return false;
+    }
+
+    m_speed = speed;
+    return true;
 }

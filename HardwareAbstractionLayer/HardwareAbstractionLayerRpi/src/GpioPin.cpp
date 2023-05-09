@@ -39,9 +39,9 @@ bool GpioPin::init(const IConfiguration& configuration)
     }
 
     const bool activeHigh = configuration.getOption(option::id::ActiveHigh).get<bool>();
-    m_direction =
-        (configuration.getOption("direction").get<std::string>() == "in" ? Direction::In
-                                                                         : Direction::Out);
+    m_direction = (configuration.getOption(option::id::Direction).get<std::string>() == "in"
+                       ? Direction::In
+                       : Direction::Out);
     LOG(debug) << getId() << ": direction=" << m_direction;
     LOG(debug) << getId() << ": activate-high=" << activeHigh;
 
@@ -69,6 +69,11 @@ bool GpioPin::init(const IConfiguration& configuration)
             LOG(error) << getId() << "failed to set default state";
             return false;
         }
+    }
+
+    if (m_direction == Direction::In)
+    {
+        LOG(debug) << getId() << ": state=" << (getState() == State::High ? "high" : "low");
     }
 
     return true;

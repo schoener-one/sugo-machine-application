@@ -1,114 +1,14 @@
 {
     "build.type": "DEBUG",
-    "build.directory.x86": "${workspaceFolder}/build.x86.${config:build.type}",
-    "build.directory.rpi": "${workspaceFolder}/build.rpi.${config:build.type}",
+    "build.directory": "${workspaceFolder}/build.${config:build.type}",
     "sdk.directory": "${workspaceFolder}/../sdk",
     "sdk.env": "${config:sdk.directory}/environment-setup-cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi",
     "sdk.gdb": "{config:sdk.directory}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gdb",
     "remote.host": "raspberrypi3",
     "remote.port": 1234,
-    "editor.tokenColorCustomizations": {
-        "textMateRules": [
-            {
-                "scope": "googletest.failed",
-                "settings": {
-                    "foreground": "#f00"
-                }
-            },
-            {
-                "scope": "googletest.passed",
-                "settings": {
-                    "foreground": "#0f0"
-                }
-            },
-            {
-                "scope": "googletest.run",
-                "settings": {
-                    "foreground": "#0f0"
-                }
-            }
-        ]
-    },
+    "build.compile_commands": "${config:build.directory}/compile_commands.json",
     "testMate.cpp.test.executables": "build.*/**/*{test,Test,TEST}*",
     "cmake.configureOnOpen": false,
-    "files.associations": {
-        "any": "cpp",
-        "cctype": "cpp",
-        "clocale": "cpp",
-        "cmath": "cpp",
-        "csignal": "cpp",
-        "cstdarg": "cpp",
-        "cstddef": "cpp",
-        "cstdio": "cpp",
-        "cstdlib": "cpp",
-        "cstring": "cpp",
-        "ctime": "cpp",
-        "cwchar": "cpp",
-        "cwctype": "cpp",
-        "array": "cpp",
-        "atomic": "cpp",
-        "hash_map": "cpp",
-        "hash_set": "cpp",
-        "strstream": "cpp",
-        "bit": "cpp",
-        "*.tcc": "cpp",
-        "bitset": "cpp",
-        "chrono": "cpp",
-        "codecvt": "cpp",
-        "complex": "cpp",
-        "condition_variable": "cpp",
-        "cstdint": "cpp",
-        "deque": "cpp",
-        "forward_list": "cpp",
-        "list": "cpp",
-        "map": "cpp",
-        "set": "cpp",
-        "unordered_map": "cpp",
-        "unordered_set": "cpp",
-        "vector": "cpp",
-        "exception": "cpp",
-        "algorithm": "cpp",
-        "functional": "cpp",
-        "iterator": "cpp",
-        "memory": "cpp",
-        "memory_resource": "cpp",
-        "numeric": "cpp",
-        "optional": "cpp",
-        "random": "cpp",
-        "ratio": "cpp",
-        "regex": "cpp",
-        "string": "cpp",
-        "string_view": "cpp",
-        "system_error": "cpp",
-        "tuple": "cpp",
-        "type_traits": "cpp",
-        "utility": "cpp",
-        "fstream": "cpp",
-        "future": "cpp",
-        "initializer_list": "cpp",
-        "iomanip": "cpp",
-        "iosfwd": "cpp",
-        "iostream": "cpp",
-        "istream": "cpp",
-        "limits": "cpp",
-        "mutex": "cpp",
-        "new": "cpp",
-        "ostream": "cpp",
-        "shared_mutex": "cpp",
-        "sstream": "cpp",
-        "stdexcept": "cpp",
-        "streambuf": "cpp",
-        "thread": "cpp",
-        "cfenv": "cpp",
-        "cinttypes": "cpp",
-        "typeindex": "cpp",
-        "typeinfo": "cpp",
-        "valarray": "cpp",
-        "variant": "cpp",
-        "*.ipp": "cpp",
-        "netfwd": "cpp",
-        "climits": "cpp",
-        "cassert": "cpp"
-    },
-    "sonarlint.pathToCompileCommands": "${workspaceFolder}/build.x86.DEBUG/compile_commands.json"
+    "sonarlint.pathToCompileCommands": "${config:build.compile_commands}",
+    "taskExplorer.groupMaxLevel": 2
 }

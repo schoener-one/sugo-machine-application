@@ -63,9 +63,12 @@ bool StepperMotor::init(const sugo::IConfiguration& configuration)
         configuration.getOption(option::id::I2cAddress).get<unsigned>());
     m_maxSpeed = StepperMotor::Speed(
         configuration.getOption(option::id::MaxSpeedRpm).get<unsigned>(), Unit::Rpm);
-    m_initMaxSpeed = m_maxSpeed;
-    LOG(debug) << getId() << ".i2c-address: " << address;
-    LOG(debug) << getId() << ".max-speed-rpm: " << m_maxSpeed;
+    m_direction = (configuration.getOption(option::id::Direction).get<std::string>() == "backward")
+                      ? IStepperMotor::Direction::Backward
+                      : IStepperMotor::Direction::Forward;
+    LOG(debug) << getId() << "." << option::id::I2cAddress << ": " << address;
+    LOG(debug) << getId() << "." << option::id::MaxSpeedRpm << ": " << m_maxSpeed;
+    LOG(debug) << getId() << "." << option::id::Direction << ": " << m_direction;
 
     m_controller = new TicController(address, m_i2cControl, m_ioErr, m_ioRst);
     if (!m_controller->init())
@@ -93,7 +96,6 @@ bool StepperMotor::reset()
     {
         stop(true);
     }
-    setMaxSpeed(m_initMaxSpeed);
     return true;
 }
 
@@ -200,15 +202,10 @@ bool StepperMotor::rotate(Direction direction)
         return false;
     }
 
-    const unsigned maxSpeed =
-        static_cast<unsigned>(std::abs(rpmToMicrostepsPer10kSeconds(m_maxSpeed.getValue())));
-    const int32_t velocity =
-        static_cast<int32_t>(maxSpeed) * ((direction == Direction::Forward) ? 1 : -1);
+    m_direction = direction;
 
-    if (!m_controller->setTargetVelocity(velocity))
+    if (!setSpeed(m_speed))
     {
-        LOG(error) << getId() << ": Failed to set target velocity";
-        (void)stop(true);
         return false;
     }
 
@@ -310,4 +307,30 @@ StepperMotor::Speed StepperMotor::getSpeed() const
     }
     const int valueRpm = microstepsPer10kSecondsToRpm(state.currentVelocity);
     return Speed(valueRpm, Unit::Rpm);
+}
+
+bool StepperMotor::setSpeed(StepperMotor::Speed speed)
+{
+    if (speed.getValue() > m_maxSpeed.getValue())
+    {
+        LOG(error) << getId() << ": Set target speed (" << speed << ") exceeds max speed ("
+                   << m_maxSpeed << ")";
+        return false;
+    }
+
+    m_speed = speed;
+    const unsigned speedMicrosteps =
+        static_cast<unsigned>(std::abs(rpmToMicrostepsPer10kSeconds(speed.getValue())));
+    const int32_t velocity =
+        static_cast<int32_t>(speedMicrosteps) * ((m_direction == Direction::Forward) ? 1 : -1);
+    LOG(debug) << getId() << ": Set target velocity to " << velocity;
+
+    if (!m_controller->setTargetVelocity(velocity))
+    {
+        LOG(error) << getId() << ": Failed to set target velocity";
+        (void)stop(true);
+        return false;
+    }
+
+    return true;
 }

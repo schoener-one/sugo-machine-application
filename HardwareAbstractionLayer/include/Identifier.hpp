@@ -28,8 +28,10 @@ inline const Identifier GpioPinRelaySwitchHeaterMerger{GpioPinRelaySwitchHeaterP
 inline const Identifier GpioPinRelaySwitchLightRun{"relay-switch-light-run"};
 inline const Identifier GpioPinRelaySwitchLightPower{"relay-switch-light-power"};
 inline const Identifier GpioPinRelaySwitchLightReady{"relay-switch-light-ready"};
-inline const Identifier GpioPinTemperatureSensorControlCsFeeder{"temperature-sensor-control-cs-feeder"};
-inline const Identifier GpioPinTemperatureSensorControlCsMerger{"temperature-sensor-control-cs-merger"};
+inline const Identifier GpioPinTemperatureSensorControlCsFeeder{
+    "temperature-sensor-control-cs-feeder"};
+inline const Identifier GpioPinTemperatureSensorControlCsMerger{
+    "temperature-sensor-control-cs-merger"};
 inline const Identifier GpioPinMotorControlReset{"motor-control-reset"};
 // in pins
 inline const Identifier GpioPinSignalFilamentTensionLow{"signal-filament-tension-low"};
@@ -56,5 +58,6 @@ inline const Identifier ChipSelect{"chip-select"};
 inline const Identifier ActiveHigh{"active-high"};
 inline const Identifier MaxSpeedRpm{"max-speed-rpm"};
 inline const Identifier I2cAddress{"i2c-address"};
+inline const Identifier Direction{"direction"};
 }  // namespace option::id
 }  // namespace sugo::hal

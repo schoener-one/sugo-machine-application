@@ -23,6 +23,7 @@ add_library(${MODULE_NAME}
     src/MotorService.cpp
     src/GpioPinEventObserver.cpp
     src/FilamentTensionControlService.cpp
+    src/MachineConfig.cpp
     )
 target_include_directories (${MODULE_NAME}
     PUBLIC

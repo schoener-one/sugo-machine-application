@@ -16,6 +16,7 @@ namespace sugo::protocol
 {
 inline static const std::string IdResult{"result"};
 inline static const std::string IdSpeed{"speed"};
+inline static const std::string IdTensionControl{"tension-control"};
 inline static const std::string IdType{"type"};
 inline static const std::string IdTemperature{"temperature"};
 inline static const std::string IdErrorSetMotorSpeedOutOfRange{"error-setmotorspeed-outofrange"};

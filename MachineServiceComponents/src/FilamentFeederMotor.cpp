@@ -45,7 +45,8 @@ message::CommandResponse FilamentFeederMotor::onCommandStopMotor(const message::
 message::CommandResponse FilamentFeederMotor::onCommandSetMotorSpeed(
     const message::Command& command)
 {
-    const auto& motorSpeed = Json::parse(command.parameters()).at(protocol::IdSpeed);
+    const auto  parameters = Json::parse(command.parameters());
+    const auto& motorSpeed = parameters.at(protocol::IdSpeed);
 
     if (motorSpeed.empty())
     {

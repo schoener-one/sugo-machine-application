@@ -10,22 +10,34 @@
 
 #pragma once
 
-#include "IHalObject.hpp"
+#include "IConfiguration.hpp"
 
 #include <chrono>
 #include <string>
 
-namespace sugo::config
+namespace sugo
 {
-// FIXME needs to be configurable in a configuration file!
+namespace id
+{
+inline static const std::string MotorSpeedMax{"machine-control.motor-speed.max"};
+inline static const std::string MotorSpeedDefault{"machine-control.motor-speed.default"};
+inline static const std::string MotorSpeedIncrement{"machine-control.motor-speed.increment"};
+inline static const std::string HeaterTemperatureMax{"machine-control.heater.max-temperature"};
+inline static const std::string HeaterTemperatureMin{"machine-control.heater.min-temperature"};
+inline static const std::string ObservationTimeoutGpioPin{
+    "machine-control.observation-timeout.gpio-pin"};
+inline static const std::string ObservationTimeoutTemperature{
+    "machine-control.observation-timeout.temperature"};
+inline static const std::string ObservationTimeoutTension{
+    "machine-control.observation-timeout.tension"};
+}  // namespace id
 
-static constexpr std::chrono::milliseconds TemperatureObservationPeriod(1000u);
-static constexpr std::chrono::milliseconds MaxGpioPinObservationTimeout(1000u);
+class MachineConfig final
+{
+public:
+    static void addConfigurationOptions(IConfiguration& configuration);
 
-static constexpr unsigned MotorSpeedInc        = 10;                  ///< Default motor speed
-static constexpr unsigned DefaultMotorSpeed    = 10 * MotorSpeedInc;  ///<  Default motor speed
-static constexpr unsigned MinMotorSpeed        = 0;                   ///< Min motor speed
-static constexpr unsigned MaxMotorSpeed        = 30 * MotorSpeedInc;  ///< Max motor speed
-static constexpr int32_t  MaxHeaterTemperature = 205;  ///< Max heater temperature in Celcius
-static constexpr int32_t  MinHeaterTemperature = 195;  ///< Min heater temperature in Celcius
-}  // namespace sugo::config
+private:
+    MachineConfig() = default;  // Cannot be instanciated!
+};
+}  // namespace sugo

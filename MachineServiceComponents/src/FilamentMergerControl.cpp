@@ -39,13 +39,19 @@ message::CommandResponse FilamentMergerControl::onCommandStartFeeding(
 message::CommandResponse FilamentMergerControl::onCommandStopFeeding(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event::StopMotor);
+    return handleEventMessage(command, Event::Stop);
 }
 
 message::CommandResponse FilamentMergerControl::onCommandGetTemperatures(
     const message::Command& command)
 {
     return forward(IFilamentMergerHeater::CommandGetTemperature, command);
+}
+
+message::CommandResponse FilamentMergerControl::onCommandStartHeating(
+    const message::Command& command)
+{
+    return handleEventMessage(command, Event::StartHeating);
 }
 
 message::CommandResponse
@@ -155,17 +161,16 @@ void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&,
     }
 }
 
-void FilamentMergerControl::stopMotor(const IFilamentMergerControl::Event&,
-                                      const IFilamentMergerControl::State&)
+void FilamentMergerControl::stopMerger(const IFilamentMergerControl::Event&,
+                                       const IFilamentMergerControl::State&)
 {
+    switchOffServiceComponent<IFilamentMergerHeater>();
+    switchOffServiceComponent<IFilamentPreHeater>();
+
     const auto response = send(IFilamentFeederMotor::CommandStopMotor);
-    if (response.result() == message::CommandResponse_Result_SUCCESS)
+    if (response.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event::StopMotorSucceeded);
-    }
-    else
-    {
-        push(Event::StopMotorFailed);
+        push(Event::ErrorOccurred);
     }
     notify(NotificationFeedingStopped);
 }
@@ -185,12 +190,17 @@ void FilamentMergerControl::notifyHeatedUp(const Event&, const State&)
 void FilamentMergerControl::heatingUp(const IFilamentMergerControl::Event&,
                                       const IFilamentMergerControl::State&)
 {
-    const auto responsePreHeater = send(IFilamentPreHeater::CommandSwitchOn);
+    m_isMergerHeaterTemperatureReached = false;
+    m_isPreHeaterTemperatureReached    = false;
+    const auto responsePreHeater       = send(IFilamentPreHeater::CommandSwitchOn);
+
     if (responsePreHeater.result() != message::CommandResponse_Result_SUCCESS)
     {
         push(Event::HeatingUpFailed);
     }
+
     const auto responseMergerHeater = send(IFilamentMergerHeater::CommandSwitchOn);
+
     if (responseMergerHeater.result() != message::CommandResponse_Result_SUCCESS)
     {
         push(Event::HeatingUpFailed);

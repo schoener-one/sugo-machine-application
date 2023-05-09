@@ -25,8 +25,10 @@ HeaterService::HeaterService(hal::Identifier heaterId, hal::Identifier temperatu
       m_temperatureSensorId(std::move(temperatureSensorId)),
       m_serviceLocator(serviceLocator),
       m_temperatureObserver(
-          config::TemperatureObservationPeriod, [&]() { updateHeaterTemperatureAndCheck(); },
-          m_heaterId + "Timer"),
+          std::chrono::milliseconds(m_serviceLocator.get<IConfiguration>()
+                                        .getOption(id::ObservationTimeoutTemperature)
+                                        .get<unsigned>()),
+          [&]() { updateHeaterTemperatureAndCheck(); }, m_heaterId + "Timer"),
       m_lastCheckedTemperature(std::numeric_limits<Temperature>::min())
 {
 }
@@ -56,13 +58,16 @@ void HeaterService::updateHeaterTemperatureAndCheck()
     if (m_lastCheckedTemperature != m_currentTemperature)
     {
         // Implement hysteresis
-        if (m_currentTemperature >= config::MaxHeaterTemperature)
+        if (m_currentTemperature >=
+            m_serviceLocator.get<IConfiguration>().getOption(id::HeaterTemperatureMax).get<int>())
         {
             LOG(debug) << "Max temperature reached: " << m_lastCheckedTemperature << "/"
                        << m_currentTemperature;
             onTemperatureLimitEvent(TemperatureLimitEvent::MaxTemperatureReached);
         }
-        else if (m_currentTemperature <= config::MinHeaterTemperature)
+        else if (m_currentTemperature <= m_serviceLocator.get<IConfiguration>()
+                                             .getOption(id::HeaterTemperatureMin)
+                                             .get<int>())
         {
             LOG(debug) << "Min temperature reached: " << m_lastCheckedTemperature << "/"
                        << m_currentTemperature;

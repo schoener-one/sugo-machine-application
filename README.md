@@ -98,3 +98,4 @@ CLOSED
 # TODOs
 
 1. Remove cppcheck suppressed parts (e.g. '// cppcheck-suppress')
+2. Pass command parameters to events

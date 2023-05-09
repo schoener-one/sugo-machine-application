@@ -30,6 +30,9 @@ std::string UserInterfaceControl::convertToString(const UserInterfaceControl::Ev
     {
         case Event::MachineSwitchedOff:
             return "off";
+        case Event::MachineStopped:
+            return "stopped";
+        case Event::MachineHeatingUp:
         case Event::MachineStarting:
             return "starting";
         case Event::MachineRunning:
@@ -87,13 +90,21 @@ bool UserInterfaceControl::receiveRequest(remote_control::IRequestHandler::Clien
             LOG(debug) << clientId << ": Received command request: " << command;
             message::CommandResponse machineResponse;
             machineResponse.set_result(message::CommandResponse_Result_ERROR);
-            if (command == "start")
+            if (command == "switch-on")
             {
                 machineResponse = send(IMachineControl::CommandSwitchOn);
             }
+            else if (command == "start")
+            {
+                machineResponse = send(IMachineControl::CommandStart);
+            }
+            else if (command == "start-heatless")
+            {
+                machineResponse = send(IMachineControl::CommandStartHeatless);
+            }
             else if (command == "stop")
             {
-                machineResponse = send(IMachineControl::CommandSwitchOff);
+                machineResponse = send(IMachineControl::CommandStop);
             }
             else if (command == "increase-speed")
             {
@@ -102,6 +113,10 @@ bool UserInterfaceControl::receiveRequest(remote_control::IRequestHandler::Clien
             else if (command == "decrease-speed")
             {
                 machineResponse = send(IMachineControl::CommandDecreaseMotorSpeed);
+            }
+            else if (command == "switch-off")
+            {
+                machineResponse = send(IMachineControl::CommandSwitchOff);
             }
 
             const std::string result =
@@ -148,6 +163,18 @@ message::CommandResponse UserInterfaceControl::onNotificationMachineControlStart
     return handleEventMessage(command, Event::MachineStarting);
 }
 
+message::CommandResponse UserInterfaceControl::onNotificationMachineControlStopped(
+    const message::Command& command)
+{
+    return handleEventMessage(command, Event::MachineStopped);
+}
+
+message::CommandResponse UserInterfaceControl::onNotificationMachineControlHeatingUp(
+    const message::Command& command)
+{
+    return handleEventMessage(command, Event::MachineHeatingUp);
+}
+
 message::CommandResponse UserInterfaceControl::onNotificationMachineControlRunning(
     const message::Command& command)
 {
@@ -170,7 +197,6 @@ message::CommandResponse UserInterfaceControl::onNotificationMachineControlError
 // Transition actions:
 
 void UserInterfaceControl::handleMachineStateChange(const Event& event, const State&)
-
 {
     auto& hal          = m_serviceLocator.get<hal::IHardwareAbstractionLayer>();
     m_lastMachineEvent = event;
@@ -180,18 +206,33 @@ void UserInterfaceControl::handleMachineStateChange(const Event& event, const St
         case Event::MachineError:
         // TODO Make LED lights flashing on error!
         case Event::MachineSwitchedOff:
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightPower)
+                ->setState(hal::IGpioPin::State::Low);
             (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightRun)
                 ->setState(hal::IGpioPin::State::Low);
             (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightReady)
                 ->setState(hal::IGpioPin::State::Low);
             break;
+        case Event::MachineStopped:
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightPower)
+                ->setState(hal::IGpioPin::State::High);
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightRun)
+                ->setState(hal::IGpioPin::State::Low);
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightReady)
+                ->setState(hal::IGpioPin::State::Low);
+            break;
+        case Event::MachineHeatingUp:
         case Event::MachineStarting:
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightPower)
+                ->setState(hal::IGpioPin::State::High);
             (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightRun)
                 ->setState(hal::IGpioPin::State::High);
             (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightReady)
                 ->setState(hal::IGpioPin::State::Low);
             break;
         case Event::MachineRunning:
+            (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightPower)
+                ->setState(hal::IGpioPin::State::High);
             (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightRun)
                 ->setState(hal::IGpioPin::State::High);
             (void)getGpioPin(hal, hal::id::GpioPinRelaySwitchLightReady)

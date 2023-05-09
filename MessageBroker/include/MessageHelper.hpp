@@ -49,6 +49,7 @@ inline static message::CommandResponse createErrorCommandResponse(
     const Json& errorMessage = Json({{protocol::IdErrorReason, protocol::IdErrorUnspecified}}),
     message::CommandResponse_Result errorCode = message::CommandResponse_Result_ERROR)
 {
+    LOG(debug) << "Create command error response: " << command.name() << "/" << errorMessage.dump();
     return createCommandResponse(command, errorMessage, errorCode);
 }
 

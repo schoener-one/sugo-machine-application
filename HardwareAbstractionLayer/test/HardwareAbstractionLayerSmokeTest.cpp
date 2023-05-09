@@ -50,16 +50,19 @@ protected:
 
     void TestRotationTo(IStepperMotor& stepperMotor, const int32_t position)
     {
-        std::cout << "Stepper motor " << stepperMotor.getId() << " rotates to: " << position << std::endl;
+        std::cout << "Stepper motor " << stepperMotor.getId() << " rotates to: " << position
+                  << std::endl;
         EXPECT_TRUE(stepperMotor.rotateToPosition(position));
         EXPECT_EQ(stepperMotor.getPosition(), position);
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    void TestRotate(IStepperMotor& stepperMotor, const IStepperMotor::Direction direction, const unsigned maxSpeed) 
+    void TestRotate(IStepperMotor& stepperMotor, const IStepperMotor::Direction direction,
+                    const unsigned maxSpeed)
     {
         stepperMotor.setMaxSpeed({maxSpeed, Unit::Rpm});
-        std::cout << "Stepper motor " << stepperMotor.getId() << " rotated in direction: " << direction << std::endl;
+        std::cout << "Stepper motor " << stepperMotor.getId()
+                  << " rotated in direction: " << direction << std::endl;
         EXPECT_TRUE(stepperMotor.rotate(direction));
         std::this_thread::sleep_for(std::chrono::seconds(10));
         EXPECT_NEAR(stepperMotor.getSpeed().getValue(), maxSpeed, 2u);

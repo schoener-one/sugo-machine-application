@@ -14,8 +14,10 @@
 #include "IHalObject.hpp"
 #include "IRunnable.hpp"
 #include "ServiceLocator.hpp"
+#include "Timer.hpp"
 
 #include <atomic>
+#include <mutex>
 
 namespace sugo
 {
@@ -58,7 +60,7 @@ protected:
      */
     bool isSensorObservationRunning() const
     {
-        return m_lowTensionSensorId.isRunning() && m_highTensionSensorId.isRunning();
+        return m_lowTensionSensorObserver.isRunning() && m_highTensionSensorObserver.isRunning();
     }
 
     /**
@@ -75,12 +77,15 @@ protected:
     virtual void onFilamentTensionEvent(FilamentTensionEvent event) = 0;
 
 private:
+    void repeatFilamentTensionEvent();
     void filterFilamentTensionEvent(const hal::IGpioPin::Event& gpioEvent,
                                     const hal::Identifier&      pinId);
 
-    GpioPinEventObserver              m_lowTensionSensorId;
-    GpioPinEventObserver              m_highTensionSensorId;
+    GpioPinEventObserver              m_lowTensionSensorObserver;
+    GpioPinEventObserver              m_highTensionSensorObserver;
     std::atomic<FilamentTensionEvent> m_lastFilamentTensionEvent =
         FilamentTensionEvent::FilamentTensionNormal;
+    Timer      m_tensionEventRepeatTimer;
+    std::mutex m_mutex;
 };
 }  // namespace sugo

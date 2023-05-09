@@ -20,7 +20,7 @@
                 "motor-control-reset"
             ],
             "gpio-pin": {
-                "relay-switch-heater-merger": {
+                "relay-switch-heater-feeder": {
                     "pin": 4,
                     "direction": "out"
                 },
@@ -62,7 +62,7 @@
                     "pin": 20,
                     "direction": "out"
                 },
-                "relay-switch-heater-feeder": {
+                "relay-switch-heater-merger": {
                     "pin": 21,
                     "direction": "out"
                 },
@@ -97,12 +97,13 @@
             ],
             "motor": {
                 "feeder": {
-                    "i2c-address": 15,
+                    "i2c-address": 14,
                     "max-speed-rpm": "100"
                 },
                 "coiler": {
-                    "i2c-address": 14,
-                    "max-speed-rpm": "100"
+                    "i2c-address": 15,
+                    "max-speed-rpm": "100",
+                    "direction": "backward"
                 }
             }
         },
