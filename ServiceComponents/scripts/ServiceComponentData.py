@@ -6,6 +6,7 @@ __author__      = "denis@schoener-one.de"
 __copyright__   = "Copyright 2022, Schoener-One"
 
 from dataclasses import dataclass
+from typing import List
 
 @dataclass
 class Transition:
@@ -29,10 +30,20 @@ class Notification:
     receivers: list
 
 @dataclass
+class Message:
+    """Keeps information about messages"""
+    name: str
+    event: str
+    forward: str
+
+    def __str__(self) -> str:
+        return self.name
+
+@dataclass
 class Inbound:
     """Keeps information about inbound messages"""
-    commands: list
-    notifications: list
+    commands: List[Message]
+    notifications: List[Message]
 
 @dataclass
 class Outbound:

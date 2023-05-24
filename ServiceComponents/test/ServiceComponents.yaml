@@ -1,6 +1,10 @@
 components:
   - MachineControl:
-      description: "Service component to controls the whole machine"
+      description: "Service component to control the whole machine"
+      # properties:
+      #   - FilamentMergerRunning:
+      #     type: bool
+      #     default: false
       inbound:
         commands:
           - SwitchOn:
@@ -129,32 +133,21 @@ components:
       description: "Hardware service component to control the filament merger unit"
       inbound:
         commands:
-          - SwitchOn:
-              event: SwitchOn
-          - SwitchOff:
-              event: SwitchOff
-          - StartFeeding:
-              event: StartMotor
-          - StopFeeding:
-              event: Stop
+          - SwitchOn
+          - SwitchOff
+          - StartFeeding
+          - StopFeeding
           - GetTemperatures
-          - SetMotorSpeed:
-              forward: FilamentFeederMotor::CommandSetMotorSpeed #FIXME Remove Command prefix!
-          - StartHeating:
-              event: StartHeating
+          - SetMotorSpeed
+          - StartHeating
         notifications:
           - FilamentPreHeater.TargetTemperatureRangeReached
-          - FilamentPreHeater.ErrorOccurred:
-              event: ErrorOccurred
+          - FilamentPreHeater.ErrorOccurred
           - FilamentMergerHeater.TargetTemperatureRangeReached
-          - FilamentMergerHeater.ErrorOccurred:
-              event: ErrorOccurred
-          - FilamentFeederMotor.StartMotorSucceeded:
-              event: StartMotorSucceeded
-          - FilamentFeederMotor.StopMotorSucceeded:
-              event: StopMotorSucceeded
-          - FilamentFeederMotor.ErrorOccurred:
-              event: ErrorOccurred
+          - FilamentMergerHeater.ErrorOccurred
+          - FilamentFeederMotor.StartMotorSucceeded
+          - FilamentFeederMotor.StopMotorSucceeded
+          - FilamentFeederMotor.ErrorOccurred
       outbound:
         notifications:
           - FeedingRunning
@@ -213,11 +206,15 @@ components:
             next: HeatedUp
             event: HeatingUpSucceeded
             action: notifyHeatedUp
-          - state: 'HeatingUp|StartingMotor|Running'
+          - state: HeatingUp
             next: MergerStopped
             event: Stop
             action: stopMerger
-          - state: 'HeatedUp|MergerStopped'
+          - state: HeatedUp
+            next: StartingMotor
+            event: StartMotor
+            action: startMotor
+          - state: MergerStopped
             next: StartingMotor
             event: StartMotor
             action: startMotor
@@ -225,9 +222,17 @@ components:
             next: MergerStopped
             event: Stop
           - state: StartingMotor
+            next: MergerStopped
+            event: Stop
+            action: stopMerger
+          - state: StartingMotor
             next: Running
             event: StartMotorSucceeded
             action: notifyRunning
+          - state: Running
+            next: MergerStopped
+            event: Stop
+            action: stopMerger
 
 
   - _BaseMotor: &BaseMotor
@@ -409,7 +414,7 @@ components:
           - StopCoil:
               event: StopMotor
           - SetMotorSpeed:
-              forward: FilamentCoilMotor.CommandSetMotorSpeed #FIXME Remove Command prefix!
+              forward: FilamentCoilControl.CommandSetMotorSpeed #FIXME Remove Command prefix!
         notifications:
           - FilamentTensionSensor.TensionTooLow:
               event: TensionTooLow

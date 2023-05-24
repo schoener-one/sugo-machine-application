@@ -1,9 +1,10 @@
 '''
-Contains the C++ parser for parsing component configuration
+Contains the parser for parsing component configuration
 '''
 
 import logging
 import yaml
+import re
 from ServiceComponentData import *
 __author__ = "denis@schoener-one.de"
 __copyright__ = "Copyright 2022, Schoener-One"
@@ -48,15 +49,39 @@ class Parser:
         self._components[component_name] = self._components[used_component]
 
     def _parse_component(self, component_name, config):
-        inbound = config['inbound'] if 'inbound' in config else None
-        outbound = config['outbound'] if 'outbound' in config else None
-        self._components[component_name] = ServiceComponent(Inbound(inbound['commands'] if inbound and 'commands' in inbound else list(),
-                                                                    inbound['notifications'] if inbound and 'notifications' in inbound else list()),
-                                                            Outbound(
-            [Notification(name, list()) for name in outbound['notifications']] if outbound and 'notifications' in outbound else list()),
-            config['events'], None)
+        inbound = self._parse_inbound(
+            config['inbound']) if 'inbound' in config else Inbound([], [])
+        outbound = self._parse_outbound(
+            config['outbound']) if 'outbound' in config else Outbound([])
+        self._components[component_name] = ServiceComponent(inbound, outbound,
+                                                            config['events'], None)
         self._parse_statemachine(
             component_name, self._components[component_name], config['statemachine'])
+
+    @staticmethod
+    def _parse_message(value) -> Message:
+        if type(value) is dict:
+            name = next(iter(value))
+            value = value[name]
+            event = value['event'] if 'event' in value else None
+            forward = value['forward'] if 'forward' in value else None
+            if event and forward:
+                raise ParseException(
+                    f"only event {event} creation or forwarding is allowed for a inbound message")
+            return Message(name, event, forward)
+        else:  # str
+            return Message(str(value), None, False)
+
+    def _parse_inbound(self, inbound) -> Inbound:
+        commands = list(
+            map(lambda message: Parser._parse_message(message), inbound['commands'])) if 'commands' in inbound else list()
+        notifications = list(map(lambda message: Parser._parse_message(
+            message), inbound['notifications'])) if 'notifications' in inbound else list()
+        return Inbound(commands, notifications)
+
+    def _parse_outbound(self, outbound) -> Outbound:
+        return Outbound(
+            [Notification(name, list()) for name in outbound['notifications']] if outbound and 'notifications' in outbound else list())
 
     def _parse_statemachine(self, component_name, component, config):
         start_state = config['start']
@@ -68,7 +93,10 @@ class Parser:
             self._parse_transition(component_name, component, transition)
 
     def _parse_transition(self, component_name, component, config):
-        if not config['state'] in component.statemachine.states:
+        regex = re.compile(config['state'])
+        matching_states = list(
+            filter(lambda x: regex.match(x), component.statemachine.states))
+        if len(matching_states) == 0:
             raise ParseException(
                 f"state {config['state']} not in statemachine of component {component_name}")
         if not config['next'] in component.statemachine.states:
@@ -77,14 +105,21 @@ class Parser:
         if not config['event'] in component.events:
             raise ParseException(
                 f"event {config['event']} not in events of component {component_name}")
-        transition = Transition(config['state'], config['next'], config['event'],
-                                config['action'] if 'action' in config else None)
-        component.statemachine.transitions.append(transition)
+        for state in matching_states:
+            existing_transition = list(filter(lambda x: x.state == state and x.next ==
+                                       config['next'] and x.event == config['event'], component.statemachine.transitions))
+            if not existing_transition:
+                transition = Transition(state, config['next'], config['event'],
+                                        config['action'] if 'action' in config else None)
+                component.statemachine.transitions.append(transition)
+            else:
+                raise ParseException(
+                    f"Transition ({state} -> {config['next']} / {config['event']}) already exists")
 
     def _validate_messages(self):
         for component_name, component in self._components.items():
             for notification in component.inbound.notifications:
-                chunks = notification.split('.')
+                chunks = notification.name.split('.')
                 if len(chunks) != 2:
                     raise ParseException(
                         f"invalid notification {notification} from {component_name} has unexpected number of separators")
@@ -95,9 +130,9 @@ class Parser:
                     raise ParseException(
                         f"invalid command {notification} from {component_name} has no notification {chunks[1]} in {chunks[0]}")
             for command in component.inbound.commands:
-                if '.' in command:
+                if '.' in command.name:
                     raise ParseException(
-                        f"invalid command {command} from {component_name} has separator")
+                        f"invalid command {command.name} from {component_name} has separator")
             for notification in component.outbound.notifications:
                 if '.' in notification.name:
                     raise ParseException(
@@ -109,7 +144,8 @@ class Parser:
     def _create_receiver_lists(self):
         for component_name, component in self._components.items():
             for notification in component.inbound.notifications:
-                publisher_name, notification_name = notification.split('.')
+                publisher_name, notification_name = notification.name.split('.')
                 publisher = self._components[publisher_name]
-                publisher_notif = next(filter(lambda notif: notif.name == notification_name, publisher.outbound.notifications))
+                publisher_notif = next(filter(
+                    lambda notif: notif.name == notification_name, publisher.outbound.notifications))
                 publisher_notif.receivers.append(component_name)

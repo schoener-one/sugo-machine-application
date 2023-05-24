@@ -42,16 +42,6 @@ void FilamentPreHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentPreHeater::onCommandSwitchOn(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOn);
-}
-
-message::CommandResponse FilamentPreHeater::onCommandSwitchOff(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOff);
-}
-
 message::CommandResponse FilamentPreHeater::onCommandGetTemperature(const message::Command& command)
 {
     return createCommandResponse(command, Json({{protocol::IdTemperature, getTemperature()}}));
@@ -66,7 +56,7 @@ void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilame
 
     if (!startTemperatureObservation())
     {
-        push(Event::SwitchOnFailed);
+        push(Event::ErrorOccurred);
         return;
     }
 

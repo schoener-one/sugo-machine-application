@@ -29,8 +29,6 @@ public:
 
 protected:
     // Command handlers
-    message::CommandResponse onCommandSwitchOn(const message::Command& command) override;
-    message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
     message::CommandResponse onCommandGetTemperature(const message::Command& command) override;
 
     // Transition actions

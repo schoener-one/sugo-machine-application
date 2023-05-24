@@ -30,27 +30,16 @@ public:
 
 protected:
     // Command handlers
-    message::CommandResponse onCommandSwitchOn(const message::Command& command) override;
-    message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
-    message::CommandResponse onCommandStart(const message::Command& command) override;
-    message::CommandResponse onCommandStartHeatless(const message::Command& command) override;
     message::CommandResponse onCommandIncreaseMotorSpeed(const message::Command& command) override;
     message::CommandResponse onCommandDecreaseMotorSpeed(const message::Command& command) override;
-    message::CommandResponse onCommandStop(const message::Command& command) override;
     message::CommandResponse onCommandGetMotorSpeed(const message::Command& command) override;
     message::CommandResponse onNotificationFilamentMergerControlFeedingRunning(
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentMergerControlFeedingStopped(
         const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentMergerControlHeatedUp(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentMergerControlErrorOccurred(
-        const message::Command& command) override;
     message::CommandResponse onNotificationFilamentCoilControlCoilRunning(
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentCoilControlCoilStopped(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentCoilControlErrorOccurred(
         const message::Command& command) override;
 
     // Transition actions

@@ -30,25 +30,6 @@ MachineControl::MachineControl(message::ICommandMessageBroker& messageBroker,
 
 ///////////////////////////////////////////////////////////////////////////////
 // Commands
-message::CommandResponse MachineControl::onCommandSwitchOn(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOn);
-}
-
-message::CommandResponse MachineControl::onCommandSwitchOff(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOff);
-}
-
-message::CommandResponse MachineControl::onCommandStart(const message::Command& command)
-{
-    return handleEventMessage(command, Event::Start);
-}
-
-message::CommandResponse MachineControl::onCommandStartHeatless(const message::Command& command)
-{
-    return handleEventMessage(command, Event::StartHeatless);
-}
 
 message::CommandResponse MachineControl::onCommandIncreaseMotorSpeed(const message::Command&)
 {
@@ -88,11 +69,6 @@ message::CommandResponse MachineControl::onCommandDecreaseMotorSpeed(const messa
     return send(IFilamentMergerControl::CommandSetMotorSpeed, parameters);
 }
 
-message::CommandResponse MachineControl::onCommandStop(const message::Command& command)
-{
-    return handleEventMessage(command, Event::Stop);
-}
-
 message::CommandResponse MachineControl::onCommandGetMotorSpeed(const message::Command& command)
 {
     return createCommandResponse(command, Json({{protocol::IdSpeed, m_motorSpeed}}));
@@ -112,18 +88,6 @@ message::CommandResponse MachineControl::onNotificationFilamentMergerControlFeed
     return handleEventMessage(command, Event::CheckStoppingState);
 }
 
-message::CommandResponse MachineControl::onNotificationFilamentMergerControlHeatedUp(
-    const message::Command& command)
-{
-    return handleEventMessage(command, Event::MergerHeatedUp);
-}
-
-message::CommandResponse MachineControl::onNotificationFilamentMergerControlErrorOccurred(
-    const message::Command& command)
-{
-    return handleEventMessage(command, Event::ErrorOccurred);
-}
-
 message::CommandResponse MachineControl::onNotificationFilamentCoilControlCoilRunning(
     const message::Command& command)
 {
@@ -138,26 +102,21 @@ message::CommandResponse MachineControl::onNotificationFilamentCoilControlCoilSt
     return handleEventMessage(command, Event::CheckStoppingState);
 }
 
-message::CommandResponse MachineControl::onNotificationFilamentCoilControlErrorOccurred(
-    const message::Command& command)
-{
-    return handleEventMessage(command, Event::ErrorOccurred);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions
+
 void MachineControl::switchOn(const IMachineControl::Event&, const IMachineControl::State&)
 {
     const auto responseFilamentMerger = send(IFilamentMergerControl::CommandSwitchOn);
     if (responseFilamentMerger.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event::SwitchOnFailed);
+        push(Event::ErrorOccurred);
         return;
     }
     const auto responseFilamentCoilControl = send(IFilamentCoilControl::CommandSwitchOn);
     if (responseFilamentCoilControl.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event::SwitchOnFailed);
+        push(Event::ErrorOccurred);
         return;
     }
     push(Event::SwitchOnSucceeded);

@@ -33,27 +33,11 @@ public:
 
 protected:
     // Command handlers
-    message::CommandResponse onCommandSwitchOn(const message::Command& command) override;
-    message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
-    message::CommandResponse onCommandStartFeeding(const message::Command& command) override;
-    message::CommandResponse onCommandStopFeeding(const message::Command& command) override;
     message::CommandResponse onCommandGetTemperatures(const message::Command& command) override;
-    message::CommandResponse onCommandStartHeating(const message::Command& command) override;
     message::CommandResponse onNotificationFilamentPreHeaterTargetTemperatureRangeReached(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentPreHeaterErrorOccurred(
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentMergerHeaterTargetTemperatureRangeReached(
         const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentMergerHeaterErrorOccurred(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentFeederMotorStartMotorSucceeded(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentFeederMotorStopMotorSucceeded(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentFeederMotorErrorOccurred(
-        const message::Command& command) override;
-    message::CommandResponse onCommandSetMotorSpeed(const message::Command& command) override;
 
     // Transition actions
     void switchOff(const Event& event, const State& state) override;

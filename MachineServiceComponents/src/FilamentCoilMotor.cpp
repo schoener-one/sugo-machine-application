@@ -22,26 +22,6 @@ using namespace sugo::message::protocol;
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentCoilMotor::onCommandSwitchOn(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOn);
-}
-
-message::CommandResponse FilamentCoilMotor::onCommandSwitchOff(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOff);
-}
-
-message::CommandResponse FilamentCoilMotor::onCommandStartMotor(const message::Command& command)
-{
-    return handleEventMessage(command, Event::StartMotor);
-}
-
-message::CommandResponse FilamentCoilMotor::onCommandStopMotor(const message::Command& command)
-{
-    return handleEventMessage(command, Event::StopMotor);
-}
-
 message::CommandResponse FilamentCoilMotor::onCommandSetMotorSpeed(const message::Command& command)
 {
     const auto  parameters = Json::parse(command.parameters());
@@ -88,7 +68,7 @@ void FilamentCoilMotor::switchOn(const IFilamentCoilMotor::Event&, const IFilame
     }
     else
     {
-        push(Event::SwitchOnFailed);
+        push(Event::ErrorOccurred);
     }
 }
 
@@ -120,4 +100,10 @@ void FilamentCoilMotor::stopMotor(const IFilamentCoilMotor::Event&,
     stopMotorRotation(false);
     push(Event::StopMotorSucceeded);
     notify(NotificationStopMotorSucceeded);
+}
+
+void FilamentCoilMotor::switchOff(const IFilamentCoilMotor::Event&,
+                                  const IFilamentCoilMotor::State&)
+{
+    stopMotorRotation(false);
 }

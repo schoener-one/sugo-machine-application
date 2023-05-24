@@ -22,26 +22,6 @@ using namespace sugo::message;
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentFeederMotor::onCommandSwitchOn(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOn);
-}
-
-message::CommandResponse FilamentFeederMotor::onCommandSwitchOff(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOff);
-}
-
-message::CommandResponse FilamentFeederMotor::onCommandStartMotor(const message::Command& command)
-{
-    return handleEventMessage(command, Event::StartMotor);
-}
-
-message::CommandResponse FilamentFeederMotor::onCommandStopMotor(const message::Command& command)
-{
-    return handleEventMessage(command, Event::StopMotor);
-}
-
 message::CommandResponse FilamentFeederMotor::onCommandSetMotorSpeed(
     const message::Command& command)
 {
@@ -71,7 +51,7 @@ void FilamentFeederMotor::switchOn(const IFilamentFeederMotor::Event&,
     }
     else
     {
-        push(Event::SwitchOnFailed);
+        push(Event::ErrorOccurred);
     }
 }
 
@@ -103,4 +83,10 @@ void FilamentFeederMotor::stopMotor(const IFilamentFeederMotor::Event&,
     stopMotorRotation(false);
     push(Event::StopMotorSucceeded);
     notify(NotificationStopMotorSucceeded);
+}
+
+void FilamentFeederMotor::switchOff(const IFilamentFeederMotor::Event&,
+                                    const IFilamentFeederMotor::State&)
+{
+    stopMotorRotation(false);
 }

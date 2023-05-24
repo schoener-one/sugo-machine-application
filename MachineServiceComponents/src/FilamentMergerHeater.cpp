@@ -42,16 +42,6 @@ void FilamentMergerHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentMergerHeater::onCommandSwitchOn(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOn);
-}
-
-message::CommandResponse FilamentMergerHeater::onCommandSwitchOff(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOff);
-}
-
 message::CommandResponse FilamentMergerHeater::onCommandGetTemperature(
     const message::Command& command)
 {
@@ -68,7 +58,7 @@ void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
 
     if (!startTemperatureObservation())
     {
-        push(Event::SwitchOnFailed);
+        push(Event::ErrorOccurred);
         return;
     }
     push(Event::SwitchOnSucceeded);

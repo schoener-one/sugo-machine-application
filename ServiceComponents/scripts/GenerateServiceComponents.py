@@ -9,7 +9,7 @@ import argparse
 import sys
 import logging
 
-from ServiceComponentGenerator import Generator as ServiceComponentGenerator
+from generator.cpp.ServiceComponentGenerator import Generator as ServiceComponentGenerator
 from ServiceComponentParser import Parser, ParseException 
 from PlantumlStateGenerator import Generator as PlantumlStateGenerator
 from ServiceComponentsExecutionGroupGenerator import Generator as ServiceComponentsExecutionGroupGenerator

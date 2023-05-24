@@ -29,28 +29,14 @@ public:
         : IFilamentCoilControl(messageBroker), m_serviceLocator(serviceLocator)
     {
     }
+    
+    ~FilamentCoilControl() override
+    {
+    }
 
 protected:
     // Command handlers
-    message::CommandResponse onCommandSwitchOn(const message::Command& command) override;
-    message::CommandResponse onCommandSwitchOff(const message::Command& command) override;
     message::CommandResponse onCommandStartCoil(const message::Command& command) override;
-    message::CommandResponse onCommandStopCoil(const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentTensionSensorTensionTooLow(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentTensionSensorTensionTooHigh(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentTensionSensorTensionOverloaded(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentTensionSensorErrorOccurred(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentCoilMotorStartMotorSucceeded(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentCoilMotorStopMotorSucceeded(
-        const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentCoilMotorErrorOccurred(
-        const message::Command& command) override;
-    message::CommandResponse onCommandSetMotorSpeed(const message::Command& command) override;
 
     // Transition actions
     void switchOff(const Event& event, const State& state) override;

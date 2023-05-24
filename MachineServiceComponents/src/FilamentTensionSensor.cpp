@@ -44,15 +44,6 @@ void FilamentTensionSensor::onFilamentTensionEvent(FilamentTensionEvent event)
 ///////////////////////////////////////////////////////////////////////////////
 // Commands:
 
-message::CommandResponse FilamentTensionSensor::onCommandSwitchOn(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOn);
-}
-
-message::CommandResponse FilamentTensionSensor::onCommandSwitchOff(const message::Command& command)
-{
-    return handleEventMessage(command, Event::SwitchOff);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
