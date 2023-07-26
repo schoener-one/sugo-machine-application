@@ -36,7 +36,7 @@ inline const Identifier GpioPinMotorControlReset{"motor-control-reset"};
 // in pins
 inline const Identifier GpioPinSignalFilamentTensionLow{"signal-filament-tension-low"};
 inline const Identifier GpioPinSignalFilamentTensionHigh{"signal-filament-tension-high"};
-inline const Identifier GpioPinSignalButtonStart{"signal-button-start"};
+inline const Identifier GpioPinSignalFilamentTensionOverload{"signal-filament-tension-overload"};
 inline const Identifier GpioPinSignalButtonStop{"signal-button-stop"};
 inline const Identifier GpioPinMotorControlError{"motor-control-error"};
 

@@ -70,7 +70,7 @@ protected:
         std::this_thread::sleep_for(std::chrono::seconds(2));
         EXPECT_EQ(stepperMotor.getSpeed().getValue(), 0);
     }
-    constexpr static char m_configFile[] = "HardwareAbstractionLayer/conf/HardwareConfig.json";
+    constexpr static char m_configFile[] = "HardwareAbstractionLayerSmokeTestConfig.json";
 
     Configuration            m_configuration;
     HardwareAbstractionLayer m_hal;
@@ -84,7 +84,7 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_GpioControl)
 
     // GPIO in-pins
     for (const std::string pin : {
-             id::GpioPinSignalButtonStart, id::GpioPinSignalButtonStop,
+             id::GpioPinSignalFilamentTensionOverload, id::GpioPinSignalButtonStop,
              id::GpioPinSignalFilamentTensionLow, id::GpioPinSignalFilamentTensionHigh,
              //   id::GpioPinMotorControlError
          })

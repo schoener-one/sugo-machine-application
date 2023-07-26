@@ -102,8 +102,8 @@ void FilamentCoilMotor::startMotor(const IFilamentCoilMotor::Event&,
     }
     else
     {
-        push(Event::StartMotorFailed);
-        notify(NotificationStartMotorFailed);
+        push(Event::ErrorOccurred);
+        notify(NotificationErrorOccurred);
     }
 }
 
@@ -118,4 +118,6 @@ void FilamentCoilMotor::stopMotor(const IFilamentCoilMotor::Event&,
                                   const IFilamentCoilMotor::State&)
 {
     stopMotorRotation(false);
+    push(Event::StopMotorSucceeded);
+    notify(NotificationStopMotorSucceeded);
 }

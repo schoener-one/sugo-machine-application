@@ -49,7 +49,7 @@ protected:
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentFeederMotorStartMotorSucceeded(
         const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentFeederMotorStartMotorFailed(
+    message::CommandResponse onNotificationFilamentFeederMotorStopMotorSucceeded(
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentFeederMotorErrorOccurred(
         const message::Command& command) override;

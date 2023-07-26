@@ -174,7 +174,7 @@ components:
           - FilamentMergerHeater.TargetTemperatureRangeReached
           - FilamentMergerHeater.ErrorOccurred
           - FilamentFeederMotor.StartMotorSucceeded
-          - FilamentFeederMotor.StartMotorFailed
+          - FilamentFeederMotor.StopMotorSucceeded
           - FilamentFeederMotor.ErrorOccurred
       outbound:
         notifications:
@@ -192,7 +192,7 @@ components:
         - HeatingUpFailed
         - StartMotor
         - StartMotorSucceeded
-        - StartMotorFailed
+        - StopMotorSucceeded
         - Stop
         - ErrorOccurred
       statemachine:
@@ -287,7 +287,7 @@ components:
             action: handleError
           - state: StartingMotor
             next: Error
-            event: StartMotorFailed
+            event: ErrorOccurred
             action: handleError
           - state: Running
             next: Error
@@ -321,7 +321,7 @@ components:
       outbound:
         notifications:
           - StartMotorSucceeded
-          - StartMotorFailed
+          - StopMotorSucceeded
           - ErrorOccurred
       events:
         - SwitchOff
@@ -330,7 +330,8 @@ components:
         - SwitchOnSucceeded
         - StartMotor
         - StartMotorSucceeded
-        - StartMotorFailed
+        - StopMotorSucceeded
+        - ErrorOccurred
         - RunMotorFailed
         - StopMotor
       statemachine:
@@ -341,6 +342,7 @@ components:
           - Stopped
           - Starting
           - Running
+          - Stopping
           - Error
         transitions:
           - state: 'Off'
@@ -365,16 +367,29 @@ components:
             event: StartMotorSucceeded
           - state: Starting
             next: Error
-            event: StartMotorFailed
+            event: ErrorOccurred
             action: handleError
           - state: Running
-            next: Stopped
+            next: Stopping
             event: StopMotor
             action: stopMotor
           - state: Running
             next: 'Off'
             event: SwitchOff
             action: stopMotor
+          - state: Stopping
+            next: Stopping
+            event: StopMotor
+          - state: Stopping
+            next: Stopped
+            event: StopMotorSucceeded
+          - state: Stopping
+            next: 'Off'
+            event: SwitchOff
+          - state: Stopping
+            next: Error
+            event: ErrorOccurred
+            action: handleError
           - state: Initialization
             next: Error
             event: SwitchOnFailed
@@ -507,9 +522,10 @@ components:
         notifications:
           - FilamentTensionSensor.TensionTooLow
           - FilamentTensionSensor.TensionTooHigh
+          - FilamentTensionSensor.TensionOverloaded
           - FilamentTensionSensor.ErrorOccurred
           - FilamentCoilMotor.StartMotorSucceeded
-          - FilamentCoilMotor.StartMotorFailed
+          - FilamentCoilMotor.StopMotorSucceeded
           - FilamentCoilMotor.ErrorOccurred
       outbound:
         notifications:
@@ -523,11 +539,11 @@ components:
         - SwitchOff
         - StartMotor
         - StartMotorSucceeded
-        - StartMotorFailed
         - StopMotor
-        - StopMotorFailed
+        - StopMotorSucceeded
         - TensionTooLow
         - TensionTooHigh
+        - TensionOverloaded
         - ErrorOccurred
       statemachine:
         start: 'Off'
@@ -536,7 +552,10 @@ components:
           - Initialization
           - MotorStopped
           - StartingMotor
+          - StoppingMotor
           - Running
+          - Pausing
+          - Paused
           - Error
         transitions:
           - state: 'Off'
@@ -575,16 +594,30 @@ components:
             action: notifyRunning
           - state: StartingMotor
             next: Error
-            event: StartMotorFailed
+            event: ErrorOccurred
             action: handleError
           - state: StartingMotor
             next: 'Off'
             event: SwitchOff
             action: switchOff
           - state: Running
-            next: MotorStopped
+            next: StoppingMotor
             event: StopMotor
             action: stopMotor
+          - state: StoppingMotor
+            next: StoppingMotor
+            event: StopMotor
+          - state: StoppingMotor
+            next: MotorStopped
+            event: StopMotorSucceeded
+          - state: StoppingMotor
+            next: Error
+            event: ErrorOccurred
+            action: handleError
+          - state: StoppingMotor
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
           - state: Running
             next: Running
             event: TensionTooHigh
@@ -593,6 +626,43 @@ components:
             next: Running
             event: TensionTooLow
             action: controlFilamentTension
+          - state: Running
+            next: Pausing
+            event: TensionOverloaded
+            action: stopMotor
+          - state: Pausing
+            next: Pausing
+            event: TensionOverloaded
+          - state: Pausing
+            next: Paused
+            event: StopMotorSucceeded
+          - state: Pausing
+            next: Error
+            event: ErrorOccurred
+            action: handleError
+          - state: Pausing
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: Paused
+            next: Paused
+            event: TensionOverloaded
+          - state: Paused
+            next: StartingMotor
+            event: TensionTooHigh
+            action: startMotor            
+          - state: Paused
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff            
+          - state: Paused
+            next: Error
+            event: ErrorOccurred
+            action: handleError
+          - state: Paused
+            next: MotorStopped
+            event: StopMotor
+            action: stopMotor         
           - state: Running
             next: 'Off'
             event: SwitchOff
@@ -637,6 +707,7 @@ components:
         notifications:
           - TensionTooLow
           - TensionTooHigh
+          - TensionOverloaded
           - ErrorOccurred
       events:
         - SwitchOn

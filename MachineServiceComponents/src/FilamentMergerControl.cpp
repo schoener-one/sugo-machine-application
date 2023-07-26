@@ -101,10 +101,10 @@ FilamentMergerControl::onNotificationFilamentFeederMotorStartMotorSucceeded(
     return handleEventMessage(command, Event::StartMotorSucceeded);
 }
 
-message::CommandResponse FilamentMergerControl::onNotificationFilamentFeederMotorStartMotorFailed(
+message::CommandResponse FilamentMergerControl::onNotificationFilamentFeederMotorStopMotorSucceeded(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event::StartMotorFailed);
+    return handleEventMessage(command, Event::StopMotorSucceeded);
 }
 
 message::CommandResponse FilamentMergerControl::onNotificationFilamentFeederMotorErrorOccurred(
@@ -157,7 +157,7 @@ void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&,
     const auto response = send(IFilamentFeederMotor::CommandStartMotor);
     if (response.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event::StartMotorFailed);
+        push(Event::ErrorOccurred);
     }
 }
 

@@ -58,6 +58,7 @@ public:
 
     bool start() override
     {
+        assert(!isRunning());
         m_nextWakeUpTime = Clock::now() + m_period;
         m_doRun          = true;
 

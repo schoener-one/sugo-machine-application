@@ -6,8 +6,8 @@
             "increment": 2
         },
         "heater": {
-            "max-temperature": 110,
-            "min-temperature": 100
+            "max-temperature": 60,
+            "min-temperature": 50
         }
     },
     "machine-service-gateway": {
@@ -30,7 +30,7 @@
                 "relay-switch-light-run",
                 "relay-switch-light-power",
                 "relay-switch-light-ready",
-                "signal-button-start",
+                "signal-filament-tension-overload",
                 "signal-button-stop",
                 "signal-filament-tension-low",
                 "signal-filament-tension-high",
@@ -44,7 +44,7 @@
                     "pin": 4,
                     "direction": "out"
                 },
-                "signal-button-start": {
+                "signal-filament-tension-overload": {
                     "pin": 5,
                     "direction": "in",
                     "active-high": false

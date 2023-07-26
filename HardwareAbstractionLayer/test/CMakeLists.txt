@@ -14,4 +14,6 @@ if (NOT NO_UNITTEST)
         GTest::Main
         gmock)
     gtest_add_tests(HardwareAbstractionLayerSmokeTest "" AUTO)
+    configure_file("HardwareAbstractionLayerSmokeTestConfig.json"
+        "HardwareAbstractionLayerSmokeTestConfig.json" COPYONLY)
 endif()

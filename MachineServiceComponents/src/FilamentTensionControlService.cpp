@@ -17,19 +17,29 @@ using namespace sugo;
 
 FilamentTensionControlService::FilamentTensionControlService(
     const hal::Identifier& lowTensionSensorId, const hal::Identifier& highTensionSensorId,
-    const ServiceLocator& serviceLocator)
+    const hal::Identifier& tensionOverloadSensorId, const ServiceLocator& serviceLocator)
     : m_lowTensionSensorObserver(
-          getGpioPin(serviceLocator.get<hal::IHardwareAbstractionLayer>(), lowTensionSensorId),
+          hal::getGpioPin(serviceLocator.get<hal::IHardwareAbstractionLayer>(), lowTensionSensorId),
           [this](const hal::IGpioPin::Event& event, const hal::Identifier& pinId) {
-              this->filterFilamentTensionEvent(event, pinId);
+              this->handleFilamentTensionEvent(event, pinId);
           },
           std::chrono::milliseconds(serviceLocator.get<IConfiguration>()
                                         .getOption(id::ObservationTimeoutGpioPin)
                                         .get<unsigned>())),
       m_highTensionSensorObserver(
-          getGpioPin(serviceLocator.get<hal::IHardwareAbstractionLayer>(), highTensionSensorId),
+          hal::getGpioPin(serviceLocator.get<hal::IHardwareAbstractionLayer>(),
+                          highTensionSensorId),
           [this](const hal::IGpioPin::Event& event, const hal::Identifier& pinId) {
-              this->filterFilamentTensionEvent(event, pinId);
+              this->handleFilamentTensionEvent(event, pinId);
+          },
+          std::chrono::milliseconds(serviceLocator.get<IConfiguration>()
+                                        .getOption(id::ObservationTimeoutGpioPin)
+                                        .get<unsigned>())),
+      m_tensionOverloadSensorObserver(
+          hal::getGpioPin(serviceLocator.get<hal::IHardwareAbstractionLayer>(),
+                          tensionOverloadSensorId),
+          [this](const hal::IGpioPin::Event& event, const hal::Identifier& pinId) {
+              this->handleFilamentTensionEvent(event, pinId);
           },
           std::chrono::milliseconds(serviceLocator.get<IConfiguration>()
                                         .getOption(id::ObservationTimeoutGpioPin)
@@ -60,6 +70,14 @@ bool FilamentTensionControlService::startSensorObservation()
         return false;
     }
 
+    if (!m_tensionOverloadSensorObserver.start())
+    {
+        LOG(error) << "Failed to start tension overload sensor observation";
+        m_lowTensionSensorObserver.stop();
+        m_highTensionSensorObserver.stop();
+        return false;
+    }
+
     return true;
 }
 
@@ -67,38 +85,51 @@ void FilamentTensionControlService::stopSensorObservation()
 {
     m_lowTensionSensorObserver.stop();
     m_highTensionSensorObserver.stop();
+    m_tensionOverloadSensorObserver.stop();
     m_tensionEventRepeatTimer.stop();
 }
 
 void FilamentTensionControlService::repeatFilamentTensionEvent()
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    if (m_lastFilamentTensionEvent != FilamentTensionNormal)
+    if ((m_lastFilamentTensionEvent == FilamentTensionLow) or
+        (m_lastFilamentTensionEvent == FilamentTensionHigh))
     {
         // Repeat event call as long as the tension is not at normal level!
         onFilamentTensionEvent(m_lastFilamentTensionEvent);
     }
 }
 
-void FilamentTensionControlService::filterFilamentTensionEvent(
-    const hal::IGpioPin::Event& gpioEvent, const hal::Identifier& pinId)
+void FilamentTensionControlService::handleFilamentTensionEvent(const hal::IGpioPin::Event& event,
+                                                               const hal::Identifier&      pinId)
 {
     FilamentTensionEvent currentEvent = FilamentTensionNormal;
 
-    switch (gpioEvent.type)
+    switch (event.type)
     {
         case hal::IGpioPin::EventType::RisingEdge:
-            if (pinId == m_lowTensionSensorObserver.getId())
+            if (pinId == m_tensionOverloadSensorObserver.getId())
+            {
+                currentEvent = FilamentTensionOverload;
+            }
+            else if (pinId == m_lowTensionSensorObserver.getId())
             {
                 currentEvent = FilamentTensionLow;
             }
-            else
+            else if (pinId == m_highTensionSensorObserver.getId())
             {
                 currentEvent = FilamentTensionHigh;
             }
             break;
         case hal::IGpioPin::EventType::FallingEdge:
-            currentEvent = FilamentTensionNormal;
+            if (pinId == m_tensionOverloadSensorObserver.getId())
+            {
+                currentEvent = FilamentTensionHigh;
+            }
+            else
+            {
+                currentEvent = FilamentTensionNormal;
+            }
             break;
         case hal::IGpioPin::EventType::Timeout:
             currentEvent = m_lastFilamentTensionEvent;
@@ -115,7 +146,7 @@ void FilamentTensionControlService::filterFilamentTensionEvent(
         {
             m_tensionEventRepeatTimer.stop();
         }
-        else
+        else if (!m_tensionEventRepeatTimer.isRunning())
         {
             m_tensionEventRepeatTimer.start();
         }

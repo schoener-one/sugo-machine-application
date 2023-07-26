@@ -11,8 +11,8 @@
             "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/ServiceComponents",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--list-only"]
+            "cwd": "${workspaceFolder}",
+            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "out/src-gen", "--list-only"]
         },
         {
             "name": "ServiceComponentGenerator",
@@ -21,8 +21,8 @@
             "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/ServiceComponents",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--generate-exec-group", "--generate-service-components", "-L", "debug"]
+            "cwd": "${workspaceFolder}",
+            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "out/src-gen", "--generate-exec-group", "--generate-service-components", "-L", "debug"]
         },
         {
             "name": "ServiceComponentGenerator Templates",
@@ -31,8 +31,8 @@
             "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/ServiceComponents",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "-t"]
+            "cwd": "${workspaceFolder}",
+            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "out/src-gen", "-t"]
         },
         {
             "name": "ServiceComponentGenerator State Diagrams",
@@ -41,8 +41,8 @@
             "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/ServiceComponents",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "gen", "--generate-state-diagrams"]
+            "cwd": "${workspaceFolder}",
+            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "out/src-gen", "--generate-state-diagrams"]
         },
         {
             "name": "Debug HAL SmokeTest (x86)",

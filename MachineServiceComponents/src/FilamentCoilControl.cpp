@@ -64,6 +64,12 @@ message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSenso
     return handleEventMessage(command, Event::TensionTooHigh);
 }
 
+message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorTensionOverloaded(
+    const message::Command& command)
+{
+    return handleEventMessage(command, Event::TensionOverloaded);
+}
+
 message::CommandResponse FilamentCoilControl::onNotificationFilamentTensionSensorErrorOccurred(
     const message::Command& command)
 {
@@ -76,10 +82,10 @@ message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorSta
     return handleEventMessage(command, Event::StartMotorSucceeded);
 }
 
-message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorStartMotorFailed(
+message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorStopMotorSucceeded(
     const message::Command& command)
 {
-    return handleEventMessage(command, Event::StartMotorFailed);
+    return handleEventMessage(command, Event::StopMotorSucceeded);
 }
 
 message::CommandResponse FilamentCoilControl::onNotificationFilamentCoilMotorErrorOccurred(
@@ -142,7 +148,7 @@ void FilamentCoilControl::stopMotor(const IFilamentCoilControl::Event&,
     const auto response = send(IFilamentCoilMotor::CommandStopMotor);
     if (response.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event::StopMotorFailed);
+        push(Event::ErrorOccurred);
     }
     notify(NotificationCoilStopped);
 }
@@ -153,7 +159,7 @@ void FilamentCoilControl::startMotor(const IFilamentCoilControl::Event&,
     const auto response = send(IFilamentCoilMotor::CommandStartMotor);
     if (response.result() != message::CommandResponse_Result_SUCCESS)
     {
-        push(Event::StartMotorFailed);
+        push(Event::ErrorOccurred);
     }
 }
 

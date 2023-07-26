@@ -85,8 +85,8 @@ void FilamentFeederMotor::startMotor(const IFilamentFeederMotor::Event&,
     }
     else
     {
-        push(Event::StartMotorFailed);
-        notify(NotificationStartMotorFailed);
+        push(Event::ErrorOccurred);
+        notify(NotificationErrorOccurred);
     }
 }
 
@@ -101,4 +101,6 @@ void FilamentFeederMotor::stopMotor(const IFilamentFeederMotor::Event&,
                                     const IFilamentFeederMotor::State&)
 {
     stopMotorRotation(false);
+    push(Event::StopMotorSucceeded);
+    notify(NotificationStopMotorSucceeded);
 }

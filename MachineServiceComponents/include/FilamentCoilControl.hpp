@@ -40,11 +40,13 @@ protected:
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentTensionSensorTensionTooHigh(
         const message::Command& command) override;
+    message::CommandResponse onNotificationFilamentTensionSensorTensionOverloaded(
+        const message::Command& command) override;
     message::CommandResponse onNotificationFilamentTensionSensorErrorOccurred(
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentCoilMotorStartMotorSucceeded(
         const message::Command& command) override;
-    message::CommandResponse onNotificationFilamentCoilMotorStartMotorFailed(
+    message::CommandResponse onNotificationFilamentCoilMotorStopMotorSucceeded(
         const message::Command& command) override;
     message::CommandResponse onNotificationFilamentCoilMotorErrorOccurred(
         const message::Command& command) override;

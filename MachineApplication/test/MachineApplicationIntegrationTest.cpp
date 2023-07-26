@@ -132,6 +132,7 @@ protected:
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinRelaySwitchLightReady;
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinSignalFilamentTensionLow;
     std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinSignalFilamentTensionHigh;
+    std::shared_ptr<NiceMock<IGpioPinMock>>     m_mockGpioPinSignalFilamentTensionOverload;
 
     NiceMock<MockFunction<void(const Json&)>> m_mockNotificationHandler;
 
@@ -197,6 +198,10 @@ void MachineApplicationIntegrationTest::prepareHardwareAbstractionLayer()
         hal::id::GpioPinSignalFilamentTensionHigh,
         m_mockGpioPinSignalFilamentTensionHigh =
             std::make_shared<NiceMock<IGpioPinMock>>("GpioPinSignalFilamentTensionHigh"));
+    m_gpioPinMap.emplace(
+        hal::id::GpioPinSignalFilamentTensionOverload,
+        m_mockGpioPinSignalFilamentTensionOverload =
+            std::make_shared<NiceMock<IGpioPinMock>>("GpioPinSignalFilamentTensionOverload"));
 
     m_serviceLocator.add<IHardwareAbstractionLayer>(m_mockHardwareAbstractionLayer);
     ON_CALL(m_mockHardwareAbstractionLayer, getStepperMotorControllerMap())
@@ -243,6 +248,8 @@ void MachineApplicationIntegrationTest::prepareSwitchOn(bool expectHeating = tru
     ON_CALL(*m_mockGpioPinSignalFilamentTensionLow, getState())
         .WillByDefault(Return(hal::IGpioPin::State::Low));
     ON_CALL(*m_mockGpioPinSignalFilamentTensionHigh, getState())
+        .WillByDefault(Return(hal::IGpioPin::State::Low));
+    ON_CALL(*m_mockGpioPinSignalFilamentTensionOverload, getState())
         .WillByDefault(Return(hal::IGpioPin::State::Low));
 }
 
@@ -434,5 +441,46 @@ TEST_F(MachineApplicationIntegrationTest, TensionSensorTooHigh)
     EXPECT_NOTIFICATION(IFilamentTensionSensor, NotificationTensionTooHigh);
     EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionHigh, getState())
         .WillRepeatedly(Return(hal::IGpioPin::State::Low));
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+}
+
+TEST_F(MachineApplicationIntegrationTest, TensionSensorOverloaded)
+{
+    switchOnMachine();
+
+    m_nextMotorSpeed = test::MachineConfiguration::MotorSpeedDefault -
+                       test::MachineConfiguration::MotorSpeedIncrement;
+    EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentTensionSensor, NotificationTensionOverloaded);
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionOverload, waitForEvent(_))
+        .WillOnce(
+            Return(IGpioPin::Event{std::chrono::nanoseconds(0), IGpioPin::EventType::RisingEdge}))
+        .WillRepeatedly(Invoke([&](std::chrono::nanoseconds timeout) {
+            std::this_thread::sleep_for(timeout);
+            return IGpioPin::Event{std::chrono::nanoseconds(0), IGpioPin::EventType::Timeout};
+        }));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, stop(false)).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionOverload, getState())
+        .WillRepeatedly(Return(hal::IGpioPin::State::High));
+    EXPECT_CALL(*m_mockStepperMotorCoiler, setMaxSpeed(_))
+        .WillRepeatedly([&](hal::IStepperMotor::Speed speed) {
+            EXPECT_EQ(speed, m_nextMotorSpeed);
+            m_nextMotorSpeed =
+                std::clamp(m_nextMotorSpeed - test::MachineConfiguration::MotorSpeedIncrement, 0u,
+                           test::MachineConfiguration::MotorSpeedMax);
+        });
+    EXPECT_NOTIFICATION(IFilamentTensionSensor, NotificationTensionOverloaded);
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    EXPECT_NOTIFICATION_SUBSCRIBE(IFilamentTensionSensor, NotificationTensionTooHigh);
+    EXPECT_CALL(*m_mockStepperMotorCoiler, rotate()).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionOverload, waitForEvent(_))
+        .WillOnce(
+            Return(IGpioPin::Event{std::chrono::nanoseconds(0), IGpioPin::EventType::FallingEdge}))
+        .WillRepeatedly(Invoke([&](std::chrono::nanoseconds timeout) {
+            std::this_thread::sleep_for(timeout);
+            return IGpioPin::Event{std::chrono::nanoseconds(0), IGpioPin::EventType::Timeout};
+        }));
+    EXPECT_CALL(*m_mockGpioPinSignalFilamentTensionOverload, getState())
+        .WillRepeatedly(Return(hal::IGpioPin::State::Low));
+    EXPECT_NOTIFICATION(IFilamentTensionSensor, NotificationTensionTooHigh);
     std::this_thread::sleep_for(std::chrono::seconds(2));
 }

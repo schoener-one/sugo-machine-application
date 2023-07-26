@@ -19,7 +19,8 @@ FilamentTensionSensor::FilamentTensionSensor(message::ICommandMessageBroker& mes
                                              const ServiceLocator&           serviceLocator)
     : IFilamentTensionSensor(messageBroker),
       FilamentTensionControlService(hal::id::GpioPinSignalFilamentTensionLow,
-                                    hal::id::GpioPinSignalFilamentTensionHigh, serviceLocator),
+                                    hal::id::GpioPinSignalFilamentTensionHigh,
+                                    hal::id::GpioPinSignalFilamentTensionOverload, serviceLocator),
       m_serviceLocator(serviceLocator)
 {
 }
@@ -33,6 +34,10 @@ void FilamentTensionSensor::onFilamentTensionEvent(FilamentTensionEvent event)
     else if (event == FilamentTensionHigh)
     {
         notify(IFilamentTensionSensor::NotificationTensionTooHigh);
+    }
+    else if (event == FilamentTensionOverload)
+    {
+        notify(IFilamentTensionSensor::NotificationTensionOverloaded);
     }
 }
 

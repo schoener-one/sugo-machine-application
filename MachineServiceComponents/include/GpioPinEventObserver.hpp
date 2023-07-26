@@ -5,6 +5,8 @@
  *
  * @author: denis@schoener-one
  * @date:   2022-07-29
+ *
+ * @todo Move observer functionality to GpioPin (GpioPinObserverInterface)
  */
 ///////////////////////////////////////////////////////////////////////////////
 

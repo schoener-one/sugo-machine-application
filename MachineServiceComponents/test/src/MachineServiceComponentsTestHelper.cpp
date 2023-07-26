@@ -53,4 +53,6 @@ void MachineConfiguration::prepareOptions(IConfigurationMock& mock)
         .WillByDefault(ReturnRef(m_optionObservationTimeoutGpioPin));
     ON_CALL(mock, getOption(id::ObservationTimeoutTemperature))
         .WillByDefault(ReturnRef(m_optionObservationTimeoutTemperature));
+    ON_CALL(mock, getOption(id::ObservationTimeoutTension))
+        .WillByDefault(ReturnRef(m_optionObservationTimeoutGpioPin));
 }

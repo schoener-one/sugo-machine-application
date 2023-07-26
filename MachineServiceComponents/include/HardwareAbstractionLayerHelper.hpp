@@ -5,6 +5,8 @@
  *
  * @author: denis@schoener-one
  * @date:   2022-09-15
+ *
+ * @todo Include to IHardwareAbstractionLayer
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -13,7 +15,7 @@
 #include "IHardwareAbstractionLayer.hpp"
 #include "MachineConfig.hpp"
 
-namespace sugo
+namespace sugo::hal
 {
 /**
  * @brief Get the Gpio pin according to the passed identifier.
@@ -70,4 +72,4 @@ inline static auto& getStepperMotor(const hal::IHardwareAbstractionLayer& hal,
     assert(stepperMotor);
     return stepperMotor;
 }
-}  // namespace sugo
+}  // namespace sugo::hal

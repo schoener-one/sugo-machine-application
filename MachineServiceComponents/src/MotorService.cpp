@@ -46,13 +46,15 @@ bool MotorService::setMotorSpeed(unsigned motorSpeed)
 
 bool MotorService::setMotorSpeed()
 {
-    assert(static_cast<unsigned>(std::abs(m_motorOffsetSpeed)) <= m_motorSpeed);
+    assert((static_cast<int>(m_motorSpeed) + m_motorOffsetSpeed) <=
+           static_cast<int>(m_maxMotorSpeed));
     const int motorSpeed = static_cast<int>(m_motorSpeed) + m_motorOffsetSpeed;
     LOG(debug) << "Setting motor speed: " << motorSpeed;
     return m_stepperMotor->setSpeed(
         hal::IStepperMotor::Speed(static_cast<unsigned>(motorSpeed), hal::Unit::Rpm));
 }
 
+// FIXME remove offset-speed, just use one speed!
 bool MotorService::addMotorOffsetSpeed(int motorOffsetSpeed)
 {
     int resultingSpeed =
@@ -95,4 +97,5 @@ void MotorService::stopMotorRotation(bool immediately)
     {
         LOG(error) << "Failed to stop motor" << ((immediately) ? " immediately" : "");
     }
+    LOG(debug) << "Motor stop finished";
 }

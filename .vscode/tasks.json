@@ -228,8 +228,8 @@
             "label": "remote-upload-HardwareConfig",
             "type": "shell",
             "command": [
-                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"mkdir -p HardwareAbstractionLayer/conf\";",
-                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/HardwareAbstractionLayer/conf/HardwareConfig.json\" \"root@${config:remote.host}:HardwareAbstractionLayer/conf/HardwareConfig.json\""
+                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"mkdir -p HardwareAbstractionLayer/test\";",
+                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTestConfig.json\" \"root@${config:remote.host}:HardwareAbstractionLayerSmokeTestConfig.json\""
             ]
         },
         {

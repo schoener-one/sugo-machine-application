@@ -101,7 +101,7 @@ void HardwareAbstractionLayer::addConfigurationOptions(sugo::IConfiguration& con
     // clang-format off
     configuration.add(Option(gpioPin + "-enabled",  std::vector<std::string>{},         "HAL: List of GPIO pin names to be enabled", true));
     for (const auto& name : {".relay-switch-heater-feeder", ".relay-switch-heater-merger", ".relay-switch-light-power",
-        ".relay-switch-light-run", ".relay-switch-light-ready", ".signal-button-start", ".signal-button-stop",
+        ".relay-switch-light-run", ".relay-switch-light-ready", ".signal-filament-tension-overload", ".signal-button-stop",
         ".signal-filament-tension-low", ".signal-filament-tension-high", ".temperature-sensor-control-cs-merger",
         ".temperature-sensor-control-cs-feeder", ".motor-control-error", ".motor-control-reset", ".relay-switch-fan-feeder",
         ".relay-switch-fan-merger"})

@@ -48,7 +48,7 @@ The I2C, SPI and UART interfaces are provided over the GPIO pin header.
 | 23  | CLK (SPI) | temperature-sensor-control-spi-clk  | \| |                                  | GPIO 08 | 24 |
 | 25  | GND       | temperature-sensor-control-gnd      | \| |                                  | GPIO 07 | 26 |
 | 27  | ID_SD     |                                     | \| |                                  | ID_SC   | 28 |
-| 29  | GPIO 05   | signal-button-start (in)            | \| |                                  | GND     | 30 |
+| 29  | GPIO 05   | signal-motor-stop (in)            | \| |                                  | GND     | 30 |
 | 31  | GPIO 06   | signal-button-stop (in)             | \| | signal-filament-tension-low (in) | GPIO 12 | 32 |
 | 33  | GPIO 13   | motor-control-error (in)            | \| |                                  | GND     | 34 |
 | 35  | GPIO 19   | motor-control-reset (out)           | \| | signal-filament-tension-high (in)| GPIO 16 | 36 |
@@ -140,19 +140,19 @@ main board from over voltage damages.
 
 **Channel occupancy:**
 
-| Channel | Device                | Device type | Color  |
-|---------|-----------------------|-------------|--------|
-| 0       | button-start          | button      | red    |
-| 1       | button-stop           | button      | orange |
-| 2       | filament-tension-low  |             | yellow |
-| 3       | filament-tension-high |             | green  |
-| 4       | _unused_              |             | blue   |
-| 5       | _unused_              |             | violet |
-| 6       | _unused_              |             | gray   |
-| 7       | _unused_              |             | white  |
-| GND     | gnd                   |             | brown  |
-| DC      | power-supply 5V       |             | black  |
-|||||
+| Channel | Device                | Device type | Color (internal) | Color (external) |
+|---------|-----------------------|-------------|------------------|------------------|
+| 0       | motor-stop            | button      | red              | violet / gray    |
+| 1       | button-stop           | button      | orange           | green / blue     |
+| 2       | filament-tension-low  |             | yellow           | yellow / orange  |
+| 3       | filament-tension-high |             | green            | red / brown      |
+| 4       | _unused_              |             | blue             |                  |
+| 5       | _unused_              |             | violet           |                  |
+| 6       | _unused_              |             | gray             |                  |
+| 7       | _unused_              |             | white            |                  |
+| GND     | gnd                   |             | brown            |                  |
+| DC      | power-supply 5V       |             | black            |                  |
+||||||
 
 ### Button
 

@@ -28,8 +28,17 @@ namespace sugo
 class FilamentTensionControlService
 {
 public:
+    /**
+     * @brief Construct a new filament tension control service object.
+     *
+     * @param lowTensionSensorId       Id of the low tension sensor.
+     * @param highTensionSensorId      Id of the hight tension sensor.
+     * @param tensionOverloadSensorId  Id of the tension overload sensor.
+     * @param serviceLocator           Service locator reference.
+     */
     FilamentTensionControlService(const hal::Identifier& lowTensionSensorId,
                                   const hal::Identifier& highTensionSensorId,
+                                  const hal::Identifier& tensionOverloadSensorId,
                                   const ServiceLocator&  serviceLocator);
 
 protected:
@@ -41,7 +50,8 @@ protected:
     {
         FilamentTensionLow,
         FilamentTensionNormal,
-        FilamentTensionHigh
+        FilamentTensionHigh,
+        FilamentTensionOverload
     };
 
     /**
@@ -78,11 +88,12 @@ protected:
 
 private:
     void repeatFilamentTensionEvent();
-    void filterFilamentTensionEvent(const hal::IGpioPin::Event& gpioEvent,
+    void handleFilamentTensionEvent(const hal::IGpioPin::Event& gpioEvent,
                                     const hal::Identifier&      pinId);
 
     GpioPinEventObserver              m_lowTensionSensorObserver;
     GpioPinEventObserver              m_highTensionSensorObserver;
+    GpioPinEventObserver              m_tensionOverloadSensorObserver;
     std::atomic<FilamentTensionEvent> m_lastFilamentTensionEvent =
         FilamentTensionEvent::FilamentTensionNormal;
     Timer      m_tensionEventRepeatTimer;
