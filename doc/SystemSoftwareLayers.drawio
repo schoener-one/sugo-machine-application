@@ -1,0 +1,70 @@
+<mxfile host="app.diagrams.net" modified="2023-08-10T10:59:34.106Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36" etag="DPsAUy8BIcLdndVx0Jpv" version="21.6.3" type="device">
+  <diagram name="Page-1" id="bvGSKQpgaZ4HW3BRRWA5">
+    <mxGraphModel dx="4204" dy="2925" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-1" value="&lt;h4&gt;System Component Layer&lt;/h4&gt;" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="-260" y="-130" width="970" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-2" value="&lt;h4&gt;Hardware Service Layer&lt;/h4&gt;" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#bac8d3;strokeColor=#23445d;" vertex="1" parent="1">
+          <mxGeometry x="-260" y="10" width="970" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-3" value="&lt;h4&gt;Hardware Abstraction Layer&lt;/h4&gt;" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="-260" y="150" width="970" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-4" value="System Component&lt;br&gt;A" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-240" y="-80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-5" value="System Component&lt;br&gt;B" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-110" y="-80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-6" value="System Component&lt;br&gt;C" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="-80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-7" value="Hardware Service&lt;br&gt;1" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-240" y="60" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-8" value="Hardware Service&lt;br&gt;2" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-110" y="60" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-9" value="Hardware Service&lt;br&gt;3" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="60" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-10" value="Motor 1 Driver" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-240" y="200" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-11" value="Motor 2 Driver" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-110" y="200" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-12" value="GPIO Driver" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="200" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-13" value="Call" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;fillColor=#fad7ac;strokeColor=#b46504;" edge="1" parent="1" source="FdfVr3G_z1q4EIC0lLNX-4" target="FdfVr3G_z1q4EIC0lLNX-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-360" y="80" as="sourcePoint" />
+            <mxPoint x="-310" y="30" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-14" value="Event" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;fillColor=#fad7ac;strokeColor=#b46504;" edge="1" parent="1" source="FdfVr3G_z1q4EIC0lLNX-7" target="FdfVr3G_z1q4EIC0lLNX-4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-140" y="-10" as="sourcePoint" />
+            <mxPoint x="-140" y="70" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-16" value="Call" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;fillColor=#fad7ac;strokeColor=#b46504;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="FdfVr3G_z1q4EIC0lLNX-7" target="FdfVr3G_z1q4EIC0lLNX-10">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="1100" y="840" as="sourcePoint" />
+            <mxPoint x="1200" y="740" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FdfVr3G_z1q4EIC0lLNX-17" value="Call" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;fillColor=#fad7ac;strokeColor=#b46504;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="FdfVr3G_z1q4EIC0lLNX-7" target="FdfVr3G_z1q4EIC0lLNX-12">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="-170" y="130" as="sourcePoint" />
+            <mxPoint x="-170" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
