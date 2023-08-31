@@ -5,54 +5,54 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "MachineServiceComponentsGenerator ListOnly",
+            "name": "ServiceComponentGenerator ListOnly",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "out/MachineServiceComponents/src-gen", "--list-only"]
+            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--list-only"]
         },
         {
-            "name": "MachineServiceComponentsGenerator",
+            "name": "ServiceComponentGenerator",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "out/MachineServiceComponents/src-gen", "--generate-exec-group", "--generate-service-components", "-L", "debug"]
+            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-exec-group", "--generate-service-components", "-L", "debug"]
         },
         {
             "name": "ServiceComponentsGenerator (test)",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponents/test/ServiceComponents.yaml", "-o", "out/ServiceComponents/src-gen", "--generate-service-components", "--generate-state-diagrams", "-L", "debug"]
+            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-service-components", "--generate-state-diagrams", "-L", "debug"]
         },
         {
-            "name": "MachineServiceComponentsGenerator Templates",
+            "name": "ServiceComponentGenerator Templates",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "out/MachineServiceComponents/src-gen", "-t"]
+            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "-t"]
         },
         {
-            "name": "MachineServiceComponentsGenerator State Diagrams",
+            "name": "ServiceComponentGenerator State Diagrams",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponents/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/MachineServiceComponents/MachineServiceComponents.yaml", "-o", "out/MachineServiceComponents/src-gen", "--generate-state-diagrams"]
+            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-state-diagrams"]
         },
         {
             "name": "Debug HAL SmokeTest (x86)",

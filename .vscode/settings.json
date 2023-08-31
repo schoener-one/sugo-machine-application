@@ -9,9 +9,5 @@
     "build.compile_commands": "${config:build.directory}/compile_commands.json",
     "testMate.cpp.test.executables": "build.*/**/*{test,Test,TEST}*",
     "cmake.configureOnOpen": false,
-    "sonarlint.pathToCompileCommands": "${config:build.compile_commands}",
-    "taskExplorer.groupMaxLevel": 2,
-    "files.associations": {
-        "*.ipp": "cpp"
-    }
+    "taskExplorer.groupMaxLevel": 2
 }

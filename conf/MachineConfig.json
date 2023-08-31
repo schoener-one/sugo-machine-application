@@ -1,0 +1,149 @@
+{
+    "machine-service-component": {
+        "motor-speed": {
+            "max": 50,
+            "default": 25,
+            "increment": 2
+        },
+        "heater": {
+            "max-temperature": 60,
+            "min-temperature": 50
+        }
+    },
+    "service-gateway": {
+        "address": "127.0.0.1",
+        "port": 4242
+    },
+    "remote-control": {
+        "address": "0.0.0.0",
+        "port": 8080,
+        "doc-root": "MachineRemoteControl/www"
+    },
+    "hardware-abstraction-layer": {
+        "gpio-control": {
+            "device": "gpiochip0",
+            "gpio-pin-enabled": [
+                "relay-switch-fan-feeder",
+                "relay-switch-fan-merger",
+                "relay-switch-heater-feeder",
+                "relay-switch-heater-merger",
+                "relay-switch-light-run",
+                "relay-switch-light-power",
+                "relay-switch-light-ready",
+                "signal-filament-tension-overload",
+                "signal-button-stop",
+                "signal-filament-tension-low",
+                "signal-filament-tension-high",
+                "temperature-sensor-control-cs-feeder",
+                "temperature-sensor-control-cs-merger",
+                "motor-control-error",
+                "motor-control-reset"
+            ],
+            "gpio-pin": {
+                "relay-switch-heater-feeder": {
+                    "pin": 4,
+                    "direction": "out"
+                },
+                "signal-filament-tension-overload": {
+                    "pin": 5,
+                    "direction": "in",
+                    "active-high": false
+                },
+                "signal-button-stop": {
+                    "pin": 6,
+                    "direction": "in",
+                    "active-high": false
+                },
+                "signal-filament-tension-low": {
+                    "pin": 12,
+                    "direction": "in",
+                    "active-high": false
+                },
+                "motor-control-error": {
+                    "pin": 13,
+                    "direction": "in"
+                },
+                "signal-filament-tension-high": {
+                    "pin": 16,
+                    "direction": "in",
+                    "active-high": false
+                },
+                "relay-switch-light-run": {
+                    "pin": 17,
+                    "direction": "out"
+                },
+                "relay-switch-light-ready": {
+                    "pin": 18,
+                    "direction": "out"
+                },
+                "motor-control-reset": {
+                    "pin": 19,
+                    "direction": "out"
+                },
+                "relay-switch-fan-merger": {
+                    "pin": 20,
+                    "direction": "out"
+                },
+                "relay-switch-heater-merger": {
+                    "pin": 21,
+                    "direction": "out"
+                },
+                "temperature-sensor-control-cs-merger": {
+                    "pin": 22,
+                    "direction": "out",
+                    "active-high": false,
+                    "state": "low"
+                },
+                "relay-switch-light-power": {
+                    "pin": 24,
+                    "direction": "out",
+                    "state": "high"
+                },
+                "relay-switch-fan-feeder": {
+                    "pin": 26,
+                    "direction": "out"
+                },
+                "temperature-sensor-control-cs-feeder": {
+                    "pin": 27,
+                    "direction": "out",
+                    "active-high": false,
+                    "state": "low"
+                }
+            }
+        },
+        "stepper-motor-control": {
+            "device": "i2c-3",
+            "motor-enabled": [
+                "feeder",
+                "coiler"
+            ],
+            "motor": {
+                "feeder": {
+                    "i2c-address": 14,
+                    "max-speed-rpm": "50",
+                    "direction": "forward"
+                },
+                "coiler": {
+                    "i2c-address": 15,
+                    "max-speed-rpm": "50",
+                    "direction": "backward"
+                }
+            }
+        },
+        "temperature-sensor-control": {
+            "device": "spidev0.0",
+            "temperature-sensor-enabled": [
+                "temperature-sensor-feeder",
+                "temperature-sensor-merger"
+            ],
+            "temperature-sensor": {
+                "temperature-sensor-feeder": {
+                    "chip-select": "temperature-sensor-control-cs-feeder"
+                },
+                "temperature-sensor-merger": {
+                    "chip-select": "temperature-sensor-control-cs-merger"
+                }
+            }
+        }
+    }
+}

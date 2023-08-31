@@ -1,8 +1,8 @@
-# Sugo SugoMachine Project
+# Sugo Machine Application Project
 
-This package contains the SugoMachine project of Sugo.
+This repository contains the Sugo machine application project.
 
-## Installation
+## Prerequisite
 
 Make sure you have installed all required packages on your system.
 
@@ -15,35 +15,35 @@ sudo apt install googletest libgtest-dev libgmock-dev \
   libboost-thread-dev libboost-system-dev libboost-random-dev
 ```
 
-Additional libraries which are not available as debian package:
+Additional libraries which are not available as debian package yet:
 * azmq: https://github.com/zeromq/azmq
 * jsonrpcpp: https://github.com/badaix/jsonrpcpp.git
 
-### X86 Installation
 
-The additional dependent libraries like azmq and librpcpp will be fetched from Git
-repository and build automatically within the project build folder.
+### Installation on x86 host
 
-The SugoMachine application can be build on host systems as well, to run the
-unit tests for example:
+If you don't have the required installed libraries like azmq and librpcpp locally installed, you could fetch and build them also by cmake target:
 
 ```bash
-cmake . -Bbuild.x86 -GNinja -DCMAKE_BUILD_TYPE=Debug
-cmake --build build.x86 --target all
+cmake --build build --target ExternalLibraries
+```
+
+The sugo machine application can be build on host systems as well, to run the unit tests for example:
+
+```bash
+cmake . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build --target all
 ```
 
 ### Cross Target Installation (i.e. on Raspberry PI)
 
-First you need an installed Yocto SDK. If 'LD_LIBRARY_PATH'
-has been set in your environment unset it first. Source the
-contained environment configuration script and call
-cmake as follows:
+First, you need an installed Yocto SDK. If 'LD_LIBRARY_PATH' has been set in your environment, unset it first. Source the contained environment configuration script and call cmake as follows:
 
 ```bash
 source $SDK_RPI_PATH/environment-setup-...
-cmake . -Bbuild.rpi -GNinja -DCMAKE_BUILD_TYPE=Debug \
+cmake . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_TOOLCHAIN_FILE=$OECORE_NATIVE_SYSROOT/usr/share/cmake/OEToolchainConfig.cmake
-cmake --build build.rpi -- all
+cmake --build build --target all
 ```
 
 #### Debugging
@@ -56,46 +56,66 @@ $SDK_RPI_PATH/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux/arm-poky-linu
 
 ## Using
 
-The CoffeAutomat main application should be started as a daemon job when
-the system gets started. It is listening to remote commands comming from a
-user interface for example.
+The machine application could be started easily from commandline by passing the appropriate configuration file. If the application should be started automatically in system, it should be started as a daemon job.
 
-The application has to be configured appropriate to the usage and hardware
-it runs on!
+The application is listening to remote commands comming from a user web interface.
+
+Before the application is started, make sure the application configuration is adapted appropriate to the hardware setup of the system it runs on!
 
 Example:
 
 ```bash
-SugoMachineApp [-d] -c /etc/SugoMachine.conf
+sugo machineApp [-d] -c /etc/sugo machine.conf
 ```
 
----
-**Important**: Before the I2C interface can be used, the two kernel modules
-'i2c-dev' and 'i2c-bcm2708' have to be loaded first.
+> **_NOTE:_** On Raspberry Pi systems make sure the two kernel modules
+'i2c-dev' and 'i2c-bcm2708' have to be loaded first before the I2C interface is used!
 
 ---
 
-## Testing
+### Testing
 
-The project comes contains different unit-tests. In order to run them
-you just have to build the project as previously described. After that
-you have to change to the build directory (e.g. 'build.x86') and just
-call 'ctest', which runs all tests.
+All unit tests can be found in the _test_ folder. The project comes with different unit-tests. In order to run all tests, you just have to build the project as previously described. After the tests have been build successfully, execute the following commands to run all tests:
+
+```bash
+cd ./build/test
+ctest
+```
 
 ## System Documentation
 
 * [Architecture](doc/Architecture.md)
 * [HardwareAbstractionLayer](HardwareAbstractionLayer/doc/README.md)
 
-# Contributing
+## Usage
+
+For more information please refer to the [Design Specification](doc/Design.md).
+
+## Contributing
 
 The software is not allowed to be contributed for commercial intentions.
 
-# License
+## License
 
-CLOSED
+Copyright 2023 by Denis Schoener
 
-# TODOs
+Distributed under the GPLv3 License. See [LICENSE](LICENSE) for more information.
 
-1. Remove cppcheck suppressed parts (e.g. '// cppcheck-suppress')
-2. Pass command parameters to events
+> **_NOTE:_**  The library is also distributed under a dual commercial license!
+
+## Contact
+
+Maintainer: Denis Schoener (denis@schoener-one.de)
+
+## TODOs
+
+1. Replace address and topic by class ServiceId
+2. Introduce clang-tidy checks by default and remove warnings
+3. Create ServiceId to network address translation. Kind of factory which could translate
+service identifiers to a full qualified network address.
+4. Remove cppcheck suppressed parts (e.g. '// cppcheck-suppress')
+5. Introduce component properties
+6. Support TCP messaging with mDNS name resolution
+7. Support CAN messaging
+8. Add a log format checker for integration tests (see boost::log::core) to check if an error happened
+9. FreeRTOS support

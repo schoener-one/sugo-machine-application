@@ -1,0 +1,523 @@
+<!--
+/**
+ * @file
+ *
+ * @author: Denis Schoener (denis@schoener-one.de)
+ * @date:   22.09.2023
+ *
+ * @license: Copyright (C) 2020 by Denis Schoener
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SUGO Machine Control</title>
+    <style type="text/css">
+      body {
+        background-color: #ffffff;
+        color: #ee0000;
+        margin: 0px;
+      }
+      .text-element {
+        font-family: Arial, Helvetica, sans-serif;
+        stroke: #333333;
+        fill: #333333;
+      }
+      #user-control {
+        display: flex;
+        justify-content: center;
+        margin: 0px;
+      }
+      svg .svg-button :hover {
+        fill: #cccccc;
+        cursor: grab;
+      }
+    </style>
+    <script language="javascript" type="text/javascript">
+      var currentLocation = window.location;
+      var ws = null;
+      var lastMachineState = "off";
+      const colorActive = "#333333";
+      const colorInactive = "#cccccc";
+      const colorLightOn = "#aaff22";
+      const colorLightOff = colorInactive;
+
+      // Handle new machine state
+      function receiveMachineState(js) {
+        console.log("state: " + js.state);
+        console.log("speed: " + js.speed);
+        lastMachineState = js.state;
+        document.getElementById("svg-speed-text").textContent = js.speed;
+        updateUserControl();
+      }
+
+      // Request current machine state
+      function requestMachineState() {
+        console.log("requesting current machine state...");
+        ws.send(
+          JSON.stringify({
+            type: "request-state",
+          })
+        );
+      }
+
+      function sendMachineCommand(commandName) {
+        console.log("sending machine command '" + commandName + "'");
+        ws.send(
+          JSON.stringify({
+            type: "request-command",
+            command: commandName,
+          })
+        );
+      }
+
+      // Connect to websocket server
+      function connect() {
+        ws = new WebSocket("ws://" + currentLocation.host + "/websocket");
+        ws.onopen = (event) => {
+          console.log("...opened connection");
+          requestMachineState();
+        };
+
+        ws.onclose = (event) => {
+          console.log("closing connection...");
+          setTimeout(function () {
+            connect();
+          }, 500);
+        };
+
+        ws.onmessage = (event) => {
+          console.log("received message: '" + event.data + "'");
+          var js = JSON.parse(event.data);
+          if (js != null && "type" in js) {
+            if (
+              js.type == "response-state" ||
+              js.type == "notification-state"
+            ) {
+              receiveMachineState(js);
+            } else if (js.type == "response-command") {
+              if (js.result == "error") {
+                alert("Command failed");
+                console.log("command response: " + js.result);
+              } else {
+                requestMachineState();
+              }
+            }
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.log(error);
+          ws.close();
+          ws = null;
+        };
+      }
+
+      // Update UI
+      function updateUserControl() {
+        var buttonStart = document.getElementById("svg-button-start-text");
+        var buttonStartHeatless = document.getElementById(
+          "svg-button-start-heatless-text"
+        );
+        var buttonStop = document.getElementById("svg-button-stop-text");
+        var buttonDec = document.getElementById(
+          "svg-button-decrease-speed-triangle"
+        );
+        var buttonInc = document.getElementById(
+          "svg-button-increase-speed-triangle"
+        );
+        var lightPower = document.getElementById("svg-light-power");
+        var lightRunning = document.getElementById("svg-light-running");
+        if (lastMachineState == "off") {
+          buttonStart.style.stroke = colorInactive;
+          buttonStart.style.fill = colorInactive;
+          buttonStartHeatless.style.stroke = colorInactive;
+          buttonStartHeatless.style.fill = colorInactive;
+          buttonStop.style.stroke = colorInactive;
+          buttonStop.style.fill = colorInactive;
+          buttonDec.style.fill = colorInactive;
+          buttonInc.style.fill = colorInactive;
+          lightPower.style.fill = colorLightOff;
+          lightRunning.style.fill = colorLightOff;
+        } else if (lastMachineState == "stopped") {
+          buttonStart.style.stroke = colorActive;
+          buttonStart.style.fill = colorActive;
+          buttonStartHeatless.style.stroke = colorActive;
+          buttonStartHeatless.style.fill = colorActive;
+          buttonStop.style.stroke = colorInactive;
+          buttonStop.style.fill = colorInactive;
+          buttonDec.style.fill = colorInactive;
+          buttonInc.style.fill = colorInactive;
+          lightPower.style.fill = colorLightOn;
+          lightRunning.style.fill = colorLightOff;
+        } else if (lastMachineState == "starting") {
+          buttonStart.style.stroke = colorInactive;
+          buttonStart.style.fill = colorInactive;
+          buttonStartHeatless.style.stroke = colorInactive;
+          buttonStartHeatless.style.fill = colorInactive;
+          buttonStop.style.stroke = colorActive;
+          buttonStop.style.fill = colorActive;
+          buttonDec.style.fill = colorInactive;
+          buttonInc.style.fill = colorInactive;
+          lightPower.style.fill = colorLightOn;
+          lightRunning.style.fill = colorLightOff;
+        } else if (lastMachineState == "running") {
+          buttonStart.style.stroke = colorInactive;
+          buttonStart.style.fill = colorInactive;
+          buttonStartHeatless.style.stroke = colorInactive;
+          buttonStartHeatless.style.fill = colorInactive;
+          buttonStop.style.stroke = colorActive;
+          buttonStop.style.fill = colorActive;
+          buttonDec.style.fill = colorActive;
+          buttonInc.style.fill = colorActive;
+          lightPower.style.fill = colorLightOn;
+          lightRunning.style.fill = colorLightOn;
+        }
+        updateEventHandlers();
+      }
+
+      function updateEventHandlers() {
+        if (lastMachineState == "off") {
+          document.getElementById("svg-button-power").onclick = function () {
+            sendMachineCommand("switch-on");
+          };
+          document.getElementById("svg-button-start").onclick = null;
+          document.getElementById("svg-button-start-heatless").onclick = null;
+          document.getElementById("svg-button-stop").onclick = null;
+          document.getElementById("svg-button-increase-speed").onclick = null;
+          document.getElementById("svg-button-decrease-speed").onclick = null;
+        } else if (lastMachineState == "stopped") {
+          document.getElementById("svg-button-power").onclick = function () {
+            sendMachineCommand("switch-off");
+          };
+          document.getElementById("svg-button-start").onclick = function () {
+            sendMachineCommand("start");
+          };
+          document.getElementById("svg-button-start-heatless").onclick = function () {
+            sendMachineCommand("start-heatless");
+          };
+          document.getElementById("svg-button-stop").onclick = null;
+          document.getElementById("svg-button-increase-speed").onclick = null;
+          document.getElementById("svg-button-decrease-speed").onclick = null;
+        } else if (lastMachineState == "starting") {
+          document.getElementById("svg-button-power").onclick = function () {
+            sendMachineCommand("switch-off");
+          };
+          document.getElementById("svg-button-start").onclick = null;
+          document.getElementById("svg-button-start-heatless").onclick = null;
+          document.getElementById("svg-button-stop").onclick = function () {
+            sendMachineCommand("stop");
+          };
+          document.getElementById("svg-button-increase-speed").onclick = null;
+          document.getElementById("svg-button-decrease-speed").onclick = null;
+        } else if (lastMachineState == "running") {
+          document.getElementById("svg-button-power").onclick = function () {
+            sendMachineCommand("switch-off");
+          };
+          document.getElementById("svg-button-start").onclick = null;
+          document.getElementById("svg-button-start-heatless").onclick = null;
+          document.getElementById("svg-button-stop").onclick = function () {
+            sendMachineCommand("stop");
+          };
+          document.getElementById("svg-button-increase-speed").onclick =
+            function () {
+              sendMachineCommand("increase-speed");
+            };
+          document.getElementById("svg-button-decrease-speed").onclick =
+            function () {
+              sendMachineCommand("decrease-speed");
+            };
+        }
+      }
+      window.onload = function () {
+        updateUserControl();
+        connect();
+      };
+    </script>
+  </head>
+  <body>
+    <div id="user-control">
+      <!-- Generator: Adobe Illustrator 16.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+      <svg
+        version="1.2"
+        baseProfile="tiny"
+        id="svg-user-control"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        x="0px"
+        y="0px"
+        width="880px"
+        height="380px"
+        viewBox="-845.515 105.199 880 380"
+        xml:space="preserve"
+      >
+        <g class="svg-button" id="svg-button-start">
+          <path
+            fill="none"
+            stroke="#CCCCCC"
+            stroke-width="6"
+            stroke-miterlimit="10"
+            d="M-592.516,220.795
+        c0,6.627-4.521,11.705-10.715,11.705h-177.57c-6.193,0-11.715-5.078-11.715-11.705v-56c0-6.627,5.521-12.295,11.715-12.295h177.57
+        c6.194,0,10.715,5.666,10.715,12.295V220.795z"
+          />
+          <g class="svg-button" id="svg-button-start">
+            <text
+              transform="matrix(0.9346 0 0 1 -745.1072 202.1016)"
+              font-size="36"
+              class="text-element"
+              id="svg-button-start-text"
+            >
+              start
+            </text>
+            <g>
+              <path
+                fill="#C0C0C0"
+                d="M-666.186,205c-1.351-2.777-1.351-5.557,0-8.332c1.35-2.779,1.35-5.557,0-8.336
+            c-1.351-2.775-1.351-5.553,0-8.332h5.25c-1.351,2.779-1.351,5.557,0,8.332c1.35,2.779,1.35,5.557,0,8.336
+            c-1.351,2.775-1.351,5.555,0,8.332H-666.186z"
+              />
+              <path
+                fill="#C0C0C0"
+                d="M-656.186,205c-1.351-2.777-1.351-5.557,0-8.332c1.35-2.779,1.35-5.557,0-8.336
+            c-1.351-2.775-1.351-5.553,0-8.332h5.25c-1.351,2.779-1.351,5.557,0,8.332c1.35,2.779,1.35,5.557,0,8.336
+            c-1.351,2.775-1.351,5.555,0,8.332H-656.186z"
+              />
+              <path
+                fill="#C0C0C0"
+                d="M-646.186,205c-1.351-2.777-1.351-5.557,0-8.332c1.35-2.779,1.35-5.557,0-8.336
+            c-1.351-2.775-1.351-5.553,0-8.332h5.25c-1.351,2.779-1.351,5.557,0,8.332c1.35,2.779,1.35,5.557,0,8.336
+            c-1.351,2.775-1.351,5.555,0,8.332H-646.186z"
+              />
+            </g>
+          </g>
+        </g>
+        <g class="svg-button" id="svg-button-stop">
+          <path
+            fill="none"
+            stroke="#CCCCCC"
+            stroke-width="6"
+            stroke-miterlimit="10"
+            d="M-334.063,220.796
+      c0,6.627-4.521,11.704-10.715,11.704h-177.57c-6.193,0-11.715-5.077-11.715-11.704v-56c0-6.627,5.521-12.296,11.715-12.296h177.57
+      c6.192,0,10.715,5.668,10.715,12.296V220.796z"
+          />
+          <text
+            transform="matrix(0.9346 0 0 1 -465.8601 202.1016)"
+            font-size="36"
+            class="text-element"
+            id="svg-button-stop-text"
+          >
+            stop
+          </text>
+        </g>
+        <g>
+          <path
+            fill="none"
+            stroke="#CCCCCC"
+            stroke-width="6"
+            stroke-miterlimit="10"
+            d="M-458.517,434.699c0,6.628-5.373,12-12,12h-190
+        c-6.627,0-12-5.372-12-12v-56c0-6.627,5.373-12,12-12h190c6.627,0,12,5.373,12,12V434.699z"
+          />
+          <g>
+            <text
+              id="svg-speed-text"
+              transform="matrix(1 0 0 1 -594.5496 416.3008)"
+              fill="#333333"
+              font-size="36"
+              class="text-element"
+              id="svg-speed-text"
+            >
+              0
+            </text>
+            <text
+              transform="matrix(1 0 0 1 -520.0 411.5)"
+              fill="#333333"
+              font-size="18"
+              class="text-element"
+            >
+              rpm
+            </text>
+          </g>
+        </g>
+        <g id="svg-button-increase-speed" class="svg-button">
+          <path
+            fill="none"
+            stroke="#CCCCCC"
+            stroke-width="6"
+            stroke-miterlimit="10"
+            d="M-339.5,434.021c0,7.164-4.569,12.678-10.82,12.678
+        h-77.358c-6.252,0-11.821-5.514-11.821-12.678v-54.054c0-7.165,5.568-13.269,11.821-13.269h77.358
+        c6.251,0,10.82,6.104,10.82,13.269V434.021z"
+          />
+          <polygon
+            id="svg-button-decrease-speed-triangle"
+            fill="#333333"
+            points="-407.5,380.495 -407.5,433.495 -371.558,406.995 	"
+          />
+        </g>
+        <g id="svg-button-decrease-speed" class="svg-button">
+          <path
+            fill="none"
+            stroke="#CCCCCC"
+            stroke-width="6"
+            stroke-miterlimit="10"
+            d="M-792.516,379.967
+        c0-7.164,5.569-13.269,11.82-13.269h77.359c6.252,0,10.819,6.104,10.819,13.269v54.055c0,7.164-4.567,12.679-10.819,12.679h-77.359
+        c-6.251,0-11.82-5.515-11.82-12.679V379.967z"
+          />
+          <polygon
+            id="svg-button-increase-speed-triangle"
+            fill="#333333"
+            points="-724.516,433.494 -724.516,380.494 -760.457,406.994 	"
+          />
+        </g>
+        <g>
+          <g>
+            <path
+              fill="none"
+              d="M-37.063,397.291c0,6.627-5.023,12.204-11.836,12.204h-195.328c-6.813,0-12.836-5.577-12.836-12.204v-56
+          c0-6.627,6.023-11.796,12.836-11.796h195.328c6.813,0,11.836,5.168,11.836,11.796V397.291z"
+            />
+            <g>
+              <circle
+                id="svg-light-running"
+                fill="#00C846"
+                stroke="#CCCCCC"
+                stroke-width="3"
+                cx="-227.563"
+                cy="369.995"
+                r="25"
+              />
+              <g>
+                <polygon
+                  points="-233.423,353.513 -242.977,355.604 -239.561,359.256 -236.208,362.837 				"
+                />
+                <path
+                  d="M-216.648,355.944l-2.661,3.002c2.872,2.396,4.715,5.989,4.715,10.015c0,7.197-5.855,13.055-13.055,13.055
+              c-7.197,0-13.054-5.885-13.054-13.083c0-3.7,1.557-7.438,4.04-9.438h-1.4v-3.684c-4,3.128-6.433,7.856-6.433,13.148
+              c0,9.403,7.547,17.055,16.949,17.055c9.404,0,17.004-7.65,17.004-17.055C-210.542,363.747-212.948,359.074-216.648,355.944z"
+                />
+              </g>
+            </g>
+
+            <text
+              transform="matrix(0.9346 0 0 1 -174.8894 377.9561)"
+              fill="#333333"
+              stroke="#333333"
+              stroke-miterlimit="10"
+              font-size="36"
+              class="text-element"
+            >
+              running
+            </text>
+          </g>
+          <g>
+            <path
+              fill="none"
+              d="M-37.063,297.791c0,6.627-5.023,11.704-11.836,11.704h-195.328c-6.813,0-12.836-5.077-12.836-11.704v-56
+          c0-6.627,6.023-12.296,12.836-12.296h195.328c6.813,0,11.836,5.668,11.836,12.296V297.791z"
+            />
+            <g id="svg-button-power" class="svg-button">
+              <circle
+                id="svg-light-power"
+                fill="#CC3300"
+                stroke="#CCCCCC"
+                stroke-width="6"
+                cx="-227.563"
+                cy="269.995"
+                r="25"
+              />
+              <g>
+                <g>
+                  <path
+                    d="M-219.063,255.71v4.799c3,2.395,4.719,6.059,4.719,10.164c0,7.197-5.938,13.055-13.137,13.055
+                s-12.931-5.855-12.931-13.055c0-4.693,2.349-8.805,6.349-11.104v-4.512c-6,2.639-10.39,8.642-10.39,15.616
+                c0,9.403,7.567,17.055,16.972,17.055s17.178-7.65,17.178-17.055C-210.303,264.228-214.063,258.609-219.063,255.71z"
+                  />
+                  <rect x="-229.063" y="252.495" width="5" height="20" />
+                </g>
+              </g>
+            </g>
+
+            <text
+              transform="matrix(0.9346 0 0 1 -174.8894 278.4561)"
+              fill="#333333"
+              stroke="#333333"
+              stroke-miterlimit="10"
+              font-size="36"
+              class="text-element"
+            >
+              power
+            </text>
+          </g>
+          <g>
+            <g>
+              <path
+                fill="none"
+                stroke="#CCCCCC"
+                stroke-width="6"
+                stroke-miterlimit="10"
+                d="M-27.248,152.5h-132.314
+            c0,5.428-5.82,9.771-13,9.771h-57.416c-7.181,0-13-4.343-13-9.771h-22.899c-5.9,0-11.185,5.179-11.185,10.729v273.826
+            c0,5.548,5.284,9.645,11.185,9.645h238.629c5.901,0,10.187-4.096,10.187-9.645V163.229
+            C-17.063,157.679-21.347,152.5-27.248,152.5z"
+              />
+            </g>
+            <text
+              transform="matrix(0.8941 0 0 1 -223.0496 151.7236)"
+              class="text-element"
+              font-size="25.0878"
+            >
+              State
+            </text>
+          </g>
+        </g>
+        <path
+          fill="none"
+          stroke="#CCCCCC"
+          stroke-width="10"
+          stroke-miterlimit="10"
+          d="M13.984,464.699c0,6.627-5.373,12-12,12h-815
+      c-6.627,0-12-5.373-12-12v-339c0-6.627,5.373-12,12-12h815c6.627,0,12,5.373,12,12V464.699z"
+        />
+        <g class="svg-button" id="svg-button-start-heatless">
+          <path
+            fill="none"
+            stroke="#CCCCCC"
+            stroke-width="6"
+            stroke-miterlimit="10"
+            d="M-592.516,316.022
+        c0,6.627-4.521,11.705-10.715,11.705h-177.57c-6.193,0-11.715-5.078-11.715-11.705v-56c0-6.627,5.521-12.295,11.715-12.295h177.57
+        c6.194,0,10.715,5.666,10.715,12.295V316.022z"
+          />
+          <g>
+            <text
+              transform="matrix(0.9346 0 0 1 -745.1072 297.3291)"
+              font-size="36"
+              class="text-element"
+              id="svg-button-start-heatless-text"
+            >
+              start
+            </text>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <p id="state-text">State</p>
+  </body>
+</html>

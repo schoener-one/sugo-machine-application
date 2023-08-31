@@ -1,0 +1,650 @@
+components:
+  - MachineControl:
+      description: "Service component to controls the whole machine"
+      inbound:
+        requests:
+          - SwitchOn:
+              event: SwitchOn
+          - SwitchOff:
+              event: SwitchOff
+          - Start:
+              event: Start
+          - StartHeatless:
+              event: StartHeatless
+          - IncreaseMotorSpeed
+          - DecreaseMotorSpeed
+          - Stop:
+              event: Stop
+          - GetMotorSpeed
+        notifications:
+          - FilamentMergerControl.FeedingRunning
+          - FilamentMergerControl.FeedingStopped
+          - FilamentMergerControl.HeatedUp:
+              event: MergerHeatedUp
+          - FilamentMergerControl.ErrorOccurred:
+              event: ErrorOccurred
+          - FilamentCoilControl.CoilRunning
+          - FilamentCoilControl.CoilStopped
+          - FilamentCoilControl.ErrorOccurred:
+              event: ErrorOccurred
+      outbound:
+        notifications:
+          - Stopped
+          - HeatingUp
+          - Starting
+          - Running
+          - SwitchedOff
+          - ErrorOccurred
+      events:
+        - SwitchOff
+        - SwitchOn
+        - SwitchOnSucceeded
+        - Start
+        - StartHeatless
+        - MergerHeatedUp
+        - StartingSucceeded
+        - Stop
+        - StoppingSucceeded
+        - CheckStartingState
+        - CheckStoppingState
+        - ErrorOccurred
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - Stopped
+          - HeatingUp
+          - Starting
+          - Running
+          - Stopping
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: '\b(?!Off)\b.+' # All except 'Off'
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
+          - state: '\b(?!Error)\b.+' # All except 'Error'
+            next: Error
+            event: ErrorOccurred
+            action: handleError
+          - state: 'Error'
+            next: Error
+            event: ErrorOccurred
+          - state: Initialization
+            next: Stopped
+            event: SwitchOnSucceeded
+            action: notifyStopped
+          - state: Stopped
+            next: HeatingUp
+            event: Start
+            action: startHeating
+          - state: Stopped
+            next: Starting
+            event: StartHeatless
+            action: startMachine
+          - state: HeatingUp
+            next: Starting
+            event: MergerHeatedUp
+            action: startMachine
+          - state: HeatingUp
+            next: Stopping
+            event: Stop
+            action: stopMachine
+          - state: Starting
+            next: Starting
+            event: CheckStartingState
+            action: checkStartingState
+          - state: Starting|Running
+            next: Running
+            event: StartingSucceeded
+          - state: Starting
+            next: Stopping
+            event: Stop
+            action: stopMachine
+          - state: Running
+            next: Stopping
+            event: Stop
+            action: stopMachine
+          - state: Stopping
+            next: Stopping
+            event: CheckStoppingState
+            action: checkStoppingState
+          - state: Stopping
+            next: Stopped
+            event: StoppingSucceeded
+          - state: Stopped
+            next: Stopped
+            event: CheckStoppingState
+
+
+  - FilamentMergerControl:
+      description: "Hardware service component to control the filament merger unit"
+      inbound:
+        requests:
+          - SwitchOn:
+              event: SwitchOn
+          - SwitchOff:
+              event: SwitchOff
+          - StartFeeding:
+              event: StartMotor
+          - StopFeeding:
+              event: Stop
+          - GetTemperature:
+              forward: FilamentMergerHeater::RequestGetTemperature #FIXME Remote request prefix!
+          - SetMotorSpeed:
+              forward: FilamentFeederMotor::RequestSetMotorSpeed #FIXME Remove request prefix!
+          - StartHeating:
+              event: StartHeating
+        notifications:
+          - FilamentPreHeater.TargetTemperatureRangeReached
+          - FilamentPreHeater.ErrorOccurred:
+              event: ErrorOccurred
+          - FilamentMergerHeater.TargetTemperatureRangeReached
+          - FilamentMergerHeater.ErrorOccurred:
+              event: ErrorOccurred
+          - FilamentFeederMotor.StartMotorSucceeded:
+              event: StartMotorSucceeded
+          - FilamentFeederMotor.StopMotorSucceeded:
+              event: StopMotorSucceeded
+          - FilamentFeederMotor.ErrorOccurred:
+              event: ErrorOccurred
+      outbound:
+        notifications:
+          - FeedingRunning
+          - FeedingStopped
+          - HeatedUp
+          - ErrorOccurred
+      events:
+        - SwitchOff
+        - SwitchOn
+        - SwitchOnSucceeded
+        - StartHeating
+        - HeatingUpSucceeded
+        - StartMotor
+        - StartMotorSucceeded
+        - StopMotorSucceeded
+        - Stop
+        - ErrorOccurred
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - HeatingUp
+          - HeatedUp
+          - MergerStopped
+          - StartingMotor
+          - Running
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: '\b(?!Off)\b.+' # All except 'Off'
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
+          - state: '\b(?!Error)\b.+' # All except 'Error'
+            next: Error
+            event: ErrorOccurred
+            action: handleError
+          - state: 'Error'
+            next: Error
+            event: ErrorOccurred
+          - state: Initialization
+            next: MergerStopped
+            event: SwitchOnSucceeded
+          - state: MergerStopped
+            next: HeatingUp
+            event: StartHeating
+            action: heatingUp
+          - state: HeatingUp
+            next: HeatedUp
+            event: HeatingUpSucceeded
+            action: notifyHeatedUp
+          - state: 'HeatingUp|StartingMotor|Running'
+            next: MergerStopped
+            event: Stop
+            action: stopMerger
+          - state: 'HeatedUp|MergerStopped'
+            next: StartingMotor
+            event: StartMotor
+            action: startMotor
+          - state: MergerStopped
+            next: MergerStopped
+            event: Stop
+          - state: StartingMotor
+            next: Running
+            event: StartMotorSucceeded
+            action: notifyRunning
+
+
+  - _BaseMotor: &BaseMotor
+      description: "Hardware service component to control a motor"
+      inbound:
+        requests:
+          - SwitchOn:
+              event: SwitchOn
+          - SwitchOff:
+              event: SwitchOff
+          - StartMotor:
+              event: StartMotor
+          - StopMotor:
+              event: StopMotor
+          - SetMotorSpeed
+      outbound:
+        notifications:
+          - StartMotorSucceeded
+          - StopMotorSucceeded
+          - ErrorOccurred
+      events:
+        - SwitchOff
+        - SwitchOn
+        - SwitchOnSucceeded
+        - StartMotor
+        - StartMotorSucceeded
+        - StopMotorSucceeded
+        - ErrorOccurred
+        - StopMotor
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - Stopped
+          - Starting
+          - Running
+          - Stopping
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: '\b(?!Off|Running|Starting)\b.+' # All except 'Off|Running|Starting'
+            next: 'Off'
+            event: SwitchOff
+          - state: 'Starting|Running'
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
+          - state: '\b(?!Error)\b.+' # All except 'Error'
+            next: Error
+            event: ErrorOccurred
+            action: handleError
+          - state: 'Error'
+            next: Error
+            event: ErrorOccurred
+          - state: Initialization
+            next: Stopped
+            event: SwitchOnSucceeded
+          - state: Stopped
+            next: Stopped
+            event: StopMotor
+          - state: Stopped
+            next: Starting
+            event: StartMotor
+            action: startMotor
+          - state: Starting
+            next: Running
+            event: StartMotorSucceeded
+          - state: 'Running|Starting'
+            next: Stopping
+            event: StopMotor
+            action: stopMotor
+          - state: Stopping
+            next: Stopping
+            event: StopMotor
+          - state: Stopping
+            next: Stopped
+            event: StopMotorSucceeded
+
+
+  - FilamentFeederMotor:
+      <<: *BaseMotor
+      description: "Hardware service component to control the feeder motor of the filament merger unit"
+
+
+  - _BaseHeater: &BaseHeater
+      description: "Hardware service component to control a heater"
+      inbound:
+        requests:
+          - SwitchOn:
+              event: SwitchOn
+          - SwitchOff:
+              event: SwitchOff
+          - GetTemperature
+      outbound:
+        notifications:
+          - TargetTemperatureRangeReached
+          - TargetTemperatureRangeLeft
+          - ErrorOccurred
+      events:
+        - SwitchOn
+        - SwitchOff
+        - SwitchOnSucceeded
+        - MaxTemperatureReached
+        - MinTemperatureReached
+        - ErrorOccurred
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - HeatingOn
+          - HeatingOff
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: '\b(?!Off)\b.+' # All except 'Off'
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
+          - state: '\b(?!Error)\b.+' # All except 'Error'
+            next: Error
+            event: ErrorOccurred
+            action: handleError
+          - state: 'Error'
+            next: Error
+            event: ErrorOccurred
+          - state: Initialization
+            next: HeatingOn
+            event: SwitchOnSucceeded
+            action: startHeating
+          - state: HeatingOn
+            next: HeatingOff
+            event: MaxTemperatureReached
+            action: stopHeating
+          - state: HeatingOn
+            next: HeatingOn
+            event: MinTemperatureReached
+          - state: HeatingOff
+            next: HeatingOff
+            event: MaxTemperatureReached
+          - state: HeatingOff
+            next: HeatingOn
+            event: MinTemperatureReached
+            action: startHeating
+
+
+  - FilamentPreHeater:
+      <<: *BaseHeater
+      description: "Hardware service component to control the pre-heater of the filament merger unit"
+
+
+  - FilamentMergerHeater:
+      <<: *BaseHeater
+      description: "Hardware service component to control the merger heater of the filament merger unit"
+
+
+  - FilamentCoilControl:
+      description: "Service component to control the filament coil unit"
+      inbound:
+        requests:
+          - SwitchOn:
+              event: SwitchOn
+          - SwitchOff:
+              event: SwitchOff
+          - StartCoil
+          - StopCoil:
+              event: StopMotor
+          - SetMotorSpeed:
+              forward: FilamentCoilMotor.RequestSetMotorSpeed #FIXME Remove Request prefix!
+        notifications:
+          - FilamentTensionSensor.TensionTooLow:
+              event: TensionTooLow
+          - FilamentTensionSensor.TensionTooHigh:
+              event: TensionTooHigh
+          - FilamentTensionSensor.TensionOverloaded:
+              event: TensionOverloaded
+          - FilamentTensionSensor.ErrorOccurred:
+              event: ErrorOccurred
+          - FilamentCoilMotor.StartMotorSucceeded:
+              event: StartMotorSucceeded
+          - FilamentCoilMotor.StopMotorSucceeded:
+              event: StopMotorSucceeded
+          - FilamentCoilMotor.ErrorOccurred:
+              event: ErrorOccurred
+      outbound:
+        notifications:
+          - CoilRunning
+          - CoilStopped
+          - ErrorOccurred
+      events:
+        - SwitchOn
+        - SwitchOnSucceeded
+        - SwitchOff
+        - StartMotor
+        - StartMotorSucceeded
+        - StopMotor
+        - StopMotorSucceeded
+        - TensionTooLow
+        - TensionTooHigh
+        - TensionOverloaded
+        - ErrorOccurred
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - MotorStopped
+          - StartingMotor
+          - StoppingMotor
+          - Running
+          - Pausing
+          - Paused
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: '\b(?!Off)\b.+' # All except 'Off'
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
+          - state: '\b(?!Error)\b.+' # All except 'Error'
+            next: Error
+            event: ErrorOccurred
+            action: handleError
+          - state: 'Error'
+            next: Error
+            event: ErrorOccurred
+          - state: Initialization
+            next: MotorStopped
+            event: SwitchOnSucceeded
+          - state: MotorStopped
+            next: StartingMotor
+            event: StartMotor
+            action: startMotor
+          - state: MotorStopped
+            next: MotorStopped
+            event: StopMotor
+          - state: StartingMotor
+            next: MotorStopped
+            event: StopMotor
+            action: stopMotor
+          - state: StartingMotor
+            next: Running
+            event: StartMotorSucceeded
+            action: notifyRunning
+          - state: Running
+            next: StoppingMotor
+            event: StopMotor
+            action: stopMotor
+          - state: StoppingMotor
+            next: StoppingMotor
+            event: StopMotor
+          - state: StoppingMotor
+            next: MotorStopped
+            event: StopMotorSucceeded
+          - state: Running
+            next: Running
+            event: TensionTooHigh
+            action: controlFilamentTension
+          - state: Running
+            next: Running
+            event: TensionTooLow
+            action: controlFilamentTension
+          - state: Running
+            next: Pausing
+            event: TensionOverloaded
+            action: stopMotor
+          - state: Pausing
+            next: Pausing
+            event: TensionOverloaded
+          - state: Pausing
+            next: Paused
+            event: StopMotorSucceeded
+          - state: Paused
+            next: Paused
+            event: TensionOverloaded
+          - state: Paused
+            next: StartingMotor
+            event: TensionTooHigh
+            action: startMotor
+          - state: Paused
+            next: MotorStopped
+            event: StopMotor
+            action: stopMotor         
+
+
+  - FilamentCoilMotor:
+      <<: *BaseMotor
+      description: "Hardware service component controls the filament coil motor of the filament coil unit"
+      inbound:
+        requests:
+          - SwitchOn:
+              event: SwitchOn
+          - SwitchOff:
+              event: SwitchOff
+          - StartMotor:
+              event: StartMotor
+          - StopMotor:
+              event: StopMotor
+          - SetMotorSpeed
+          - IncreaseMotorOffsetSpeed
+          - DecreaseMotorOffsetSpeed
+
+
+  - FilamentTensionSensor:
+      description: "Hardware service component to control the strain sensor of the filament coil unit"
+      inbound:
+        requests:
+          - SwitchOn:
+              event: SwitchOn
+          - SwitchOff:
+              event: SwitchOff
+      outbound:
+        notifications:
+          - TensionTooLow
+          - TensionTooHigh
+          - TensionOverloaded
+          - ErrorOccurred
+      events:
+        - SwitchOn
+        - SwitchOnSucceeded
+        - SwitchOnFailed
+        - SwitchOff
+        - ErrorOccurred
+      statemachine:
+        start: 'Off'
+        states:
+          - 'Off'
+          - Initialization
+          - Running
+          - Error
+        transitions:
+          - state: 'Off'
+            next: Initialization
+            event: SwitchOn
+            action: switchOn
+          - state: '\b(?!Off)\b.+' # All except 'Off'
+            next: 'Off'
+            event: SwitchOff
+            action: switchOff
+          - state: 'Off'
+            next: 'Off'
+            event: SwitchOff
+          - state: '\b(?!Error)\b.+' # All except 'Error'
+            next: Error
+            event: ErrorOccurred
+            action: handleError
+          - state: 'Error'
+            next: Error
+            event: ErrorOccurred
+          - state: Initialization
+            next: Running
+            event: SwitchOnSucceeded
+
+
+  - UserInterfaceControl:
+      description: "Hardware service component to control the user interface of the filament coil unit"
+      inbound:
+        notifications:
+          - MachineControl.Stopped
+          - MachineControl.HeatingUp
+          - MachineControl.Starting
+          - MachineControl.Running
+          - MachineControl.SwitchedOff
+          - MachineControl.ErrorOccurred
+      events:
+        - MachineStopped
+        - MachineHeatingUp
+        - MachineStarting
+        - MachineRunning
+        - MachineSwitchedOff
+        - MachineError
+      statemachine:
+        start: Active
+        states:
+          - Active
+        transitions:
+          - state: Active
+            next: Active
+            event: MachineStopped
+            action: handleMachineStateChange
+          - state: Active
+            next: Active
+            event: MachineHeatingUp
+            action: handleMachineStateChange
+          - state: Active
+            next: Active
+            event: MachineStarting
+            action: handleMachineStateChange
+          - state: Active
+            next: Active
+            event: MachineRunning
+            action: handleMachineStateChange
+          - state: Active
+            next: Active
+            event: MachineSwitchedOff
+            action: handleMachineStateChange
+          - state: Active
+            next: Active
+            event: MachineError
+            action: handleMachineStateChange

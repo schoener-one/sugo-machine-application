@@ -1,0 +1,62 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file
+ *
+ * @author: Denis Schoener (denis@schoener-one.de)
+ * @date:   22.09.2023
+ *
+ * @license: Copyright (C) 2020 by Denis Schoener
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+syntax = "proto3";
+
+package sugo.message_broker.proto;
+
+message MessageHeader {
+	/// Unique message id
+	uint32 id = 1;
+	/// Sequence number
+	uint32 sequence = 2;
+}
+
+/// Message type
+message Message {
+	// The message header 
+	MessageHeader header = 1;
+	/// payload or parameter data
+	bytes payload = 2;
+}
+
+/// Response message type
+message ResponseMessage {
+	/// The message header which relates to the origin message
+	MessageHeader header = 1;
+	/// Result types
+	enum Result {
+		Success = 0;
+		UnsupportedRequest = 1; ///< Unsupported message type
+		InvalidMessage = 2;     ///< Invalid message received
+		InvalidPayload = 3;     ///< Payload or parameter value invalid
+        Error = 5;	            ///< General error	
+	}
+	/// Result type
+	Result result = 2;
+	/// Detailed error description stored as JSON format
+	string error = 3;
+	/// payload or parameter data
+	bytes payload = 4;
+}
