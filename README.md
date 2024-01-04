@@ -1,6 +1,6 @@
 # Sugo Machine Application Project
 
-This repository contains the Sugo machine application project.
+This package contains the Sugo machine application project.
 
 ## Prerequisite
 
@@ -109,13 +109,14 @@ Maintainer: Denis Schoener (denis@schoener-one.de)
 
 ## TODOs
 
-1. Replace address and topic by class ServiceId
-2. Introduce clang-tidy checks by default and remove warnings
-3. Create ServiceId to network address translation. Kind of factory which could translate
+* Split project libs to submodules (i.e. Common, HardwareAbstractionLayer etc.) 
+* Replace address and topic by class ServiceId
+* Introduce clang-tidy checks by default and remove warnings
+* Create ServiceId to network address translation. Kind of factory which could translate
 service identifiers to a full qualified network address.
-4. Remove cppcheck suppressed parts (e.g. '// cppcheck-suppress')
-5. Introduce component properties
-6. Support TCP messaging with mDNS name resolution
-7. Support CAN messaging
-8. Add a log format checker for integration tests (see boost::log::core) to check if an error happened
-9. FreeRTOS support
+* Remove cppcheck suppressed parts (e.g. '// cppcheck-suppress')
+* Introduce component properties
+* Support TCP messaging with mDNS name resolution
+* Support CAN messaging
+* Add a log format checker for integration tests (see boost::log::core) to check if an error happened
+* FreeRTOS support
