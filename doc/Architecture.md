@@ -49,7 +49,7 @@ The architecture applies the **Active Object** design pattern as the major syste
 ---
 ### Layer model
 
-For a better testability and scalability, the software are divided into 3 layers. Every software package is assigned only to one layer.
+For a better testability and scalability, the software are divided into 3 layers. Every software module is assigned only to one layer.
 
 1. **System Component Layer**: Provides the service components and application business logic. Only service components of this layer could communicate with each other.
 

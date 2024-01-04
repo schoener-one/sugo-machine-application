@@ -85,7 +85,7 @@ ctest
 ## System Documentation
 
 * [Architecture](doc/Architecture.md)
-* [HardwareAbstractionLayer](HardwareAbstractionLayer/doc/README.md)
+* [HardwareAbstractionLayer](libs/HardwareAbstractionLayerImpl/doc/Design.md)
 
 ## Usage
 
