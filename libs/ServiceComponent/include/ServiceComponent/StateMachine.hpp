@@ -184,6 +184,7 @@ private:
 
     StateT                m_state;                 ///< Current state.
     const TransitionTable m_transitions;           ///< Transition table.
+    //FIXME Move event queue out of the state machine!
     EventQueue<EventT>    m_eventQueue;            ///< Event queue for pending events.
     mutable std::mutex    m_mutexEventProcessing;  ///< Mutex to protect the state
 };

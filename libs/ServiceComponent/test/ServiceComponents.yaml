@@ -1,12 +1,8 @@
 components:
   - MachineControl:
-      description: "Service component to control the whole machine"
-      # properties:
-      #   - FilamentMergerRunning:
-      #     type: bool
-      #     default: false
-      inbound:
-        requests:
+      description: "Service component to controls the whole machine"
+      interface:
+        commands:
           - SwitchOn:
               event: SwitchOn
           - SwitchOff:
@@ -19,19 +15,20 @@ components:
           - DecreaseMotorSpeed
           - Stop:
               event: Stop
-          - GetMotorSpeed
-        notifications:
-          - FilamentMergerControl.FeedingRunning
-          - FilamentMergerControl.FeedingStopped
-          - FilamentMergerControl.HeatedUp:
-              event: MergerHeatedUp
-          - FilamentMergerControl.ErrorOccurred:
-              event: ErrorOccurred
-          - FilamentCoilControl.CoilRunning
-          - FilamentCoilControl.CoilStopped
-          - FilamentCoilControl.ErrorOccurred:
-              event: ErrorOccurred
-      outbound:
+        properties:
+          - SystemName:
+              type: char[32]
+              value: "'M', 'a', 'c', 'h', 'i', 'n', 'e', 0x00"
+          - MotorSpeed:
+              type: uint32
+              value: 0
+              max: 100
+          - IsFeedingRunning:
+              type: bool
+              value: false
+          - IsCoilRunning:
+              type: bool
+              value: false
         notifications:
           - Stopped
           - HeatingUp
@@ -39,6 +36,35 @@ components:
           - Running
           - SwitchedOff
           - ErrorOccurred
+          - MotorSpeedChanged
+      utilization:
+        notifications:
+          - FilamentMergerControl.FeedingRunning:
+              change:
+                property: IsFeedingRunning
+                value: true
+              action: checkStartingState
+          - FilamentMergerControl.FeedingStopped:
+              change:
+                property: IsFeedingRunning
+                value: false
+              action: checkStoppingState
+          - FilamentMergerControl.HeatedUp:
+              event: MergerHeatedUp
+          - FilamentMergerControl.ErrorOccurred:
+              event: ErrorOccurred
+          - FilamentCoilControl.CoilRunning:
+              change:
+                property: IsCoilRunning
+                value: true
+              action: checkStartingState
+          - FilamentCoilControl.CoilStopped:
+              change:
+                property: IsCoilRunning
+                value: false
+              action: checkStoppingState
+          - FilamentCoilControl.ErrorOccurred:
+              event: ErrorOccurred
       events:
         - SwitchOff
         - SwitchOn
@@ -49,8 +75,6 @@ components:
         - StartingSucceeded
         - Stop
         - StoppingSucceeded
-        - CheckStartingState
-        - CheckStoppingState
         - ErrorOccurred
       statemachine:
         start: 'Off'
@@ -102,10 +126,6 @@ components:
             next: Stopping
             event: Stop
             action: stopMachine
-          - state: Starting
-            next: Starting
-            event: CheckStartingState
-            action: checkStartingState
           - state: Starting|Running
             next: Running
             event: StartingSucceeded
@@ -118,21 +138,14 @@ components:
             event: Stop
             action: stopMachine
           - state: Stopping
-            next: Stopping
-            event: CheckStoppingState
-            action: checkStoppingState
-          - state: Stopping
             next: Stopped
             event: StoppingSucceeded
-          - state: Stopped
-            next: Stopped
-            event: CheckStoppingState
 
 
   - FilamentMergerControl:
       description: "Hardware service component to control the filament merger unit"
-      inbound:
-        requests:
+      interface:
+        commands:
           - SwitchOn:
               event: SwitchOn
           - SwitchOff:
@@ -141,12 +154,14 @@ components:
               event: StartMotor
           - StopFeeding:
               event: Stop
-          - GetTemperature:
-              forward: FilamentMergerHeater::RequestGetTemperature #FIXME Remote request prefix!
-          - SetMotorSpeed:
-              forward: FilamentFeederMotor::RequestSetMotorSpeed #FIXME Remove request prefix!
           - StartHeating:
               event: StartHeating
+        notifications:
+          - FeedingRunning
+          - FeedingStopped
+          - HeatedUp
+          - ErrorOccurred
+      utilization:
         notifications:
           - FilamentPreHeater.TargetTemperatureRangeReached
           - FilamentPreHeater.ErrorOccurred:
@@ -160,12 +175,6 @@ components:
               event: StopMotorSucceeded
           - FilamentFeederMotor.ErrorOccurred:
               event: ErrorOccurred
-      outbound:
-        notifications:
-          - FeedingRunning
-          - FeedingStopped
-          - HeatedUp
-          - ErrorOccurred
       events:
         - SwitchOff
         - SwitchOn
@@ -234,11 +243,23 @@ components:
             event: StartMotorSucceeded
             action: notifyRunning
 
+  - _BaseMotor_Notifications: &BaseMotor_Notifications
+      notifications:
+        - StartMotorSucceeded
+        - StopMotorSucceeded
+        - ErrorOccurred
+
+  - _BaseMotor_Properties: &BaseMotor_Properties
+      properties:
+        - MotorSpeed:
+            type: uint32
+            value: 0
+            max: 100
 
   - _BaseMotor: &BaseMotor
       description: "Hardware service component to control a motor"
-      inbound:
-        requests:
+      interface:
+        commands:
           - SwitchOn:
               event: SwitchOn
           - SwitchOff:
@@ -247,12 +268,8 @@ components:
               event: StartMotor
           - StopMotor:
               event: StopMotor
-          - SetMotorSpeed
-      outbound:
-        notifications:
-          - StartMotorSucceeded
-          - StopMotorSucceeded
-          - ErrorOccurred
+        <<: *BaseMotor_Notifications
+        <<: *BaseMotor_Properties
       events:
         - SwitchOff
         - SwitchOn
@@ -326,18 +343,23 @@ components:
 
   - _BaseHeater: &BaseHeater
       description: "Hardware service component to control a heater"
-      inbound:
-        requests:
+      interface:
+        commands:
           - SwitchOn:
               event: SwitchOn
           - SwitchOff:
               event: SwitchOff
-          - GetTemperature
-      outbound:
         notifications:
           - TargetTemperatureRangeReached
           - TargetTemperatureRangeLeft
           - ErrorOccurred
+        properties:
+          - Temperature:
+              type: int32
+              value: -250
+              min: -250
+              max: 250
+              readonly: true
       events:
         - SwitchOn
         - SwitchOff
@@ -404,8 +426,8 @@ components:
 
   - FilamentCoilControl:
       description: "Service component to control the filament coil unit"
-      inbound:
-        requests:
+      interface:
+        commands:
           - SwitchOn:
               event: SwitchOn
           - SwitchOff:
@@ -413,8 +435,11 @@ components:
           - StartCoil
           - StopCoil:
               event: StopMotor
-          - SetMotorSpeed:
-              forward: FilamentCoilMotor.RequestSetMotorSpeed #FIXME Remove Request prefix!
+        notifications:
+          - CoilRunning
+          - CoilStopped
+          - ErrorOccurred
+      utilization:
         notifications:
           - FilamentTensionSensor.TensionTooLow:
               event: TensionTooLow
@@ -430,11 +455,6 @@ components:
               event: StopMotorSucceeded
           - FilamentCoilMotor.ErrorOccurred:
               event: ErrorOccurred
-      outbound:
-        notifications:
-          - CoilRunning
-          - CoilStopped
-          - ErrorOccurred
       events:
         - SwitchOn
         - SwitchOnSucceeded
@@ -506,6 +526,7 @@ components:
           - state: StoppingMotor
             next: MotorStopped
             event: StopMotorSucceeded
+            action: notifyCoilStopped
           - state: Running
             next: Running
             event: TensionTooHigh
@@ -540,8 +561,8 @@ components:
   - FilamentCoilMotor:
       <<: *BaseMotor
       description: "Hardware service component controls the filament coil motor of the filament coil unit"
-      inbound:
-        requests:
+      interface:
+        commands:
           - SwitchOn:
               event: SwitchOn
           - SwitchOff:
@@ -550,20 +571,20 @@ components:
               event: StartMotor
           - StopMotor:
               event: StopMotor
-          - SetMotorSpeed
           - IncreaseMotorOffsetSpeed
           - DecreaseMotorOffsetSpeed
+        <<: *BaseMotor_Notifications
+        <<: *BaseMotor_Properties
 
 
   - FilamentTensionSensor:
       description: "Hardware service component to control the strain sensor of the filament coil unit"
-      inbound:
-        requests:
+      interface:
+        commands:
           - SwitchOn:
               event: SwitchOn
           - SwitchOff:
               event: SwitchOff
-      outbound:
         notifications:
           - TensionTooLow
           - TensionTooHigh
@@ -608,7 +629,7 @@ components:
 
   - UserInterfaceControl:
       description: "Hardware service component to control the user interface of the filament coil unit"
-      inbound:
+      utilization:
         notifications:
           - MachineControl.Stopped
           - MachineControl.HeatingUp

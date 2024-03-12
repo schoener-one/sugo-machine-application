@@ -41,16 +41,12 @@ public:
     MOCK_METHOD(bool, subscribe, (const Address&, const Topic&));
     MOCK_METHOD(bool, unsubscribe, (const Address&, const Topic&));
     MOCK_METHOD(bool, send, (Message&, const Address&, ResponseMessage&));
-    MOCK_METHOD(void, registerRequestMessageHandler,
-                (const Message::Identifier&, RequestMessageHandler&));
-    MOCK_METHOD(void, registerRequestMessageHandler,
-                (const Message::Identifier&, RequestMessageHandler&&));
-    MOCK_METHOD(void, registerNotificationMessageHandler,
-                (const Message::Identifier&, NotificationMessageHandler&));
-    MOCK_METHOD(void, registerNotificationMessageHandler,
-                (const Message::Identifier&, NotificationMessageHandler&&));
-    MOCK_METHOD(void, unregisterMessageHandler, (const Message::Identifier&));
-    MOCK_METHOD(bool, hasRegisteredMessageHandler, (const Message::Identifier&), (const));
+    MOCK_METHOD(void, registerRequestMessageHandler, (RequestMessageHandler&));
+    MOCK_METHOD(void, registerRequestMessageHandler, (RequestMessageHandler &&));
+    MOCK_METHOD(void, registerNotificationMessageHandler, (NotificationMessageHandler&));
+    MOCK_METHOD(void, registerNotificationMessageHandler, (NotificationMessageHandler &&));
+    MOCK_METHOD(void, unregisterRequestMessageHandler, ());
+    MOCK_METHOD(void, unregisterNotificationMessageHandler, ());
 };
 
 }  // namespace sugo::message_broker

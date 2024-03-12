@@ -34,12 +34,11 @@
 #include "Common/Logger.hpp"
 #include "MessageBroker/MessageBroker.hpp"
 #include "ServiceComponent/ServiceId.hpp"
-
-// #include <Command.pb.h>
+#include "ServiceComponent/Identifier.hpp"
 
 /// Expect a defined state of that component
 #define EXPECT_STATE(_COMP, _STATE) expectState<_COMP>(_COMP::State::_STATE)
-#define EXPECT_NOTIFICATION_SUBSCRIBE(_COMP, _NOTIF) subscribeToNotification<_COMP>(_COMP::_NOTIF)
+#define EXPECT_NOTIFICATION_SUBSCRIBE(_COMP, _NOTIF) subscribeForNotification<_COMP>(_COMP::_NOTIF)
 #define EXPECT_NOTIFICATION(_COMP, _NOTIF) waitForNotification<_COMP>(_COMP::_NOTIF)
 
 namespace sugo
@@ -57,10 +56,12 @@ protected:
     {
         m_receivedNotifications.clear();
         ASSERT_TRUE(m_broker.start());
+        subscribeForNotifications();
     }
 
     void TearDown() override
     {
+        m_broker.unregisterNotificationMessageHandler();
         m_broker.stop();
     }
 
@@ -82,25 +83,29 @@ protected:
     {
         LOG(info) << "!! Expect state: " << state;
         std::unique_lock<std::mutex> lock(m_mutex);
-        auto                         response = send(ComponentT::RequestGetState);
-        const common::Json& jsonState = common::Json::parse(response.getPayload()).at("state");
+        auto                         response = send(ComponentT::PropertyRequestGetState);
+        EXPECT_FALSE(response.getPayload().empty());
+        const common::Json& jsonState = common::Json::parse(response.getPayload()).at(service_component::id::PropertyValue);
         EXPECT_FALSE(jsonState.empty());
         EXPECT_EQ(static_cast<unsigned>(state), jsonState.get<unsigned>());
     }
 
-    template <typename ComponentT>
-    void subscribeToNotification(const service_component::NotificationId& notificationId)
+    void subscribeForNotifications()
     {
-        m_broker.registerNotificationMessageHandler(
-            notificationId.getMessageId(), [&](const message_broker::Message& message) {
-                {
-                    std::lock_guard<std::mutex> lock(m_mutex);
-                    m_receivedNotifications.push_back(message.getId());
-                }
-                m_condVar.notify_one();
-            });
+        m_broker.registerNotificationMessageHandler([this](const message_broker::Message& message) {
+            LOG(info) << ">> Received notification: " << std::hex << message.getId();
+            {
+                std::lock_guard<std::mutex> lock(this->m_mutex);
+                m_receivedNotifications.push_back(message.getId());
+            }
+            m_condVar.notify_one();
+        });
+    }
+
+    template <typename ComponentT>
+    void subscribeForNotification(const service_component::NotificationId& notificationId)
+    {
         ASSERT_TRUE(m_broker.subscribe(notificationId.getAddress(), notificationId.getTopic()));
-        LOG(debug) << "Subscribed for notification: " << notificationId;
     }
 
     template <typename ComponentT>
@@ -111,6 +116,9 @@ protected:
         std::unique_lock<std::mutex> lock(m_mutex);
         std::cv_status               status = std::cv_status::no_timeout;
 
+        // clear all old notifications first!
+        while (hasNotificationReceived(notificationId.getMessageId())) {}
+
         LOG(info) << "!! Expect notification: " << notificationId;
 
         while ((status == std::cv_status::no_timeout) &&
@@ -120,8 +128,7 @@ protected:
             EXPECT_NE(std::cv_status::timeout, status);
         }
         ASSERT_TRUE(m_broker.unsubscribe(notificationId.getAddress(), notificationId.getTopic()));
-        m_broker.unregisterMessageHandler(notificationId.getMessageId());
-        LOG(info) << ">> Expected notification received: " << notificationId;
+        LOG(info) << "++ Expected notification received: " << notificationId;
     }
 
 private:

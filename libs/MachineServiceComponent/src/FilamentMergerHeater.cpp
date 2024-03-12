@@ -55,11 +55,11 @@ void FilamentMergerHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
 ///////////////////////////////////////////////////////////////////////////////
 // Requests:
 
-message_broker::ResponseMessage FilamentMergerHeater::onRequestGetTemperature(
+message_broker::ResponseMessage FilamentMergerHeater::onPropertyRequestGetTemperature(
     const message_broker::Message& request)
 {
-    return message_broker::createResponseMessage(
-        request, common::Json({{id::Temperature, getTemperature()}}));
+    m_propertyTemperature.setValue(getTemperature());
+    return IFilamentMergerHeater::onPropertyRequestGetTemperature(request);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

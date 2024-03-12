@@ -43,7 +43,7 @@ FilamentCoilControl::FilamentCoilControl(message_broker::IMessageBroker& message
 ///////////////////////////////////////////////////////////////////////////////
 // Requests:
 
-message_broker::ResponseMessage FilamentCoilControl::onRequestStartCoil(
+message_broker::ResponseMessage FilamentCoilControl::onCommandRequestStartCoil(
     const message_broker::Message& request)
 {
     const auto  parameters     = common::Json::parse(request.getPayload());
@@ -56,7 +56,7 @@ message_broker::ResponseMessage FilamentCoilControl::onRequestStartCoil(
     }
 
     m_controlTension = tensionControl.get<bool>();
-    return handleEventMessage(request, Event::StartMotor);
+    return handleCommandRequestMessage(request, Event::StartMotor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,13 +65,13 @@ message_broker::ResponseMessage FilamentCoilControl::onRequestStartCoil(
 void FilamentCoilControl::switchOn(const IFilamentCoilControl::Event&,
                                    const IFilamentCoilControl::State&)
 {
-    if (!send(IFilamentCoilMotor::RequestSwitchOn))
+    if (!send(IFilamentCoilMotor::CommandRequestSwitchOn))
     {
         push(Event::ErrorOccurred);
         return;
     }
 
-    if (!send(IFilamentTensionSensor::RequestSwitchOn))
+    if (!send(IFilamentTensionSensor::CommandRequestSwitchOn))
     {
         push(Event::ErrorOccurred);
         return;
@@ -102,17 +102,22 @@ void FilamentCoilControl::handleError(const IFilamentCoilControl::Event&,
 void FilamentCoilControl::stopMotor(const IFilamentCoilControl::Event&,
                                     const IFilamentCoilControl::State&)
 {
-    if (!send(IFilamentCoilMotor::RequestStopMotor))
+    if (!send(IFilamentCoilMotor::CommandRequestStopMotor))
     {
         push(Event::ErrorOccurred);
     }
+}
+
+void FilamentCoilControl::notifyCoilStopped(const IFilamentCoilControl::Event&,
+                                            const IFilamentCoilControl::State&)
+{
     notify(NotificationCoilStopped);
 }
 
 void FilamentCoilControl::startMotor(const IFilamentCoilControl::Event&,
                                      const IFilamentCoilControl::State&)
 {
-    if (!send(IFilamentCoilMotor::RequestStartMotor))
+    if (!send(IFilamentCoilMotor::CommandRequestStartMotor))
     {
         push(Event::ErrorOccurred);
     }
@@ -133,11 +138,11 @@ void FilamentCoilControl::controlFilamentTension(const IFilamentCoilControl::Eve
 
         if (event == Event::TensionTooLow)
         {
-            success = send(IFilamentCoilMotor::RequestIncreaseMotorOffsetSpeed);
+            success = send(IFilamentCoilMotor::CommandRequestIncreaseMotorOffsetSpeed);
         }
         else if (event == Event::TensionTooHigh)
         {
-            success = send(IFilamentCoilMotor::RequestDecreaseMotorOffsetSpeed);
+            success = send(IFilamentCoilMotor::CommandRequestDecreaseMotorOffsetSpeed);
         }
 
         if (!success)

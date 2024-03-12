@@ -60,9 +60,14 @@ public:
     GenericServiceId<MessageIdT, AddressT, TopicT>& operator                    =(
         GenericServiceId<MessageIdT, AddressT, TopicT>&&) noexcept = default;
 
-    operator const MessageIdT&() const
+    /**
+     * @brief Type conversion operation.
+     *
+     * @return Message id associated to this object.
+     */
+    constexpr operator MessageIdT() const
     {
-        return getMessageId();
+        return m_id;
     }
 
     /**
@@ -70,7 +75,7 @@ public:
      *
      * @return The message id.
      */
-    const MessageIdT& getMessageId() const
+    constexpr MessageIdT getMessageId() const
     {
         return m_id;
     }

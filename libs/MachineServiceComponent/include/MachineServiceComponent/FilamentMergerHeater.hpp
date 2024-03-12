@@ -48,7 +48,7 @@ public:
 
 protected:
     // Request handlers
-    message_broker::ResponseMessage onRequestGetTemperature(
+    message_broker::ResponseMessage onPropertyRequestGetTemperature(
         const message_broker::Message& request) override;
 
     // Transition actions

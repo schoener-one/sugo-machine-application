@@ -48,7 +48,7 @@ public:
 
 protected:
     // Request handlers
-    message_broker::ResponseMessage onRequestStartCoil(
+    message_broker::ResponseMessage onCommandRequestStartCoil(
         const message_broker::Message& request) override;
 
     // Transition actions
@@ -59,6 +59,7 @@ protected:
     void switchOn(const Event& event, const State& state) override;
     void notifyRunning(const Event& event, const State& state) override;
     void controlFilamentTension(const Event& event, const State& state) override;
+    void notifyCoilStopped(const Event& event, const State& state) override;
 
 private:
     void switchOff();

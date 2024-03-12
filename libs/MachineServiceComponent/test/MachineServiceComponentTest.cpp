@@ -121,7 +121,7 @@ TEST_F(MachineServiceComponentTest, StartFilamentCoilMotor)
     EXPECT_CALL(*m_mockStepperMotor, reset()).WillOnce(Return(true));
     message_broker::Message request;
     request.setId(4);
-    auto response = filamentCoilMotor.onRequestSwitchOn(request);
+    auto response = filamentCoilMotor.onCommandRequestSwitchOn(request);
     EXPECT_EQ(response.getResult(), message_broker::ResponseMessage::Result::Success);
     processAllEvents(filamentCoilMotor);
     EXPECT_EQ(filamentCoilMotor.getCurrentState(), FilamentCoilMotor::State::Stopped);
@@ -133,14 +133,14 @@ TEST_F(MachineServiceComponentTest, StartFilamentCoilMotor)
     EXPECT_CALL(*m_mockStepperMotor, setSpeed(IStepperMotor::Speed{
                                          test::MachineConfiguration::MotorSpeedDefault, Unit::Rpm}))
         .WillOnce(Return(true));
-    response = filamentCoilMotor.onRequestSetMotorSpeed(request);
+    response = filamentCoilMotor.onPropertyRequestSetMotorSpeed(request);
     EXPECT_EQ(response.getResult(), message_broker::ResponseMessage::Result::Success);
 
     EXPECT_CALL(*m_mockStepperMotor, setSpeed(IStepperMotor::Speed{
                                          test::MachineConfiguration::MotorSpeedDefault, Unit::Rpm}))
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotor, rotate()).WillOnce(Return(true));
-    response = filamentCoilMotor.onRequestStartMotor(request);
+    response = filamentCoilMotor.onCommandRequestStartMotor(request);
     processAllEvents(filamentCoilMotor);
     EXPECT_EQ(response.getId(), 4);
     EXPECT_EQ(response.getResult(), message_broker::ResponseMessage::Result::Success);

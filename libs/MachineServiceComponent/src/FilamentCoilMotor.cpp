@@ -38,28 +38,14 @@ FilamentCoilMotor::FilamentCoilMotor(message_broker::IMessageBroker& messageBrok
       MotorService(hal::id::StepperMotorCoiler, serviceLocator),
       m_serviceLocator(serviceLocator)
 {
+    m_propertyMotorSpeed.registerValueChangeHandler(
+        [this](const IProperty<uint32_t>&) { this->setMotorSpeed(this->m_propertyMotorSpeed); });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Requests:
 
-message_broker::ResponseMessage FilamentCoilMotor::onRequestSetMotorSpeed(
-    const message_broker::Message& request)
-{
-    const auto  parameters = common::Json::parse(request.getPayload());
-    const auto& motorSpeed = parameters.at(id::Speed);
-
-    if (motorSpeed.empty())
-    {
-        return message_broker::createErrorResponseMessage(
-            request, message_broker::ResponseMessage::Result::InvalidPayload);
-    }
-
-    (void)setMotorSpeed(motorSpeed.get<unsigned>());
-    return message_broker::createResponseMessage(request);
-}
-
-message_broker::ResponseMessage FilamentCoilMotor::onRequestIncreaseMotorOffsetSpeed(
+message_broker::ResponseMessage FilamentCoilMotor::onCommandRequestIncreaseMotorOffsetSpeed(
     const message_broker::Message& request)
 {
     const int motorSpeedIncrement = static_cast<int>(m_serviceLocator.get<common::IConfiguration>()
@@ -69,7 +55,7 @@ message_broker::ResponseMessage FilamentCoilMotor::onRequestIncreaseMotorOffsetS
     return message_broker::createResponseMessage(request);
 }
 
-message_broker::ResponseMessage FilamentCoilMotor::onRequestDecreaseMotorOffsetSpeed(
+message_broker::ResponseMessage FilamentCoilMotor::onCommandRequestDecreaseMotorOffsetSpeed(
     const message_broker::Message& request)
 {
     static constexpr int negativeMultiplier = -1;

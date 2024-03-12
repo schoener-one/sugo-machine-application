@@ -47,11 +47,9 @@ public:
 
 protected:
     // Request handlers
-    message_broker::ResponseMessage onRequestSetMotorSpeed(
+    message_broker::ResponseMessage onCommandRequestIncreaseMotorOffsetSpeed(
         const message_broker::Message& request) override;
-    message_broker::ResponseMessage onRequestIncreaseMotorOffsetSpeed(
-        const message_broker::Message& request) override;
-    message_broker::ResponseMessage onRequestDecreaseMotorOffsetSpeed(
+    message_broker::ResponseMessage onCommandRequestDecreaseMotorOffsetSpeed(
         const message_broker::Message& request) override;
 
     // Transition actions

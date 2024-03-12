@@ -5,54 +5,62 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Current file",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+        },
+        {
             "name": "ServiceComponentGenerator ListOnly",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--list-only"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--list-only"]
         },
         {
             "name": "ServiceComponentGenerator",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-exec-group", "--generate-service-components", "-L", "debug"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-exec-group", "--generate-service-components", "-L", "debug"]
         },
         {
             "name": "ServiceComponentsGenerator (test)",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-service-components", "--generate-state-diagrams", "-L", "debug"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-service-components", "--generate-state-diagrams", "-L", "debug"]
         },
         {
             "name": "ServiceComponentGenerator Templates",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "-t"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "-t"]
         },
         {
             "name": "ServiceComponentGenerator State Diagrams",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-state-diagrams"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-state-diagrams"]
         },
         {
             "name": "Debug HAL SmokeTest (x86)",
@@ -131,6 +139,6 @@
             "stopAtEntry": false,
             "MIMode": "gdb",
             "args": ["www"]
-        },
+        }
     ]
 }

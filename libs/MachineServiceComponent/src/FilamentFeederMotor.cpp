@@ -37,24 +37,8 @@ FilamentFeederMotor::FilamentFeederMotor(message_broker::IMessageBroker& message
     : IFilamentFeederMotor(messageBroker, processContext),
       MotorService(hal::id::StepperMotorFeeder, serviceLocator)
 {
-}
-///////////////////////////////////////////////////////////////////////////////
-// Requests:
-
-message_broker::ResponseMessage FilamentFeederMotor::onRequestSetMotorSpeed(
-    const message_broker::Message& request)
-{
-    const auto  parameters = common::Json::parse(request.getPayload());
-    const auto& motorSpeed = parameters.at(id::Speed);
-
-    if (motorSpeed.empty())
-    {
-        return message_broker::createErrorResponseMessage(
-            request, message_broker::ResponseMessage::Result::InvalidPayload);
-    }
-
-    (void)setMotorSpeed(motorSpeed.get<unsigned>());
-    return message_broker::createResponseMessage(request);
+    m_propertyMotorSpeed.registerValueChangeHandler(
+        [this](const IProperty<uint32_t>&) { this->setMotorSpeed(this->m_propertyMotorSpeed); });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

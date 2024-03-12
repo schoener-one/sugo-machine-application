@@ -31,6 +31,7 @@
 #include "MessageBroker/Message.hpp"
 #include "RemoteControl/Protocol.hpp"
 #include "ServiceComponent/IMachineControl.hpp"
+#include "ServiceComponent/Identifier.hpp"
 
 using namespace sugo;
 using namespace sugo::service_component;
@@ -69,12 +70,12 @@ common::Json UserInterfaceControl::createStateMessage(const std::string& type)
     namespace rp                          = remote_control::id;
     unsigned                        speed = 0;
     message_broker::ResponseMessage machineResponse{};
-    const auto                      success = send(IMachineControl::RequestGetMotorSpeed);
+    const auto success = send(IMachineControl::PropertyRequestGetMotorSpeed, machineResponse);
 
     if (success && !machineResponse.getPayload().empty())
     {
         auto response  = common::Json::parse(machineResponse.getPayload());
-        auto jsonSpeed = response.at(id::Speed);
+        auto jsonSpeed = response.at(service_component::id::PropertyValue);
         speed          = (jsonSpeed.empty()) ? 0 : jsonSpeed.get<unsigned>();
     }
 
@@ -115,31 +116,31 @@ bool UserInterfaceControl::receiveRequest(remote_control::IClientRequestHandler:
 
             if (requestId == "switch-on")
             {
-                success = send(IMachineControl::RequestSwitchOn, machineResponse);
+                success = send(IMachineControl::CommandRequestSwitchOn, machineResponse);
             }
             else if (requestId == "start")
             {
-                success = send(IMachineControl::RequestStart, machineResponse);
+                success = send(IMachineControl::CommandRequestStart, machineResponse);
             }
             else if (requestId == "start-heatless")
             {
-                success = send(IMachineControl::RequestStartHeatless, machineResponse);
+                success = send(IMachineControl::CommandRequestStartHeatless, machineResponse);
             }
             else if (requestId == "stop")
             {
-                success = send(IMachineControl::RequestStop, machineResponse);
+                success = send(IMachineControl::CommandRequestStop, machineResponse);
             }
             else if (requestId == "increase-speed")
             {
-                success = send(IMachineControl::RequestIncreaseMotorSpeed, machineResponse);
+                success = send(IMachineControl::CommandRequestIncreaseMotorSpeed, machineResponse);
             }
             else if (requestId == "decrease-speed")
             {
-                success = send(IMachineControl::RequestDecreaseMotorSpeed, machineResponse);
+                success = send(IMachineControl::CommandRequestDecreaseMotorSpeed, machineResponse);
             }
             else if (requestId == "switch-off")
             {
-                success = send(IMachineControl::RequestSwitchOff, machineResponse);
+                success = send(IMachineControl::CommandRequestSwitchOff, machineResponse);
             }
 
             const std::string result = success ? rp::ResultSuccess : rp::ResultError;
@@ -177,40 +178,34 @@ void UserInterfaceControl::updateMachineState()
 ///////////////////////////////////////////////////////////////////////////////
 // Requests:
 
-void UserInterfaceControl::onNotificationMachineControlStarting(
-    const message_broker::Message& request)
+void UserInterfaceControl::onNotificationMachineControlStarting(const message_broker::Message&)
 {
-    (void)handleEventMessage(request, Event::MachineStarting);
+    handleNotificationMessage(Event::MachineStarting);
 }
 
-void UserInterfaceControl::onNotificationMachineControlStopped(
-    const message_broker::Message& request)
+void UserInterfaceControl::onNotificationMachineControlStopped(const message_broker::Message&)
 {
-    (void)handleEventMessage(request, Event::MachineStopped);
+    handleNotificationMessage(Event::MachineStopped);
 }
 
-void UserInterfaceControl::onNotificationMachineControlHeatingUp(
-    const message_broker::Message& request)
+void UserInterfaceControl::onNotificationMachineControlHeatingUp(const message_broker::Message&)
 {
-    (void)handleEventMessage(request, Event::MachineHeatingUp);
+    handleNotificationMessage(Event::MachineHeatingUp);
 }
 
-void UserInterfaceControl::onNotificationMachineControlRunning(
-    const message_broker::Message& request)
+void UserInterfaceControl::onNotificationMachineControlRunning(const message_broker::Message&)
 {
-    (void)handleEventMessage(request, Event::MachineRunning);
+    handleNotificationMessage(Event::MachineRunning);
 }
 
-void UserInterfaceControl::onNotificationMachineControlSwitchedOff(
-    const message_broker::Message& request)
+void UserInterfaceControl::onNotificationMachineControlSwitchedOff(const message_broker::Message&)
 {
-    (void)handleEventMessage(request, Event::MachineSwitchedOff);
+    handleNotificationMessage(Event::MachineSwitchedOff);
 }
 
-void UserInterfaceControl::onNotificationMachineControlErrorOccurred(
-    const message_broker::Message& request)
+void UserInterfaceControl::onNotificationMachineControlErrorOccurred(const message_broker::Message&)
 {
-    (void)handleEventMessage(request, Event::MachineError);
+    handleNotificationMessage(Event::MachineError);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -311,12 +311,11 @@ void MachineApplicationIntegrationTest::switchOnMachine()
 {
     prepareSwitchOn();
     EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationStopped);
-    send(IMachineControl::RequestSwitchOn);
+    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationHeatingUp);
+    send(IMachineControl::CommandRequestSwitchOn);
     EXPECT_NOTIFICATION(IMachineControl, NotificationStopped);
     EXPECT_STATE(IMachineControl, Stopped);
-
-    EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationHeatingUp);
-    send(IMachineControl::RequestStart);
+    send(IMachineControl::CommandRequestStart);
     EXPECT_NOTIFICATION(IMachineControl, NotificationHeatingUp);
 
     // Heating up
@@ -336,7 +335,7 @@ void MachineApplicationIntegrationTest::switchOffMachine()
     EXPECT_CALL(*m_mockStepperMotorFeeder, stop(false)).WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorCoiler, stop(false)).WillOnce(Return(true));
     EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationSwitchedOff);
-    send(IMachineControl::RequestSwitchOff);
+    send(IMachineControl::CommandRequestSwitchOff);
     EXPECT_NOTIFICATION(IMachineControl, NotificationSwitchedOff);
 }
 }  // namespace sugo
@@ -366,7 +365,7 @@ TEST_F(MachineApplicationIntegrationTest, MotorErrorOccurred)
     // switchOn
     prepareSwitchOn(false);
     EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationStopped);
-    send(IMachineControl::RequestSwitchOn);
+    send(IMachineControl::CommandRequestSwitchOn);
     EXPECT_NOTIFICATION(IMachineControl, NotificationStopped);
     EXPECT_STATE(IMachineControl, Stopped);
 
@@ -376,13 +375,13 @@ TEST_F(MachineApplicationIntegrationTest, MotorErrorOccurred)
     EXPECT_CALL(*m_mockStepperMotorCoiler, rotate()).WillOnce(Return(false));  // Error occurred!
     EXPECT_CALL(*m_mockStepperMotorFeeder, stop(false)).WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorCoiler, stop(true)).WillOnce(Return(true));
-    send(IMachineControl::RequestStartHeatless);
+    send(IMachineControl::CommandRequestStartHeatless);
     EXPECT_NOTIFICATION(IMachineControl, NotificationErrorOccurred);
     EXPECT_STATE(IMachineControl, Error);
 
     // Switch off
     EXPECT_NOTIFICATION_SUBSCRIBE(IMachineControl, NotificationSwitchedOff);
-    send(IMachineControl::RequestSwitchOff);
+    send(IMachineControl::CommandRequestSwitchOff);
     EXPECT_NOTIFICATION(IMachineControl, NotificationSwitchedOff);
 }
 

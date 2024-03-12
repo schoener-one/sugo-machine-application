@@ -29,6 +29,8 @@
 #include "MachineServiceComponent/MachineControl.hpp"
 #include "MachineServiceComponent/Protocol.hpp"
 #include "ServiceComponent/IFilamentCoilControl.hpp"
+#include "ServiceComponent/IFilamentCoilMotor.hpp"
+#include "ServiceComponent/IFilamentFeederMotor.hpp"
 #include "ServiceComponent/IFilamentMergerControl.hpp"
 
 using namespace sugo;
@@ -38,39 +40,36 @@ using namespace sugo::machine_service_component;
 MachineControl::MachineControl(message_broker::IMessageBroker& messageBroker,
                                common::IProcessContext&        processContext,
                                const common::ServiceLocator&   serviceLocator)
-    : IMachineControl(messageBroker, processContext),
-      m_serviceLocator(serviceLocator),
-      m_motorSpeed(m_serviceLocator.get<common::IConfiguration>()
-                       .getOption(id::ConfigMotorSpeedDefault)
-                       .get<unsigned>())
+    : IMachineControl(messageBroker, processContext), m_serviceLocator(serviceLocator)
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Requests
 
-message_broker::ResponseMessage MachineControl::onRequestIncreaseMotorSpeed(
+message_broker::ResponseMessage MachineControl::onCommandRequestIncreaseMotorSpeed(
     const message_broker::Message& request)
 {
-    m_motorSpeed = static_cast<unsigned>(
-        std::clamp(static_cast<int>(m_motorSpeed) +
+    m_propertyMotorSpeed.setValue(static_cast<uint32_t>(
+        std::clamp(static_cast<int>(m_propertyMotorSpeed.getValue()) +
                        static_cast<int>(m_serviceLocator.get<common::IConfiguration>()
                                             .getOption(id::ConfigMotorSpeedIncrement)
                                             .get<unsigned>()),
                    0,
                    static_cast<int>(m_serviceLocator.get<common::IConfiguration>()
                                         .getOption(id::ConfigMotorSpeedMax)
-                                        .get<unsigned>())));
-    LOG(debug) << "Increase motor speed to " << m_motorSpeed;
-    const common::Json              parameters({{id::Speed, m_motorSpeed}});
+                                        .get<unsigned>()))));
+    LOG(debug) << "Increase motor speed to " << m_propertyMotorSpeed.getValue();
     message_broker::ResponseMessage responseMessage{};
 
-    if (!send(IFilamentCoilControl::RequestSetMotorSpeed, parameters, responseMessage))
+    if (!send(IFilamentCoilMotor::PropertyRequestSetMotorSpeed,
+              m_propertyMotorSpeed.getValueAsJson(), responseMessage))
     {
         return message_broker::createErrorResponseMessage(request, responseMessage.getResult());
     }
 
-    if (!send(IFilamentMergerControl::RequestSetMotorSpeed, parameters, responseMessage))
+    if (!send(IFilamentFeederMotor::PropertyRequestSetMotorSpeed,
+              m_propertyMotorSpeed.getValueAsJson(), responseMessage))
     {
         return message_broker::createErrorResponseMessage(request, responseMessage.getResult());
     }
@@ -78,28 +77,29 @@ message_broker::ResponseMessage MachineControl::onRequestIncreaseMotorSpeed(
     return message_broker::createResponseMessage(request);
 }
 
-message_broker::ResponseMessage MachineControl::onRequestDecreaseMotorSpeed(
+message_broker::ResponseMessage MachineControl::onCommandRequestDecreaseMotorSpeed(
     const message_broker::Message& request)
 {
-    m_motorSpeed = static_cast<unsigned>(
-        std::clamp(static_cast<int>(m_motorSpeed) -
+    m_propertyMotorSpeed.setValue(static_cast<uint32_t>(
+        std::clamp(static_cast<int>(m_propertyMotorSpeed.getValue()) -
                        static_cast<int>(m_serviceLocator.get<common::IConfiguration>()
                                             .getOption(id::ConfigMotorSpeedIncrement)
                                             .get<unsigned>()),
                    0,
                    static_cast<int>(m_serviceLocator.get<common::IConfiguration>()
                                         .getOption(id::ConfigMotorSpeedMax)
-                                        .get<unsigned>())));
-    LOG(debug) << "Decrease motor speed to " << m_motorSpeed;
-    const common::Json              parameters({{id::Speed, m_motorSpeed}});
+                                        .get<unsigned>()))));
+    LOG(debug) << "Decrease motor speed to " << m_propertyMotorSpeed.getValue();
     message_broker::ResponseMessage responseMessage{};
 
-    if (!send(IFilamentCoilControl::RequestSetMotorSpeed, parameters, responseMessage))
+    if (!send(IFilamentCoilMotor::PropertyRequestSetMotorSpeed,
+              m_propertyMotorSpeed.getValueAsJson(), responseMessage))
     {
         return message_broker::createErrorResponseMessage(request, responseMessage.getResult());
     }
 
-    if (!send(IFilamentMergerControl::RequestSetMotorSpeed, parameters, responseMessage))
+    if (!send(IFilamentFeederMotor::PropertyRequestSetMotorSpeed,
+              m_propertyMotorSpeed.getValueAsJson(), responseMessage))
     {
         return message_broker::createErrorResponseMessage(request, responseMessage.getResult());
     }
@@ -107,39 +107,25 @@ message_broker::ResponseMessage MachineControl::onRequestDecreaseMotorSpeed(
     return message_broker::createResponseMessage(request);
 }
 
-message_broker::ResponseMessage MachineControl::onRequestGetMotorSpeed(
-    const message_broker::Message& request)
+///////////////////////////////////////////////////////////////////////////////
+// Notification handler actions
+
+void MachineControl::checkStartingState()
 {
-    return message_broker::createResponseMessage(request,
-                                                 common::Json({{id::Speed, m_motorSpeed}}));
+    if (m_propertyIsFeedingRunning && m_propertyIsCoilRunning)
+    {
+        push(Event::StartingSucceeded);
+        notify(NotificationRunning);
+    }
 }
 
-void MachineControl::onNotificationFilamentMergerControlFeedingRunning(
-    const message_broker::Message& request)
+void MachineControl::checkStoppingState()
 {
-    m_isFilamentMergerControlRunning = true;
-    handleEventMessage(request, Event::CheckStartingState);
-}
-
-void MachineControl::onNotificationFilamentMergerControlFeedingStopped(
-    const message_broker::Message& request)
-{
-    m_isFilamentMergerControlRunning = false;
-    handleEventMessage(request, Event::CheckStoppingState);
-}
-
-void MachineControl::onNotificationFilamentCoilControlCoilRunning(
-    const message_broker::Message& request)
-{
-    m_isFilamentCoilControlRunning = true;
-    handleEventMessage(request, Event::CheckStartingState);
-}
-
-void MachineControl::onNotificationFilamentCoilControlCoilStopped(
-    const message_broker::Message& request)
-{
-    m_isFilamentCoilControlRunning = false;
-    handleEventMessage(request, Event::CheckStoppingState);
+    if (!m_propertyIsFeedingRunning && !m_propertyIsCoilRunning)
+    {
+        push(Event::StoppingSucceeded);
+        notify(NotificationStopped);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -147,13 +133,13 @@ void MachineControl::onNotificationFilamentCoilControlCoilStopped(
 
 void MachineControl::switchOn(const IMachineControl::Event&, const IMachineControl::State&)
 {
-    if (!send(IFilamentMergerControl::RequestSwitchOn))
+    if (!send(IFilamentMergerControl::CommandRequestSwitchOn))
     {
         push(Event::ErrorOccurred);
         return;
     }
 
-    if (!send(IFilamentCoilControl::RequestSwitchOn))
+    if (!send(IFilamentCoilControl::CommandRequestSwitchOn))
     {
         push(Event::ErrorOccurred);
         return;
@@ -164,7 +150,7 @@ void MachineControl::switchOn(const IMachineControl::Event&, const IMachineContr
 
 void MachineControl::startHeating(const Event&, const State&)
 {
-    if (!send(IFilamentMergerControl::RequestStartHeating))
+    if (!send(IFilamentMergerControl::CommandRequestStartHeating))
     {
         push(Event::ErrorOccurred);
     }
@@ -177,25 +163,27 @@ void MachineControl::startMachine(const IMachineControl::Event& event,
 {
     m_isFilamentMergerControlRunning = false;
     m_isFilamentCoilControlRunning   = false;
-    m_motorSpeed                     = (event == Event::StartHeatless) ? 0
-                                                   : m_serviceLocator.get<common::IConfiguration>()
-                                                         .getOption(id::ConfigMotorSpeedDefault)
-                                                         .get<unsigned>();
-    const common::Json setMotorSpeedParameter({{id::Speed, m_motorSpeed}});
+    m_propertyMotorSpeed.setValue((event == Event::StartHeatless)
+                                      ? 0
+                                      : m_serviceLocator.get<common::IConfiguration>()
+                                            .getOption(id::ConfigMotorSpeedDefault)
+                                            .get<unsigned>());
 
-    if (!send(IFilamentMergerControl::RequestSetMotorSpeed, setMotorSpeedParameter))
+    if (!send(IFilamentFeederMotor::PropertyRequestSetMotorSpeed,
+              m_propertyMotorSpeed.getValueAsJson()))
     {
         push(Event::ErrorOccurred);
         return;
     }
 
-    if (!send(IFilamentMergerControl::RequestStartFeeding))
+    if (!send(IFilamentMergerControl::CommandRequestStartFeeding))
     {
         push(Event::ErrorOccurred);
         return;
     }
 
-    if (!send(IFilamentCoilControl::RequestSetMotorSpeed, setMotorSpeedParameter))
+    if (!send(IFilamentCoilMotor::PropertyRequestSetMotorSpeed,
+              m_propertyMotorSpeed.getValueAsJson()))
     {
         push(Event::ErrorOccurred);
         return;
@@ -204,22 +192,13 @@ void MachineControl::startMachine(const IMachineControl::Event& event,
     const common::Json startCoilParameter(
         {{id::TensionControl, (event == Event::StartHeatless) ? false : true}});
 
-    if (!send(IFilamentCoilControl::RequestStartCoil, startCoilParameter))
+    if (!send(IFilamentCoilControl::CommandRequestStartCoil, startCoilParameter))
     {
         push(Event::ErrorOccurred);
         return;
     }
 
     notify(NotificationStarting);
-}
-
-void MachineControl::checkStartingState(const Event&, const State&)
-{
-    if (m_isFilamentMergerControlRunning && m_isFilamentCoilControlRunning)
-    {
-        push(Event::StartingSucceeded);
-        notify(NotificationRunning);
-    }
 }
 
 void MachineControl::handleError(const IMachineControl::Event&, const IMachineControl::State&)
@@ -230,24 +209,15 @@ void MachineControl::handleError(const IMachineControl::Event&, const IMachineCo
 
 void MachineControl::stopMachine(const Event&, const State&)
 {
-    if (!send(IFilamentMergerControl::RequestStopFeeding))
+    if (!send(IFilamentMergerControl::CommandRequestStopFeeding))
     {
         push(Event::ErrorOccurred);
         return;
     }
 
-    if (!send(IFilamentCoilControl::RequestStopCoil))
+    if (!send(IFilamentCoilControl::CommandRequestStopCoil))
     {
         push(Event::ErrorOccurred);
-    }
-}
-
-void MachineControl::checkStoppingState(const Event&, const State&)
-{
-    if (!m_isFilamentMergerControlRunning && !m_isFilamentCoilControlRunning)
-    {
-        push(Event::StoppingSucceeded);
-        notify(NotificationStopped);
     }
 }
 

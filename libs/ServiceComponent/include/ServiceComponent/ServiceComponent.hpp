@@ -28,6 +28,7 @@
 #include "MessageBroker/IMessageBroker.hpp"
 #include "MessageBroker/Message.hpp"
 #include "MessageBroker/MessageHelper.hpp"
+#include "ServiceComponent/IProperty.hpp"
 #include "ServiceComponent/IServiceComponent.hpp"
 
 namespace sugo::service_component
@@ -145,6 +146,44 @@ protected:
      */
     bool notify(const NotificationId& notificationId,
                 const common::Json&   parameters = common::Json());
+
+    /**
+     * @brief Method to handle property read request messages.
+     *
+     * @param message Received message to handle.
+     * @param property Property to be read.
+     * @return Request response message.
+     */
+    template<typename TypeT>
+    message_broker::ResponseMessage handleGetPropertyRequestMessage(
+        const message_broker::Message& message, const IProperty<TypeT>& property)
+    {
+        return message_broker::createResponseMessage(message, property.getValueAsJson());
+    }
+
+    /**
+     * @brief Method to handle property read request messages.
+     *
+     * @param message Received message to handle.
+     * @param property Property to be read.
+     * @return Request response message.
+     */
+    template<typename TypeT>
+    message_broker::ResponseMessage handleSetPropertyRequestMessage(
+        const message_broker::Message& message, IProperty<TypeT>& property)
+    {
+        if (property.setValueFromJson(message.getPayload()))
+        {
+            LOG(debug) << "New property " << property.getName()
+                       << " value set: " << property.getValueAsJson();
+            return message_broker::createResponseMessage(message);
+        }
+        else
+        {
+            return message_broker::createErrorResponseMessage(
+                message, message_broker::ResponseMessage::Result::InvalidPayload);
+        }
+    }
 
 private:
     message_broker::IMessageBroker& m_messageBroker;  ///< Message broker object.
