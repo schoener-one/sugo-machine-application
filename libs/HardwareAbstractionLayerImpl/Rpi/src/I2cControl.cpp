@@ -25,21 +25,15 @@
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <cerrno>
+#include <cstdint>
 #include <iomanip>
 
 #include "Common/Ios.hpp"
 #include "Common/Logger.hpp"
 #include "HardwareAbstractionLayer/I2cControl.hpp"
-
-namespace
-{
-constexpr char Me[] = "I2cControl: ";
-}
 
 using namespace sugo::hal;
 
@@ -55,13 +49,13 @@ bool I2cControl::init(const std::string& device)
 {
     if (m_fd != InvalidFileDescriptor)
     {
-        LOG(warning) << Me << "File descripter not closed";
+        LOG(warning) << "File descripter not closed";
         finalize();
     }
 
     if ((m_fd = open(device.c_str(), O_RDWR)) < 0)
     {
-        LOG(error) << Me << "Failed to open device '" << device << "'";
+        LOG(error) << "Failed to open device '" << device << "'";
         return false;
     }
     return true;
@@ -89,7 +83,7 @@ bool I2cControl::read(Address address, const ByteBuffer& command, ByteBuffer& re
     const int retValue = ::ioctl(m_fd, I2C_RDWR, &ioctl_data);
     if (retValue != 2)
     {
-        LOG(error) << Me << "Failed to read from device address: "
+        LOG(error) << "Failed to read from device address: "
                    << sugo::common::ios::hex(static_cast<uint32_t>(address)) << " ("
                    << std::strerror(errno) << ")";
         return false;
@@ -106,7 +100,7 @@ bool I2cControl::write(Address address, const ByteBuffer& command) const
     const int retValue = ::ioctl(m_fd, I2C_RDWR, &ioctl_data);
     if (retValue != 1)
     {
-        LOG(error) << Me << "Failed to write to device address: " << std::hex << std::setw(2)
+        LOG(error) << "Failed to write to device address: " << std::hex << std::setw(2)
                    << std::setfill('0') << static_cast<uint32_t>(address) << " ("
                    << std::strerror(errno) << ")";
         return false;

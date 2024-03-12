@@ -90,18 +90,6 @@ protected:
     std::array<MessageBroker*, NumberOfBrokers> m_brokers;
 };
 
-TEST_F(MessageBrokerIntegrationTest, RegisterHandler)
-{
-    m_broker1.registerRequestMessageHandler(1, [&](const Message&) { return ResponseMessage{}; });
-    m_broker1.registerRequestMessageHandler(2, [&](const Message&) { return ResponseMessage{}; });
-    m_broker1.registerRequestMessageHandler(3, [&](const Message&) { return ResponseMessage{}; });
-    EXPECT_TRUE(m_broker1.hasRegisteredMessageHandler(2));
-    EXPECT_FALSE(m_broker1.hasRegisteredMessageHandler(4));
-    m_broker1.unregisterMessageHandler(2);
-    EXPECT_FALSE(m_broker1.hasRegisteredMessageHandler(2));
-    EXPECT_TRUE(m_broker1.hasRegisteredMessageHandler(3));
-}
-
 TEST_F(MessageBrokerIntegrationTest, ConnectAndDisconnect)
 {
     Client     client(m_ioContext2);
@@ -116,11 +104,14 @@ TEST_F(MessageBrokerIntegrationTest, RequestHandler)
     constexpr Message::Identifier messageId = 23;
 
     Client client(m_ioContext2);
-    m_broker1.registerRequestMessageHandler(messageId, [&](const Message& message) {
+    m_broker1.registerRequestMessageHandler([&](const Message& message) {
         ResponseMessage response;
-        response.referTo(message);
-        response.setResult(ResponseMessage::Result::Success);
-        response.setError(message.getPayload());
+        if (message.getId() == messageId)
+        {
+            response.referTo(message);
+            response.setResult(ResponseMessage::Result::Success);
+            response.setError(message.getPayload());
+        }
         return response;
     });
     EXPECT_TRUE(client.connect(MessageBroker::createFullQualifiedAddress(
@@ -143,14 +134,13 @@ TEST_F(MessageBrokerIntegrationTest, NotifyAllHandlers)
 {
     static const Message::Identifier messageId = 0x42;
 
-    m_broker2.registerNotificationMessageHandler(messageId,
-                                                 [&](const Message& message) -> ResponseMessage {
-                                                     notifyReceivedMessage(message.getId());
-                                                     return ResponseMessage();
-                                                 });
+    m_broker2.registerNotificationMessageHandler([&](const Message& message) -> ResponseMessage {
+        notifyReceivedMessage(message.getId());
+        return ResponseMessage();
+    });
     Topic theTopic{"the_topic"};
     EXPECT_TRUE(m_broker2.subscribe(m_brokerIds[0], theTopic));
-    m_broker3.registerNotificationMessageHandler(messageId, [&](const Message& message) {
+    m_broker3.registerNotificationMessageHandler([&](const Message& message) {
         notifyReceivedMessage(message.getId());
         return ResponseMessage();
     });

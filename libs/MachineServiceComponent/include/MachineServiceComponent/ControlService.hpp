@@ -53,7 +53,7 @@ public:
         // static_assert(
         //     not std::is_base_of_v<ServiceComponentT, StatedServiceComponent<StateT, EventT>>);
         const message_broker::ResponseMessage response =
-            static_cast<DerivedClassT*>(this)->send(ServiceComponentT::RequestGetState);
+            static_cast<DerivedClassT*>(this)->send(ServiceComponentT::CommandRequestGetState);
 
         if (response.getResult() != message_broker::ResponseMessage::Result::Success)
         {
@@ -86,7 +86,7 @@ public:
     {
         LOG(debug) << "Turn off service component: " << ServiceComponentT::Identifier;
         const auto success =
-            static_cast<DerivedClassT*>(this)->send(ServiceComponentT::RequestSwitchOff);
+            static_cast<DerivedClassT*>(this)->send(ServiceComponentT::CommandRequestSwitchOff);
 
         if (!success)
         {

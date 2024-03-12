@@ -22,6 +22,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
 #include <istream>
 #include <ostream>
 
@@ -91,7 +92,7 @@ bool MessageBroker::send(Message& message, const Address& address, ResponseMessa
     }
 
     message.setSequence(getNextSequenceNumber());
-    LOG(debug) << "Sending request message " << message << " to " << fullAddress;
+    LOG(trace) << "Sending request message " << message << " to " << fullAddress;
 
     StreamBuffer outBuf;
     std::ostream outStream(&outBuf);
@@ -132,7 +133,7 @@ bool MessageBroker::send(Message& message, const Address& address, ResponseMessa
 bool MessageBroker::notify(Message& message, const Topic& topic)
 {
     message.setSequence(getNextSequenceNumber());
-    LOG(debug) << "Send notification message " << message << " from " << m_publisher.getAddress()
+    LOG(trace) << "Send notification message " << message << " from " << m_publisher.getAddress()
                << "/" << topic;
 
     StreamBuffer outBuf;
@@ -170,16 +171,14 @@ bool MessageBroker::processReceivedRequestMessage(StreamBuffer& inBuf, StreamBuf
         return false;
     }
 
-    LOG(debug) << "Received request message " << message;
+    LOG(trace) << "Received request message " << message;
 
     ResponseMessage response;
     std::ostream    out(&outBuf);
-    auto            iter{m_requestHandlers.find(message.getId())};
 
-    if (iter != m_requestHandlers.end())
+    if (m_requestHandler)
     {
-        auto& handler = iter->second;
-        response      = handler(message);
+        response = m_requestHandler(message);
         response.referTo(message);
     }
     else
@@ -202,14 +201,11 @@ bool MessageBroker::processReceivedNotificationMessage(StreamBuffer& inBuf)
         return false;
     }
 
-    LOG(debug) << "Received notification message " << message;
+    LOG(trace) << "Received notification message " << message;
 
-    auto iter{m_notificationHandlers.find(message.getId())};
-
-    if (iter != m_notificationHandlers.end())
+    if (m_notificationHandler)
     {
-        auto& handler = iter->second;
-        (void)handler(message);
+        m_notificationHandler(message);
         return true;
     }
     else
@@ -217,28 +213,4 @@ bool MessageBroker::processReceivedNotificationMessage(StreamBuffer& inBuf)
         LOG(error) << "Received unhandled notification: " << message;
         return false;
     }
-}
-
-void MessageBroker::unregisterMessageHandler(const Message::Identifier& messageId)
-{
-    auto iterRequestHandler = m_requestHandlers.find(messageId);
-
-    if (iterRequestHandler != m_requestHandlers.end())
-    {
-        m_requestHandlers.erase(iterRequestHandler);
-    }
-
-    auto iterNotificationHandler = m_notificationHandlers.find(messageId);
-
-    if (iterNotificationHandler != m_notificationHandlers.end())
-    {
-        m_notificationHandlers.erase(iterNotificationHandler);
-    }
-}
-
-bool MessageBroker::hasRegisteredMessageHandler(const Message::Identifier& messageId) const
-{
-    const auto requestHandlerCount      = m_requestHandlers.count(messageId);
-    const auto notificationHandlerCount = m_notificationHandlers.count(messageId);
-    return ((requestHandlerCount + notificationHandlerCount) > 0);
 }

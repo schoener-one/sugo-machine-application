@@ -52,7 +52,6 @@ public:
      * @param ioContext Process context to be use to run the JSON RPC server.
      *
      * @todo Pass only a ready configured IServer interface object.
-     * @todo
      */
     ServiceGateway(message_broker::IMessageBroker& messageBroker,
                    common::IProcessContext&        processContext,

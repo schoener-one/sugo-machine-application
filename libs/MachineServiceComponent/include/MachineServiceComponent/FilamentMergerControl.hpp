@@ -55,6 +55,8 @@ protected:
         const message_broker::Message& request) override;
 
     // Transition actions
+    void stopHeatingAndNotifyFeedingStopped(const Event& event, const State& state) override;
+    void notifyFeedingStopped(const Event& event, const State& state) override;
     void switchOff(const Event& event, const State& state) override;
     void stopMerger(const Event& event, const State& state) override;
     void handleError(const Event& event, const State& state) override;
@@ -67,6 +69,7 @@ protected:
 private:
     /// @brief Switches off the unit.
     void switchOff();
+    void stopHeating();
 
     const common::ServiceLocator& m_serviceLocator;  ///< Service locator instance.
     bool                          m_isPreHeaterTemperatureReached =

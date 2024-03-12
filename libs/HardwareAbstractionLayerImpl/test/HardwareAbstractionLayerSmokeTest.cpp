@@ -92,14 +92,14 @@ protected:
     HardwareAbstractionLayer m_hal;
 };
 
-TEST_F(HardwareAbstractionLayerSmokeTest, Test_GpioControl)
+TEST_F(HardwareAbstractionLayerSmokeTest, GpioControl)
 {
     // GPIO control
     auto& gpioControl = m_hal.getGpioControllerMap().at(id::GpioControl);
     EXPECT_TRUE(gpioControl);
 
     // GPIO in-pins
-    for (const std::string pin : {
+    for (const auto& pin : {
              id::GpioPinSignalFilamentTensionOverload, id::GpioPinSignalButtonStop,
              id::GpioPinSignalFilamentTensionLow, id::GpioPinSignalFilamentTensionHigh,
              //   id::GpioPinMotorControlError
@@ -113,7 +113,7 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_GpioControl)
     }
 
     // GPIO out-pins
-    for (const std::string pin :
+    for (const auto& pin :
          {id::GpioPinRelaySwitchFanFeeder, id::GpioPinRelaySwitchFanMerger,
           id::GpioPinRelaySwitchHeaterFeeder, id::GpioPinRelaySwitchHeaterMerger,
           id::GpioPinRelaySwitchLightPower, id::GpioPinRelaySwitchLightRun,
@@ -144,7 +144,7 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_GpioControl)
     }
 }
 
-TEST_F(HardwareAbstractionLayerSmokeTest, Test_MotorControl)
+TEST_F(HardwareAbstractionLayerSmokeTest, MotorControl)
 {
     // Stepper motor control
     auto& stepperMotorControl = m_hal.getStepperMotorControllerMap().at(id::StepperMotorControl);
@@ -155,7 +155,7 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_MotorControl)
     constexpr int64_t timePerStep     = 60000000LL / static_cast<int64_t>(maxSpeed * stepsPerRound);
 
     // Stepper motors
-    for (const std::string motorName : {"feeder", "coiler"})
+    for (const auto& motorName : {"feeder", "coiler"})
     {
         std::cout << "Stepper motor: " << motorName << std::endl;
         auto& stepperMotor = stepperMotorControl->getStepperMotorMap().at(motorName);
@@ -182,13 +182,13 @@ TEST_F(HardwareAbstractionLayerSmokeTest, Test_MotorControl)
     }
 }
 
-TEST_F(HardwareAbstractionLayerSmokeTest, Test_TemperatureSensorControl)
+TEST_F(HardwareAbstractionLayerSmokeTest, TemperatureSensorControl)
 {
     auto& tempSensorControl =
         m_hal.getTemperatureSensorControllerMap().at(id::TemperatureSensorControl);
     EXPECT_TRUE(tempSensorControl);
 
-    for (const std::string sensorName : {id::TemperatureSensorFeeder, id::TemperatureSensorMerger})
+    for (const auto& sensorName : {id::TemperatureSensorFeeder, id::TemperatureSensorMerger})
     {
         auto& tempSensor = tempSensorControl->getTemperatureSensorMap().at(sensorName);
         EXPECT_TRUE(tempSensor);

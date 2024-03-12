@@ -109,14 +109,12 @@ Maintainer: Denis Schoener (denis@schoener-one.de)
 
 ## TODOs
 
-* Split project libs to submodules (i.e. Common, HardwareAbstractionLayer etc.) 
-* Replace address and topic by class ServiceId
 * Introduce clang-tidy checks by default and remove warnings
+* Remove cppcheck suppressed parts (e.g. '// cppcheck-suppress')
+* Introduce timer support to system model
 * Create ServiceId to network address translation. Kind of factory which could translate
 service identifiers to a full qualified network address.
-* Remove cppcheck suppressed parts (e.g. '// cppcheck-suppress')
-* Introduce component properties
+* Split project libs to submodules (i.e. Common, HardwareAbstractionLayer etc.) 
 * Support TCP messaging with mDNS name resolution
 * Support CAN messaging
 * Add a log format checker for integration tests (see boost::log::core) to check if an error happened
-* FreeRTOS support

@@ -36,7 +36,8 @@
                 },
                 "signal-filament-tension-low": {
                     "pin": 12,
-                    "direction": "in"
+                    "direction": "in",
+                    "active-high": false
                 },
                 "motor-control-error": {
                     "pin": 13,
@@ -44,7 +45,8 @@
                 },
                 "signal-filament-tension-high": {
                     "pin": 16,
-                    "direction": "in"
+                    "direction": "in",
+                    "active-high": false
                 },
                 "relay-switch-light-run": {
                     "pin": 17,
@@ -98,11 +100,12 @@
             "motor": {
                 "feeder": {
                     "i2c-address": 14,
-                    "max-speed-rpm": "100"
+                    "max-speed-rpm": "50",
+                    "direction": "forward"
                 },
                 "coiler": {
                     "i2c-address": 15,
-                    "max-speed-rpm": "100",
+                    "max-speed-rpm": "50",
                     "direction": "backward"
                 }
             }

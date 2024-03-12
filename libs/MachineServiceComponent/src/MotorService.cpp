@@ -42,8 +42,7 @@ MotorService::MotorService(const hal::Identifier&        motorId,
                            const common::ServiceLocator& serviceLocator)
     : HardwareService(serviceLocator.get<hal::IHardwareAbstractionLayer>()),
       m_stepperMotor(getStepperMotor(motorId)),
-      m_maxMotorSpeed(m_stepperMotor->getMaxSpeed().getValue()),
-      m_motorSpeed(0)
+      m_maxMotorSpeed(m_stepperMotor->getMaxSpeed().getValue())
 {
 }
 

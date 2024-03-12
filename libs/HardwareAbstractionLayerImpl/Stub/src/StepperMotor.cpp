@@ -97,7 +97,7 @@ StepperMotor::StepCount StepperMotor::getMicroStepCount() const
 
 StepperMotor::StepCount StepperMotor::getStepsPerRound() const
 {
-    static constexpr StepCount stepsPerRound = 200u;
+    static constexpr StepCount stepsPerRound = 1600u;
     return stepsPerRound;
 }
 

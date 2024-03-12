@@ -25,12 +25,12 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <linux/types.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <cassert>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 
 #include "Common/Logger.hpp"
 #include "HardwareAbstractionLayer/SpiControl.hpp"

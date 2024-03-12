@@ -47,10 +47,6 @@ public:
                         const common::ServiceLocator&   serviceLocator);
 
 protected:
-    // Request handlers
-    message_broker::ResponseMessage onRequestSetMotorSpeed(
-        const message_broker::Message& request) override;
-
     // Transition actions
     void handleError(const Event& event, const State& state) override;
     void stopMotor(const Event& event, const State& state) override;

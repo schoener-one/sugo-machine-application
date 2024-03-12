@@ -23,11 +23,11 @@
 ###################################################################################################
 
 # Remote control server integration test
-set(MODULE_SERVER_TEST_APP ${MODULE_NAME}ServerTest)
-add_executable(${MODULE_SERVER_TEST_APP}
-    RemoteControlServer/RemoteControlServerTest.cpp
+set(MODULE_SERVER_SIM_APP ${MODULE_NAME}ServerSimulator)
+add_executable(${MODULE_SERVER_SIM_APP}
+    RemoteControlServer/RemoteControlServerSimulator.cpp
 )
-target_link_libraries(${MODULE_SERVER_TEST_APP}
+target_link_libraries(${MODULE_SERVER_SIM_APP}
     PRIVATE
         ${MODULE_NAME}
 )

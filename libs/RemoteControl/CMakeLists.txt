@@ -32,6 +32,7 @@ find_package(Boost REQUIRED COMPONENTS log program_options system thread)
 # Build library
 add_compile_definitions(MG_ARCH=MG_ARCH_UNIX)
 add_library (${MODULE_NAME}
+    src/Configuration.cpp
     src/Connection.cpp
     src/RemoteControlServer.cpp
     )

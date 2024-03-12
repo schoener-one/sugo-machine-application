@@ -103,14 +103,14 @@ public:
 
 protected:
     /**
-     * @brief Helper method to handle event request messages.
+     * @brief Method to handle request messages.
      *
      * @param message Received message to handle
-     * @param event Received event.
+     * @param event Event associated to the received message.
      * @return Request response message.
      */
-    message_broker::ResponseMessage handleEventMessage(const message_broker::Message& message,
-                                                       const EventT&                  event)
+    message_broker::ResponseMessage handleCommandRequestMessage(
+        const message_broker::Message& message, const EventT& event)
     {
         if (m_stateMachine.push(event))
         {
@@ -121,6 +121,16 @@ protected:
             return message_broker::createErrorResponseMessage(
                 message, message_broker::ResponseMessage::Result::UnsupportedRequest);
         };
+    }
+
+    /**
+     * @brief Method to handle notification messages.
+     *
+     * @param event Event associated to the received message.
+     */
+    void handleNotificationMessage(const EventT& event)
+    {
+        (void)m_stateMachine.push(event);
     }
 
     /**

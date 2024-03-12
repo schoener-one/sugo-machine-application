@@ -40,8 +40,6 @@ constexpr int32_t FaultMask        = 0x0001;
 constexpr int32_t Factor           = 32768;  // 2^15
 constexpr int32_t HalfFactor       = Factor / 2;
 
-constexpr char Me[] = "MAX31865: ";
-
 enum Register
 {
     Config                = 0x00,
@@ -123,26 +121,26 @@ bool Max31865::init()
                             ConfigRegisterFaultStatusClear};
     if (!writeSpiRegister(Register::Config, config))
     {
-        LOG(error) << Me << "Failed to write config";
+        LOG(error) << "Failed to write config";
         return false;
     }
 
     ByteBuffer allRegister(8u);
     if (!readSpiData(Register::Config, allRegister))
     {
-        LOG(error) << Me << "Failed to read all register";
+        LOG(error) << "Failed to read all register";
         return false;
     }
 
     if (allRegister.at(Register::Config) != (ConfigRegisterBias | ConfigRegisterConversionModeAuto))
     {
-        LOG(error) << Me << "Failed to config the device";
+        LOG(error) << "Failed to config the device";
         return false;
     }
 
     if (allRegister.at(Register::FaultStatus) != 0)
     {
-        LOG(error) << Me << "Unexpected fault status: " << allRegister.at(Register::FaultStatus);
+        LOG(error) << "Unexpected fault status: " << allRegister.at(Register::FaultStatus);
         return false;
     }
 
@@ -155,7 +153,7 @@ int16_t Max31865::getTemperature()
     readSpiData(Register::RtdMsb, rtd);
     if ((FaultMask & rtd.at(1)) != 0)
     {
-        LOG(error) << Me << "Failed to retrieve new temperature";
+        LOG(error) << "Failed to retrieve new temperature";
         return std::numeric_limits<int16_t>::min();
     }
     // Note: Fault bit is shifted out (>>1)!
@@ -175,7 +173,7 @@ int16_t Max31865::getTemperature()
     }
     else
     {
-        LOG(warning) << Me << "Failed to calculate temperature value";
+        LOG(warning) << "Failed to calculate temperature value";
         return std::numeric_limits<int16_t>::max();
     }
 }

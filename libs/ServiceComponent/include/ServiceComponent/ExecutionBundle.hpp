@@ -76,7 +76,7 @@ public:
      *
      * @param bundle Bundle object to move to this.
      */
-    ExecutionBundle(ExecutionBundle&& bundle)
+    ExecutionBundle(ExecutionBundle&& bundle) noexcept
         : m_ioContext(std::move(bundle.m_ioContext)),
           m_broker(std::move(bundle.m_broker)),
           m_processContext(std::move(bundle.m_processContext)),
@@ -93,7 +93,7 @@ public:
      * @param bundle Bundle object to move to this.
      * @return This object.
      */
-    ExecutionBundle& operator=(ExecutionBundle&& bundle)
+    ExecutionBundle& operator=(ExecutionBundle&& bundle) noexcept
     {
         *this = std::move(bundle);
         return *this;

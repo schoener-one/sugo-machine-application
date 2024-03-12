@@ -47,15 +47,15 @@ Server::~Server()  // NOLINT(modernize-use-equals-default) - std::unique_ptr/std
 {
 }
 
-Server::Server(Server&& server)
-    : m_address(std::move(server.m_address)),
+Server::Server(Server&& server) noexcept
+    : m_address(server.m_address),
       m_messageHandler(std::move(server.m_messageHandler)),
       m_socket(std::move(server.m_socket)),
-      m_isRunning(std::move(server.m_isRunning))
+      m_isRunning(server.m_isRunning)
 {
 }
 
-Server& Server::operator=(Server&& server)
+Server& Server::operator=(Server&& server) noexcept
 {
     *this = std::move(server);
     return *this;

@@ -22,7 +22,7 @@
 #
 ###################################################################################################
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.17)
 project(SugoMachine VERSION 0.1.0) # TODO Create version automatically from git tag
 
 set(PROJECT_SOURCE_DIR "${PROJECT_SOURCE_DIR}")
@@ -30,10 +30,14 @@ set(PROJECT_BINARY_DIR "bin")
 message("Source path: ${PROJECT_SOURCE_DIR}")
 message("Binary path: ${PROJECT_BINARY_DIR}")
 
+message("Configure build for: ${CMAKE_SYSTEM_PROCESSOR}")
+
 include(cmake/CompilerConfig.cmake)
 include(cmake/Coverage.cmake)
 include(cmake/LibBoost.cmake)
-include(cmake/ExternalLibraries.cmake)
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
+  include(cmake/ExternalLibraries.cmake)
+endif()
 
 # Enable cppcheck
 include(cmake/Cppcheck.cmake)

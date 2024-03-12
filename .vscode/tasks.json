@@ -3,244 +3,255 @@
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
-        // X86
         {
-            "label": "build-x86-init",
+            "label": "build-init-coverage",
             "type": "shell",
-            "command": "cmake -B${config:build.directory} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type} -DCODE_COVERAGE=ON"
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  -B${config:build.directory} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type} -DCODE_COVERAGE=ON"
+            ]
         },
         {
-            "label": "build-x86-ExternalLibraries",
+            "label": "build-init-build-x86",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target ExternalLibraries",
+            "command": [
+                "cmake  -B${config:build.directory} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type}"
+            ]
+        },
+        {
+            "label": "build-init-build-rpi",
+            "type": "shell",
+            "command": [
+                ". ${config:sdk.env}; ",
+                "cmake  -B${config:build.directory} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type}"
+            ]
+        },
+        {
+            "label": "build-all",
+            "type": "shell",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target all"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-MachineApplication",
+            "label": "build-ExternalLibraries",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target MachineApplication",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target ExternalLibraries"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-MachineApplicationIntegrationTest",
+            "label": "build-MachineApplication",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target MachineApplicationIntegrationTest",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target MachineApplication"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-CommonTest",
+            "label": "build-MachineApplicationIntegrationTest",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target CommonTest",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target MachineApplicationIntegrationTest"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-ServiceComponent",
+            "label": "build-CommonTest",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target ServiceComponent",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target CommonTest"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-ServiceComponentTest",
+            "label": "build-ServiceComponent",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target ServiceComponentTest",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target ServiceComponent"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-ServiceGateway",
+            "label": "build-ServiceComponentTest",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target ServiceGateway",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target ServiceComponentTest"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-ServiceGatewayTest",
+            "label": "build-ServiceGateway",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target ServiceGatewayTest",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target ServiceGateway"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-RemoteControl",
+            "label": "build-ServiceGatewayTest",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target RemoteControl",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target ServiceGatewayTest"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-RemoteControlServerTest",
+            "label": "build-RemoteControl",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target RemoteControlServerTest",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target RemoteControl"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-MessageBrokerTest",
+            "label": "build-RemoteControlServerSimulator",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target MessageBrokerTest",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target RemoteControlServerSimulator"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-MessageBroker",
+            "label": "build-MessageBrokerTest",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target MessageBroker",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target MessageBrokerTest"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-MachineServiceComponent",
+            "label": "build-MessageBroker",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target MachineServiceComponent",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target MessageBroker"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-MachineServiceComponentTest",
+            "label": "build-MachineServiceComponent",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target MachineServiceComponentTest",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target MachineServiceComponent"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-HardwareAbstractionLayer",
+            "label": "build-MachineServiceComponentTest",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target HardwareAbstractionLayer",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target MachineServiceComponentTest"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-HardwareAbstractionLayerImplTest",
+            "label": "build-HardwareAbstractionLayerImpl",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target HardwareAbstractionLayerImplTest",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target HardwareAbstractionLayerImpl"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-MachineRemoteControlServer",
+            "label": "build-HardwareAbstractionLayerImplTest",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target MachineRemoteControlServer",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target HardwareAbstractionLayerImplTest"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-all",
+            "label": "build-MachineRemoteControlServer",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target all",
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target MachineRemoteControlServer"
+            ],
             "problemMatcher": {
                 "base": "$gcc",
             },
             "group": "build"
         },
         {
-            "label": "build-x86-clean",
+            "label": "build-clean-all",
             "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target clean"
+            "command": [
+                "test -d ${config:sdk.dir} && . ${config:sdk.env}; ",
+                "cmake  --build ${config:build.directory} --target clean"
+            ]
         },
         {
-            "label": "build-x86-clean-prestine",
-            "type": "shell",
-            "command": "rm -rf ${config:build.directory}"
-        },
-        // RPI
-        {
-            "label": "build-rpi-init",
-            "type": "shell",
-            "command": ". ${config:sdk.env}; cmake -B${config:build.directory} -GNinja -DCMAKE_BUILD_TYPE=${config:build.type}"
-        },
-        {
-            "label": "build-rpi-HardwareAbstractionLayerTest",
-            "type": "shell",
-            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory} --target HardwareAbstractionLayerTest",
-            "problemMatcher": {
-                "base": "$gcc",
-            },
-            "group": "build"
-        },
-        {
-            "label": "build-rpi-HardwareAbstractionLayer",
-            "type": "shell",
-            "command": "cmake --build ${config:build.directory} --target HardwareAbstractionLayer",
-            "problemMatcher": {
-                "base": "$gcc",
-            },
-            "group": "build"
-        },
-        {
-            "label": "build-rpi-HardwareAbstractionLayerSmokeTest",
-            "type": "shell",
-            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory} --target HardwareAbstractionLayerSmokeTest",
-            "problemMatcher": {
-                "base": "$gcc",
-            },
-            "group": "build"
-        },
-        {
-            "label": "build-rpi-all",
-            "type": "shell",
-            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory} --target all",
-            "problemMatcher": {
-                "base": "$gcc",
-            },
-            "group": "build",
-            "options": {}
-        },
-        {
-            "label": "build-rpi-MachineApplication",
-            "type": "shell",
-            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory} --target MachineApplication",
-            "problemMatcher": {
-                "base": "$gcc",
-            },
-            "group": "build",
-            "options": {}
-        },
-        {
-            "label": "build-rpi-clean",
-            "type": "shell",
-            "command": ". ${config:sdk.env}; cmake --build ${config:build.directory} --target clean"
-        },
-        {
-            "label": "build-rpi-clean-prestine",
+            "label": "build-clean-build",
             "type": "shell",
             "command": "rm -rf ${config:build.directory}"
         },
@@ -253,19 +264,19 @@
         {
             "label": "remote-upload-MachineApplication",
             "type": "shell",
-            "command": "scp -o StrictHostKeyChecking=no \"${config:build.directory}/MachineApplication/MachineApplication\" \"root@${config:remote.host}:MachineApplication\""
+            "command": "scp -o StrictHostKeyChecking=no \"${config:build.directory}/MachineApplication\" \"root@${config:remote.host}:MachineApplication\""
         },
         {
-            "label": "remote-upload-HardwareAbstractionLayerSmokeTest",
+            "label": "remote-upload-HardwareAbstractionLayerImplTest",
             "type": "shell",
-            "command": "scp -o StrictHostKeyChecking=no \"${config:build.directory}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest\" \"root@${config:remote.host}:HardwareAbstractionLayerSmokeTest\""
+            "command": "scp -o StrictHostKeyChecking=no \"${config:build.directory}/libs/HardwareAbstractionLayerImpl/test/HardwareAbstractionLayerImplTest\" \"root@${config:remote.host}:HardwareAbstractionLayerImplTest\""
         },
         {
             "label": "remote-upload-HardwareConfig",
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"mkdir -p HardwareAbstractionLayer/test\";",
-                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTestConfig.json\" \"root@${config:remote.host}:HardwareAbstractionLayerSmokeTestConfig.json\""
+                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/libs/HardwareAbstractionLayerImpl/test/HardwareAbstractionLayerSmokeTestConfig.json\" \"root@${config:remote.host}:HardwareAbstractionLayerSmokeTestConfig.json\""
             ]
         },
         {
@@ -273,15 +284,15 @@
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"mkdir -p conf\";",
-                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/MachineApplication/conf/MachineConfig.json\" \"root@${config:remote.host}:conf/MachineConfig.json\""
+                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/conf/MachineConfig.json\" \"root@${config:remote.host}:conf/MachineConfig.json\""
             ]
         },
         {
             "label": "remote-upload-RemoteControlConfig",
             "type": "shell",
             "command": [
-                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"mkdir -p MachineRemoteControl/www\";",
-                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/MachineRemoteControl/www/index.html\" \"root@${config:remote.host}:MachineRemoteControl/www/index.html\""
+                "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"mkdir -p www\";",
+                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/conf/www/index.html\" \"root@${config:remote.host}:www/index.html\""
             ]
         },
         {
@@ -310,82 +321,82 @@
             "isBackground": false
         },
         {
-            "label": "remote-start-HardwareAbstractionLayerSmokeTest.GpioControl",
+            "label": "remote-start-HardwareAbstractionLayerImplTest.GpioControl",
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
-                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
-                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_GpioControl\""
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerImplTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.GpioControl\""
             ],
             "dependsOn": [
                 "remote-gdbserver-killall",
-                "remote-upload-HardwareAbstractionLayerSmokeTest",
+                "remote-upload-HardwareAbstractionLayerImplTest",
                 "remote-upload-HardwareConfig"
             ],
             "dependsOrder": "sequence",
             "isBackground": false
         },
         {
-            "label": "remote-start-HardwareAbstractionLayerSmokeTest.GpioControl-direct",
+            "label": "remote-start-HardwareAbstractionLayerImplTest.GpioControl-direct",
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
-                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
-                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_GpioControl\""
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerImplTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.GpioControl\""
             ],
             "dependsOrder": "sequence",
             "isBackground": false
         },
         {
-            "label": "remote-start-HardwareAbstractionLayerSmokeTest.MotorControl",
+            "label": "remote-start-HardwareAbstractionLayerImplTest.MotorControl",
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
-                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
-                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_MotorControl\""
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerImplTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.MotorControl\""
             ],
             "dependsOn": [
                 "remote-gdbserver-killall",
-                "remote-upload-HardwareAbstractionLayerSmokeTest",
+                "remote-upload-HardwareAbstractionLayerImplTest",
                 "remote-upload-HardwareConfig"
             ],
             "dependsOrder": "sequence",
             "isBackground": false
         },
         {
-            "label": "remote-start-HardwareAbstractionLayerSmokeTest.MotorControl-direct",
+            "label": "remote-start-HardwareAbstractionLayerImplTest.MotorControl-direct",
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
-                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
-                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_MotorControl\""
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerImplTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.MotorControl\""
             ],
             "dependsOrder": "sequence",
             "isBackground": false
         },
         {
-            "label": "remote-start-HardwareAbstractionLayerSmokeTest.TemperatureSensorControl",
+            "label": "remote-start-HardwareAbstractionLayerImplTest.TemperatureSensorControl",
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
-                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
-                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_TemperatureSensorControl\""
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerImplTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.TemperatureSensorControl\""
             ],
             "dependsOn": [
                 "remote-gdbserver-killall",
-                "remote-upload-HardwareAbstractionLayerSmokeTest",
+                "remote-upload-HardwareAbstractionLayerImplTest",
                 "remote-upload-HardwareConfig"
             ],
             "dependsOrder": "sequence",
             "isBackground": false
         },
         {
-            "label": "remote-start-HardwareAbstractionLayerSmokeTest.TemperatureSensorControl-direct",
+            "label": "remote-start-HardwareAbstractionLayerImplTest.TemperatureSensorControl-direct",
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C ",
-                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerSmokeTest ",
-                "--gtest_filter=HardwareAbstractionLayerSmokeTest.Test_TemperatureSensorControl\""
+                "\"/usr/bin/gdbserver localhost:${config:remote.port} HardwareAbstractionLayerImplTest ",
+                "--gtest_filter=HardwareAbstractionLayerSmokeTest.TemperatureSensorControl\""
             ],
             "dependsOrder": "sequence",
             "isBackground": false

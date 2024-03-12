@@ -32,27 +32,28 @@
 #include "HardwareAbstractionLayer/HalTypes.hpp"
 #include "HardwareAbstractionLayer/TicController.hpp"
 
+using namespace sugo::hal;
+
 namespace
 {
 constexpr size_t MaxBlockSize = 15u;  ///< Maximum size a read response at once!
 
 template <class ValueT = int32_t>
-constexpr void writeToBuffer(ValueT value, std::byteBuffer& buffer, unsigned offset)
+constexpr void writeToBuffer(ValueT value, ByteBuffer& buffer, unsigned offset)
 {
-    buffer[0 + offset] = static_cast<std::byte>(value >> 0 & 0xff);
-    buffer[1 + offset] = static_cast<std::byte>(value >> 8 & 0xff);
-    buffer[2 + offset] = static_cast<std::byte>(value >> 16 & 0xff);
-    buffer[3 + offset] = static_cast<std::byte>(value >> 24 & 0xff);
+    buffer[0 + offset] = static_cast<Byte>(value >> 0 & 0xff);
+    buffer[1 + offset] = static_cast<Byte>(value >> 8 & 0xff);
+    buffer[2 + offset] = static_cast<Byte>(value >> 16 & 0xff);
+    buffer[3 + offset] = static_cast<Byte>(value >> 24 & 0xff);
 }
 
-const std::map<std::byte, std::string> s_operationStateName = {
-    {static_cast<std::byte>(sugo::hal::TicController::OperationState::Reset), "Reset"},
-    {static_cast<std::byte>(sugo::hal::TicController::OperationState::DeEnergize), "DeEnergize"},
-    {static_cast<std::byte>(sugo::hal::TicController::OperationState::SoftError), "SoftError"},
-    {static_cast<std::byte>(sugo::hal::TicController::OperationState::WaitingForErrLine),
-     "WaitingForErrLine"},
-    {static_cast<std::byte>(sugo::hal::TicController::OperationState::StartingUp), "StartingUp"},
-    {static_cast<std::byte>(sugo::hal::TicController::OperationState::Normal), "Normal"},
+const std::map<Byte, std::string> s_operationStateName = {
+    {static_cast<Byte>(TicController::OperationState::Reset), "Reset"},
+    {static_cast<Byte>(TicController::OperationState::DeEnergize), "DeEnergize"},
+    {static_cast<Byte>(TicController::OperationState::SoftError), "SoftError"},
+    {static_cast<Byte>(TicController::OperationState::WaitingForErrLine), "WaitingForErrLine"},
+    {static_cast<Byte>(TicController::OperationState::StartingUp), "StartingUp"},
+    {static_cast<Byte>(TicController::OperationState::Normal), "Normal"},
 };
 }  // namespace
 
@@ -290,18 +291,18 @@ bool TicController::setCurrentLimit(uint16_t currentLimit)
     return success;
 }
 
-bool TicController::getVariable(Byte variableOff, ByteBuffer& receiveData) const
+bool TicController::getVariable(uint8_t variableOffset, ByteBuffer& receiveData) const
 {
     static constexpr Byte commandId = 0xA1;
-    ByteBuffer            commandData{commandId, variableOff};
+    ByteBuffer            commandData{commandId, variableOffset};
     const bool            success = m_i2c.read(m_address, commandData, receiveData);
     return success;
 }
 
-bool TicController::getVariableAndClearErrors(Byte variableOff, ByteBuffer& receiveData) const
+bool TicController::getVariableAndClearErrors(uint8_t variableOffset, ByteBuffer& receiveData) const
 {
     static constexpr Byte commandId = 0xA2;
-    ByteBuffer            commandData{commandId, variableOff};
+    ByteBuffer            commandData{commandId, variableOffset};
     const bool            success = m_i2c.read(m_address, commandData, receiveData);
     return success;
 }

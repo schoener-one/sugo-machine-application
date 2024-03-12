@@ -63,7 +63,7 @@ public:
      * @warning This could cause unexpected behaviour, because not all members are movable, so use
      * it with care!
      */
-    ProcessContext(ProcessContext&& processContext)
+    ProcessContext(ProcessContext&& processContext) noexcept
         : m_thread(std::move(processContext.m_thread)),
           m_process(std::move(processContext.m_process)),
           m_stopProcess(std::move(processContext.m_stopProcess))
@@ -82,7 +82,7 @@ public:
      * @warning This could cause unexpected behaviour, because not all members are movable, so use
      * it with care!
      */
-    ProcessContext& operator=(ProcessContext&& processContext)
+    ProcessContext& operator=(ProcessContext&& processContext) noexcept
     {
         *this = std::move(processContext);
         return *this;

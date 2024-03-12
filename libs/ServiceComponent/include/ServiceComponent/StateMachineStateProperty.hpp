@@ -3,7 +3,7 @@
  * @file
  *
  * @author: Denis Schoener (denis@schoener-one.de)
- * @date:   22.09.2020
+ * @date:   15.03.2024
  *
  * @license: Copyright (C) 2020 by Denis Schoener
  *
@@ -24,44 +24,29 @@
 
 #pragma once
 
-#include <gpiod.hpp>
+#include "Common/Types.hpp"
+#include "ServiceComponent/Property.hpp"
+#include "ServiceComponent/StateMachine.hpp"
 
-#include "HardwareAbstractionLayer/IGpioPin.hpp"
-
-namespace sugo::hal
+namespace sugo::service_component
 {
-/// @brief Class represents a GPIO pin
-class GpioPin : public IGpioPin
+/// @brief Class for state machine state property.
+template <typename StateMachineT>
+class StateMachineStateProperty : public Property<uint32_t>
 {
 public:
-    /**
-     * @brief Construct a new Gpio pin.
-     *
-     * @param id Identifier of the GPIO chip.
-     * @param chip Representing GPIO chip object.
-     */
-    GpioPin(const Identifier& id, gpiod::chip chip) noexcept : IGpioPin(id), m_chip(std::move(chip))
+    StateMachineStateProperty(const StateMachineT& stateMachine)
+        : Property<uint32_t>("State", stateMachine.getCurrentState()), m_stateMachine(stateMachine)
     {
     }
 
-    /**
-     * @brief Destructor of the GPIO pin.
-     *
-     */
-    ~GpioPin() override;
-
-    bool init(const common::IConfiguration& configuration) override;
-    void finalize();
-
-    State     getState() const override;
-    bool      setState(State state) override;
-    Direction getDirection() const override;
-    Event     waitForEvent(std::chrono::nanoseconds timeout = std::chrono::nanoseconds(0)) override;
+    common::Json getValueAsJson() const override
+    {
+        return common::Json(
+            {{id::PropertyValue, static_cast<uint32_t>(m_stateMachine.getCurrentState())}});
+    }
 
 private:
-    gpiod::chip m_chip;
-    gpiod::line m_line{};
-    Direction   m_direction = Direction::In;
+    const StateMachineT& m_stateMachine;
 };
-
-}  // namespace sugo::hal
+}  // namespace sugo::service_component
