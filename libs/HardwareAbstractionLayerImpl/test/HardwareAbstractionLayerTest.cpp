@@ -191,7 +191,7 @@ protected:
     }
 };
 
-TEST_F(HardwareAbstractionLayerTest, IHardwareAbstractionLayer_SetConfiguration)
+TEST_F(HardwareAbstractionLayerTest, AddConfigurationOptions)
 {
     std::istringstream              iss(s_halConfig);
     common::ConfigurationFileParser parser(iss);
@@ -202,29 +202,21 @@ TEST_F(HardwareAbstractionLayerTest, IHardwareAbstractionLayer_SetConfiguration)
     const std::vector<std::string>& pinEnabled =
         config.getOption("hardware-abstraction-layer.gpio-control.gpio-pin-enabled")
             .get<const std::vector<std::string>&>();
-    EXPECT_EQ(pinEnabled.size(), 2);
+    EXPECT_EQ(pinEnabled.size(), 15);
     unsigned pinValue =
-        config.getOption("hardware-abstraction-layer.gpio-control.pin.adc-control-data-ready.pin")
-            .get<unsigned>();
-    EXPECT_EQ(pinValue, 17);
-    const std::vector<std::string>& adcEnabled =
-        config.getOption("hardware-abstraction-layer.adc-control.adc-enabled")
-            .get<const std::vector<std::string>&>();
-    EXPECT_EQ(adcEnabled.size(), 5);
-    unsigned inputValue =
         config
-            .getOption("hardware-abstraction-layer.adc-control.adc.temperature-cool-filament.input")
+            .getOption(
+                "hardware-abstraction-layer.gpio-control.gpio-pin.relay-switch-fan-merger.pin")
             .get<unsigned>();
-    EXPECT_EQ(inputValue, 3);
+    EXPECT_EQ(pinValue, 20);
     const std::vector<std::string>& motorEnabled =
         config.getOption("hardware-abstraction-layer.stepper-motor-control.motor-enabled")
             .get<const std::vector<std::string>&>();
     EXPECT_EQ(motorEnabled.size(), 2);
-    unsigned idValue =
-        config
-            .getOption("hardware-abstraction-layer.stepper-motor-control.motor.feeder.i2c-address")
-            .get<unsigned>();
-    EXPECT_EQ(idValue, 14);
+    const std::string motorDirection =
+        config.getOption("hardware-abstraction-layer.stepper-motor-control.motor.coiler.direction")
+            .get<const std::string>();
+    EXPECT_STREQ(motorDirection.c_str(), "backward");
     HardwareAbstractionLayer hal;
     EXPECT_TRUE(hal.init(config));
 }

@@ -5,73 +5,81 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Current file",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+        },
+        {
             "name": "ServiceComponentGenerator ListOnly",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--list-only"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--list-only"]
         },
         {
             "name": "ServiceComponentGenerator",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-exec-group", "--generate-service-components", "-L", "debug"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-exec-group", "--generate-service-components", "-L", "debug"]
         },
         {
             "name": "ServiceComponentsGenerator (test)",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-service-components", "--generate-state-diagrams", "-L", "debug"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-service-components", "--generate-state-diagrams", "-L", "debug"]
         },
         {
             "name": "ServiceComponentGenerator Templates",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "-t"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "-t"]
         },
         {
             "name": "ServiceComponentGenerator State Diagrams",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ServiceComponent/scripts/GenerateServiceComponents.py",
+            "program": "${workspaceFolder}/libs/ServiceComponent/scripts/GenerateServiceComponents.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": ["-i", "${workspaceFolder}/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-state-diagrams"]
+            "args": ["-i", "${workspaceFolder}/libs/ServiceComponent/test/ServiceComponents.yaml", "-o", "out/ServiceComponent/src-gen", "--generate-state-diagrams"]
         },
         {
-            "name": "Debug HAL SmokeTest (x86)",
+            "name": "Debug HardwareAbstractionLayerImplTest (x86)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest",
+            "program": "${config:build.directory}/libs/HardwareAbstractionLayerImpl/test/HardwareAbstractionLayerImplTest",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "MIMode": "gdb"
         },
         {
-            "name": "Debug HAL SmokeTest (remote)",
+            "name": "Debug HardwareAbstractionLayerImplTest (remote)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory}/HardwareAbstractionLayer/test/HardwareAbstractionLayerSmokeTest",
+            "program": "${config:build.directory}/libs/HardwareAbstractionLayerImpl/test/HardwareAbstractionLayerImplTest",
             "miDebuggerServerAddress": "${config:remote.host}:${config:remote.port}",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
-            "miDebuggerPath": "${workspaceFolder}/../sdk/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gdb",
+            "miDebuggerPath": "${config:sdk.dir}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gdb",
             "MIMode": "gdb",
             "args": [],
             "setupCommands": [
@@ -81,17 +89,17 @@
                     "ignoreFailures": true
                 }
             ],
-            //"preLaunchTask": "remote-gdbserver-start-HardwareAbstractionLayerSmokeTest"
+            //"preLaunchTask": "remote-gdbserver-start-HardwareAbstractionLayerImplTest"
         },
         {
             "name": "Debug MachineApplication (remote)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory}/MachineApplication/MachineApplication",
+            "program": "${config:build.directory}/MachineApplication",
             "miDebuggerServerAddress": "${config:remote.host}:${config:remote.port}",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
-            "miDebuggerPath": "${workspaceFolder}/../sdk/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gdb",
+            "miDebuggerPath": "${config:sdk.dir}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gdb",
             "MIMode": "gdb",
             "args": [],
             "setupCommands": [
@@ -106,17 +114,17 @@
             "name": "Debug Machine Application (x86)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory}/MachineApplication/MachineApplication",
+            "program": "${config:build.directory}/MachineApplication",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "MIMode": "gdb",
-            "args": ["--config-file", "${workspaceFolder}/MachineApplication/conf/MachineConfig.json"]
+            "args": ["--config-file", "${workspaceFolder}/conf/MachineConfig.json"]
         },
         {
             "name": "Machine Application Integration Test (x86)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory}/MachineApplication/test/MachineApplicationIntegrationTest",
+            "program": "${config:build.directory}/test/MachineApplicationIntegrationTest",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "MIMode": "gdb",
@@ -126,11 +134,11 @@
             "name": "Debug Machine Remote Control Server (x86)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory}/MachineRemoteControl/MachineRemoteControlServer",
+            "program": "${config:build.directory}/libs/MachineRemoteControl/MachineRemoteControlServer",
             "cwd": "${workspaceFolder}/MachineRemoteControl",
             "stopAtEntry": false,
             "MIMode": "gdb",
             "args": ["www"]
-        },
+        }
     ]
 }

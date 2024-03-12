@@ -54,11 +54,11 @@ void FilamentPreHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
 ///////////////////////////////////////////////////////////////////////////////
 // Requests:
 
-message_broker::ResponseMessage FilamentPreHeater::onRequestGetTemperature(
+message_broker::ResponseMessage FilamentPreHeater::onPropertyRequestGetTemperature(
     const message_broker::Message& request)
 {
-    return message_broker::createResponseMessage(
-        request, common::Json({{id::Temperature, getTemperature()}}));
+    m_propertyTemperature.setValue(getTemperature());
+    return IFilamentPreHeater::onPropertyRequestGetTemperature(request);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

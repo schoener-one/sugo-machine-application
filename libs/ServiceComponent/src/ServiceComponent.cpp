@@ -64,7 +64,7 @@ bool ServiceComponent::send(const RequestId& requestId, const common::Json& para
         message.setPayload(parameters.dump());
     }
 
-    LOG(debug) << "Sending request " << requestId;
+    LOG(debug) << "Sending request message " << requestId;
     const bool success = m_messageBroker.send(message, requestId.getAddress(), response);
 
     return success && (response.getResult() == message_broker::ResponseMessage::Result::Success);
@@ -80,6 +80,6 @@ bool ServiceComponent::notify(const NotificationId& notificationId, const common
         notification.setPayload(parameters.dump());
     }
 
-    LOG(debug) << "Sending notification " << notificationId;
+    LOG(debug) << "Sending notification message " << notificationId;
     return m_messageBroker.notify(notification, notificationId.getTopic());
 }

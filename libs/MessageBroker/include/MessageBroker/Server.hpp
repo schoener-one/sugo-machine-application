@@ -73,13 +73,13 @@ public:
     Server(const Server&) = delete;
 
     /// @brief Move constructor.
-    Server(Server&&);
+    Server(Server&&) noexcept;
 
     /// @brief Copy operator.
     Server& operator=(const Server&) = delete;
 
     /// @brief Move operator.
-    Server& operator=(Server&&);
+    Server& operator=(Server&&) noexcept;
 
     /**
      * Returns the binded address.

@@ -24,6 +24,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 
 #include "Common/IConfigurationMock.hpp"
 #include "Common/IOContext.hpp"
@@ -31,11 +32,15 @@
 #include "Common/Logger.hpp"
 #include "Common/ServiceLocator.hpp"
 #include "MessageBroker/IMessageBrokerMock.hpp"
+#include "ServiceGateway/Configuration.hpp"
 #include "ServiceGateway/ServiceGateway.hpp"
 
 using ::testing::_;
+using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
+using namespace sugo;
 using namespace sugo::common;
 using namespace sugo::message_broker;
 using namespace sugo::service_component;
@@ -44,9 +49,7 @@ using namespace sugo::service_gateway;
 class ServiceGatewayTest : public ::testing::Test
 {
 protected:
-    ServiceGatewayTest()
-        : m_ioContext("ServiceGatewayTest"),
-          m_serviceGateway(m_mockMessageBroker, m_mockProcessContext, m_serviceLocator, m_ioContext)
+    ServiceGatewayTest() : m_ioContext("ServiceGatewayTest")
     {
     }
 
@@ -58,18 +61,29 @@ protected:
     void SetUp() override
     {
         m_serviceLocator.add<IConfiguration>(m_mockConfiguration);
+        ON_CALL(m_mockConfiguration, getOption(service_gateway::id::ConfigNetworkPort))
+            .WillByDefault(ReturnRef(m_optionNetworkPort));
+        ON_CALL(m_mockConfiguration, getOption(service_gateway::id::ConfigNetworkAddress))
+            .WillByDefault(ReturnRef(m_optionNetworkAddress));
+        m_serviceGateway = std::make_unique<ServiceGateway>(
+            m_mockMessageBroker, m_mockProcessContext, m_serviceLocator, m_ioContext);
     }
 
     void TearDown() override
     {
     }
 
-    ServiceLocator      m_serviceLocator;
-    IConfigurationMock  m_mockConfiguration;
-    IOContext           m_ioContext;
-    IMessageBrokerMock  m_mockMessageBroker;
-    IProcessContextMock m_mockProcessContext;
-    ServiceGateway      m_serviceGateway;
+    ServiceLocator                  m_serviceLocator;
+    NiceMock<IConfigurationMock>    m_mockConfiguration;
+    IOContext                       m_ioContext;
+    IMessageBrokerMock              m_mockMessageBroker;
+    IProcessContextMock             m_mockProcessContext;
+    std::unique_ptr<ServiceGateway> m_serviceGateway{};
+
+    Option m_optionNetworkPort{service_gateway::id::ConfigNetworkPort,
+                               static_cast<unsigned short>(1234), ""};
+    Option m_optionNetworkAddress{service_gateway::id::ConfigNetworkAddress,
+                                  std::string("test_address"), ""};
 };
 
 TEST_F(ServiceGatewayTest, Start)

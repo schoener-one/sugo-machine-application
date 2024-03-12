@@ -3,7 +3,7 @@
  * @file
  *
  * @author: Denis Schoener (denis@schoener-one.de)
- * @date:   22.09.2020
+ * @date:   15.03.2024
  *
  * @license: Copyright (C) 2020 by Denis Schoener
  *
@@ -24,44 +24,42 @@
 
 #pragma once
 
-#include <gpiod.hpp>
+#include <array>
+#include <string>
 
-#include "HardwareAbstractionLayer/IGpioPin.hpp"
+#include "Common/Logger.hpp"
+#include "ServiceComponent/Identifier.hpp"
+#include "ServiceComponent/Property.hpp"
 
-namespace sugo::hal
+namespace sugo::service_component
 {
-/// @brief Class represents a GPIO pin
-class GpioPin : public IGpioPin
+/// @brief Class for array type properties.
+template <typename TypeT, std::size_t Size>
+class ArrayTypeProperty : public Property<std::array<TypeT, Size>>
 {
+    /// Assert: minimum value must be lower or equal maximum!
+    static_assert(Size > 0);
+
 public:
-    /**
-     * @brief Construct a new Gpio pin.
-     *
-     * @param id Identifier of the GPIO chip.
-     * @param chip Representing GPIO chip object.
-     */
-    GpioPin(const Identifier& id, gpiod::chip chip) noexcept : IGpioPin(id), m_chip(std::move(chip))
+    /// @brief Property array type declaration.
+    using ArrayType = std::array<TypeT, Size>;
+
+    /// @brief Creates a new property instance.
+    ArrayTypeProperty(const std::string& name, ArrayType value)
+        : Property<std::array<TypeT, Size>>(name, std::move(value))
     {
     }
 
     /**
-     * @brief Destructor of the GPIO pin.
+     * @brief Assigns a new value to the property.
      *
+     * @param value Value to be assigned.
+     * @return The property object.
      */
-    ~GpioPin() override;
-
-    bool init(const common::IConfiguration& configuration) override;
-    void finalize();
-
-    State     getState() const override;
-    bool      setState(State state) override;
-    Direction getDirection() const override;
-    Event     waitForEvent(std::chrono::nanoseconds timeout = std::chrono::nanoseconds(0)) override;
-
-private:
-    gpiod::chip m_chip;
-    gpiod::line m_line{};
-    Direction   m_direction = Direction::In;
+    ArrayTypeProperty& operator=(const ArrayType& value)
+    {
+        (void)setValue(value);
+        return *this;
+    }
 };
-
-}  // namespace sugo::hal
+}  // namespace sugo::service_component

@@ -44,6 +44,12 @@ void HardwareAbstractionLayer::postInitialization()
     for (auto& [key, pin] : gpioController->getGpioPinMap())
     {
         simulator.registerGpioPin(key, pin->getDirection());
+
+        if (key == id::GpioPinRelaySwitchLightPower or key == id::GpioPinMotorControlReset)
+        {
+            // Special case!
+            pin->setState(IGpioPin::State::High);
+        }
     }
 
     const auto& temperatureSensorControl =

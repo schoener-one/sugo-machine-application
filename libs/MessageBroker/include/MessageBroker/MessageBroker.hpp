@@ -26,7 +26,6 @@
 
 #include <atomic>
 #include <cassert>
-#include <map>
 #include <memory>
 #include <mutex>
 
@@ -108,33 +107,35 @@ public:
      */
     static Address createFullQualifiedAddress(const Address& address, Service serviceType);
 
-    void registerRequestMessageHandler(const Message::Identifier& messageId,
-                                       RequestMessageHandler&     handler) override
+    void registerRequestMessageHandler(RequestMessageHandler& handler) override
     {
-        m_requestHandlers[messageId] = handler;
+        m_requestHandler = handler;
     }
 
-    void registerRequestMessageHandler(const Message::Identifier& messageId,
-                                       RequestMessageHandler&&    handler) override
+    void registerRequestMessageHandler(RequestMessageHandler&& handler) override
     {
-        m_requestHandlers[messageId] = handler;
+        m_requestHandler = handler;
     }
 
-    void registerNotificationMessageHandler(const Message::Identifier&  messageId,
-                                            NotificationMessageHandler& handler) override
+    void registerNotificationMessageHandler(NotificationMessageHandler& handler) override
     {
-        m_notificationHandlers[messageId] = handler;
+        m_notificationHandler = handler;
     }
 
-    void registerNotificationMessageHandler(const Message::Identifier&   messageId,
-                                            NotificationMessageHandler&& handler) override
+    void registerNotificationMessageHandler(NotificationMessageHandler&& handler) override
     {
-        m_notificationHandlers[messageId] = handler;
+        m_notificationHandler = handler;
     }
 
-    void unregisterMessageHandler(const Message::Identifier& messageId) override;
+    void unregisterRequestMessageHandler() override
+    {
+        m_requestHandler = nullptr;
+    }
 
-    bool hasRegisteredMessageHandler(const Message::Identifier& messageId) const override;
+    void unregisterNotificationMessageHandler() override
+    {
+        m_notificationHandler = nullptr;
+    }
 
 private:
     /**
@@ -156,11 +157,6 @@ private:
      */
     bool processReceivedNotificationMessage(StreamBuffer& in);
 
-    /// @brief Request message handler map type.
-    using RequestMessageHandlerMap = std::map<Message::Identifier, RequestMessageHandler>;
-    /// @brief Notification message handler map type.
-    using NotificationMessageHandlerMap = std::map<Message::Identifier, NotificationMessageHandler>;
-
     /**
      * @brief Increment and returns the next sequence number.
      *
@@ -171,13 +167,13 @@ private:
         return m_sequenceNumber++;
     }
 
-    Server                        m_server;      ///< Server instance
-    Client                        m_client;      ///< Client instance
-    Publisher                     m_publisher;   ///< Publisher instance
-    Subscriber                    m_subscriber;  ///< Subscriber instance
-    common::IOContext&            m_ioContext;   ///< Io context of the client and server instances.
-    RequestMessageHandlerMap      m_requestHandlers;       ///< Request message handler map.
-    NotificationMessageHandlerMap m_notificationHandlers;  ///< Notification message handler map.
+    Server                     m_server;      ///< Server instance
+    Client                     m_client;      ///< Client instance
+    Publisher                  m_publisher;   ///< Publisher instance
+    Subscriber                 m_subscriber;  ///< Subscriber instance
+    common::IOContext&         m_ioContext;   ///< Io context of the client and server instances.
+    RequestMessageHandler      m_requestHandler{};       ///< Request message handler.
+    NotificationMessageHandler m_notificationHandler{};  ///< Notification message handler.
     std::mutex           m_mutexClient;       ///< Mutex to restrict concurrent usage of the client.
     std::atomic_uint32_t m_sequenceNumber{};  ///< Sequence number of the next sent message.
 };

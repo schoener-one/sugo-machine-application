@@ -39,21 +39,20 @@ constexpr std::size_t MaxThreadNameSize = 15;  // + \0 = 16!
 
 using namespace sugo::common;
 
-Thread::Thread(std::string id, Thread::Policy policy, Priority priority)
+Thread::Thread(std::string id, Thread::Policy policy, Priority priority) noexcept
     : m_id(std::move(id)), m_policy(policy), m_priority(priority)
 {
 }
 
-Thread::Thread(Thread&& thread)
+Thread::Thread(Thread&& thread) noexcept
     : m_id(std::move(thread.m_id)),
-      m_isReady(false),
       m_runnable(std::move(thread.m_runnable)),
-      m_policy(std::move(thread.m_policy)),
-      m_priority(std::move(thread.m_priority))
+      m_policy(thread.m_policy),
+      m_priority(thread.m_priority)
 {
 }
 
-Thread& Thread::operator=(Thread&& thread)
+Thread& Thread::operator=(Thread&& thread) noexcept
 {
     *this = std::move(thread);
     return *this;

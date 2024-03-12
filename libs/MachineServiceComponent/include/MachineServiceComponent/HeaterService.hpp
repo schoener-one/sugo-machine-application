@@ -113,7 +113,7 @@ private:
     const hal::Identifier         m_heaterId;             ///< Heater actor identifier.
     const hal::Identifier         m_temperatureSensorId;  ///< Heater temperature sensor identifier.
     const common::ServiceLocator& m_serviceLocator;       ///< Service locator instance.
-    common::Timer                 m_temperatureObserver;  ///< Temperature observer timer.
+    common::Timer                 m_temperatureObserverTimer;    ///< Temperature observer timer.
     std::atomic<Temperature>      m_currentTemperature     = 0;  ///< Current measured temperature.
     Temperature                   m_lastCheckedTemperature = 0;  ///< Last measured temperture.
 };

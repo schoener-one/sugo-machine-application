@@ -30,7 +30,7 @@ project(${MODULE_NAME})
 find_package(Boost REQUIRED COMPONENTS log program_options system thread)
 
 # Build library
-add_library (${MODULE_NAME}
+add_executable(${MODULE_NAME}
     src/MachineApplication.cpp
     src/main.cpp
 )

@@ -51,8 +51,8 @@ public:
 
 private:
     const IGpioControl::GpioPinMap& m_gpioPins;
-    TemperatureSensorMap            m_temperatureSensorMap;
-    std::unique_ptr<SpiControl>     m_spiControl;
+    TemperatureSensorMap            m_temperatureSensorMap{};
+    std::unique_ptr<SpiControl>     m_spiControl{};
 };
 
 }  // namespace sugo::hal

@@ -1,9 +1,8 @@
-///////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * @file
  *
  * @author: Denis Schoener (denis@schoener-one.de)
- * @date:   22.09.2020
+ * @date:   15.03.2024
  *
  * @license: Copyright (C) 2020 by Denis Schoener
  *
@@ -24,14 +23,9 @@
 
 #pragma once
 
-#include <cstdint>
-#include <vector>
+#include <string>
 
-namespace sugo::hal
+namespace sugo::service_component::id
 {
-// FIXME Use std::byte here!
-/// @brief Byte type declaration.
-using Byte = uint8_t;
-/// @brief Byte buffer type
-using ByteBuffer = std::vector<Byte>;
-}  // namespace sugo::hal
+inline const std::string PropertyValue{"value"};
+}  // namespace sugo::service_component::id

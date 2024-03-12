@@ -357,23 +357,23 @@ public:
      * @brief This command reads a block of data from the Tic’s variables; the block starts from the
      * specified offset and can have a variable length
      *
-     * @param variableOff Offset of the variable to read out.
+     * @param variableOffset Offset of the variable to read out.
      * @param receiveData Buffer for the received data.
      * @return true if succeeded
      * @return false if failed
      */
-    bool getVariable(Byte variableOff, ByteBuffer& receiveData) const;
+    bool getVariable(uint8_t variableOffset, ByteBuffer& receiveData) const;
 
     /**
      * @brief This command is identical to the Get variable command, except that it also clears the
      * “Errors occurred” variable at the same time.
      *
-     * @param variableOff Offset of the variable to read out.
+     * @param variableOffset Offset of the variable to read out.
      * @param receiveData Buffer for the received data.
      * @return true if succeeded
      * @return false if failed
      */
-    bool getVariableAndClearErrors(Byte variableOff, ByteBuffer& receiveData) const;
+    bool getVariableAndClearErrors(uint8_t variableOffset, ByteBuffer& receiveData) const;
 
 private:
     bool runSimpleCommand(Byte commandId);

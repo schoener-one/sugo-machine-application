@@ -42,7 +42,7 @@ FilamentMergerControl::FilamentMergerControl(message_broker::IMessageBroker& mes
 // Requests:
 
 void FilamentMergerControl::onNotificationFilamentPreHeaterTargetTemperatureRangeReached(
-    const message_broker::Message& request)
+    const message_broker::Message&)
 {
     const bool stateChange          = !m_isPreHeaterTemperatureReached;
     m_isPreHeaterTemperatureReached = true;
@@ -50,12 +50,12 @@ void FilamentMergerControl::onNotificationFilamentPreHeaterTargetTemperatureRang
     // TODO add support for state change conditions!
     if (stateChange && m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
     {
-        handleEventMessage(request, Event::HeatingUpSucceeded);
+        handleNotificationMessage(Event::HeatingUpSucceeded);
     }
 }
 
 void FilamentMergerControl::onNotificationFilamentMergerHeaterTargetTemperatureRangeReached(
-    const message_broker::Message& request)
+    const message_broker::Message&)
 {
     const bool stateChange             = !m_isMergerHeaterTemperatureReached;
     m_isMergerHeaterTemperatureReached = true;
@@ -63,7 +63,7 @@ void FilamentMergerControl::onNotificationFilamentMergerHeaterTargetTemperatureR
     // TODO add support for state change conditions!
     if (stateChange && m_isMergerHeaterTemperatureReached && m_isPreHeaterTemperatureReached)
     {
-        handleEventMessage(request, Event::HeatingUpSucceeded);
+        handleNotificationMessage(Event::HeatingUpSucceeded);
     }
 }
 
@@ -76,7 +76,7 @@ void FilamentMergerControl::switchOn(const IFilamentMergerControl::Event&,
     m_isMergerHeaterTemperatureReached = false;
     m_isPreHeaterTemperatureReached    = false;
 
-    if (!send(IFilamentFeederMotor::RequestSwitchOn))
+    if (!send(IFilamentFeederMotor::CommandRequestSwitchOn))
     {
         push(Event::ErrorOccurred);
     }
@@ -102,7 +102,7 @@ void FilamentMergerControl::switchOff()
 void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&,
                                        const IFilamentMergerControl::State&)
 {
-    if (!send(IFilamentFeederMotor::RequestStartMotor))
+    if (!send(IFilamentFeederMotor::CommandRequestStartMotor))
     {
         push(Event::ErrorOccurred);
     }
@@ -111,14 +111,25 @@ void FilamentMergerControl::startMotor(const IFilamentMergerControl::Event&,
 void FilamentMergerControl::stopMerger(const IFilamentMergerControl::Event&,
                                        const IFilamentMergerControl::State&)
 {
-    switchOffServiceComponent<IFilamentMergerHeater>();
-    switchOffServiceComponent<IFilamentPreHeater>();
+    stopHeating();
 
-    if (!send(IFilamentFeederMotor::RequestStopMotor))
+    if (!send(IFilamentFeederMotor::CommandRequestStopMotor))
     {
         push(Event::ErrorOccurred);
     }
-    notify(NotificationFeedingStopped);
+}
+
+void FilamentMergerControl::stopHeating()
+{
+    switchOffServiceComponent<IFilamentMergerHeater>();
+    switchOffServiceComponent<IFilamentPreHeater>();
+}
+
+void FilamentMergerControl::stopHeatingAndNotifyFeedingStopped(
+    const IFilamentMergerControl::Event& event, const IFilamentMergerControl::State& state)
+{
+    stopHeating();
+    notifyFeedingStopped(event, state);
 }
 
 void FilamentMergerControl::handleError(const IFilamentMergerControl::Event&,
@@ -139,12 +150,12 @@ void FilamentMergerControl::heatingUp(const IFilamentMergerControl::Event&,
     m_isMergerHeaterTemperatureReached = false;
     m_isPreHeaterTemperatureReached    = false;
 
-    if (!send(IFilamentPreHeater::RequestSwitchOn))
+    if (!send(IFilamentPreHeater::CommandRequestSwitchOn))
     {
         push(Event::ErrorOccurred);
     }
 
-    if (!send(IFilamentMergerHeater::RequestSwitchOn))
+    if (!send(IFilamentMergerHeater::CommandRequestSwitchOn))
     {
         push(Event::ErrorOccurred);
     }
@@ -154,4 +165,10 @@ void FilamentMergerControl::notifyRunning(const IFilamentMergerControl::Event&,
                                           const IFilamentMergerControl::State&)
 {
     notify(NotificationFeedingRunning);
+}
+
+void FilamentMergerControl::notifyFeedingStopped(const IFilamentMergerControl::Event&,
+                                                 const IFilamentMergerControl::State&)
+{
+    notify(NotificationFeedingStopped);
 }

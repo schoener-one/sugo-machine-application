@@ -64,7 +64,7 @@ public:
     ~SpiControl();
 
     bool init(const std::string& device);
-    void finalize(void);
+    void finalize();
 
     uint8_t writeByte(uint8_t buf);
     uint8_t readByte()
@@ -81,9 +81,9 @@ private:
     bool setChipSelect(SPIChipSelect CS_Mode);
     bool setMode(SPIMode mode);
 
-    struct spi_ioc_transfer m_tr = {};
-    int                     m_fd = InvalidFileDescriptor;
-    uint16_t                m_mode;
+    struct spi_ioc_transfer m_tr   = {};
+    int                     m_fd   = InvalidFileDescriptor;
+    uint16_t                m_mode = 0;
 };
 
 }  // namespace sugo::hal

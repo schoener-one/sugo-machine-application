@@ -53,7 +53,7 @@ public:
      * @warning This could cause unexpected behaviour, because not all members are movable, so use
      * it with care!
      */
-    GenericStreamBuffer(GenericStreamBuffer<MaxBufferSizeT>&&)
+    GenericStreamBuffer(GenericStreamBuffer<MaxBufferSizeT>&&) noexcept
     {
     }
 
@@ -71,13 +71,16 @@ public:
      * it with care!
      */
     GenericStreamBuffer<MaxBufferSizeT>& operator=(
-        GenericStreamBuffer<MaxBufferSizeT>&& streamBuffer)
+        GenericStreamBuffer<MaxBufferSizeT>&& streamBuffer) noexcept
     {
         *this = std::move(streamBuffer);
         return *this;
     }
 };
 
+/// @brief StreamBuffer buffer size.
+static constexpr unsigned StreamBufferSize = 2048u;
+
 /// @brief Fix size stream buffer type.
-using StreamBuffer = GenericStreamBuffer<2048u>;
+using StreamBuffer = GenericStreamBuffer<StreamBufferSize>;
 }  // namespace sugo::message_broker

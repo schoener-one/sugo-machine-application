@@ -92,53 +92,40 @@ public:
     /**
      * @brief Registers a new request message handler.
      *
-     * @param messageId Message identifier.
      * @param handler   Request message handler to be invoked on message receive.
      */
-    virtual void registerRequestMessageHandler(const Message::Identifier& messageId,
-                                               RequestMessageHandler&     handler) = 0;
+    virtual void registerRequestMessageHandler(RequestMessageHandler& handler) = 0;
 
     /**
      * @brief Registers a new request message handler.
      *
-     * @param messageId Message identifier.
      * @param handler   Request message handler to be invoked on message receive.
      */
-    virtual void registerRequestMessageHandler(const Message::Identifier& messageId,
-                                               RequestMessageHandler&&    handler) = 0;
+    virtual void registerRequestMessageHandler(RequestMessageHandler&& handler) = 0;
 
     /**
-     * @brief Registers a new request message handler.
+     * @brief Registers a new notification message handler.
      *
-     * @param messageId Message identifier.
      * @param handler   Notification message handler to be invoked on message receive.
      */
-    virtual void registerNotificationMessageHandler(const Message::Identifier&  messageId,
-                                                    NotificationMessageHandler& handler) = 0;
+    virtual void registerNotificationMessageHandler(NotificationMessageHandler& handler) = 0;
 
     /**
-     * @brief Registers a new request message handler.
+     * @brief Registers a new notification message handler.
      *
-     * @param messageId Message identifier.
      * @param handler   Notification message handler to be invoked on message receive.
      */
-    virtual void registerNotificationMessageHandler(const Message::Identifier&   messageId,
-                                                    NotificationMessageHandler&& handler) = 0;
+    virtual void registerNotificationMessageHandler(NotificationMessageHandler&& handler) = 0;
 
     /**
-     * @brief Unregisters an existing message handler.
-     *
-     * @param messageId Message identifier.
+     * @brief Unregisters an existing request message handler.
      */
-    virtual void unregisterMessageHandler(const Message::Identifier& messageId) = 0;
+    virtual void unregisterRequestMessageHandler() = 0;
 
     /**
-     * @brief Indicates if a handler has been registered for a message id.
-     *
-     * @param messageId Message identifier.
-     * @return true if the handler could be registered.
+     * @brief Unregisters an existing notification message handler.
      */
-    virtual bool hasRegisteredMessageHandler(const Message::Identifier& messageId) const = 0;
+    virtual void unregisterNotificationMessageHandler() = 0;
 };
 
 }  // namespace sugo::message_broker

@@ -49,31 +49,23 @@ public:
 
 protected:
     // Request handlers
-    message_broker::ResponseMessage onRequestIncreaseMotorSpeed(
+    message_broker::ResponseMessage onCommandRequestIncreaseMotorSpeed(
         const message_broker::Message& request) override;
-    message_broker::ResponseMessage onRequestDecreaseMotorSpeed(
+    message_broker::ResponseMessage onCommandRequestDecreaseMotorSpeed(
         const message_broker::Message& request) override;
-    message_broker::ResponseMessage onRequestGetMotorSpeed(
-        const message_broker::Message& request) override;
-    void onNotificationFilamentMergerControlFeedingRunning(
-        const message_broker::Message& request) override;
-    void onNotificationFilamentMergerControlFeedingStopped(
-        const message_broker::Message& request) override;
-    void onNotificationFilamentCoilControlCoilRunning(
-        const message_broker::Message& request) override;
-    void onNotificationFilamentCoilControlCoilStopped(
-        const message_broker::Message& request) override;
+
+    // Notification handler actions
+    void checkStartingState() override;
+    void checkStoppingState() override;
 
     // Transition actions
     void switchOn(const Event& event, const State& state) override;
     void startHeating(const Event& event, const State& state) override;
     void stopMachine(const Event& event, const State& state) override;
     void switchOff(const Event& event, const State& state) override;
-    void checkStartingState(const Event& event, const State& state) override;
     void handleError(const Event& event, const State& state) override;
     void notifyStopped(const Event& event, const State& state) override;
     void startMachine(const Event& event, const State& state) override;
-    void checkStoppingState(const Event& event, const State& state) override;
 
 private:
     void switchOff();
@@ -82,9 +74,7 @@ private:
     bool                          m_isFilamentMergerControlRunning =
         false;  ///< Indicates if filament merger control unit is running.
     bool m_isFilamentCoilControlRunning =
-        false;                  ///< Indicates if filament coil control unit is running.
-    unsigned m_motorSpeed = 0;  ///< Current set motor speed.
-
+        false;  ///< Indicates if filament coil control unit is running.
     friend class ControlService<MachineControl>;  // FIXME: use another solution here!
 };
 

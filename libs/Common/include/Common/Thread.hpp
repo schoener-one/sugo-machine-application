@@ -67,7 +67,7 @@ public:
      * @param priority Thread priority.
      */
     explicit Thread(std::string id, Policy policy = DefaultPolicy,
-                    Priority priority = DefaultPriority);
+                    Priority priority = DefaultPriority) noexcept;
 
     /// @brief Default destructor.
     ~Thread() = default;
@@ -82,7 +82,7 @@ public:
      * @warning This could cause unexpected behaviour, because not all members are movable, so use
      * it with care!
      */
-    Thread(Thread&& thread);
+    Thread(Thread&& thread) noexcept;
 
     /// @brief Copy operator
     /// @return Thread
@@ -96,7 +96,7 @@ public:
      * @warning This could cause unexpected behaviour, because not all members are movable, so use
      * it with care!
      */
-    Thread& operator=(Thread&& thread);
+    Thread& operator=(Thread&& thread) noexcept;
 
     /**
      * Starts a new thread with the runnable function.

@@ -43,15 +43,16 @@ constexpr unsigned                  MillisecondsPerMinute = SecondsPerMinute * 1
 constexpr std::chrono::milliseconds MinWaitTime(2u);
 constexpr std::chrono::milliseconds MaxWaitTime(500u);
 constexpr uint16_t                  CurrentLimit = 1500u;
+constexpr int                       Const10K     = 10000;
 
 constexpr int rpmToMicrostepsPer10kSeconds(int speedRpm)
 {
-    return (speedRpm * MicroStepsPerRound * 10000) / SecondsPerMinute;
+    return (speedRpm * MicroStepsPerRound * Const10K) / SecondsPerMinute;
 }
 
 constexpr int microstepsPer10kSecondsToRpm(int microstepsPer10kSeconds)
 {
-    return (microstepsPer10kSeconds * SecondsPerMinute) / (MicroStepsPerRound * 10000);
+    return (microstepsPer10kSeconds * SecondsPerMinute) / (MicroStepsPerRound * Const10K);
 }
 
 /// Calculate the minimum motion time depending on speed and distance (microsteps)!
@@ -117,7 +118,7 @@ StepperMotor::Position StepperMotor::getPosition() const
 {
     assert(m_controller != nullptr);
 
-    TicController::State state;
+    TicController::State state{};
     if (!m_controller->getState(state))
     {
         LOG(error) << getId() << ": Failed to get current position";
@@ -132,7 +133,7 @@ bool StepperMotor::prepareForMotion()
     assert(m_controller != nullptr);
 
     // Check if pre state is ok
-    TicController::State state;
+    TicController::State state{};
     if (!m_controller->getState(state))
     {
         LOG(error) << getId() << ": Failed to get motion state";
@@ -153,8 +154,8 @@ bool StepperMotor::prepareForMotion()
         return false;
     }
 
-    const unsigned maxSpeed =
-        static_cast<unsigned>(std::abs(rpmToMicrostepsPer10kSeconds(m_maxSpeed.getValue())));
+    const auto maxSpeed = static_cast<unsigned>(
+        std::abs(rpmToMicrostepsPer10kSeconds(static_cast<int>(m_maxSpeed.getValue()))));
 
     if (!m_controller->setMaxSpeed(maxSpeed))
     {
@@ -232,7 +233,7 @@ bool StepperMotor::waitAndShutdown(std::chrono::milliseconds remainingMotionTime
     assert(m_controller != nullptr);
 
     // FIXME Workaround to ensure that the current velocity is not zero!
-    TicController::State state;
+    TicController::State state{};
     m_controller->getState(state);
 
     // Wait until motor reached target position!
@@ -313,7 +314,7 @@ StepperMotor::StepCount StepperMotor::getStepsPerRound() const
 
 StepperMotor::Speed StepperMotor::getSpeed() const
 {
-    TicController::State state;
+    TicController::State state{};
     if (!m_controller->getState(state))
     {
         LOG(error) << getId() << ": Failed to get current velocity";
@@ -333,9 +334,9 @@ bool StepperMotor::setSpeed(StepperMotor::Speed speed)
     }
 
     m_speed = speed;
-    const unsigned speedMicrosteps =
+    const auto speedMicrosteps =
         static_cast<unsigned>(std::abs(rpmToMicrostepsPer10kSeconds(speed.getValue())));
-    const int32_t velocity =
+    const auto velocity =
         static_cast<int32_t>(speedMicrosteps) * ((m_direction == Direction::Forward) ? 1 : -1);
     LOG(debug) << getId() << ": Set target velocity to " << velocity;
 

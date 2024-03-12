@@ -37,6 +37,7 @@
 #include "MachineServiceComponentTest.hpp"
 #include "MachineServiceComponentTest/MachineConfiguration.hpp"
 #include "MessageBroker/IMessageBrokerMock.hpp"
+#include "ServiceComponent/Identifier.hpp"
 
 using namespace sugo;
 using namespace sugo::common;
@@ -121,26 +122,26 @@ TEST_F(MachineServiceComponentTest, StartFilamentCoilMotor)
     EXPECT_CALL(*m_mockStepperMotor, reset()).WillOnce(Return(true));
     message_broker::Message request;
     request.setId(4);
-    auto response = filamentCoilMotor.onRequestSwitchOn(request);
+    auto response = filamentCoilMotor.onCommandRequestSwitchOn(request);
     EXPECT_EQ(response.getResult(), message_broker::ResponseMessage::Result::Success);
     processAllEvents(filamentCoilMotor);
     EXPECT_EQ(filamentCoilMotor.getCurrentState(), FilamentCoilMotor::State::Stopped);
 
     // Set motor speed
     const common::Json parameters(
-        {{machine_service_component::id::Speed, test::MachineConfiguration::MotorSpeedDefault}});
+        {{service_component::id::PropertyValue, test::MachineConfiguration::MotorSpeedDefault}});
     request.setPayload(parameters.dump());
     EXPECT_CALL(*m_mockStepperMotor, setSpeed(IStepperMotor::Speed{
                                          test::MachineConfiguration::MotorSpeedDefault, Unit::Rpm}))
         .WillOnce(Return(true));
-    response = filamentCoilMotor.onRequestSetMotorSpeed(request);
+    response = filamentCoilMotor.onPropertyRequestSetMotorSpeed(request);
     EXPECT_EQ(response.getResult(), message_broker::ResponseMessage::Result::Success);
 
     EXPECT_CALL(*m_mockStepperMotor, setSpeed(IStepperMotor::Speed{
                                          test::MachineConfiguration::MotorSpeedDefault, Unit::Rpm}))
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotor, rotate()).WillOnce(Return(true));
-    response = filamentCoilMotor.onRequestStartMotor(request);
+    response = filamentCoilMotor.onCommandRequestStartMotor(request);
     processAllEvents(filamentCoilMotor);
     EXPECT_EQ(response.getId(), 4);
     EXPECT_EQ(response.getResult(), message_broker::ResponseMessage::Result::Success);

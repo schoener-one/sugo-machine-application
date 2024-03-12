@@ -39,7 +39,7 @@ HeaterService::HeaterService(hal::Identifier heaterId, hal::Identifier temperatu
       m_heaterId(std::move(heaterId)),
       m_temperatureSensorId(std::move(temperatureSensorId)),
       m_serviceLocator(serviceLocator),
-      m_temperatureObserver(
+      m_temperatureObserverTimer(
           std::chrono::milliseconds(m_serviceLocator.get<common::IConfiguration>()
                                         .getOption(id::ConfigObservationTimeoutTemperature)
                                         .get<unsigned>()),
@@ -94,10 +94,10 @@ void HeaterService::updateHeaterTemperatureAndCheck()
 
 bool HeaterService::startTemperatureObservation()
 {
-    return m_temperatureObserver.start();
+    return m_temperatureObserverTimer.start();
 }
 
 void HeaterService::stopTemperatureObservation()
 {
-    m_temperatureObserver.stop();
+    m_temperatureObserverTimer.stop();
 }
