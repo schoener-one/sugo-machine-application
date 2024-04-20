@@ -39,6 +39,6 @@ public:
     }
 
     MOCK_METHOD(bool, init, (const common::IConfiguration&));
-    MOCK_METHOD(Temperature, getTemperature, (), (const));
+    MOCK_METHOD(Result, getTemperature, (), (const));
 };
 }  // namespace sugo::hal

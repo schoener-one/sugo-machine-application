@@ -162,10 +162,18 @@ class Utilization:
 
 
 @dataclass
+class Timer(Nameable):
+    """Contains the timer configuration"""
+    event: str
+    timeout: int
+
+
+@dataclass
 class ServiceComponent:
     """Contains the content of a service component"""
 
     interface: Interface
-    utilization: List[Subscription]
+    utilization: Utilization
     events: list
+    timers: List[Timer]
     statemachine: StateMachine

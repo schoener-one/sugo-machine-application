@@ -2,12 +2,16 @@
     "machine-service-component": {
         "motor-speed": {
             "max": 50,
-            "default": 25,
+            "default": 15,
             "increment": 2
         },
-        "heater": {
-            "max-temperature": 60,
-            "min-temperature": 50
+        "pre-heater": {
+            "max-temperature": 75,
+            "min-temperature": 70
+        },
+        "merger-heater": {
+            "max-temperature": 195,
+            "min-temperature": 190
         }
     },
     "service-gateway": {
@@ -40,7 +44,7 @@
                 "motor-control-reset"
             ],
             "gpio-pin": {
-                "relay-switch-heater-feeder": {
+                "relay-switch-heater-merger": {
                     "pin": 4,
                     "direction": "out"
                 },
@@ -84,11 +88,11 @@
                     "pin": 20,
                     "direction": "out"
                 },
-                "relay-switch-heater-merger": {
+                "relay-switch-heater-feeder": {
                     "pin": 21,
                     "direction": "out"
                 },
-                "temperature-sensor-control-cs-merger": {
+                "temperature-sensor-control-cs-feeder": {
                     "pin": 22,
                     "direction": "out",
                     "active-high": false,
@@ -103,7 +107,7 @@
                     "pin": 26,
                     "direction": "out"
                 },
-                "temperature-sensor-control-cs-feeder": {
+                "temperature-sensor-control-cs-merger": {
                     "pin": 27,
                     "direction": "out",
                     "active-high": false,

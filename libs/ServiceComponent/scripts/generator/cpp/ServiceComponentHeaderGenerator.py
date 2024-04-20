@@ -65,8 +65,10 @@ class ServiceComponentHeaderGenerator:
 #include <string>
 #include <ostream>
 #include <limits>
+{'#include <chrono>' if len(self.context.component.events) > 0 else ""}
 
 #include "Common/IProcessContext.hpp"
+{'#include "Common/Timer.hpp"' if len(self.context.component.events) > 0 else ""}
 #include "MessageBroker/Message.hpp"
 #include "ServiceComponent/PrimitiveTypeProperty.hpp"
 #include "ServiceComponent/ArrayTypeProperty.hpp"
@@ -133,6 +135,7 @@ protected:
     virtual message_broker::ResponseMessage onPropertyRequestGetState(const message_broker::Message& request);
 {ServiceComponentHeaderGenerator._generate_property_request_handler_declarations(self.context.component.interface.properties)}
 {ServiceComponentHeaderGenerator._generate_trans_actions_declarations(self.context.actions, self.context.name)}
+{ServiceComponentHeaderGenerator._generate_timers_declarations(self.context.component.timers)}
 }};
 
 }} // namespace sugo::service_component
@@ -221,4 +224,11 @@ ostream& operator<<(std::ostream& ostr, sugo::service_component::{self.context.n
         out_str = "\n    // Transition actions" if len(actions) > 0 else ""
         for action in actions:
             out_str += f"\n    virtual void {action}(const Event& event, const State& state) = 0;"
+        return out_str
+    
+    @staticmethod
+    def _generate_timers_declarations(timers):
+        out_str = "\n    // Timers" if len(timers) > 0 else ""
+        for timer in timers:
+            out_str += f'\n    common::Timer m_timer{timer.name}; ///< Timer {timer.name}'
         return out_str

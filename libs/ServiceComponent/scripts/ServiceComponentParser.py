@@ -76,8 +76,14 @@ class Parser:
             if "utilization" in config and config["utilization"]
             else Utilization([])
         )
+        events = config["events"] if "events" in config else []
+        timers = (
+            Parser._parse_timers(config["timers"], component_name, events)
+            if "timers" in config and config["timers"]
+            else []
+        )
         self._components[component_name] = ServiceComponent(
-            interface, utilization, config["events"], None
+            interface, utilization, events, timers, None
         )
         self._parse_statemachine(
             component_name, self._components[component_name], config["statemachine"]
@@ -114,7 +120,7 @@ class Parser:
             return Command(name, event, forward)
         else:  # str
             return Command(str(value), None, False)
-        
+
     @staticmethod
     def _parse_notification(value) -> Notification:
         if type(value) is dict:
@@ -122,7 +128,7 @@ class Parser:
             return Notification(name)
         else:
             return Notification(str(value))
-        
+
     @staticmethod
     def _parse_property(value) -> Property:
         assert type(value) is dict
@@ -135,7 +141,7 @@ class Parser:
             entry["min"] if "min" in entry else None,
             entry["max"] if "max" in entry else None,
             entry["notification"] if "notification" in entry else None,
-            entry["readonly"] if "readonly" in entry else False
+            entry["readonly"] if "readonly" in entry else False,
         )
 
     @staticmethod
@@ -145,7 +151,11 @@ class Parser:
             entry = value[name]
             event = entry["event"] if "event" in entry else None
             action = entry["action"] if "action" in entry else None
-            change = Parser._parse_property_change(entry["change"]) if "change" in entry else None
+            change = (
+                Parser._parse_property_change(entry["change"])
+                if "change" in entry
+                else None
+            )
             return SubscribedNotification(name, event, action, change)
         else:
             return SubscribedNotification(str(value), None, None, None)
@@ -195,7 +205,32 @@ class Parser:
             else list()
         )
         return Utilization(notifications)
-    
+
+    @staticmethod
+    def _parse_timers(timers, component_name, component_events) -> List[Timer]:
+        _timers = (
+            list(
+                map(
+                    lambda timer: Parser._parse_timer(
+                        timer, component_name, component_events
+                    ),
+                    timers,
+                )
+            )
+        )
+        return _timers
+
+    @staticmethod
+    def _parse_timer(value, component_name, component_events) -> Timer:
+        name = next(iter(value))
+        entry = value[name]
+        event = entry["event"] if "event" in entry else None
+        if event and not event in component_events:
+            raise ParseException(
+                f"timer event {event} of time {name} is unknown event of component {component_name}"
+            )
+        timeout = int(entry["timeout"]) if "timeout" in entry else 0
+        return Timer(name, event, timeout)
 
     def _parse_statemachine(self, component_name, component, config):
         start_state = config["start"]
@@ -220,7 +255,7 @@ class Parser:
             )
         if not config["event"] in component.events:
             raise ParseException(
-                f"event {config['event']} not in events of component {component_name}"
+                f"transition event {config['event']} is unknown event of component {component_name}"
             )
         for state in matching_states:
             existing_transition = list(
@@ -261,10 +296,12 @@ class Parser:
                         f"invalid utilized notification {notification} from {component_name} refers to unknown notification {chunks[1]} of {chunks[0]}"
                     )
                 if notification.change:
-                    if not self._component_has_property(component_name, notification.change.property):
+                    if not self._component_has_property(
+                        component_name, notification.change.property
+                    ):
                         raise ParseException(
                             f"invalid notification property change {notification.change.property} from {component_name} refers to unknown property"
-                        )                        
+                        )
             for command in component.interface.commands:
                 if "." in command.name:
                     raise ParseException(
@@ -293,5 +330,5 @@ class Parser:
     def _component_has_property(self, component, property_name) -> bool:
         return any(
             property_name == property.name
-            for property in self._components[component].interface.properties            
+            for property in self._components[component].interface.properties
         )

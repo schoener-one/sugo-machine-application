@@ -104,6 +104,7 @@ I{self.context.name}::I{self.context.name}(message_broker::IMessageBroker& messa
               // clang-format on
         }}),
       StatedServiceComponent<I{self.context.name}::State, I{self.context.name}::Event>(messageBroker, SubscriptionIds, *this, processContext)
+{ServiceComponentSourceGenerator._generate_timer_initializers(self.context.component.timers)}
 {{
     messageBroker.registerRequestMessageHandler([this](const message_broker::Message& request)
     {{
@@ -276,4 +277,11 @@ void I{self.context.name}::onNotification{notification_name}(const message_broke
                 out_str += f"""
 }}
 """
+        return out_str
+
+    @staticmethod
+    def _generate_timer_initializers(timers):
+        out_str = ""
+        for timer in timers:
+            out_str += f'\n    , m_timer{timer.name}(std::chrono::milliseconds({timer.timeout}), "Timer{timer.name}", [&] {{ push(Event::{timer.event}); }})'
         return out_str

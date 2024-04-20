@@ -23,6 +23,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "MachineServiceComponent/FilamentPreHeater.hpp"
+#include "MachineServiceComponent/Configuration.hpp"
 #include "MachineServiceComponent/Protocol.hpp"
 
 using namespace sugo;
@@ -34,21 +35,9 @@ FilamentPreHeater::FilamentPreHeater(message_broker::IMessageBroker& messageBrok
                                      const common::ServiceLocator&   serviceLocator)
     : IFilamentPreHeater(messageBroker, processContext),
       HeaterService(hal::id::GpioPinRelaySwitchHeaterFeeder, hal::id::TemperatureSensorFeeder,
-                    serviceLocator)
+                    id::ConfigPreHeaterServiceTemperatureMin,
+                    id::ConfigPreHeaterServiceTemperatureMax, serviceLocator)
 {
-}
-
-void FilamentPreHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
-{
-    switch (event)
-    {
-        case MinTemperatureReached:
-            push(Event::MinTemperatureReached);
-            break;
-        case MaxTemperatureReached:
-            push(Event::MaxTemperatureReached);
-            break;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,7 +46,7 @@ void FilamentPreHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
 message_broker::ResponseMessage FilamentPreHeater::onPropertyRequestGetTemperature(
     const message_broker::Message& request)
 {
-    m_propertyTemperature.setValue(getTemperature());
+    m_propertyTemperature.setValue(getHeaterTemperature());
     return IFilamentPreHeater::onPropertyRequestGetTemperature(request);
 }
 
@@ -68,7 +57,7 @@ void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilame
 {
     updateHeaterTemperature();
 
-    if (!startTemperatureObservation())
+    if (!m_timerTemperatureObservation.start())
     {
         push(Event::ErrorOccurred);
         return;
@@ -107,10 +96,33 @@ void FilamentPreHeater::stopHeating(const IFilamentPreHeater::Event& event,
     }
 }
 
+void FilamentPreHeater::checkTemperature(const Event&, const State& state)
+{
+    const auto temperatureState = getHeaterTemperatureState();
+
+    if (TemperatureState::ErrorNoTemperature == temperatureState)
+    {
+        push(Event::ErrorOccurred);
+        return;
+    }
+
+    if (State::HeatingOn == state && TemperatureState::AboveMaxTemperature == temperatureState)
+    {
+        LOG(debug) << "above max temperature: " << getHeaterTemperature() << " °C";
+        push(Event::MaxTemperatureReached);
+    }
+    else if (State::HeatingOff == state &&
+             TemperatureState::BelowMinTemperature == temperatureState)
+    {
+        LOG(debug) << "below min temperature: " << getHeaterTemperature() << " °C";
+        push(Event::MinTemperatureReached);
+    }
+}
+
 void FilamentPreHeater::switchOff(const IFilamentPreHeater::Event&,
                                   const IFilamentPreHeater::State&)
 {
-    stopTemperatureObservation();
+    m_timerTemperatureObservation.stop();
 
     if (!switchHeater(false))
     {

@@ -76,14 +76,11 @@ TEST_F(CommonTest, TimerStartStop)
     const std::chrono::milliseconds       duration(1000 + period.count() - 1);
     unsigned                              counts   = 0;
     std::chrono::time_point<Timer::Clock> stopTime = std::chrono::high_resolution_clock::now();
-    Timer                                 timer(
-        period,
-        [&counts, &stopTime] {
-            counts++;
-            stopTime = std::chrono::high_resolution_clock::now();
-        },
-        "TestTimer");
-    auto startTime = std::chrono::high_resolution_clock::now();
+    Timer                                 timer(period, "TestTimer", [&counts, &stopTime] {
+        counts++;
+        stopTime = std::chrono::high_resolution_clock::now();
+    });
+    auto                                  startTime = std::chrono::high_resolution_clock::now();
     EXPECT_TRUE(timer.start());
     std::this_thread::sleep_for(duration);
     timer.stop();
@@ -100,18 +97,15 @@ TEST_F(CommonTest, TimeoutHandlerDelay)
     const std::chrono::milliseconds       duration(1000);
     unsigned                              counts   = 0;
     std::chrono::time_point<Timer::Clock> stopTime = std::chrono::high_resolution_clock::now();
-    Timer                                 timer(
-        period,
-        [&counts, &stopTime, &period] {
-            counts++;
-            stopTime = std::chrono::high_resolution_clock::now();
-            if (counts == 3)
-            {
-                std::this_thread::sleep_for(period);
-            }
-        },
-        "TestTimer");
-    auto startTime = std::chrono::high_resolution_clock::now();
+    Timer                                 timer(period, "TestTimer", [&counts, &stopTime, &period] {
+        counts++;
+        stopTime = std::chrono::high_resolution_clock::now();
+        if (counts == 3)
+        {
+            std::this_thread::sleep_for(period);
+        }
+    });
+    auto                                  startTime = std::chrono::high_resolution_clock::now();
     EXPECT_TRUE(timer.start());
     std::this_thread::sleep_for(duration);
     timer.stop();

@@ -31,7 +31,8 @@ using namespace machine_service_component;
 
 FilamentTensionSensorService::FilamentTensionSensorService(
     const hal::Identifier& lowTensionSensorId, const hal::Identifier& highTensionSensorId,
-    const hal::Identifier& tensionOverloadSensorId, const common::ServiceLocator& serviceLocator)
+    const hal::Identifier& tensionOverloadSensorId, const common::ServiceLocator& serviceLocator,
+    FilamentTensionStateChangeHandler handler)
     : HardwareService(serviceLocator.get<hal::IHardwareAbstractionLayer>()),
       m_lowTensionSensorObserver(
           getGpioPin(lowTensionSensorId),
@@ -57,18 +58,14 @@ FilamentTensionSensorService::FilamentTensionSensorService(
           std::chrono::milliseconds(serviceLocator.get<common::IConfiguration>()
                                         .getOption(id::ConfigObservationTimeoutGpioPin)
                                         .get<unsigned>())),
-      m_tensionEventRepeatTimer(
-          std::chrono::milliseconds(serviceLocator.get<common::IConfiguration>()
-                                        .getOption(id::ConfigObservationTimeoutTension)
-                                        .get<unsigned>()),
-          [this] { this->repeatFilamentTensionEvent(); }, lowTensionSensorId + "common::Timer")
+      m_filamentTensionEventHandler(std::move(handler))
 {
 }
 
 bool FilamentTensionSensorService::startSensorObservation()
 {
     assert(!isSensorObservationRunning());
-    m_lastFilamentTensionEvent = FilamentTensionEvent::FilamentTensionNormal;
+    m_currentFilamentTensionState = FilamentTensionState::FilamentTensionNormal;
 
     if (!m_lowTensionSensorObserver.start())
     {
@@ -99,69 +96,50 @@ void FilamentTensionSensorService::stopSensorObservation()
     m_lowTensionSensorObserver.stop();
     m_highTensionSensorObserver.stop();
     m_tensionOverloadSensorObserver.stop();
-    m_tensionEventRepeatTimer.stop();
-}
-
-void FilamentTensionSensorService::repeatFilamentTensionEvent()
-{
-    std::lock_guard<std::mutex> lock(m_mutex);
-    if ((m_lastFilamentTensionEvent == FilamentTensionLow) or
-        (m_lastFilamentTensionEvent == FilamentTensionHigh))
-    {
-        // Repeat event call as long as the tension is not at normal level!
-        onFilamentTensionEvent(m_lastFilamentTensionEvent);
-    }
 }
 
 void FilamentTensionSensorService::handleFilamentTensionEvent(const hal::IGpioPin::Event& event,
                                                               const hal::Identifier&      pinId)
 {
-    FilamentTensionEvent currentEvent = FilamentTensionNormal;
+    FilamentTensionState newState = FilamentTensionNormal;
 
     switch (event.type)
     {
         case hal::IGpioPin::EventType::RisingEdge:
             if (pinId == m_tensionOverloadSensorObserver.getId())
             {
-                currentEvent = FilamentTensionOverload;
+                newState = FilamentTensionOverload;
             }
             else if (pinId == m_lowTensionSensorObserver.getId())
             {
-                currentEvent = FilamentTensionLow;
+                newState = FilamentTensionLow;
             }
             else if (pinId == m_highTensionSensorObserver.getId())
             {
-                currentEvent = FilamentTensionHigh;
+                newState = FilamentTensionHigh;
             }
             break;
         case hal::IGpioPin::EventType::FallingEdge:
-            if (pinId == m_tensionOverloadSensorObserver.getId())
+            if (pinId == m_tensionOverloadSensorObserver.getId() &&
+                m_currentFilamentTensionState == FilamentTensionOverload)
             {
-                currentEvent = FilamentTensionHigh;
+                // In this case we're comming from an overloaded state back to tension high state!
+                newState = FilamentTensionHigh;
             }
             else
             {
-                currentEvent = FilamentTensionNormal;
+                newState = FilamentTensionNormal;
             }
             break;
         case hal::IGpioPin::EventType::Timeout:
-            currentEvent = m_lastFilamentTensionEvent;
+            newState = m_currentFilamentTensionState;
             break;
     }
 
-    if (currentEvent != m_lastFilamentTensionEvent)
+    if (newState != m_currentFilamentTensionState)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_lastFilamentTensionEvent = currentEvent;
-        onFilamentTensionEvent(m_lastFilamentTensionEvent);
-
-        if (currentEvent == FilamentTensionNormal)
-        {
-            m_tensionEventRepeatTimer.stop();
-        }
-        else if (!m_tensionEventRepeatTimer.isRunning())
-        {
-            m_tensionEventRepeatTimer.start();
-        }
+        m_currentFilamentTensionState = newState;
+        m_filamentTensionEventHandler(newState);
     }
 }

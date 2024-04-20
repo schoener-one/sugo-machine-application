@@ -45,16 +45,18 @@ void MachineConfiguration::prepareOptions(IConfigurationMock& mock)
     m_optionMotorSpeedDefault = {id::ConfigMotorSpeedDefault,
                                  static_cast<unsigned>(MotorSpeedDefault), ""};
     m_optionMotorSpeedMax     = {id::ConfigMotorSpeedMax, static_cast<unsigned>(MotorSpeedMax), ""};
-    m_optionMotorSpeedIncrement           = {id::ConfigMotorSpeedIncrement,
+    m_optionMotorSpeedIncrement        = {id::ConfigMotorSpeedIncrement,
                                    static_cast<unsigned>(MotorSpeedIncrement), ""};
-    m_optionHeaterTemperatureMax          = {id::ConfigHeaterTemperatureMax,
-                                    static_cast<int>(HeaterTemperatureMax), ""};
-    m_optionHeaterTemperatureMin          = {id::ConfigHeaterTemperatureMin,
-                                    static_cast<int>(HeaterTemperatureMin), ""};
-    m_optionObservationTimeoutGpioPin     = {id::ConfigObservationTimeoutGpioPin,
+    m_optionPreHeaterTemperatureMax    = {id::ConfigPreHeaterServiceTemperatureMax,
+                                       static_cast<int>(HeaterTemperatureMax), ""};
+    m_optionPreHeaterTemperatureMin    = {id::ConfigPreHeaterServiceTemperatureMin,
+                                       static_cast<int>(HeaterTemperatureMin), ""};
+    m_optionMergerHeaterTemperatureMax = {id::ConfigMergerHeaterServiceTemperatureMax,
+                                          static_cast<int>(HeaterTemperatureMax), ""};
+    m_optionMergerHeaterTemperatureMin = {id::ConfigMergerHeaterServiceTemperatureMin,
+                                          static_cast<int>(HeaterTemperatureMin), ""};
+    m_optionObservationTimeoutGpioPin  = {id::ConfigObservationTimeoutGpioPin,
                                          static_cast<unsigned>(ObservationTimeout), ""};
-    m_optionObservationTimeoutTemperature = {id::ConfigObservationTimeoutTemperature,
-                                             static_cast<unsigned>(ObservationTimeout), ""};
 
     ON_CALL(mock, getOption(id::ConfigMotorSpeedDefault))
         .WillByDefault(ReturnRef(m_optionMotorSpeedDefault));
@@ -62,14 +64,14 @@ void MachineConfiguration::prepareOptions(IConfigurationMock& mock)
         .WillByDefault(ReturnRef(m_optionMotorSpeedMax));
     ON_CALL(mock, getOption(id::ConfigMotorSpeedIncrement))
         .WillByDefault(ReturnRef(m_optionMotorSpeedIncrement));
-    ON_CALL(mock, getOption(id::ConfigHeaterTemperatureMax))
-        .WillByDefault(ReturnRef(m_optionHeaterTemperatureMax));
-    ON_CALL(mock, getOption(id::ConfigHeaterTemperatureMin))
-        .WillByDefault(ReturnRef(m_optionHeaterTemperatureMin));
+    ON_CALL(mock, getOption(id::ConfigPreHeaterServiceTemperatureMax))
+        .WillByDefault(ReturnRef(m_optionPreHeaterTemperatureMax));
+    ON_CALL(mock, getOption(id::ConfigPreHeaterServiceTemperatureMin))
+        .WillByDefault(ReturnRef(m_optionPreHeaterTemperatureMin));
+    ON_CALL(mock, getOption(id::ConfigMergerHeaterServiceTemperatureMax))
+        .WillByDefault(ReturnRef(m_optionMergerHeaterTemperatureMax));
+    ON_CALL(mock, getOption(id::ConfigMergerHeaterServiceTemperatureMin))
+        .WillByDefault(ReturnRef(m_optionMergerHeaterTemperatureMin));
     ON_CALL(mock, getOption(id::ConfigObservationTimeoutGpioPin))
-        .WillByDefault(ReturnRef(m_optionObservationTimeoutGpioPin));
-    ON_CALL(mock, getOption(id::ConfigObservationTimeoutTemperature))
-        .WillByDefault(ReturnRef(m_optionObservationTimeoutTemperature));
-    ON_CALL(mock, getOption(id::ConfigObservationTimeoutTension))
         .WillByDefault(ReturnRef(m_optionObservationTimeoutGpioPin));
 }
