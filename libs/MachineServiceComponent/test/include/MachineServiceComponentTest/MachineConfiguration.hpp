@@ -45,9 +45,10 @@ private:
     common::Option m_optionMotorSpeedDefault{};
     common::Option m_optionMotorSpeedMax{};
     common::Option m_optionMotorSpeedIncrement{};
-    common::Option m_optionHeaterTemperatureMax{};
-    common::Option m_optionHeaterTemperatureMin{};
+    common::Option m_optionPreHeaterTemperatureMax{};
+    common::Option m_optionPreHeaterTemperatureMin{};
+    common::Option m_optionMergerHeaterTemperatureMax{};
+    common::Option m_optionMergerHeaterTemperatureMin{};
     common::Option m_optionObservationTimeoutGpioPin{};
-    common::Option m_optionObservationTimeoutTemperature{};
 };
 }  // namespace sugo::test

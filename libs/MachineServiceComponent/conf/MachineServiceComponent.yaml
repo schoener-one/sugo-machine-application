@@ -379,7 +379,12 @@ components:
         - SwitchOnSucceeded
         - MaxTemperatureReached
         - MinTemperatureReached
+        - TemperatureObservationTimeout
         - ErrorOccurred
+      timers:
+        - TemperatureObservation:
+            timeout: 1000 # ms
+            event: TemperatureObservationTimeout
       statemachine:
         start: 'Off'
         states:
@@ -425,9 +430,17 @@ components:
             next: HeatingOn
             event: MinTemperatureReached
             action: startHeating
+          - state: HeatingOn
+            next: HeatingOn
+            event: TemperatureObservationTimeout
+            action: checkTemperature
+          - state: HeatingOff
+            next: HeatingOff
+            event: TemperatureObservationTimeout
+            action: checkTemperature
 
 
-  - FilamentPreHeater:
+  - FilamentPreHeater: #FIXME Use uniq name PreHeater -> FeederHeater!
       <<: *BaseHeater
       description: "Hardware service component to control the pre-heater of the filament merger unit"
 
@@ -568,7 +581,7 @@ components:
           - state: Paused
             next: MotorStopped
             event: StopMotor
-            action: stopMotor         
+            action: stopMotor
 
 
   - FilamentCoilMotor:
@@ -608,7 +621,12 @@ components:
         - SwitchOnSucceeded
         - SwitchOnFailed
         - SwitchOff
+        - TensionObservationTimeout
         - ErrorOccurred
+      timers:
+        - TensionObservation:
+            timeout: 1000
+            event: TensionObservationTimeout
       statemachine:
         start: 'Off'
         states:
@@ -638,6 +656,10 @@ components:
           - state: Initialization
             next: Running
             event: SwitchOnSucceeded
+          - state: Running
+            next: Running
+            event: TensionObservationTimeout
+            action: checkFilamentTension
 
 
   - UserInterfaceControl:

@@ -25,6 +25,7 @@
 #pragma once
 
 #include <atomic>
+#include <functional>
 #include <mutex>
 
 #include "Common/IRunnable.hpp"
@@ -41,24 +42,10 @@ class FilamentTensionSensorService : public HardwareService
 {
 public:
     /**
-     * @brief Construct a new filament tension control service object.
-     *
-     * @param lowTensionSensorId       Id of the low tension sensor.
-     * @param highTensionSensorId      Id of the hight tension sensor.
-     * @param tensionOverloadSensorId  Id of the tension overload sensor.
-     * @param serviceLocator           Service locator reference.
-     */
-    FilamentTensionSensorService(const hal::Identifier&        lowTensionSensorId,
-                                 const hal::Identifier&        highTensionSensorId,
-                                 const hal::Identifier&        tensionOverloadSensorId,
-                                 const common::ServiceLocator& serviceLocator);
-
-protected:
-    /**
      * @brief Filament tension event.
      *
      */
-    enum FilamentTensionEvent
+    enum FilamentTensionState
     {
         FilamentTensionLow,
         FilamentTensionNormal,
@@ -66,6 +53,25 @@ protected:
         FilamentTensionOverload
     };
 
+    /// @brief Filament tension event handler callback.
+    using FilamentTensionStateChangeHandler = std::function<void(FilamentTensionState event)>;
+
+    /**
+     * @brief Construct a new filament tension control service object.
+     *
+     * @param lowTensionSensorId       Id of the low tension sensor.
+     * @param highTensionSensorId      Id of the hight tension sensor.
+     * @param tensionOverloadSensorId  Id of the tension overload sensor.
+     * @param serviceLocator           Service locator reference.
+     * @param handler                  Filament tension state change handler.
+     */
+    FilamentTensionSensorService(const hal::Identifier&            lowTensionSensorId,
+                                 const hal::Identifier&            highTensionSensorId,
+                                 const hal::Identifier&            tensionOverloadSensorId,
+                                 const common::ServiceLocator&     serviceLocator,
+                                 FilamentTensionStateChangeHandler handler);
+
+protected:
     /**
      * @brief Starts the tension sensor observation.
      *
@@ -92,24 +98,26 @@ protected:
     void stopSensorObservation();
 
     /**
-     * @brief Called if a filament tension event occurred.
+     * @brief Get the Filament Tension State object
      *
-     * @param event Filament tension event.
      */
-    virtual void onFilamentTensionEvent(FilamentTensionEvent event) = 0;
+    FilamentTensionState getFilamentTensionState() const
+    {
+        return m_currentFilamentTensionState;
+    }
 
 private:
-    void repeatFilamentTensionEvent();
     void handleFilamentTensionEvent(const hal::IGpioPin::Event& gpioEvent,
                                     const hal::Identifier&      pinId);
 
     GpioPinEventObserver m_lowTensionSensorObserver;   ///< Observer for low tension sensor.
     GpioPinEventObserver m_highTensionSensorObserver;  ///< Observer for high tension sensor.
     GpioPinEventObserver
-                                      m_tensionOverloadSensorObserver;  ///< Observer for tension sensor overload.
-    std::atomic<FilamentTensionEvent> m_lastFilamentTensionEvent =
-        FilamentTensionEvent::FilamentTensionNormal;  ///< Last filament tension event.
-    common::Timer m_tensionEventRepeatTimer;          ///< Timer to check tension events.
-    std::mutex    m_mutex;                            ///< Mutex to avoid simultaneous access.
+        m_tensionOverloadSensorObserver;  ///< Observer for tension sensor overload.
+    FilamentTensionStateChangeHandler
+                                      m_filamentTensionEventHandler;  ///< Filament tension event handler.
+    std::atomic<FilamentTensionState> m_currentFilamentTensionState =
+        FilamentTensionState::FilamentTensionNormal;  ///< Last filament tension event.
+    std::mutex m_mutex;                               ///< Mutex to avoid simultaneous access.
 };
 }  // namespace sugo::machine_service_component

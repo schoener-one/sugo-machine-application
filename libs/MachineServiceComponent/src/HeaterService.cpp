@@ -34,17 +34,15 @@ using namespace sugo;
 using namespace sugo::machine_service_component;
 
 HeaterService::HeaterService(hal::Identifier heaterId, hal::Identifier temperatureSensorId,
-                             const common::ServiceLocator& serviceLocator)
+                             machine_service_component::Identifier minTemperatureId,
+                             machine_service_component::Identifier maxTemperatureId,
+                             const common::ServiceLocator&         serviceLocator)
     : HardwareService(serviceLocator.get<hal::IHardwareAbstractionLayer>()),
       m_heaterId(std::move(heaterId)),
       m_temperatureSensorId(std::move(temperatureSensorId)),
-      m_serviceLocator(serviceLocator),
-      m_temperatureObserverTimer(
-          std::chrono::milliseconds(m_serviceLocator.get<common::IConfiguration>()
-                                        .getOption(id::ConfigObservationTimeoutTemperature)
-                                        .get<unsigned>()),
-          [&]() { updateHeaterTemperatureAndCheck(); }, m_heaterId + "common::Timer"),
-      m_lastCheckedTemperature(std::numeric_limits<Temperature>::min())
+      m_minTemperatureId(std::move(minTemperatureId)),
+      m_maxTemperatureId(std::move(maxTemperatureId)),
+      m_serviceLocator(serviceLocator)
 {
 }
 
@@ -56,48 +54,46 @@ bool HeaterService::switchHeater(bool switchOn)
                                               : hal::IGpioPin::State::Low);
 }
 
-void HeaterService::updateHeaterTemperature()
+bool HeaterService::updateHeaterTemperature()
 {
-    auto& temperatureSensor = getTemperatureSensor(m_temperatureSensorId);
-    auto  value             = temperatureSensor->getTemperature();
+    auto&      temperatureSensor = getTemperatureSensor(m_temperatureSensorId);
+    const auto result            = temperatureSensor->getTemperature();
+
+    if (!result.has_value())
+    {
+        LOG(error) << "Failed to retrieve temperature";
+        return false;
+    }
+
+    const auto value = std::move(result.value());
     assert(value.getUnit() == hal::Unit::Celcius);
     m_currentTemperature = value.getValue();
+    LOG(debug) << "current temperature: " << m_currentTemperature << " °C";
+    return true;
 }
 
-void HeaterService::updateHeaterTemperatureAndCheck()
+HeaterService::TemperatureState HeaterService::getHeaterTemperatureState()
 {
-    updateHeaterTemperature();
-
-    if (m_lastCheckedTemperature != m_currentTemperature)
+    if (!updateHeaterTemperature())
     {
-        // Implement hysteresis
-        if (m_currentTemperature >= m_serviceLocator.get<common::IConfiguration>()
-                                        .getOption(id::ConfigHeaterTemperatureMax)
-                                        .get<int>())
-        {
-            LOG(debug) << "Max temperature reached: " << m_lastCheckedTemperature << "/"
-                       << m_currentTemperature;
-            onTemperatureLimitEvent(TemperatureLimitEvent::MaxTemperatureReached);
-        }
-        else if (m_currentTemperature <= m_serviceLocator.get<common::IConfiguration>()
-                                             .getOption(id::ConfigHeaterTemperatureMin)
-                                             .get<int>())
-        {
-            LOG(debug) << "Min temperature reached: " << m_lastCheckedTemperature << "/"
-                       << m_currentTemperature;
-            onTemperatureLimitEvent(TemperatureLimitEvent::MinTemperatureReached);
-        }
-
-        m_lastCheckedTemperature = m_currentTemperature;
+        return TemperatureState::ErrorNoTemperature;
     }
-}
 
-bool HeaterService::startTemperatureObservation()
-{
-    return m_temperatureObserverTimer.start();
-}
+    const auto maxTemperature =
+        m_serviceLocator.get<common::IConfiguration>().getOption(m_maxTemperatureId).get<int>();
+    const auto minTemperature =
+        m_serviceLocator.get<common::IConfiguration>().getOption(m_minTemperatureId).get<int>();
 
-void HeaterService::stopTemperatureObservation()
-{
-    m_temperatureObserverTimer.stop();
+    if (m_currentTemperature >= maxTemperature)
+    {
+        return TemperatureState::AboveMaxTemperature;
+    }
+    else if (m_currentTemperature <= minTemperature)
+    {
+        return TemperatureState::BelowMinTemperature;
+    }
+    else
+    {
+        return TemperatureState::BetweenMinMaxTemperature;
+    }
 }

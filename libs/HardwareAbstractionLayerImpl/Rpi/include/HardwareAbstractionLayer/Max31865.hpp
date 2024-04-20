@@ -25,6 +25,8 @@
 #pragma once
 
 #include <array>
+#include <mutex>
+#include <optional>
 
 #include "HardwareAbstractionLayer/HalTypes.hpp"
 #include "HardwareAbstractionLayer/IGpioPin.hpp"
@@ -33,12 +35,18 @@
 namespace sugo::hal
 {
 /**
- * @brief
- *
+ * @brief Class that provides functionality to communicate with a Max31865 temperature sensor
+ * device by using the SPI bus.
  */
 class Max31865
 {
 public:
+    /// @brief Temperature type definition.
+    using ValueType = int16_t;
+
+    /// @brief Operation result type definition.
+    using Result = std::optional<ValueType>;
+
     Max31865(SpiControl& spi, IGpioPin& ioCs) : m_spi(spi), m_ioCs(ioCs)
     {
     }
@@ -48,9 +56,10 @@ public:
     /**
      * @brief Returns the most recent temperature value.
      *
-     * @return int16_t Recent temperature value in Celcius.
+     * @return Recent temperature value in Celcius and operation result.
+     * If the operation not succeeded the value has to be treated invalid.
      */
-    int16_t getTemperature();
+    Result getTemperature();
 
     /**
      * @brief Resets the chip to default mode.
@@ -67,8 +76,9 @@ private:
     bool readSpiData(uint8_t startRegister, ByteBuffer& readData);
     bool writeSpiRegister(uint8_t startRegister, const ByteBuffer& writeData);
 
-    SpiControl& m_spi;
-    IGpioPin&   m_ioCs;
+    SpiControl& m_spi;             ///< SPI control device.
+    IGpioPin&   m_ioCs;            ///< Chip-select pin.
+    std::mutex  m_mutexSpiAccess;  ///< Mutex for SPI device access.
 };
 
 }  // namespace sugo::hal

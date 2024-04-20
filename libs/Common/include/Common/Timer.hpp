@@ -56,13 +56,23 @@ public:
     /**
      * @brief Construct a new timer instance
      *
+     * @param period         Period of timer to be triggered.
+     * @param id             Thread id of this timer.
      * @param timeoutHandler Handler to be called in case of a timeout. The handler will be called
-     * within a dedicated thread context.
-     * @param id             Id of this timer.
+     *                       within a dedicated thread context.
      */
-    //
-    GenericTimer(const TimePeriodT& period, TimeoutHandler timeoutHandler, const std::string& id)
+    GenericTimer(TimePeriodT period, const std::string& id, TimeoutHandler timeoutHandler)
         : m_period(period), m_thread(id), m_timeoutHandler(std::move(timeoutHandler))
+    {
+    }
+
+    /**
+     * @brief Construct a new timer instance
+     *
+     * @param period         Period of timer to be triggered.
+     * @param id             Thread id of this timer.
+     */
+    GenericTimer(TimePeriodT period, const std::string& id) : m_period(period), m_thread(id)
     {
     }
 
@@ -138,6 +148,16 @@ public:
         doStop();
     }
 
+    /**
+     * @brief Resters a new timeout handler which will be called on timeout.
+     *
+     * @param handler Timeout handler to be called.
+     */
+    void registerTimeoutHandler(TimeoutHandler handler)
+    {
+        m_timeoutHandler = std::move(handler);
+    }
+
 private:
     /**
      * @brief Processes the timer stop in regard to the timer state.
@@ -153,13 +173,13 @@ private:
         }
     }
 
-    const TimePeriodT          m_period;          ///< Time period of the timer.
-    typename Clock::time_point m_nextWakeUpTime;  ///< Calculated next timeout time.
-    Thread                     m_thread;          ///< Timer thread.
-    std::atomic_bool           m_doRun{false};    ///< Internal timer status indication.
-    TimeoutHandler             m_timeoutHandler;  ///< Timeout handler to be called.
-    std::mutex                 m_mutex;           ///< Mutex object.
-    std::condition_variable    m_condVariable;    ///< Conditional variable to wait on.
+    const TimePeriodT          m_period;            ///< Time period of the timer.
+    typename Clock::time_point m_nextWakeUpTime;    ///< Calculated next timeout time.
+    Thread                     m_thread;            ///< Timer thread.
+    std::atomic_bool           m_doRun{false};      ///< Internal timer status indication.
+    TimeoutHandler             m_timeoutHandler{};  ///< Timeout handler to be called.
+    std::mutex                 m_mutex;             ///< Mutex object.
+    std::condition_variable    m_condVariable;      ///< Conditional variable to wait on.
 };
 
 /// @brief Class represents a timer.

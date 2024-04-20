@@ -30,6 +30,7 @@
 #include "Common/ServiceLocator.hpp"
 #include "Common/Timer.hpp"
 #include "HardwareAbstractionLayer/IHalObject.hpp"
+#include "MachineServiceComponent/Configuration.hpp"
 #include "MachineServiceComponent/HardwareService.hpp"
 
 namespace sugo::machine_service_component
@@ -49,17 +50,21 @@ public:
      * @param serviceLocator      Service locator to retrieve the HAL.
      */
     HeaterService(hal::Identifier heaterId, hal::Identifier temperatureSensorId,
-                  const common::ServiceLocator& serviceLocator);
+                  machine_service_component::Identifier minTemperatureId,
+                  machine_service_component::Identifier maxTemperatureId,
+                  const common::ServiceLocator&         serviceLocator);
 
 protected:
     /**
      * @brief Temperature limit event.
      *
      */
-    enum TemperatureLimitEvent
+    enum TemperatureState
     {
-        MaxTemperatureReached,
-        MinTemperatureReached
+        BetweenMinMaxTemperature,  ///< Temperature between min and max.
+        AboveMaxTemperature,       ///< Temperature is above max temperature limit.
+        BelowMinTemperature,       ///< Temperature is below min temperature limit.
+        ErrorNoTemperature         ///< Error: no valid temperature could be retrieved.
     };
 
     /**
@@ -72,50 +77,36 @@ protected:
     bool switchHeater(bool switchOn);
 
     /**
-     * @brief Updates the current temperature and calls the appropriate handler callbacks.
+     * @brief Updates the current heater temperature and calls the appropriate handler callbacks.
+     * @return true    If the temperature could be retrieved.
+     * @return false   If the temperature could not be retrieved.
      */
-    void updateHeaterTemperature();
+    bool updateHeaterTemperature();
 
     /**
-     * @brief Called if a new temperature limit event has occurred.
+     * @brief Calculates the current heater temperature state based on the current temperature.
+     *
+     * @return TemperatureState The current temperature state.
      */
-    virtual void onTemperatureLimitEvent(TemperatureLimitEvent event) = 0;
+    TemperatureState getHeaterTemperatureState();
 
     /**
-     * @brief Returns the current temperature.
+     * @brief Returns the current heater temperature.
      *
      * @return The current temperature.
      */
-    int32_t getTemperature() const
+    int32_t getHeaterTemperature() const
     {
         return m_currentTemperature.load();
     }
 
-    /**
-     * @brief Starts the temperature sensor observation.
-     *
-     * @return true  If observation could be started successfully.
-     * @return false If observation could not be started successfully.
-     */
-
-    bool startTemperatureObservation();
-
-    /**
-     * @brief Stops the temperature sensor observation.
-     *
-     */
-    void stopTemperatureObservation();
-
 private:
-    /// @brief Update heater temperature and check.
-    void updateHeaterTemperatureAndCheck();
-
-    const hal::Identifier         m_heaterId;             ///< Heater actor identifier.
-    const hal::Identifier         m_temperatureSensorId;  ///< Heater temperature sensor identifier.
-    const common::ServiceLocator& m_serviceLocator;       ///< Service locator instance.
-    common::Timer                 m_temperatureObserverTimer;    ///< Temperature observer timer.
-    std::atomic<Temperature>      m_currentTemperature     = 0;  ///< Current measured temperature.
-    Temperature                   m_lastCheckedTemperature = 0;  ///< Last measured temperture.
+    const hal::Identifier m_heaterId;             ///< Heater actor identifier.
+    const hal::Identifier m_temperatureSensorId;  ///< Heater temperature sensor identifier.
+    const machine_service_component::Identifier m_minTemperatureId;  ///< Min temperature id.
+    const machine_service_component::Identifier m_maxTemperatureId;  ///< Max temperature id.
+    const common::ServiceLocator&               m_serviceLocator;    ///< Service locator instance.
+    std::atomic<Temperature> m_currentTemperature = 0;  ///< Current measured temperature.
 };
 
 }  // namespace sugo::machine_service_component

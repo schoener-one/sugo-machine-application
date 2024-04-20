@@ -231,6 +231,7 @@ components:
           - state: HeatingUp
             next: MergerStopped
             event: Stop
+            action: stopHeatingAndNotifyFeedingStopped # TODO enable action: [stopHeating, notifyFeedingStopped]
           - state: 'StartingMotor|Running'
             next: StoppingMerger
             event: Stop
@@ -378,7 +379,12 @@ components:
         - SwitchOnSucceeded
         - MaxTemperatureReached
         - MinTemperatureReached
+        - TemperatureObservationTimeout
         - ErrorOccurred
+      timers:
+        - TemperatureObservation:
+            timeout: 1000 # ms
+            event: TemperatureObservationTimeout
       statemachine:
         start: 'Off'
         states:
@@ -424,6 +430,14 @@ components:
             next: HeatingOn
             event: MinTemperatureReached
             action: startHeating
+          - state: HeatingOn
+            next: HeatingOn
+            event: TemperatureObservationTimeout
+            action: checkTemperature
+          - state: HeatingOff
+            next: HeatingOff
+            event: TemperatureObservationTimeout
+            action: checkTemperature
 
 
   - FilamentPreHeater:
@@ -567,7 +581,7 @@ components:
           - state: Paused
             next: MotorStopped
             event: StopMotor
-            action: stopMotor         
+            action: stopMotor
 
 
   - FilamentCoilMotor:
@@ -607,7 +621,12 @@ components:
         - SwitchOnSucceeded
         - SwitchOnFailed
         - SwitchOff
+        - TensionObservationTimeout
         - ErrorOccurred
+      timers:
+        - TensionObservation:
+            timeout: 1000
+            event: TensionObservationTimeout
       statemachine:
         start: 'Off'
         states:
@@ -637,6 +656,10 @@ components:
           - state: Initialization
             next: Running
             event: SwitchOnSucceeded
+          - state: Running
+            next: Running
+            event: TensionObservationTimeout
+            action: checkFilamentTension
 
 
   - UserInterfaceControl:

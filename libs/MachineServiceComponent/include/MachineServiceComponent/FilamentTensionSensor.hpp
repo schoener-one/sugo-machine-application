@@ -54,10 +54,11 @@ protected:
     void handleError(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
     void switchOff(const Event& event, const State& state) override;
-
-    void onFilamentTensionEvent(FilamentTensionEvent event) override;
+    void checkFilamentTension(const Event& event, const State& state) override;
 
 private:
+    void checkFilamentTension();
+
     const common::ServiceLocator& m_serviceLocator;  ///< Service locator instance.
 };
 

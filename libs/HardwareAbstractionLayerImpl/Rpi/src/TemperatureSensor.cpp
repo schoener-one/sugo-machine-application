@@ -69,9 +69,17 @@ void TemperatureSensor::finalize()
     }
 }
 
-TemperatureSensor::Temperature TemperatureSensor::getTemperature() const
+ITemperatureSensor::Result TemperatureSensor::getTemperature() const
 {
     assert(m_driver != nullptr);
+    const auto result = m_driver->getTemperature();
 
-    return Temperature(m_driver->getTemperature(), Unit::Celcius);
+    if (result)
+    {
+        return Temperature(result.value(), Unit::Celcius);
+    }
+    else
+    {
+        return {};
+    }
 }

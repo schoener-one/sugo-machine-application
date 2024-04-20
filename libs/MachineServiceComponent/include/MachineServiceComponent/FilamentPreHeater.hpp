@@ -53,13 +53,11 @@ protected:
 
     // Transition actions
     void stopHeating(const Event& event, const State& state) override;
-    void handleError(const Event& event, const State& state) override;
     void startHeating(const Event& event, const State& state) override;
+    void checkTemperature(const Event& event, const State& state) override;
     void switchOn(const Event& event, const State& state) override;
     void switchOff(const Event& event, const State& state) override;
-
-    // HeaterService events
-    void onTemperatureLimitEvent(TemperatureLimitEvent event) override;
+    void handleError(const Event& event, const State& state) override;
 };
 
 }  // namespace sugo::machine_service_component

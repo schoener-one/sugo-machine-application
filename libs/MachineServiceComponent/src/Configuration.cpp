@@ -35,19 +35,19 @@ void config::addConfigurationOptions(sugo::common::IConfiguration& configuration
                                      description::ConfigMotorSpeedMax));
     configuration.add(common::Option(id::ConfigMotorSpeedIncrement, def::ConfigMotorSpeedIncrement,
                                      description::ConfigMotorSpeedIncrement));
-    configuration.add(common::Option(id::ConfigHeaterTemperatureMax,
-                                     def::ConfigHeaterTemperatureMax,
-                                     description::ConfigHeaterTemperatureMax));
-    configuration.add(common::Option(id::ConfigHeaterTemperatureMin,
-                                     def::ConfigHeaterTemperatureMin,
-                                     description::ConfigHeaterTemperatureMin));
+    configuration.add(common::Option(id::ConfigPreHeaterServiceTemperatureMax,
+                                     def::ConfigPreHeaterServiceTemperatureMax,
+                                     description::ConfigPreHeaterServiceTemperatureMax));
+    configuration.add(common::Option(id::ConfigPreHeaterServiceTemperatureMin,
+                                     def::ConfigPreHeaterServiceTemperatureMin,
+                                     description::ConfigPreHeaterServiceTemperatureMin));
+    configuration.add(common::Option(id::ConfigMergerHeaterServiceTemperatureMax,
+                                     def::ConfigMergerHeaterServiceTemperatureMax,
+                                     description::ConfigMergerHeaterServiceTemperatureMax));
+    configuration.add(common::Option(id::ConfigMergerHeaterServiceTemperatureMin,
+                                     def::ConfigMergerHeaterServiceTemperatureMin,
+                                     description::ConfigMergerHeaterServiceTemperatureMin));
     configuration.add(common::Option(id::ConfigObservationTimeoutGpioPin,
                                      def::ConfigObservationTimeoutGpioPin,
-                                     description::ConfigObservationTimeoutTemperature));
-    configuration.add(common::Option(id::ConfigObservationTimeoutTemperature,
-                                     def::ConfigObservationTimeoutTemperature,
-                                     description::ConfigObservationTimeoutTemperature));
-    configuration.add(common::Option(id::ConfigObservationTimeoutTension,
-                                     def::ConfigObservationTimeoutTension,
-                                     description::ConfigObservationTimeoutTension));
+                                     description::ConfigObservationTimeoutGpioPin));
 }

@@ -24,6 +24,7 @@
 
 #include "MachineServiceComponent/FilamentMergerHeater.hpp"
 #include "HardwareAbstractionLayer/Identifier.hpp"
+#include "MachineServiceComponent/Configuration.hpp"
 #include "MachineServiceComponent/Protocol.hpp"
 
 using namespace sugo;
@@ -35,21 +36,9 @@ FilamentMergerHeater::FilamentMergerHeater(message_broker::IMessageBroker& messa
                                            const common::ServiceLocator&   serviceLocator)
     : IFilamentMergerHeater(messageBroker, processContext),
       HeaterService(hal::id::GpioPinRelaySwitchHeaterMerger, hal::id::TemperatureSensorMerger,
-                    serviceLocator)
+                    id::ConfigMergerHeaterServiceTemperatureMin,
+                    id::ConfigMergerHeaterServiceTemperatureMax, serviceLocator)
 {
-}
-
-void FilamentMergerHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
-{
-    switch (event)
-    {
-        case MinTemperatureReached:
-            push(Event::MinTemperatureReached);
-            break;
-        case MaxTemperatureReached:
-            push(Event::MaxTemperatureReached);
-            break;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,7 +47,7 @@ void FilamentMergerHeater::onTemperatureLimitEvent(TemperatureLimitEvent event)
 message_broker::ResponseMessage FilamentMergerHeater::onPropertyRequestGetTemperature(
     const message_broker::Message& request)
 {
-    m_propertyTemperature.setValue(getTemperature());
+    m_propertyTemperature.setValue(getHeaterTemperature());
     return IFilamentMergerHeater::onPropertyRequestGetTemperature(request);
 }
 
@@ -70,7 +59,7 @@ void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
 {
     updateHeaterTemperature();
 
-    if (!startTemperatureObservation())
+    if (!m_timerTemperatureObservation.start())
     {
         push(Event::ErrorOccurred);
         return;
@@ -109,10 +98,33 @@ void FilamentMergerHeater::stopHeating(const IFilamentMergerHeater::Event& event
     }
 }
 
+void FilamentMergerHeater::checkTemperature(const Event&, const State& state)
+{
+    const auto temperatureState = getHeaterTemperatureState();
+
+    if (TemperatureState::ErrorNoTemperature == temperatureState)
+    {
+        push(Event::ErrorOccurred);
+        return;
+    }
+
+    if (State::HeatingOn == state && TemperatureState::AboveMaxTemperature == temperatureState)
+    {
+        LOG(debug) << "above max temperature: " << getHeaterTemperature() << " °C";
+        push(Event::MaxTemperatureReached);
+    }
+    else if (State::HeatingOff == state &&
+             TemperatureState::BelowMinTemperature == temperatureState)
+    {
+        LOG(debug) << "below min temperature: " << getHeaterTemperature() << " °C";
+        push(Event::MinTemperatureReached);
+    }
+}
+
 void FilamentMergerHeater::switchOff(const IFilamentMergerHeater::Event&,
                                      const IFilamentMergerHeater::State&)
 {
-    stopTemperatureObservation();
+    m_timerTemperatureObservation.stop();
 
     if (!switchHeater(false))
     {

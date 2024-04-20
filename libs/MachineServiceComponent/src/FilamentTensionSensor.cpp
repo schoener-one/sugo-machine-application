@@ -35,25 +35,10 @@ FilamentTensionSensor::FilamentTensionSensor(message_broker::IMessageBroker& mes
     : IFilamentTensionSensor(messageBroker, processContext),
       FilamentTensionSensorService(hal::id::GpioPinSignalFilamentTensionLow,
                                    hal::id::GpioPinSignalFilamentTensionHigh,
-                                   hal::id::GpioPinSignalFilamentTensionOverload, serviceLocator),
+                                   hal::id::GpioPinSignalFilamentTensionOverload, serviceLocator,
+                                   [&](FilamentTensionState) { checkFilamentTension(); }),
       m_serviceLocator(serviceLocator)
 {
-}
-
-void FilamentTensionSensor::onFilamentTensionEvent(FilamentTensionEvent event)
-{
-    if (event == FilamentTensionLow)
-    {
-        notify(IFilamentTensionSensor::NotificationTensionTooLow);
-    }
-    else if (event == FilamentTensionHigh)
-    {
-        notify(IFilamentTensionSensor::NotificationTensionTooHigh);
-    }
-    else if (event == FilamentTensionOverload)
-    {
-        notify(IFilamentTensionSensor::NotificationTensionOverloaded);
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,6 +50,7 @@ void FilamentTensionSensor::onFilamentTensionEvent(FilamentTensionEvent event)
 void FilamentTensionSensor::switchOff(const IFilamentTensionSensor::Event&,
                                       const IFilamentTensionSensor::State&)
 {
+    m_timerTensionObservation.stop();
     stopSensorObservation();
 }
 
@@ -77,12 +63,37 @@ void FilamentTensionSensor::switchOn(const IFilamentTensionSensor::Event&,
         return;
     }
 
+    m_timerTensionObservation.start();
     push(Event::SwitchOnSucceeded);
+}
+
+void FilamentTensionSensor::checkFilamentTension(const Event&, const State&)
+{
+    checkFilamentTension();
+}
+
+void FilamentTensionSensor::checkFilamentTension()
+{
+    const auto state = getFilamentTensionState();
+
+    if (state == FilamentTensionLow)
+    {
+        notify(IFilamentTensionSensor::NotificationTensionTooLow);
+    }
+    else if (state == FilamentTensionHigh)
+    {
+        notify(IFilamentTensionSensor::NotificationTensionTooHigh);
+    }
+    else if (state == FilamentTensionOverload)
+    {
+        notify(IFilamentTensionSensor::NotificationTensionOverloaded);
+    }
 }
 
 void FilamentTensionSensor::handleError(const IFilamentTensionSensor::Event&,
                                         const IFilamentTensionSensor::State&)
 {
+    m_timerTensionObservation.stop();
     stopSensorObservation();
     notify(NotificationErrorOccurred);
 }

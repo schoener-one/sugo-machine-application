@@ -24,8 +24,6 @@
 
 #pragma once
 
-#include <limits>
-
 #include "HardwareAbstractionLayer/IGpioControl.hpp"
 #include "HardwareAbstractionLayer/ITemperatureSensor.hpp"
 
@@ -48,7 +46,7 @@ public:
     void finalize();
     bool init(const common::IConfiguration& configuration) override;
 
-    Temperature getTemperature() const override;
+    Result getTemperature() const override;
 
 private:
     SpiControl&                     m_spiControl;

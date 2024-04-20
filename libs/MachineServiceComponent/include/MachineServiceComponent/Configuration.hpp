@@ -31,51 +31,60 @@
 
 namespace sugo::machine_service_component
 {
+/// @brief Configuration identifier type.
+using Identifier = std::string;
+
 namespace def
 {
-inline static constexpr unsigned ConfigMotorSpeedDefault             = 50;
-inline static constexpr unsigned ConfigMotorSpeedMax                 = 100;
-inline static constexpr unsigned ConfigMotorSpeedIncrement           = 10;
-inline static constexpr int      ConfigHeaterTemperatureMax          = 205;
-inline static constexpr int      ConfigHeaterTemperatureMin          = 195;
-inline static constexpr unsigned ConfigObservationTimeoutGpioPin     = 1000;
-inline static constexpr unsigned ConfigObservationTimeoutTemperature = 1000;
-inline static constexpr unsigned ConfigObservationTimeoutTension     = 1000;
+inline static constexpr unsigned ConfigMotorSpeedDefault                 = 50;
+inline static constexpr unsigned ConfigMotorSpeedMax                     = 100;
+inline static constexpr unsigned ConfigMotorSpeedIncrement               = 10;
+inline static constexpr int      ConfigPreHeaterServiceTemperatureMax    = 145;
+inline static constexpr int      ConfigPreHeaterServiceTemperatureMin    = 140;
+inline static constexpr int      ConfigMergerHeaterServiceTemperatureMax = 205;
+inline static constexpr int      ConfigMergerHeaterServiceTemperatureMin = 195;
+inline static constexpr unsigned ConfigObservationTimeoutGpioPin         = 1000;
 }  // namespace def
 
 namespace description
 {
-inline static const std::string ConfigMotorSpeedMax{"Maximum motor speed"};
-inline static const std::string ConfigMotorSpeedDefault{"Default motor speed"};
-inline static const std::string ConfigMotorSpeedIncrement{"Motor speed increment"};
-inline static const std::string ConfigHeaterTemperatureMax{"Maximum heater temperature"};
-inline static const std::string ConfigHeaterTemperatureMin{"Minimum heater temperature"};
-inline static const std::string ConfigObservationTimeoutGpioPin{
-    "Observation timeout for GPIO pins"};
-inline static const std::string ConfigObservationTimeoutTemperature{
-    "Observation timeout for temperature values"};
-inline static const std::string ConfigObservationTimeoutTension{
-    "Observation timeout for filament tension values"};
+inline static const Identifier ConfigMotorSpeedMax{"Maximum motor speed"};
+inline static const Identifier ConfigMotorSpeedDefault{"Default motor speed"};
+inline static const Identifier ConfigMotorSpeedIncrement{"Motor speed increment"};
+inline static const Identifier ConfigPreHeaterServiceTemperatureMax{
+    "Maximum pre-heater temperature"};
+inline static const Identifier ConfigPreHeaterServiceTemperatureMin{
+    "Minimum pre-heater temperature"};
+inline static const Identifier ConfigMergerHeaterServiceTemperatureMax{
+    "Maximum merger-heater temperature"};
+inline static const Identifier ConfigMergerHeaterServiceTemperatureMin{
+    "Minimum merger-heater temperature"};
+inline static const Identifier ConfigObservationTimeoutGpioPin{"Observation timeout for GPIO pins"};
 }  // namespace description
 
 namespace id
 {
-inline static const std::string ConfigMachineServiceComponent{"machine-service-component"};
-inline static const std::string ConfigMotorSpeed{ConfigMachineServiceComponent + ".motor-speed"};
-inline static const std::string ConfigMotorSpeedMax{ConfigMotorSpeed + ".max"};
-inline static const std::string ConfigMotorSpeedDefault{ConfigMotorSpeed + ".default"};
-inline static const std::string ConfigMotorSpeedIncrement{ConfigMotorSpeed + ".increment"};
-inline static const std::string ConfigHeater{ConfigMachineServiceComponent + ".heater"};
-inline static const std::string ConfigHeaterTemperatureMax{ConfigHeater + ".max-temperature"};
-inline static const std::string ConfigHeaterTemperatureMin{ConfigHeater + ".min-temperature"};
-inline static const std::string ConfigObservationTimeout{ConfigMachineServiceComponent +
-                                                         ".observation-timeout"};
-inline static const std::string ConfigObservationTimeoutGpioPin{ConfigObservationTimeout +
-                                                                ".gpio-pin"};
-inline static const std::string ConfigObservationTimeoutTemperature{ConfigObservationTimeout +
-                                                                    ".temperature"};
-inline static const std::string ConfigObservationTimeoutTension{ConfigObservationTimeout +
-                                                                ".tension"};
+inline static const Identifier ConfigMachineServiceComponent{"machine-service-component"};
+inline static const Identifier ConfigMotorSpeed{ConfigMachineServiceComponent + ".motor-speed"};
+inline static const Identifier ConfigMotorSpeedMax{ConfigMotorSpeed + ".max"};
+inline static const Identifier ConfigMotorSpeedDefault{ConfigMotorSpeed + ".default"};
+inline static const Identifier ConfigMotorSpeedIncrement{ConfigMotorSpeed + ".increment"};
+inline static const Identifier ConfigPreHeaterService{ConfigMachineServiceComponent +
+                                                      ".pre-heater"};
+inline static const Identifier ConfigMergerHeaterService{ConfigMachineServiceComponent +
+                                                         ".merger-heater"};
+inline static const Identifier ConfigPreHeaterServiceTemperatureMax{ConfigPreHeaterService +
+                                                                    ".max-temperature"};
+inline static const Identifier ConfigPreHeaterServiceTemperatureMin{ConfigPreHeaterService +
+                                                                    ".min-temperature"};
+inline static const Identifier ConfigMergerHeaterServiceTemperatureMax{ConfigMergerHeaterService +
+                                                                       ".max-temperature"};
+inline static const Identifier ConfigMergerHeaterServiceTemperatureMin{ConfigMergerHeaterService +
+                                                                       ".min-temperature"};
+inline static const Identifier ConfigObservationTimeout{ConfigMachineServiceComponent +
+                                                        ".observation-timeout"};
+inline static const Identifier ConfigObservationTimeoutGpioPin{ConfigObservationTimeout +
+                                                               ".gpio-pin"};
 }  // namespace id
 
 namespace config

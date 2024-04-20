@@ -27,7 +27,6 @@
 #include "HardwareAbstractionLayer/HalTypes.hpp"
 
 #include <array>
-#include <limits>
 #include <thread>
 
 using namespace sugo::hal;
@@ -147,15 +146,17 @@ bool Max31865::init()
     return true;
 }
 
-int16_t Max31865::getTemperature()
+Max31865::Result Max31865::getTemperature()
 {
     ByteBuffer rtd{0, 0};
     readSpiData(Register::RtdMsb, rtd);
+
     if ((FaultMask & rtd.at(1)) != 0)
     {
         LOG(error) << "Failed to retrieve new temperature";
-        return std::numeric_limits<int16_t>::min();
+        return {};
     }
+
     // Note: Fault bit is shifted out (>>1)!
     int16_t adcCode = (static_cast<int16_t>(rtd.at(1)) | static_cast<int16_t>(rtd.at(0)) << 8);
     adcCode >>= 1;
@@ -169,18 +170,20 @@ int16_t Max31865::getTemperature()
 
     if (entry != ResistanceToTemperatureLookUpTable.cend())
     {
-        return entry->temperature;
+        return {entry->temperature};
     }
     else
     {
         LOG(warning) << "Failed to calculate temperature value";
-        return std::numeric_limits<int16_t>::max();
+        return {};
     }
 }
 
 bool Max31865::writeSpiRegister(uint8_t startRegister, const ByteBuffer& writeData)
 {
-    bool success = m_ioCs.setState(IGpioPin::State::High);
+    std::lock_guard<std::mutex> lock(m_mutexSpiAccess);
+    bool                        success = m_ioCs.setState(IGpioPin::State::High);
+
     if (success)
     {
         (void)m_spi.writeByte(startRegister | WriteMask);
@@ -190,12 +193,15 @@ bool Max31865::writeSpiRegister(uint8_t startRegister, const ByteBuffer& writeDa
         }
         success = m_ioCs.setState(IGpioPin::State::Low) && success;
     }
+
     return success;
 }
 
 bool Max31865::readSpiData(uint8_t startRegister, ByteBuffer& readData)
 {
-    bool success = m_ioCs.setState(IGpioPin::State::High);
+    std::lock_guard<std::mutex> lock(m_mutexSpiAccess);
+    bool                        success = m_ioCs.setState(IGpioPin::State::High);
+
     if (success)
     {
         (void)m_spi.writeByte(startRegister);
@@ -205,5 +211,6 @@ bool Max31865::readSpiData(uint8_t startRegister, ByteBuffer& readData)
         }
         success = m_ioCs.setState(IGpioPin::State::Low) && success;
     }
+
     return success;
 }

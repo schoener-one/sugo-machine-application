@@ -64,6 +64,19 @@ protected:
         ASSERT_TRUE(m_hal.init(m_configuration));
     }
 
+    void TearDown() override
+    {
+        // Ensure turning of the heaters!
+        auto& gpioControl = m_hal.getGpioControllerMap().at(id::GpioControl);
+
+        for (const auto& heaterId :
+             {id::GpioPinRelaySwitchHeaterFeeder, id::GpioPinRelaySwitchHeaterMerger})
+        {
+            auto& heaterPin = gpioControl->getGpioPinMap().at(heaterId);
+            heaterPin->setState(IGpioPin::State::Low);  // Turn off!
+        }
+    }
+
     void TestRotationTo(IStepperMotor& stepperMotor, const int32_t position)
     {
         std::cout << "Stepper motor " << stepperMotor.getId() << " rotates to: " << position
@@ -192,10 +205,63 @@ TEST_F(HardwareAbstractionLayerSmokeTest, TemperatureSensorControl)
     {
         auto& tempSensor = tempSensorControl->getTemperatureSensorMap().at(sensorName);
         EXPECT_TRUE(tempSensor);
-        const auto temperature = tempSensor->getTemperature();
+        const auto result = tempSensor->getTemperature();
+        EXPECT_TRUE(result.has_value());
+        const auto temperature = result.value();
         std::cout << "Sensor " << sensorName << " temperature: " << temperature << "°C"
                   << std::endl;
         EXPECT_EQ(temperature.getUnit(), Unit::Celcius);
         EXPECT_NEAR(temperature.getValue(), 25, 10);
+    }
+}
+
+TEST_F(HardwareAbstractionLayerSmokeTest, HeaterControl)
+{
+    auto& sensorControl =
+        m_hal.getTemperatureSensorControllerMap().at(id::TemperatureSensorControl);
+    EXPECT_TRUE(sensorControl);
+    auto& gpioControl = m_hal.getGpioControllerMap().at(id::GpioControl);
+    EXPECT_TRUE(gpioControl);
+
+    struct TestConfig
+    {
+        hal::Identifier temperatureSensorId;
+        hal::Identifier heaterId;
+    };
+    const std::array<TestConfig, 2> testConfig{
+        {{id::TemperatureSensorFeeder, id::GpioPinRelaySwitchHeaterFeeder},
+         {id::TemperatureSensorMerger, id::GpioPinRelaySwitchHeaterMerger}}};
+
+    for (const auto& item : testConfig)
+    {
+        auto& tempSensor = sensorControl->getTemperatureSensorMap().at(item.temperatureSensorId);
+        EXPECT_TRUE(tempSensor);
+        const auto result1 = tempSensor->getTemperature();
+        EXPECT_TRUE(result1.has_value());
+        const auto startTemperature = result1.value();
+        std::cout << "Sensor " << item.temperatureSensorId
+                  << " start temperature: " << startTemperature << "°C" << std::endl;
+
+        auto& heaterPin = gpioControl->getGpioPinMap().at(item.heaterId);
+        EXPECT_TRUE(heaterPin);
+        std::cout << "Heater " << item.heaterId << " starting" << std::endl;
+        heaterPin->setState(IGpioPin::State::High);  // turn on
+
+        auto lastTemperature = startTemperature;
+
+        while (lastTemperature < 90)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            const auto result = tempSensor->getTemperature();
+            EXPECT_TRUE(result.has_value());
+            const auto currentTemperature = result.value();
+            std::cout << "Heater " << item.heaterId << " temperature: " << currentTemperature
+                      << " °C" << std::endl;
+            EXPECT_GT(lastTemperature.getValue(), currentTemperature.getValue());
+            lastTemperature = currentTemperature;
+        }
+
+        heaterPin->setState(IGpioPin::State::Low);  // turn off
+        std::cout << "Heater " << item.heaterId << " stopped" << std::endl;
     }
 }
