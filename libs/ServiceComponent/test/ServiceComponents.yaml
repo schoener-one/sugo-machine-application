@@ -9,8 +9,8 @@ components:
               event: SwitchOff
           - Start:
               event: Start
-          - StartHeatless:
-              event: StartHeatless
+          - StartMaintenance:
+              event: StartMaintenance
           - IncreaseMotorSpeed
           - DecreaseMotorSpeed
           - Stop:
@@ -70,7 +70,7 @@ components:
         - SwitchOn
         - SwitchOnSucceeded
         - Start
-        - StartHeatless
+        - StartMaintenance
         - MergerHeatedUp
         - StartingSucceeded
         - Stop
@@ -116,7 +116,7 @@ components:
             action: startHeating
           - state: Stopped
             next: Starting
-            event: StartHeatless
+            event: StartMaintenance
             action: startMachine
           - state: HeatingUp
             next: Starting

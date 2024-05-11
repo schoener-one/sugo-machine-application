@@ -47,10 +47,6 @@ public:
                          const common::ServiceLocator&   serviceLocator);
 
 protected:
-    // Request handlers
-    message_broker::ResponseMessage onPropertyRequestGetTemperature(
-        const message_broker::Message& request) override;
-
     // Transition actions
     void stopHeating(const Event& event, const State& state) override;
     void startHeating(const Event& event, const State& state) override;

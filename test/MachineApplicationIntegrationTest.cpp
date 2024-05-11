@@ -375,7 +375,7 @@ TEST_F(MachineApplicationIntegrationTest, MotorErrorOccurred)
     EXPECT_CALL(*m_mockStepperMotorCoiler, rotate()).WillOnce(Return(false));  // Error occurred!
     EXPECT_CALL(*m_mockStepperMotorFeeder, stop(false)).WillOnce(Return(true));
     EXPECT_CALL(*m_mockStepperMotorCoiler, stop(true)).WillOnce(Return(true));
-    send(IMachineControl::CommandRequestStartHeatless);
+    send(IMachineControl::CommandRequestStartMaintenance);
     EXPECT_NOTIFICATION(IMachineControl, NotificationErrorOccurred);
     EXPECT_STATE(IMachineControl, Error);
 

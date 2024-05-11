@@ -292,7 +292,7 @@
             "type": "shell",
             "command": [
                 "ssh -o StrictHostKeyChecking=no root@${config:remote.host} -C \"mkdir -p www\";",
-                "scp -o StrictHostKeyChecking=no \"${workspaceFolder}/conf/www/index.html\" \"root@${config:remote.host}:www/index.html\""
+                "scp -o StrictHostKeyChecking=no -r \"${workspaceFolder}/conf/www\"  \"root@${config:remote.host}:\""
             ]
         },
         {

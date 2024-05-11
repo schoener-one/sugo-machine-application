@@ -1,0 +1,30 @@
+body {
+    background-color: #ffffff;
+    color: #ee0000;
+    margin: 0px;
+}
+
+text {
+    font-family: Arial, sans-serif;
+    font-size: 18pt;
+    stroke: #333333;
+    fill: #333333;
+}
+
+text.svg-button-text, text.svg-label-text {
+    stroke: #333333;
+    fill: #333333;
+    font-size: 26pt;
+    stroke-miterlimit: "10";
+}
+
+#user-control {
+    display: flex;
+    justify-content: center;
+    margin: 0px;
+}
+
+svg .svg-button :hover {
+    fill: #cccccc;
+    cursor: grab;
+}

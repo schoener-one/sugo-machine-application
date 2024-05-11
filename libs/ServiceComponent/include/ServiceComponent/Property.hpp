@@ -93,7 +93,6 @@ public:
             return false;
         }
 
-        // FIXME could throw an exception!
         return setValue(value.get<TypeT>());
     }
 

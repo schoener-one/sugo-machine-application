@@ -109,11 +109,11 @@ public:
                         return true;
                     }
                 }
-                else if (command == "increase-speed")
+                else if (command == "increase-feeder-speed")
                 {
                     m_currentSpeed = (m_currentSpeed + SpeedStep) % MaxSpeed;
                 }
-                else if (command == "decrease-speed")
+                else if (command == "decrease-feeder-speed")
                 {
                     m_currentSpeed = (m_currentSpeed - SpeedStep) % MaxSpeed;
                 }
@@ -170,7 +170,7 @@ private:
         return common::Json({{id::Type, type},
                              {id::Result, id::ResultSuccess},
                              {"state", convertToString(m_currentState)},
-                             {id::Speed, m_currentSpeed}});
+                             {id::FeederSpeed, m_currentSpeed}});
     }
 
     void updateMachineState()

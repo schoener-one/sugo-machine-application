@@ -115,10 +115,10 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${config:build.directory}/MachineApplication",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/conf",
             "stopAtEntry": false,
             "MIMode": "gdb",
-            "args": ["--config-file", "${workspaceFolder}/conf/MachineConfig.json"]
+            "args": ["--config-file", "MachineConfig.json"]
         },
         {
             "name": "Machine Application Integration Test (x86)",
@@ -134,11 +134,11 @@
             "name": "Debug Machine Remote Control Server (x86)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${config:build.directory}/libs/MachineRemoteControl/MachineRemoteControlServer",
-            "cwd": "${workspaceFolder}/MachineRemoteControl",
+            "program": "${config:build.directory}/libs/RemoteControl/test/RemoteControlServerSimulator",
+            "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "MIMode": "gdb",
-            "args": ["www"]
+            "args": ["${workspaceFolder}/conf/www"]
         }
     ]
 }

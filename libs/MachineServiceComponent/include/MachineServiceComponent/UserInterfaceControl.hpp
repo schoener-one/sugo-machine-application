@@ -27,6 +27,7 @@
 #include "Common/ServiceLocator.hpp"
 #include "Common/Thread.hpp"
 #include "Common/Types.hpp"
+#include "MachineServiceComponent/Types.hpp"
 #include "MachineServiceComponent/UserLightService.hpp"
 #include "RemoteControl/IClientRequestHandler.hpp"
 #include "ServiceComponent/IUserInterfaceControl.hpp"
@@ -73,12 +74,19 @@ public:
 
 protected:
     // Request handlers
-    void onNotificationMachineControlStopped(const message_broker::Message& request) override;
-    void onNotificationMachineControlHeatingUp(const message_broker::Message& request) override;
-    void onNotificationMachineControlStarting(const message_broker::Message& request) override;
-    void onNotificationMachineControlRunning(const message_broker::Message& request) override;
-    void onNotificationMachineControlSwitchedOff(const message_broker::Message& request) override;
-    void onNotificationMachineControlErrorOccurred(const message_broker::Message& request) override;
+    void onNotificationMachineControlStopped(const message_broker::Message& notification) override;
+    void onNotificationMachineControlHeatingUp(
+        const message_broker::Message& notification) override;
+    void onNotificationMachineControlStarting(const message_broker::Message& notification) override;
+    void onNotificationMachineControlRunning(const message_broker::Message& notification) override;
+    void onNotificationMachineControlSwitchedOff(
+        const message_broker::Message& notification) override;
+    void onNotificationMachineControlErrorOccurred(
+        const message_broker::Message& notification) override;
+    void onNotificationFilamentPreHeaterTemperatureChanged(
+        const message_broker::Message& notification) override;
+    void onNotificationFilamentMergerHeaterTemperatureChanged(
+        const message_broker::Message& notification) override;
 
     // Transition actions
     void handleMachineStateChange(const Event& event, const State& state) override;
@@ -106,7 +114,9 @@ private:
     UserLightService m_userLightService;  ///< User light service. // TODO Pass services as
                                           ///< interfaces from outside!
     SendNotificationCallback m_cbSendNotification = nullptr;  ///< Notification send callback.
-    Event m_lastMachineEvent = Event::MachineSwitchedOff;     ///< Last machine event.
+    Event       m_lastMachineEvent            = Event::MachineSwitchedOff;  ///< Last machine event.
+    Temperature m_lastPreHeaterTemperature    = InvalidTemperature;
+    Temperature m_lastMergerHeaterTemperature = InvalidTemperature;
 };
 
 }  // namespace sugo::machine_service_component

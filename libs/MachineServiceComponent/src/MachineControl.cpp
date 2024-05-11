@@ -163,7 +163,7 @@ void MachineControl::startMachine(const IMachineControl::Event& event,
 {
     m_isFilamentMergerControlRunning = false;
     m_isFilamentCoilControlRunning   = false;
-    m_propertyMotorSpeed.setValue((event == Event::StartHeatless)
+    m_propertyMotorSpeed.setValue((event == Event::StartMaintenance)
                                       ? 0
                                       : m_serviceLocator.get<common::IConfiguration>()
                                             .getOption(id::ConfigMotorSpeedDefault)
@@ -190,7 +190,7 @@ void MachineControl::startMachine(const IMachineControl::Event& event,
     }
 
     const common::Json startCoilParameter(
-        {{id::TensionControl, (event == Event::StartHeatless) ? false : true}});
+        {{id::TensionControl, (event == Event::StartMaintenance) ? false : true}});
 
     if (!send(IFilamentCoilControl::CommandRequestStartCoil, startCoilParameter))
     {

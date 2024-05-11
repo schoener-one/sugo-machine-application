@@ -29,7 +29,9 @@
 namespace sugo::remote_control::id
 {
 inline static const std::string Result{"result"};
-inline static const std::string Speed{"speed"};
+inline static const std::string FeederSpeed{"feeder_speed"};
+inline static const std::string PreHeaterTemperature{"pre_heater_temperature"};
+inline static const std::string MergerHeaterTemperature{"merger_heater_temperature"};
 inline static const std::string State{"state"};
 inline static const std::string Type{"type"};
 inline static const std::string Command{"command"};
