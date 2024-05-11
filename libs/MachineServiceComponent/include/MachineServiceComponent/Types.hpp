@@ -1,9 +1,8 @@
-///////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * @file
  *
  * @author: Denis Schoener (denis@schoener-one.de)
- * @date:   22.09.2020
+ * @date:   15.03.2024
  *
  * @license: Copyright (C) 2020 by Denis Schoener
  *
@@ -22,30 +21,15 @@
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "HardwareAbstractionLayer/TemperatureSensor.hpp"
-#include "Common/Logger.hpp"
-#include "HardwareAbstractionLayer/Simulator.hpp"
+#pragma once
 
-using namespace sugo::hal;
+#include "Common/Types.hpp"
 
-TemperatureSensor::~TemperatureSensor()
+namespace sugo::machine_service_component
 {
-    finalize();
-}
+/// @brief Temperature type definition
+using Temperature = int32_t;
 
-bool TemperatureSensor::init(const common::IConfiguration& configuration)
-{
-    const auto chipSelect = configuration.getOption(id::ChipSelect).get<std::string>();
-    LOG(debug) << getId() << "." << id::ChipSelect << ": " << chipSelect;
-
-    return true;
-}
-
-void TemperatureSensor::finalize()
-{
-}
-
-ITemperatureSensor::Result TemperatureSensor::getTemperature() const
-{
-    return {Simulator::getInstance().getTemperature(getId())};
-}
+/// @brief Invalid temperature value
+static constexpr Temperature InvalidTemperature = -256;
+}  // namespace sugo::machine_service_component

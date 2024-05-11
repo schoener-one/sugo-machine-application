@@ -39,17 +39,14 @@ FilamentMergerHeater::FilamentMergerHeater(message_broker::IMessageBroker& messa
                     id::ConfigMergerHeaterServiceTemperatureMin,
                     id::ConfigMergerHeaterServiceTemperatureMax, serviceLocator)
 {
+    m_propertyTemperature.registerValueChangeHandler([this](const IProperty<int32_t>& temperature) {
+        // TODO automate creation of value change notifications!
+        this->notify(NotificationTemperatureChanged, temperature.getValueAsJson());
+    });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Requests:
-
-message_broker::ResponseMessage FilamentMergerHeater::onPropertyRequestGetTemperature(
-    const message_broker::Message& request)
-{
-    m_propertyTemperature.setValue(getHeaterTemperature());
-    return IFilamentMergerHeater::onPropertyRequestGetTemperature(request);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
@@ -71,6 +68,8 @@ void FilamentMergerHeater::switchOn(const IFilamentMergerHeater::Event&,
 void FilamentMergerHeater::startHeating(const IFilamentMergerHeater::Event& event,
                                         const IFilamentMergerHeater::State&)
 {
+    m_propertyTemperature.setValue(getHeaterTemperature());
+
     if (!switchHeater(true))
     {
         push(Event::ErrorOccurred);
@@ -100,6 +99,7 @@ void FilamentMergerHeater::stopHeating(const IFilamentMergerHeater::Event& event
 
 void FilamentMergerHeater::checkTemperature(const Event&, const State& state)
 {
+    m_propertyTemperature.setValue(getHeaterTemperature());
     const auto temperatureState = getHeaterTemperatureState();
 
     if (TemperatureState::ErrorNoTemperature == temperatureState)

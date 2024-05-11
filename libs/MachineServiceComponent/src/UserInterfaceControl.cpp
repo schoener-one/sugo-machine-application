@@ -26,6 +26,8 @@
 #include <string>
 
 #include "HardwareAbstractionLayer/IHardwareAbstractionLayer.hpp"
+#include "MachineServiceComponent/FilamentMergerHeater.hpp"
+#include "MachineServiceComponent/FilamentPreHeater.hpp"
 #include "MachineServiceComponent/Protocol.hpp"
 #include "MachineServiceComponent/UserInterfaceControl.hpp"
 #include "MessageBroker/Message.hpp"
@@ -36,6 +38,28 @@
 using namespace sugo;
 using namespace sugo::service_component;
 using namespace sugo::machine_service_component;
+
+namespace
+{
+// template <typename ValueT, typename MessageT>
+// ValueT getPropertyValue(const MessageT& message, const ValueT defaultValue = 0)
+template <typename ValueT>
+ValueT getPropertyValue(const std::string& payload, const ValueT defaultValue = 0)
+{
+    if (!payload.empty())
+    {
+        auto json =
+            common::Json::parse(payload).at(service_component::id::PropertyValue);
+
+        if (!json.empty())
+        {
+            return json.get<ValueT>();
+        }
+    }
+
+    return defaultValue;
+}
+}  // namespace
 
 UserInterfaceControl::UserInterfaceControl(message_broker::IMessageBroker& messageBroker,
                                            common::IProcessContext&        processContext,
@@ -67,22 +91,18 @@ std::string UserInterfaceControl::convertToString(const UserInterfaceControl::Ev
 
 common::Json UserInterfaceControl::createStateMessage(const std::string& type)
 {
-    namespace rp                          = remote_control::id;
-    unsigned                        speed = 0;
-    message_broker::ResponseMessage machineResponse{};
-    const auto success = send(IMachineControl::PropertyRequestGetMotorSpeed, machineResponse);
+    namespace rp = remote_control::id;
+    message_broker::ResponseMessage responseFeederSpeed{}, responsePreHeaterTemp{},
+        responseMergerHeaterTemp{};
+    send(IMachineControl::PropertyRequestGetMotorSpeed, responseFeederSpeed);
 
-    if (success && !machineResponse.getPayload().empty())
-    {
-        auto response  = common::Json::parse(machineResponse.getPayload());
-        auto jsonSpeed = response.at(service_component::id::PropertyValue);
-        speed          = (jsonSpeed.empty()) ? 0 : jsonSpeed.get<unsigned>();
-    }
-
-    return common::Json({{rp::Type, type},
-                         {rp::Result, rp::ResultSuccess},
-                         {rp::State, convertToString(m_lastMachineEvent)},
-                         {rp::Speed, speed}});
+    return common::Json(
+        {{rp::Type, type},
+         {rp::Result, rp::ResultSuccess},
+         {rp::State, convertToString(m_lastMachineEvent)},
+         {rp::FeederSpeed, getPropertyValue<unsigned>(responseFeederSpeed.getPayload())},
+         {rp::PreHeaterTemperature, m_lastPreHeaterTemperature},
+         {rp::MergerHeaterTemperature, m_lastMergerHeaterTemperature}});
 }
 
 bool UserInterfaceControl::receiveRequest(remote_control::IClientRequestHandler::ClientId clientId,
@@ -122,19 +142,19 @@ bool UserInterfaceControl::receiveRequest(remote_control::IClientRequestHandler:
             {
                 success = send(IMachineControl::CommandRequestStart, machineResponse);
             }
-            else if (requestId == "start-heatless")
+            else if (requestId == "start-maintenance")
             {
-                success = send(IMachineControl::CommandRequestStartHeatless, machineResponse);
+                success = send(IMachineControl::CommandRequestStartMaintenance, machineResponse);
             }
             else if (requestId == "stop")
             {
                 success = send(IMachineControl::CommandRequestStop, machineResponse);
             }
-            else if (requestId == "increase-speed")
+            else if (requestId == "increase-feeder-speed")
             {
                 success = send(IMachineControl::CommandRequestIncreaseMotorSpeed, machineResponse);
             }
-            else if (requestId == "decrease-speed")
+            else if (requestId == "decrease-feeder-speed")
             {
                 success = send(IMachineControl::CommandRequestDecreaseMotorSpeed, machineResponse);
             }
@@ -206,6 +226,20 @@ void UserInterfaceControl::onNotificationMachineControlSwitchedOff(const message
 void UserInterfaceControl::onNotificationMachineControlErrorOccurred(const message_broker::Message&)
 {
     handleNotificationMessage(Event::MachineError);
+}
+
+void UserInterfaceControl::onNotificationFilamentPreHeaterTemperatureChanged(
+    const message_broker::Message& notification)
+{
+    m_lastPreHeaterTemperature = getPropertyValue<Temperature>(notification.getPayload(), InvalidTemperature);
+    updateMachineState();
+}
+
+void UserInterfaceControl::onNotificationFilamentMergerHeaterTemperatureChanged(
+    const message_broker::Message& notification)
+{
+    m_lastMergerHeaterTemperature = getPropertyValue<Temperature>(notification.getPayload(), InvalidTemperature);
+    updateMachineState();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

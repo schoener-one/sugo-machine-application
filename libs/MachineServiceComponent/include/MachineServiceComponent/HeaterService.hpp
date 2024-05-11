@@ -32,6 +32,7 @@
 #include "HardwareAbstractionLayer/IHalObject.hpp"
 #include "MachineServiceComponent/Configuration.hpp"
 #include "MachineServiceComponent/HardwareService.hpp"
+#include "MachineServiceComponent/Types.hpp"
 
 namespace sugo::machine_service_component
 {
@@ -39,9 +40,6 @@ namespace sugo::machine_service_component
 class HeaterService : public HardwareService
 {
 public:
-    /// @brief Temperature value type
-    using Temperature = int32_t;
-
     /**
      * @brief Constructs a new heater service object.
      *
@@ -106,7 +104,8 @@ private:
     const machine_service_component::Identifier m_minTemperatureId;  ///< Min temperature id.
     const machine_service_component::Identifier m_maxTemperatureId;  ///< Max temperature id.
     const common::ServiceLocator&               m_serviceLocator;    ///< Service locator instance.
-    std::atomic<Temperature> m_currentTemperature = 0;  ///< Current measured temperature.
+    std::atomic<Temperature>                    m_currentTemperature =
+        InvalidTemperature;  ///< Current measured temperature.
 };
 
 }  // namespace sugo::machine_service_component

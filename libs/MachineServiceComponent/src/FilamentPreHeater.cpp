@@ -38,17 +38,15 @@ FilamentPreHeater::FilamentPreHeater(message_broker::IMessageBroker& messageBrok
                     id::ConfigPreHeaterServiceTemperatureMin,
                     id::ConfigPreHeaterServiceTemperatureMax, serviceLocator)
 {
+    m_propertyTemperature.registerValueChangeHandler([this](const IProperty<int32_t>& temperature) {
+        // TODO automate creation of value change notifications!
+        this->notify(NotificationTemperatureChanged, temperature.getValueAsJson());
+    });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Requests:
 
-message_broker::ResponseMessage FilamentPreHeater::onPropertyRequestGetTemperature(
-    const message_broker::Message& request)
-{
-    m_propertyTemperature.setValue(getHeaterTemperature());
-    return IFilamentPreHeater::onPropertyRequestGetTemperature(request);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Transition actions:
@@ -69,6 +67,8 @@ void FilamentPreHeater::switchOn(const IFilamentPreHeater::Event&, const IFilame
 void FilamentPreHeater::startHeating(const IFilamentPreHeater::Event& event,
                                      const IFilamentPreHeater::State&)
 {
+    m_propertyTemperature.setValue(getHeaterTemperature());
+
     if (!switchHeater(true))
     {
         push(Event::ErrorOccurred);
@@ -98,6 +98,7 @@ void FilamentPreHeater::stopHeating(const IFilamentPreHeater::Event& event,
 
 void FilamentPreHeater::checkTemperature(const Event&, const State& state)
 {
+    m_propertyTemperature.setValue(getHeaterTemperature());
     const auto temperatureState = getHeaterTemperatureState();
 
     if (TemperatureState::ErrorNoTemperature == temperatureState)
@@ -108,13 +109,13 @@ void FilamentPreHeater::checkTemperature(const Event&, const State& state)
 
     if (State::HeatingOn == state && TemperatureState::AboveMaxTemperature == temperatureState)
     {
-        LOG(debug) << "above max temperature: " << getHeaterTemperature() << " °C";
+        LOG(debug) << "above max temperature: " << m_propertyTemperature.getValue() << " °C";
         push(Event::MaxTemperatureReached);
     }
     else if (State::HeatingOff == state &&
              TemperatureState::BelowMinTemperature == temperatureState)
     {
-        LOG(debug) << "below min temperature: " << getHeaterTemperature() << " °C";
+        LOG(debug) << "below min temperature: " << m_propertyTemperature.getValue() << " °C";
         push(Event::MinTemperatureReached);
     }
 }

@@ -41,7 +41,7 @@ public:
     /// @brief Temperature value type definition.
     using Temperature = UnitValue<RawTemperature>;
 
-     /// @brief Operation result type definition.
+    /// @brief Operation result type definition.
     using Result = std::optional<Temperature>;
 
     /**
