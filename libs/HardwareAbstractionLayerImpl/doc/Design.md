@@ -9,10 +9,9 @@ This document describes the used machine hardware configuration of the hardware 
 The main CPU board is connected to all further devices which are controlled
 by the firmware. The **HAL** supports the following boards.
 
-1. [Raspberry Pi 3 B+](Main_Board/RaspberryPi_3B+/RPI_B3+_Pinout.png)
-2. [Raspberry Pi CM3](Main_Board/RaspberryPi_CM3+/RPI_CM3.pdf)
+2. [Raspberry Pi 4 B](components/main_board/RpiModel4B.md)
 
-The board is powered by a 5V USB connector.
+The board is powered by a 12V to 5V DC/DC converter with a USB-C connector.
 
 ### Interfaces
 
@@ -129,16 +128,9 @@ are listed in a [CSV list](Hot_End_Heater/NTC100K_3950.csv) file.
 ---
 ## Signal input board
 
-The signal input board is 8 channel input board based on [LTV846 opto-couplers](signal_input_board/LTV_8X6_series.pdf), which protect the
-main board from over voltage damages.
+The switch input signals are received by the [8 channel signal input board](components/signal_input_board/8ChannelSignalInputBoard.md). The board is connected to the main board over a I2C connection.
 
-**Properties:**
-
-* Board power supply: 5V (out) / 3.3 (in)
-* 8 output channels (to main board): 3.3V
-* 8 input channels: 5V / max.12V
-
-**Channel occupancy:**
+### Channel occupancy
 
 | Channel | Device                | Device type | Color (internal) | Color (external) |
 |---------|-----------------------|-------------|------------------|------------------|
@@ -150,8 +142,6 @@ main board from over voltage damages.
 | 5       | _unused_              |             | violet           |                  |
 | 6       | _unused_              |             | gray             |                  |
 | 7       | _unused_              |             | white            |                  |
-| GND     | gnd                   |             | brown            |                  |
-| DC      | power-supply 5V       |             | black            |                  |
 ||||||
 
 ### Button
